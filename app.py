@@ -2,7 +2,6 @@ import os
 
 from flask import Flask
 
-
 PERMISSIVE_CORS = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type,Authorization',
