@@ -26,7 +26,7 @@ def after_request(response):
 
 if __name__ == '__main__':
     APP_CONFIG = {
-        'host': '0.0.0.0',
+        'host': '0.0.0.0',  # NOQA
         'port': 80,
         'debug': app.debug,
         'threaded': True,
@@ -36,4 +36,4 @@ if __name__ == '__main__':
     APP_CONFIG['port'] = 443 if is_prod else 80
     APP_CONFIG['debug'] = not is_prod
 
-    app.run(host='0.0.0.0', port=80, debug=app.debug, threaded=True)
+    app.run(**APP_CONFIG)
