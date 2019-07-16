@@ -6,10 +6,11 @@ python:
   - 3.6
   - 3.7
 install: pip install -r requirements.txt
+script: echo yay
 
 matrix:
   include:
     - name: "Python Lint"
-      script:
-      - flake8
-      - mypy . --ignore-missing-imports
+      script: flake8
+    - name: "Python Type Check"
+      script: mypy . --ignore-missing-imports
