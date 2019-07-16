@@ -1,5 +1,5 @@
 flask==1.0.2
 flask-admin==1.5.3
-peewee
-wtf-peewee
-mypy
+peewee==3.9.6
+wtf-peewee==3.0.0
+mypy==0.720
