@@ -1,2 +1,4 @@
-flask
+flask==1.0.2
+flask-admin==1.5.3
 peewee
+wtf-peewee
