@@ -1,11 +1,14 @@
 from peewee import *
 from lmsweb import app
 
-database = PostgresqlDatabase(database=app.config['DB_NAME'],
-                              user=app.config['USER'],
-                              port=app.config['PORT'],
-                              host=app.config['HOST_IP'],
-                              password=app.config['PASSWORD'])
+db_config = {
+    'database': app.config['DB_NAME'],
+    'user': app.config['USER'],
+    'port': app.config['PORT'],
+    'host': app.config['HOST_IP'],
+    'password': app.config['PASSWORD']
+}
+database = PostgresqlDatabase(**db_config)
 
 
 # Database models
