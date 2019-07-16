@@ -3,7 +3,7 @@ import os
 from lmsweb import app
 
 APP_CONFIG = {
-    'host': '0.0.0.0',
+    'host': '0.0.0.0', # NOQA
     'port': 80,
     'debug': app.debug,
     'threaded': True,
