@@ -1,7 +1,11 @@
 from peewee import *
+from lmsweb import app
 
-DATABASE_NAME = "database.db"
-database = SqliteDatabase(DATABASE_NAME)
+database = PostgresqlDatabase(database=app.config['DB_NAME'],
+                              user=app.config['USER'],
+                              port=app.config['PORT'],
+                              host=app.config['HOST_IP'],
+                              password=app.config['PASSWORD'])
 
 
 # Database models
@@ -66,12 +70,6 @@ class Lecture(BaseModel):
 class UserLectureRelationship(BaseModel):
     user = ForeignKeyField(User, backref='user')
     lecture = ForeignKeyField(Lecture, backref='lecture')
-
-
-# Utility to create the tables
-def create_tables():
-    with database:
-        database.create_tables([User, Course, Lecture, UserCourseRelationship, UserLectureRelationship])
 
 
 # Examples
@@ -172,6 +170,25 @@ def user_get_courses(username):
 def course_get_administrators(course_id):
     course = get_object(Course, Course.course_id == course_id)
     return course.get_course_administrators()
+
+
+ALL_MODELS = (User, Course, Lecture)
+
+from flask_admin import Admin
+from flask_admin.contrib.peewee import ModelView
+
+# set optional bootswatch theme
+app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
+
+admin = Admin(app, name='LMS', template_mode='bootstrap3')
+
+for m in ALL_MODELS:
+    admin.add_view(ModelView(m))
+
+
+def create_tables():
+    with database:
+        database.create_tables(ALL_MODELS)
 
 
 def test():
