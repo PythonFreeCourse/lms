@@ -16,3 +16,4 @@ flake8-quotes
 flake8-tidy-imports
 flake8-todo
 flask
+mypy
