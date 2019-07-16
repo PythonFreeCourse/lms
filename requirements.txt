@@ -1,3 +1,8 @@
+flask==1.0.2
+flask-admin==1.5.3
+peewee==3.9.6
+wtf-peewee==3.0.0
+mypy==0.720
 flake8
 flake8-alfred
 flake8-bandit
@@ -15,5 +20,3 @@ flake8-print
 flake8-quotes
 flake8-tidy-imports
 flake8-todo
-flask
-mypy
