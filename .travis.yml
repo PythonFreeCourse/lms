@@ -1,16 +1,17 @@
 language: python
 cache: pip
 
-dist: xenial
-python: 
-  - 3.6
-  - 3.7
 install: pip install -r requirements.txt
 script: echo yay
 
 matrix:
   include:
-    - name: "Python Lint"
+    - name: "Python 3.6"
+      python: 3.6
       script: flake8
-    - name: "Python Type Check"
-      script: mypy . --ignore-missing-imports
+    - name: "Python 3.7"
+      dist: xenial
+      python: 3.7
+      script:
+      - flake8
+      - mypy . --ignore-missing-imports
