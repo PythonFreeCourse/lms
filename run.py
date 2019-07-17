@@ -12,4 +12,4 @@ APP_CONFIG = {
 is_prod = os.getenv('env', '').lower() == 'prod'
 APP_CONFIG['port'] = 443 if is_prod else 80
 APP_CONFIG['debug'] = not is_prod
-app.run(**APP_CONFIG)  # typing: ignore
+app.run(**APP_CONFIG)  # type: ignore
