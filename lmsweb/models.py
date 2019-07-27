@@ -4,12 +4,12 @@ from flask_admin.contrib.peewee import ModelView
 from lmsweb import app
 
 from peewee import (
+    BooleanField,
     CharField,
     DateTimeField,
     ForeignKeyField,
     Model,
-    PostgresqlDatabase,
-    BooleanField)
+    PostgresqlDatabase)
 
 STUDENT_ROLE = 'Student'
 STAFF_ROLE = 'Staff'
