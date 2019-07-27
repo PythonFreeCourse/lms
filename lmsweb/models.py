@@ -9,7 +9,11 @@ from peewee import (
     ForeignKeyField,
     Model,
     PostgresqlDatabase,
-)
+    BooleanField)
+
+STUDENT_ROLE = 'Student'
+STAFF_ROLE = 'Staff'
+ADMINISTRATOR_ROLE = 'Administrator'
 
 db_config = {
     'database': app.config['DB_NAME'],
@@ -31,8 +35,13 @@ class Course(BaseModel):
     name = CharField()
     open_date = DateTimeField()
 
-    def get_course_administrators(self):
-        pass
+
+class Role(BaseModel):
+    name = CharField(unique=True, choices=(
+        (ADMINISTRATOR_ROLE, ADMINISTRATOR_ROLE),
+        (STAFF_ROLE, STAFF_ROLE),
+        (STUDENT_ROLE, STUDENT_ROLE),
+    ))
 
 
 class User(BaseModel):
@@ -40,19 +49,9 @@ class User(BaseModel):
     fullname = CharField()
     mail_address = CharField()
     password = CharField()
-    user_type = CharField()
-    course = ForeignKeyField(Course, backref='courses', null=True)
-
-    @staticmethod
-    def is_student():
-        return User.user_type == 'is_student'
-
-    @staticmethod
-    def is_teacher():
-        return User.user_type == 'teacher'
-
-    def get_user_courses(self):
-        pass
+    role = ForeignKeyField(Role, backref='users')
+    is_administrator = BooleanField(default=False)
+    course = ForeignKeyField(Course, backref='users', null=True)
 
 
 class Lecture(BaseModel):
@@ -60,14 +59,8 @@ class Lecture(BaseModel):
     date = DateTimeField()
     subject = CharField()
 
-    def get_participants(self):
-        pass
 
-    def course_get_lectures(self):
-        return Lecture.select().join(Course).where(Course.course_id == self)
-
-
-ALL_MODELS = (User, Course, Lecture)
+ALL_MODELS = (User, Course, Lecture, Role)
 
 admin = Admin(app, name='LMS', template_mode='bootstrap3')
 
