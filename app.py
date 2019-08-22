@@ -1,6 +1,7 @@
 import os
 
-from lmsweb import app, models
+# Importing `models` to have it initialized.
+from lmsweb import app, models  # NOQA: F401
 
 APP_CONFIG = {
     'host': '0.0.0.0',  # NOQA
