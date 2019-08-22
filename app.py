@@ -11,7 +11,7 @@ APP_CONFIG = {
 }
 
 if __name__ == '__main__':
-    is_prod = os.getenv('env', '').lower() == 'production'
+    is_prod = os.getenv('env').lower() == 'production'
     APP_CONFIG['port'] = 443 if is_prod else 80
     APP_CONFIG['debug'] = not is_prod
     app.run(**APP_CONFIG)  # type: ignore
