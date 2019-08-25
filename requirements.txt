@@ -3,6 +3,7 @@ flask-admin==1.5.3
 peewee==3.9.6
 wtf-peewee==3.0.0
 mypy==0.720
+pytest==5.0.1
 flake8
 flake8-alfred
 flake8-bandit
