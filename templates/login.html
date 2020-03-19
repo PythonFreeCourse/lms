@@ -6,8 +6,8 @@
             <img id="login-logo" src="{{ url_for('static', filename='avatar.jpg') }}" alt="תמונת הפרופיל של קורס פייתון" width="72" height="72">
             <h1 id="main-title" class="h3 font-weight-normal">התחברות</h1>
             <p>
-                    ברוכים הבאים למערכת התרגילים!<br>
-                    הזינו את שם המשתמש והסיסמה שלכם:
+                ברוכים הבאים למערכת התרגילים!<br>
+                הזינו את שם המשתמש והסיסמה שלכם:
             </p>
             <form method="post" action="/login" class="mb-6">
                 <div class="form-group">
@@ -15,6 +15,9 @@
                 </div>
                 <div class="form-group">
                     <input class="form-control form-control-lg" type="password" name="password" id="password" placeholder="סיסמה" required>
+                </div>
+                <div class="form-group">
+                    <input class="form-control form-control-lg" type="hidden" name="csrf" id="csrf" value="{{ csrf_token }}" required>
                 </div>
                 <input type="submit" value="התחבר!" class="btn btn-primary btn-lg btn-block">
             </form>
