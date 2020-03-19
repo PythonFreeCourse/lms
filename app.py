@@ -1,7 +1,8 @@
 import os
+import secrets
 
 
-from flask import Flask, render_template
+from flask import Flask, render_template, session
 
 webapp = Flask(__name__)
 webapp.config.from_pyfile('config.py')
@@ -24,7 +25,12 @@ APP_CONFIG = {
 @webapp.route('/')
 def main():
     # TODO: If logged in exercises page
-    return render_template('login.html')
+    return render_template('login.html', csrf_token=session['csrf'])
+
+
+@webapp.before_first_request
+def before_first_request():
+    session['csrf'] = session.get('csrf', secrets.token_urlsafe(32))
 
 
 @webapp.after_request
