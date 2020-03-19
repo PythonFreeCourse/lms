@@ -1,0 +1,39 @@
+html {
+  direction: rtl;
+  text-align: right;
+}
+
+input {
+  text-align: left;
+}
+
+::-webkit-input-placeholder {
+  text-align: right;
+}
+:-moz-placeholder {
+  text-align: right;
+}
+::-moz-placeholder {
+  text-align: right;
+}
+:-ms-input-placeholder {
+  text-align: right;
+}
+
+#login-container {
+  align-items: center;
+  display: flex;
+  min-height: calc(100vh - 4rem);
+}
+
+#login {
+  width: 100%;
+  max-width: 420px;
+  padding: 15px;
+  margin: auto;
+}
+
+#login-logo {
+  margin-bottom: 1rem;
+}
+

@@ -1,12 +1,12 @@
 import enum
 import os
 
-from flask_admin import Admin
-from flask_admin.contrib.peewee import ModelView
+from flask_admin import Admin  # type: ignore
+from flask_admin.contrib.peewee import ModelView  # type: ignore
 
-from lmsweb import app
+from lms.app import webapp
 
-from peewee import (
+from peewee import (  # type: ignore
     BooleanField,
     CharField,
     DateTimeField,
@@ -24,16 +24,16 @@ class RoleOptions(enum.Enum):
     ADMINISTRATOR_ROLE = 'Administrator'
 
 
-db_config = {
-    'database': app.config['DB_NAME'],
-    'user': app.config['DB_USER'],
-    'port': app.config['DB_PORT'],
-    'host': app.config['DB_HOST_IP'],
-    'password': app.config['DB_PASSWORD'],
-}
-if app.debug:
-    database = SqliteDatabase(os.path.join(app.instance_path, 'db.sqlite'))
-elif app.env == 'production':
+if webapp.debug:
+    database = SqliteDatabase(os.path.join(webapp.instance_path, 'db.sqlite'))
+elif webapp.env == 'production':
+    db_config = {
+        'database': webapp.config['DB_NAME'],
+        'user': webapp.config['DB_USER'],
+        'port': webapp.config['DB_PORT'],
+        'host': webapp.config['DB_HOST_IP'],
+        'password': webapp.config['DB_PASSWORD'],
+    }
     database = PostgresqlDatabase(**db_config)
 
 
@@ -92,7 +92,7 @@ StudentLecture = Exercise.users.get_through_model()
 
 ALL_MODELS = (User, Exercise, Role, StudentLecture)
 
-admin = Admin(app, name='LMS', template_mode='bootstrap3')
+admin = Admin(webapp, name='LMS', template_mode='bootstrap3')
 
 for m in ALL_MODELS:
     admin.add_view(ModelView(m))

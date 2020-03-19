@@ -128,3 +128,7 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
+
+
+# Ours
+config.py
