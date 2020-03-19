@@ -7,13 +7,15 @@ from flask_admin.contrib.peewee import ModelView
 from lmsweb import app
 
 from peewee import (
+    BooleanField,
     CharField,
     DateTimeField,
     ForeignKeyField,
     ManyToManyField,
     Model,
     PostgresqlDatabase,
-    SqliteDatabase)
+    SqliteDatabase,
+)
 
 
 class RoleOptions(enum.Enum):
@@ -38,31 +40,6 @@ elif app.env == 'production':
 class BaseModel(Model):
     class Meta:
         database = database
-
-
-class Course(BaseModel):
-    name = CharField()
-    open_date = DateTimeField()
-
-    def __str__(self):
-        return self.name
-
-    @property
-    def administrators(self):
-        admin_role = Role.get(
-            Role.name == RoleOptions.ADMINISTRATOR_ROLE.value)
-        return self.users.filter(User.role == admin_role)
-
-    @database.atomic()
-    def add_user(self, user: 'User'):
-        user.course = self
-        user.save()
-
-    @staticmethod
-    @database.atomic()
-    def remove_user(user: 'User'):
-        user.course = None
-        user.save()
 
 
 class Role(BaseModel):
@@ -94,26 +71,26 @@ class User(BaseModel):
     fullname = CharField()
     mail_address = CharField()
     password = CharField()
+    saltedhash = CharField()
     role = ForeignKeyField(Role, backref='users')
-    course = ForeignKeyField(Course, backref='users', null=True, unique=True)
 
     def __str__(self):
         return f'{self.username} - {self.fullname}'
 
 
-class Lecture(BaseModel):
+class Exercise(BaseModel):
     subject = CharField()
     date = DateTimeField()
-    course = ForeignKeyField(Course, backref='lectures')
-    users = ManyToManyField(User, backref='lectures')
+    users = ManyToManyField(User, backref='exercises')
+    is_archived = BooleanField()
 
     def __str__(self):
         return self.subject
 
 
-StudentLecture = Lecture.users.get_through_model()
+StudentLecture = Exercise.users.get_through_model()
 
-ALL_MODELS = (User, Course, Lecture, Role, StudentLecture)
+ALL_MODELS = (User, Exercise, Role, StudentLecture)
 
 admin = Admin(app, name='LMS', template_mode='bootstrap3')
 
