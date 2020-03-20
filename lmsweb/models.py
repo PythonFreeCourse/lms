@@ -1,10 +1,11 @@
 import enum
-import os
 
-from flask_admin import Admin  # type: ignore
+from flask_admin import Admin, AdminIndexView  # type: ignore
 from flask_admin.contrib.peewee import ModelView  # type: ignore
 
-from lms.app import webapp
+from flask_login import (UserMixin, current_user)
+
+from lmsweb import webapp
 
 from peewee import (  # type: ignore
     BooleanField,
@@ -17,6 +18,8 @@ from peewee import (  # type: ignore
     SqliteDatabase,
 )
 
+from werkzeug.security import check_password_hash, generate_password_hash
+
 
 class RoleOptions(enum.Enum):
     STUDENT_ROLE = 'Student'
@@ -25,7 +28,7 @@ class RoleOptions(enum.Enum):
 
 
 if webapp.debug:
-    database = SqliteDatabase(os.path.join(webapp.instance_path, 'db.sqlite'))
+    database = SqliteDatabase('db.sqlite')
 elif webapp.env == 'production':
     db_config = {
         'database': webapp.config['DB_NAME'],
@@ -66,13 +69,21 @@ class Role(BaseModel):
         return self.name == RoleOptions.ADMINISTRATOR_ROLE.value
 
 
-class User(BaseModel):
+class User(UserMixin, BaseModel):
     username = CharField(unique=True)
     fullname = CharField()
     mail_address = CharField()
-    password = CharField()
     saltedhash = CharField()
     role = ForeignKeyField(Role, backref='users')
+
+    def set_password(self, password):
+        # TODO: Make this work in admin form? Seems like it works for
+        #  sqlalchemy...
+        self.saltedhash = generate_password_hash(password)
+        self.save()
+
+    def is_password_valid(self, password):
+        return check_password_hash(self.saltedhash, password)
 
     def __str__(self):
         return f'{self.username} - {self.fullname}'
@@ -88,11 +99,31 @@ class Exercise(BaseModel):
         return self.subject
 
 
-StudentLecture = Exercise.users.get_through_model()
+StudentExercise = Exercise.users.get_through_model()
 
-ALL_MODELS = (User, Exercise, Role, StudentLecture)
 
-admin = Admin(webapp, name='LMS', template_mode='bootstrap3')
+class AccessibleByAdminMixin:
+    def is_accessible(self):
+        return (
+                current_user.is_authenticated
+                and current_user.role.is_administrator
+        )
 
-for m in ALL_MODELS:
-    admin.add_view(ModelView(m))
+
+class MyAdminIndexView(AccessibleByAdminMixin, AdminIndexView):
+    pass
+
+
+class AdminModelView(AccessibleByAdminMixin, ModelView):
+    pass
+
+
+admin = Admin(
+    webapp,
+    name='LMS',
+    template_mode='bootstrap3',
+    index_view=MyAdminIndexView(),
+)
+
+for m in (User, Role, Exercise, StudentExercise):
+    admin.add_view(AdminModelView(m))
