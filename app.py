@@ -28,6 +28,12 @@ def main():
     return render_template('login.html', csrf_token=session['csrf'])
 
 
+@webapp.route('/exercises')
+def exercises():
+    # TODO: If logged in exercises page
+    return render_template('exercises.html')
+
+
 @webapp.before_first_request
 def before_first_request():
     session['csrf'] = session.get('csrf', secrets.token_urlsafe(32))
