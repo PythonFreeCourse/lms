@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block page_content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.0/min/dropzone.min.css" integrity="sha256-AgL8yEmNfLtCpH+gYp9xqJwiDITGqcwAbI8tCfnY2lw=" crossorigin="anonymous" />
+<div class="container">
+  <div id="send-page" class="page">
+    <h1 id="send-head">העלאה לתרגיל {{ exercise_id or 1 }}: {{ exercise_name or "מוש השור" }}</h1>
+    <div id="uploads">
+      <form action="/upload" class="dropzone needsclick dz-clickable" id="demo-upload">
+        <div class="dz-message needsclick">
+          <button type="button" class="dz-button">גררו לכאן את קובץ הפתרון, או לחצו ובחרו אותו מהמחשב שלכם.</button>
+        </div>
+      </form>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.0/min/dropzone.min.js" integrity="sha256-OG/103wXh6XINV06JTPspzNgKNa/jnP1LjPP5Y3XQDY=" crossorigin="anonymous"></script>
+  </div>
+</div>
+{% endblock %}
