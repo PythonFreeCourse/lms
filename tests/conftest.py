@@ -1,10 +1,13 @@
 import datetime
 
-from lmsweb.models import ALL_MODELS, Course, Lecture, Role, RoleOptions, User
+from lmsweb.models import ALL_MODELS, Role, RoleOptions, User, Exercise, Comment
 
 from peewee import SqliteDatabase
 
 import pytest
+
+SUBJECT = 'python'
+COMMENT_TEXT = "very good!"
 
 
 @pytest.fixture(autouse=True, scope='session')
@@ -36,21 +39,15 @@ def populate_roles():
 
 
 @pytest.fixture()
-def course():
-    course_name = 'Python 1'
-    open_date = datetime.datetime.now()
-    return Course.create(name=course_name, open_date=open_date)
-
-
-@pytest.fixture()
 def user(populate_roles):
     admin_role = Role.get(Role.name == RoleOptions.STAFF_ROLE.value)
     return User.create(  # NOQA: S106
-        username='Ido',
-        fullname='Elk',
-        mail_address='mymail@mail.com',
-        password='fake pass',
-        role=admin_role,
+            username='Ido',
+            fullname='Elk',
+            mail_address='mymail@mail.com',
+            password='fake pass',
+            saltedhash='asd',
+            role=admin_role,
     )
 
 
@@ -58,20 +55,28 @@ def user(populate_roles):
 def admin_user(populate_roles):
     admin_role = Role.get(Role.name == RoleOptions.ADMINISTRATOR_ROLE.value)
     return User.create(  # NOQA: S106
-        username='Yam',
-        fullname='Elk',
-        mail_address='mymail@mail.com',
-        password='fake pass',
-        role=admin_role,
+            username='Yam',
+            fullname='Elk',
+            mail_address='mymail@mail.com',
+            password='fake pass',
+            role=admin_role,
     )
 
 
 @pytest.fixture()
-def lecture(course):
-    lecture_date = datetime.datetime.now()
-    subject = 'Intro'
-    return Lecture.create(
-        subject=subject,
-        course=course,
-        date=lecture_date,
+def exercise(user):
+    return Exercise.create(
+            subject=SUBJECT,
+            date=datetime.datetime.now(),
+            is_archived=False,
+    )
+
+
+@pytest.fixture()
+def comment(user, exercise):
+    return Comment.create(
+            commenter=user,
+            timestamp=datetime.datetime.now(),
+            exercise=exercise,
+            comment_text=COMMENT_TEXT,
     )
