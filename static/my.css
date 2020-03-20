@@ -4,7 +4,8 @@ html {
   border: #f3f3f3;
 }
 
-input {
+code, input, pre, div#code-view {
+  direction: ltr;
   text-align: left;
 }
 
@@ -40,13 +41,9 @@ input {
 
 .page {
   margin: 3rem 0rem;
-}
-
-#exercises-page {
   direction: rtl;
   text-align: right;
 }
-
 
 #exercises-head {
   margin-bottom: 2rem;
@@ -143,4 +140,41 @@ input {
 
 i.fa {
   margin-left: 0.3em;
+}
+
+/* Upload */
+#send-head {
+  margin-bottom: 5rem;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+#uploads {
+  display: block;
+  width: 50%;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.dropzone {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px dashed #0087F7 !important;
+  border-radius: 5px !important;
+  background: white;
+  min-height: 30vh !important;
+}
+
+
+/* Check/see exercise view */
+h1#view-head {
+  margin-bottom: 2rem;
+  margin-top : 2rem;
+  direction: rtl;
+  text-align: right;
+}
+
+.line-numbers-rows {
+  left: -13.8em !important;
 }

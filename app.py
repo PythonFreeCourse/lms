@@ -30,8 +30,27 @@ def main():
 
 @webapp.route('/exercises')
 def exercises():
-    # TODO: If logged in exercises page
     return render_template('exercises.html')
+
+
+@webapp.route('/send')
+def send():
+    return render_template('upload.html')
+
+
+@webapp.route('/upload', methods=['POST'])
+def upload():
+    # TODO: Save the files WITHOUT EXECUTION PERMISSIONS
+    # TODO: Check that the file is ipynb/py
+    # TODO: Extract the right exercise from the notebook
+    #       (ask Efrat for code)
+    # TODO: Check max filesize of (max notebook size + 20%)
+    return 'yay'
+
+
+@webapp.route('/view')
+def view():
+    return render_template('view.html')
 
 
 @webapp.before_first_request
