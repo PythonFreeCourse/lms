@@ -196,12 +196,13 @@ i.fa {
 }
 
 .line-numbers-rows {
-  left: -7em !important;
 }
 
 #code-view {
   grid-area: code;
   width: 80%;
+  direction: ltr;
+  text-align: left;
 }
 
 #popular-comments {
@@ -232,5 +233,17 @@ ol.comments > li {
   margin-bottom: 0.7em;
   padding: 0.5em;
   background: #c3dbe5;
+  cursor: grab;
   border: 1px solid #4b93b1;
+}
+
+ol.comments > li:active {
+  cursor: grabbing;
+}
+
+span.line {
+  width: 100%;
+  display: inline-block;
+  direction: ltr;
+  text-align: left;
 }
