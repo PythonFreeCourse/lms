@@ -9,3 +9,4 @@ class TestExercise:
         assert e and c
         assert c.exercise == e
         assert c.comment_text == COMMENT_TEXT
+        assert c.line_number == 1
