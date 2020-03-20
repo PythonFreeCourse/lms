@@ -6,7 +6,7 @@ from urllib.parse import urljoin, urlparse
 import flask
 from flask import Flask, render_template, request, session, url_for
 
-from flask_admin import Admin  # type: ignore
+from flask_admin import Admin, AdminIndexView  # type: ignore
 from flask_admin.contrib.peewee import ModelView  # type: ignore
 
 from flask_login import (LoginManager, UserMixin, current_user, login_required,
@@ -62,7 +62,7 @@ def after_request(response):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.get_by_id(user_id)
+    return User.get_or_none(id=user_id)
 
 
 def is_safe_url(target):
@@ -83,7 +83,7 @@ def login():
     password = request.form.get('password')
     user = User.get_or_none(username=username)
 
-    if user is not None and user.password == password:
+    if user is not None and user.is_password_valid(password):
         login_user(user)
         next_url = request.args.get('next_url')
         if not is_safe_url(next_url):
@@ -179,15 +179,14 @@ class User(UserMixin, BaseModel):
     username = CharField(unique=True)
     fullname = CharField()
     mail_address = CharField()
-    # TODO: Delete
-    password = CharField()
     saltedhash = CharField()
     role = ForeignKeyField(Role, backref='users')
 
     def set_password(self, password):
         self.saltedhash = generate_password_hash(password)
+        self.save()
 
-    def check_password(self, password):
+    def is_password_valid(self, password):
         return check_password_hash(self.saltedhash, password)
 
     def __str__(self):
@@ -208,10 +207,32 @@ StudentLecture = Exercise.users.get_through_model()
 
 ALL_MODELS = (User, Exercise, Role, StudentLecture)
 
-admin = Admin(webapp, name='LMS', template_mode='bootstrap3')
+
+class AccessibleByAdminMixin:
+    def is_accessible(self):
+        return (
+                current_user.is_authenticated
+                and current_user.role.is_administrator
+        )
+
+
+class MyAdminIndexView(AccessibleByAdminMixin, AdminIndexView):
+    pass
+
+
+class AdminModelView(AccessibleByAdminMixin, ModelView):
+    pass
+
+
+admin = Admin(
+    webapp,
+    name='LMS',
+    template_mode='bootstrap3',
+    index_view=MyAdminIndexView(),
+)
 
 for m in ALL_MODELS:
-    admin.add_view(ModelView(m))
+    admin.add_view(AdminModelView(m))
 
 if __name__ == '__main__':
     is_prod = os.getenv('env', '').lower() == 'production'
