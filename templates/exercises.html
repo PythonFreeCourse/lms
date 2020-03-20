@@ -1,6 +1,53 @@
 {%- extends 'base.html' -%}
 
 {%- block page_content -%}
-<div>
+<div id="exercises-page" class="page container">
+  <h1 id="exercises-head">תרגילים</h1>
+  <div id="exercises">
+    <div class="exercise">
+      <div class="right-side">
+        <div class="exercise-id">1</div>
+        <div class="exercise-name"><div class="textish">מוש השור</div></div>
+      </div>
+      <div class="left-side">
+        <div class="exercise-send">
+          <a class="our-button go-send" href="1">
+            <i class="fa fa-upload" aria-hidden="true"></i> 
+            שלח
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="exercise">
+      <div class="right-side">
+        <div class="exercise-id">2</div>
+        <div class="exercise-name"><div class="textish">שום חמור</div></div>
+      </div>
+      <div class="left-side">
+        <div class="exercise-send">
+          <a class="our-button go-view" href="2">
+            <i class="fa fa-eye" aria-hidden="true"></i> 
+            הצצה
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="exercise">
+      <div class="right-side">
+        <div class="exercise-id">3</div>
+        <div class="exercise-name"><div class="textish">שו רמזור</div></div>
+      </div>
+      <div class="left-side">
+        <div class="exercise-send">
+          <a class="our-button go-checked" href="3">
+            <i class="fa fa-check-circle-o" aria-hidden="true"></i> 
+            לבדיקה
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {%- endblock -%}

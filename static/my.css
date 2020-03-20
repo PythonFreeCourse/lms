@@ -1,6 +1,7 @@
 html {
   direction: rtl;
   text-align: right;
+  border: #f3f3f3;
 }
 
 input {
@@ -37,3 +38,109 @@ input {
   margin-bottom: 1rem;
 }
 
+.page {
+  margin: 3rem 0rem;
+}
+
+#exercises-page {
+  direction: rtl;
+  text-align: right;
+}
+
+
+#exercises-head {
+  margin-bottom: 2rem;
+}
+
+.exercise {
+  display: flex;
+  border: 1px solid;
+  border-radius: 5px;
+  padding: 1rem;
+  align-items: center;
+  text-align: center;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  background: #f8f8f8;
+}
+
+.right-side, .left-side {
+  display: flex;
+}
+
+.left-side {
+  justify-content: end;
+}
+
+.exercise-id {
+  display: flex;
+  border: 1px solid;
+  border-radius: 100%;
+  width: 3rem;
+  height: 3rem;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+  margin-left: 2em;
+}
+
+.exercise-name {
+  display: flex;
+  font-size: 1.5em;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 3rem;
+  white-space: nowrap;
+}
+
+.textish {
+  display: flex;
+  line-height: 3rem;
+}
+
+.go-send {
+  background: #247ba0;
+  color: #ebf3f6;
+}
+
+.go-send:hover {
+  color: #ebf3f6;
+}
+
+.go-view {
+  background: #ffe066;
+  color: #18150a;
+}
+.go-view:hover {
+  color: #18150a;
+}
+
+.go-checked {
+  background: #70c1b3;
+  color: #0b1211;
+}
+
+.go-checked:hover {
+  color: #0b1211;
+}
+
+.our-button {
+  display: block;
+  width: 8em;
+  border-radius: 8px;
+  padding: 0.55rem 1rem;
+  margin-right: 5rem;
+  white-space: nowrap;
+  outline: none;
+}
+
+.our-button:hover {
+  text-decoration: none;
+}
+
+i.fa {
+  margin-left: 0.3em;
+}
