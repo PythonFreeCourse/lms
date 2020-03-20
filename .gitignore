@@ -132,3 +132,4 @@ yarn-error.log*
 
 # Ours
 config.py
+db.sqlite
