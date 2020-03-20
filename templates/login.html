@@ -18,7 +18,7 @@
                     <input class="form-control form-control-lg" type="password" name="password" id="password" placeholder="סיסמה" required>
                 </div>
                 <div class="form-group">
-                    <input class="form-control form-control-lg" type="hidden" name="csrf" id="csrf" value="{{ csrf_token }}" required>
+                    <input class="form-control form-control-lg" type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token() }}" required>
                 </div>
                 <input type="submit" value="התחבר!" class="btn btn-primary btn-lg btn-block">
             </form>
