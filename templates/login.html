@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block page_content %}
+  <div class="container">
     <div id="login-container">
         <div id="login" class="text-center">
             <img id="login-logo" src="{{ url_for('static', filename='avatar.jpg') }}" alt="תמונת הפרופיל של קורס פייתון" width="72" height="72">
@@ -23,4 +24,5 @@
             </form>
         </div>
     </div>
+  </div>
 {% endblock %}

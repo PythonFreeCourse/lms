@@ -168,13 +168,69 @@ i.fa {
 
 
 /* Check/see exercise view */
-h1#view-head {
-  margin-bottom: 2rem;
-  margin-top : 2rem;
+#page-view {
+  padding: 3rem 2rem;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  justify-items: center;
+  flex-direction: column;
+}
+
+#view-head {
+  display: flex;
+  width: 100%;
   direction: rtl;
-  text-align: right;
+  margin-bottom: 2rem;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+#view-body {
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  justify-content: center;
+  text-align: center;
 }
 
 .line-numbers-rows {
-  left: -13.8em !important;
+  left: -7em !important;
+}
+
+#code-view {
+  grid-area: code;
+  width: 80%;
+}
+
+#popular-comments {
+  display: flex;
+  position: sticky;
+  height: 90vh;
+  top: 2rem;
+  flex-direction: column;
+  margin-right: 2rem;
+}
+
+#popular-comments h2 {
+  font-size: 1.5rem;
+  text-align: right;
+  direction: rtl;
+  margin-bottom: 1em;
+  font-style: italic;
+}
+
+ol.comments {
+  direction: rtl;
+  text-align: right;
+  list-style-type: none;
+  padding: 1em;
+}
+
+ol.comments > li {
+  margin-bottom: 0.7em;
+  padding: 0.5em;
+  background: #c3dbe5;
+  border: 1px solid #4b93b1;
 }
