@@ -16,6 +16,8 @@ from peewee import (  # type: ignore
     Model,
     PostgresqlDatabase,
     SqliteDatabase,
+    IntegerField,
+    Check, TextField,
 )
 
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -99,7 +101,26 @@ class Exercise(BaseModel):
         return self.subject
 
 
-StudentExercise = Exercise.users.get_through_model()
+class Solution(BaseModel):
+    exercise = ForeignKeyField(Exercise, backref='solutions')
+    solver = ForeignKeyField(User, backref='solutions')
+    checker = ForeignKeyField(User, backref='solutions')
+    is_checked = BooleanField(default=False)
+    grade = IntegerField(default=0, constraints=[Check('grade <= 100'), Check('grade >= 0')])
+    submission_timestamp = DateTimeField()
+
+
+class Comment(BaseModel):
+    commenter = ForeignKeyField(User, backref='comments')
+    timestamp = DateTimeField()
+    exercise = ForeignKeyField(Exercise, backref='comments')
+    comment_text = TextField()
+    line_number = IntegerField(constraints=[Check('line_number >= 1')])
+
+
+class CommentsToSolutions(BaseModel):
+    comment = ForeignKeyField(Comment)
+    solution = ForeignKeyField(Solution)
 
 
 class AccessibleByAdminMixin:
@@ -114,16 +135,19 @@ class MyAdminIndexView(AccessibleByAdminMixin, AdminIndexView):
     pass
 
 
+ALL_MODELS = (User, Exercise, Comment, Solution, Role)
+
+
 class AdminModelView(AccessibleByAdminMixin, ModelView):
     pass
 
 
 admin = Admin(
-    webapp,
-    name='LMS',
-    template_mode='bootstrap3',
-    index_view=MyAdminIndexView(),
+        webapp,
+        name='LMS',
+        template_mode='bootstrap3',
+        index_view=MyAdminIndexView(),
 )
 
-for m in (User, Role, Exercise, StudentExercise):
+for m in (User, Role, Exercise):
     admin.add_view(AdminModelView(m))
