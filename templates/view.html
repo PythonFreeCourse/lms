@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block page_content %}
+<div id="page-view">
+  <div id="view-head">
+    <h1>תצוגת תרגיל {{ exercise_id or "בעל מספר לא ידוע" }}: {{ exercise_name or "תרגיל לא ידוע" }}</h1>
+  </div>
+  <div id="view-body">
+    <div id="code-view">
+      <pre>
+        <code class="language-python line-numbers highlight">
+  @webapp.route('/')
+  def main():
+      # TODO: If logged in exercises page
+      return render_template('login.html', csrf_token=session['csrf'])
+
+
+  @webapp.route('/exercises')
+  def exercises():
+      return render_template('exercises.html')
+
+
+  @webapp.route('/send')
+  def send():
+      return render_template('upload.html')
+
+
+  @webapp.route('/upload', methods=['POST'])
+  def upload():
+      # TODO: Save the files WITHOUT EXECUTION PERMISSIONS
+      # TODO: Check that the file is ipynb/py
+      # TODO: Extract the right exercise from the notebook
+      #       (ask Efrat for code)
+      # TODO: Check max filesize of (max notebook size + 20%)
+      return 'yay'
+
+
+  @webapp.route('/view')
+  def view():
+      return render_template('view.html')
+  @webapp.route('/')
+  def main():
+      # TODO: If logged in exercises page
+      return render_template('login.html', csrf_token=session['csrf'])
+
+
+  @webapp.route('/exercises')
+  def exercises():
+      return render_template('exercises.html')
+
+
+  @webapp.route('/send')
+  def send():
+      return render_template('upload.html')
+
+
+  @webapp.route('/upload', methods=['POST'])
+  def upload():
+      # TODO: Save the files WITHOUT EXECUTION PERMISSIONS
+      # TODO: Check that the file is ipynb/py
+      # TODO: Extract the right exercise from the notebook
+      #       (ask Efrat for code)
+      # TODO: Check max filesize of (max notebook size + 20%)
+      return 'yay'
+
+
+  @webapp.route('/view')
+  def view():
+      return render_template('view.html')
+        </code>
+      </pre>
+    </div>
+    <!-- TODO: Add if user is admin -->
+    <div id="popular-comments">
+      <div id="exercise-comments">
+        <h2>הערות על התרגיל</h2>
+        <ol id="exercise-comments-list" class="comments exercise-comments">
+          <li class="known-comment" draggable="true" data-commentid="1">מומלץ לא לעשות רווח לפני נקודותיים.<br>תוכל לעיין ב-PEP8 כדי לראות למה זה בעייתי<br>כרובית בפיתה</li>
+          <li class="known-comment" draggable="true" data-commentid="2">שכחת נקודותיים אחרי ה-if</li>
+          <li class="known-comment" draggable="true" data-commentid="3">יש פה לולאה מיותרת.<br>תוכל לקצר אותה, במקרה?</li>
+        </ol>
+      </div>
+      <div id="all-comments">
+        <h2>הערות כלליות</h2>
+        <ol id="all-comments-list" class="comments all-comments">
+          <li class="known-comment" draggable="true" data-commentid="1">מומלץ לא לעשות רווח לפני נקודותיים.<br>תוכל לעיין ב-PEP8 כדי לראות למה זה בעייתי<br>כרובית בפיתה</li>
+          <li class="known-comment" draggable="true" data-commentid="2">שכחת נקודותיים אחרי ה-if</li>
+          <li class="known-comment"draggable="true" data-commentid="3">יש פה לולאה מיותרת.<br>תוכל לקצר אותה, במקרה?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='prism.js') }}"></script>
+<script src="{{ url_for('static', filename='grader.js') }}"></script>
+  {% endblock %}
