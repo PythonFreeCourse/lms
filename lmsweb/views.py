@@ -1,8 +1,7 @@
-import secrets
 from urllib.parse import urljoin, urlparse
 
 import flask
-from flask import render_template, request, session, url_for
+from flask import render_template, request, url_for
 
 from flask_login import (
     LoginManager,
@@ -27,11 +26,6 @@ PERMISSIVE_CORS = {
     'Access-Control-Allow-Headers': 'Content-Type,Authorization',
     'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE',
 }
-
-
-@webapp.before_first_request
-def before_first_request():
-    session['csrf'] = session.get('csrf', secrets.token_urlsafe(32))
 
 
 @webapp.after_request
@@ -94,7 +88,7 @@ def logout():
 @webapp.route('/')
 @login_required
 def main():
-    return render_template('exercises.html', csrf_token=session['csrf'])
+    return render_template('exercises.html')
 
 
 @webapp.route('/send')
