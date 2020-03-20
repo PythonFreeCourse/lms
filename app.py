@@ -74,11 +74,21 @@ def is_safe_url(target):
     )
 
 
+def redirect_logged_in(func):
+    """Must wrap the route"""
+
+    def wrapper(*args, **kwargs):
+        if current_user.is_authenticated:
+            return redirect(url_for('main'))
+        else:
+            return func(*args, **kwargs)
+
+    return wrapper
+
+
+@redirect_logged_in
 @webapp.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('main'))
-
     username = request.form.get('username')
     password = request.form.get('password')
     user = User.get_or_none(username=username)
@@ -183,6 +193,8 @@ class User(UserMixin, BaseModel):
     role = ForeignKeyField(Role, backref='users')
 
     def set_password(self, password):
+        # TODO: Make this work in admin form? Seems like it works for
+        #  sqlalchemy...
         self.saltedhash = generate_password_hash(password)
         self.save()
 
@@ -204,8 +216,6 @@ class Exercise(BaseModel):
 
 
 StudentLecture = Exercise.users.get_through_model()
-
-ALL_MODELS = (User, Exercise, Role, StudentLecture)
 
 
 class AccessibleByAdminMixin:
@@ -231,8 +241,14 @@ admin = Admin(
     index_view=MyAdminIndexView(),
 )
 
-for m in ALL_MODELS:
+
+class UserView(AdminModelView):
+    pass
+
+
+for m in (Exercise, Role, StudentLecture):
     admin.add_view(AdminModelView(m))
+admin.add_view(UserView(User))
 
 if __name__ == '__main__':
     is_prod = os.getenv('env', '').lower() == 'production'
