@@ -106,7 +106,7 @@ class Solution(BaseModel):
     solver = ForeignKeyField(User, backref='solutions')
     checker = ForeignKeyField(User, backref='solutions')
     is_checked = BooleanField(default=False)
-    grade = IntegerField(default=0, constraints=[Check('grade < 100'), Check('grade > 0')])
+    grade = IntegerField(default=0, constraints=[Check('grade <= 100'), Check('grade >= 0')])
     submission_timestamp = DateTimeField()
 
 
@@ -115,6 +115,7 @@ class Comment(BaseModel):
     timestamp = DateTimeField()
     exercise = ForeignKeyField(Exercise, backref='comments')
     comment_text = TextField()
+    line_number = IntegerField(constraints=[Check('line_number >= 1')])
 
 
 class CommentsToSolutions(BaseModel):
@@ -134,7 +135,7 @@ class MyAdminIndexView(AccessibleByAdminMixin, AdminIndexView):
     pass
 
 
-ALL_MODELS = (User, Exercise, Comment, Solution, Role, )
+ALL_MODELS = (User, Exercise, Comment, Solution, Role)
 
 
 class AdminModelView(AccessibleByAdminMixin, ModelView):

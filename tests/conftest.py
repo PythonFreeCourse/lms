@@ -79,4 +79,5 @@ def comment(user, exercise):
             timestamp=datetime.datetime.now(),
             exercise=exercise,
             comment_text=COMMENT_TEXT,
+            line_number=1,
     )
