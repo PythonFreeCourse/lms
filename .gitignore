@@ -131,4 +131,5 @@ yarn-error.log*
 
 
 # Ours
-config.py
+lmsweb/config.py
+db.sqlite
