@@ -1,20 +1,11 @@
-from lmsweb.models import Course, User
+from lmsweb.models import User, Exercise, Comment
+from tests.conftest import SUBJECT, COMMENT_TEXT
 
 
-class TestCourse:
-    def test_add_user(self, user: User, course: Course):
-        course.add_user(user)
-        assert user.course == course
-
-    def test_remove_user(self, user: User, course: Course):
-        course.add_user(user)
-
-        assert user.course == course
-        course.remove_user(user)
-        assert user.course is None
-
-    def test_administrators(self, admin_user: User, course: Course):
-        assert course.administrators.count() == 0
-        course.add_user(admin_user)
-        assert admin_user.course.administrators.count() == 1
-        assert admin_user.course.administrators[0] == admin_user
+class TestExercise:
+    def test_exercise(self, user: User, exercise: Exercise, comment: Comment):
+        e = Exercise.get(Exercise.subject == SUBJECT)
+        c = Comment.get(Comment.commenter == user)
+        assert e and c
+        assert c.exercise == e
+        assert c.comment_text == COMMENT_TEXT
