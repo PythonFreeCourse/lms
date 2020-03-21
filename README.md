@@ -8,11 +8,11 @@
 </p>
 
 ## Project setup
-```
+```bash
 git clone https://github.com/PythonFreeCourse/lms
 cd lms
 mv lmsweb/config.py.example lmsweb/config.py
-echo "SECRET_KEY = $(python -c 'import os;print(os.urandom(32))')" > lmsweb/config.py
+echo "SECRET_KEY = \"$(python -c 'import os;print(os.urandom(32).hex())')\"" > lmsweb/config.py
 
 # For debug only
 export FLASK_DEBUG=1
@@ -21,5 +21,6 @@ export FLASK_DEBUG=1
 flask run
 ```
 
-The initial credentials should appear in your terminal. :)
+Enter http://127.0.0.1:5000, and the initial credentials should appear in your terminal. :)
+
 After logging in, use 127.0.0.1:5000/admin to modify entries in the database.
