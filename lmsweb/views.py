@@ -11,8 +11,8 @@ from flask_login import (
     logout_user,
 )
 
-from lmsweb import webapp
-from lmsweb.models import User
+from lms.lmsweb import webapp
+from lms.lmsweb.models import User
 
 from werkzeug.utils import redirect
 
