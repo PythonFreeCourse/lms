@@ -11,43 +11,38 @@ function markLine(target, color) {
   target.style.background = parsedColor;
 }
 
-function addPopover(line, lineData) {
+function addCommentToLine(line, commentData) {
   const commentElement = $(`.line[data-line="${line}"]`);
-  commentElement.popover({
-    html: true,
-    title: `שורה ${line}`,
-    content: lineData,
-    placement: 'left', // Actually right :P
-  });
-  commentElement[0].dataset.marked = true;
-}
-
-function createLineComments(comments) {
-  const groupedComments = {};
-  comments.forEach((comment) => {
-    if (groupedComments[comment.line] === undefined) {
-      groupedComments[comment.line] = comment.text;
-    } else {
-      groupedComments[comment.line] += `<hr>${comment.text}`;
-    }
-  });
-  return groupedComments;
+  const existingPopover = $(commentElement).data('bs.popover');
+  if (existingPopover !== undefined) {
+    const existingContent = `${existingPopover.config.content} <hr>`;
+    existingPopover.config.content = existingContent + commentData;
+  } else {
+    commentElement.popover({
+      html: true,
+      title: `שורה ${line}`,
+      content: commentData,
+      placement: 'left', // Actually right :P
+    });
+    commentElement[0].dataset.marked = true;
+  }
 }
 
 function treatComments(comments) {
   /* comments = [
-    * { line: 5, text: 'הרצל אל תאכל כרובית בפיתה' },
-    * { line: 5, text: 'הרצל שוב פעם אכלת כרובית בפיתה.
-    *                   זו פעם מיליון שאני אומרת לך לא
-    *                   לאכול כרובית בפיתה!!!' },
-    * { line: 20, text: 'Hello' }
-    * ]; // Mock data */
+     { line: 5, text: 'הרצל אל תאכל כרובית בפיתה' },
+     { line: 5, text: `הרצל שוב פעם אכלת כרובית בפיתה.
+                       זו פעם מיליון שאני אומרת לך לא
+                       לאכול כרובית בפיתה!!!` },
+     { line: 20, text: 'Hello' }
+     ]; // Mock data */
   if (comments === undefined) {
     console.error('Probably bad xhr request');
     return;
   }
-  const lineComments = createLineComments(comments);
-  Object.keys(lineComments).forEach((line) => addPopover(line, lineComments[line]));
+  comments.forEach((entry) => {
+    addCommentToLine(entry.line, entry.text);
+  });
   $('[data-toggle=popover]').popover();
 }
 
@@ -78,6 +73,7 @@ function addLineSpansToPre(items) {
 
 
 window.markLink = markLine;
+window.addCommentToLine = addCommentToLine;
 window.addEventListener('load', () => {
   const exerciseId = 1; //  TODO: Get exercise id from URL
   addLineSpansToPre(document.getElementsByTagName('pre'));
