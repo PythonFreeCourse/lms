@@ -218,10 +218,13 @@ i.fa {
 }*/
 
 #code-view {
-  grid-area: code;
   width: 80%;
   direction: ltr;
   text-align: left;
+}
+
+code {
+  display: block;
 }
 
 #popular-comments {
@@ -282,6 +285,11 @@ span.line {
   align-items: center;
 }
 
+/*
+code > code:last-of-type{
+  display: inherit;
+}
+*/
 
 .line[data-marked="true"] {
   background: #fac4c3;
