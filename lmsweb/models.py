@@ -2,25 +2,23 @@ import enum
 
 from flask_admin import Admin, AdminIndexView  # type: ignore
 from flask_admin.contrib.peewee import ModelView  # type: ignore
-
 from flask_login import (UserMixin, current_user)
-
-from lmsweb import webapp
-
 from peewee import (  # type: ignore
     BooleanField,
     CharField,
+    Check,
     DateTimeField,
     ForeignKeyField,
+    IntegerField,
     ManyToManyField,
     Model,
     PostgresqlDatabase,
     SqliteDatabase,
-    IntegerField,
-    Check, TextField,
+    TextField,
 )
-
 from werkzeug.security import check_password_hash, generate_password_hash
+
+from lms.lmsweb import webapp
 
 
 class RoleOptions(enum.Enum):
@@ -106,7 +104,9 @@ class Solution(BaseModel):
     solver = ForeignKeyField(User, backref='solutions')
     checker = ForeignKeyField(User, backref='solutions')
     is_checked = BooleanField(default=False)
-    grade = IntegerField(default=0, constraints=[Check('grade <= 100'), Check('grade >= 0')])
+    grade = IntegerField(
+        default=0, constraints=[Check('grade <= 100'), Check('grade >= 0')]
+    )
     submission_timestamp = DateTimeField()
 
 
@@ -151,3 +151,5 @@ admin = Admin(
 
 for m in (User, Role, Exercise):
     admin.add_view(AdminModelView(m))
+
+database.create_tables(ALL_MODELS, safe=True)
