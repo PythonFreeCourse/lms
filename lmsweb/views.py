@@ -3,7 +3,7 @@ from datetime import datetime
 from urllib.parse import urljoin, urlparse
 
 import flask
-from flask import render_template, request, url_for
+from flask import abort, render_template, request, session, url_for
 
 from flask_login import (
     LoginManager,
@@ -73,6 +73,8 @@ def login():
 
     if user is not None and user.is_password_valid(password):
         login_user(user)
+        for field in ('username', 'role', 'id'):
+            session[field] = str(getattr(user, field))
         next_url = request.args.get('next_url')
         if not is_safe_url(next_url):
             return flask.abort(400)
@@ -109,21 +111,22 @@ def upload():
     # TODO: Check max filesize of (max notebook size + 20%)
     exercise = Exercise.get_by_id(request.form.get('exercise', 0))
     if not exercise:
-        # handle error
-        raise ValueError("exercise does not exist")
+        return (404, "Exercise does not exist.")
+
     user = User.get_by_id(request.form.get('user', 0))
     if not user:
-        # handle error
-        raise ValueError("invalid user")
+        return ("Invalid user.")
+    if session['id'] != request.form.get('user'):
+        abort(403, "Wrong user ID.")
+
     file: FileStorage = request.files.get('file')
     if not file:
-        # handle error
-        raise ValueError("no file was given")
+        return abort(402, "no file was given")
+
     json_file_data = file.read()
     file_content = json.loads(json_file_data)
     if 'cells' not in file_content:
-        # handle error
-        raise ValueError("Invalid file format - must be ipynb")
+        return abort(422, "Invalid file format - must be ipynb")
 
     Solution.create(
         exercise=exercise,
