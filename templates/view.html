@@ -3,10 +3,11 @@
 {% block page_content %}
 <div id="page-view">
   <div id="view-head">
-    <h1>תצוגת תרגיל {{ exercise_id or "בעל מספר לא ידוע" }}: {{ exercise_name or "תרגיל לא ידוע" }}</h1>
+    <h1>תצוגת תרגיל {{ exercise_number or "בעל מספר לא ידוע" }}: {{ exercise_name or "תרגיל לא ידוע" }}</h1>
+    <p id="checked-msg"><strong>התרגיל שלך נבדק!</strong> לחצו על השורות האדומות כדי לראות את הערות הבודקים.</p>
   </div>
   <div id="view-body">
-    <div id="code-view">
+    <div id="code-view" data-id="{{ exercise_id or 1 }}">
       <pre>
         <code class="language-python line-numbers highlight">
   @webapp.route('/')
@@ -83,14 +84,20 @@
       <div id="all-comments">
         <h2>הערות כלליות</h2>
         <ol id="all-comments-list" class="comments all-comments">
-          <li class="known-comment" draggable="true" data-commentid="1">מומלץ לא לעשות רווח לפני נקודותיים.<br>תוכל לעיין ב-PEP8 כדי לראות למה זה בעייתי<br>כרובית בפיתה</li>
-          <li class="known-comment" draggable="true" data-commentid="2">שכחת נקודותיים אחרי ה-if</li>
-          <li class="known-comment"draggable="true" data-commentid="3">יש פה לולאה מיותרת.<br>תוכל לקצר אותה, במקרה?</li>
+          <li class="known-comment" draggable="true" data-commentid="4">מומלץ לא לעשות רווח לפני נקודותיים.<br>תוכל לעיין ב-PEP8 כדי לראות למה זה בעייתי<br>כרובית בפיתה</li>
+          <li class="known-comment" draggable="true" data-commentid="5">שכחת נקודותיים אחרי ה-if</li>
+          <li class="known-comment"draggable="true" data-commentid="6">יש פה לולאה מיותרת.<br>תוכל לקצר אותה, במקרה?</li>
         </ol>
+      </div>
+      <div id="grader-buttons">
+        <button id="save-check" class="btn btn-success">סיימתי לבדוק!</button>
       </div>
     </div>
   </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous"></script>
 <script src="{{ url_for('static', filename='prism.js') }}"></script>
+<script src="{{ url_for('static', filename='comments.js') }}"></script>
 <script src="{{ url_for('static', filename='grader.js') }}"></script>
-  {% endblock %}
+{% endblock %}
