@@ -77,7 +77,7 @@ def login():
             session[field] = str(getattr(user, field))
         next_url = request.args.get('next_url')
         if not is_safe_url(next_url):
-            return flask.abort(400)
+            return abort(400)
         return redirect(next_url or url_for('main'))
 
     return render_template('login.html')
@@ -111,13 +111,13 @@ def upload():
     # TODO: Check max filesize of (max notebook size + 20%)
     exercise = Exercise.get_by_id(request.form.get('exercise', 0))
     if not exercise:
-        return (404, "Exercise does not exist.")
+        return abort(404, "Exercise does not exist.")
 
     user = User.get_by_id(request.form.get('user', 0))
     if not user:
-        return ("Invalid user.")
+        return abort(403, "Invalid user.")
     if session['id'] != request.form.get('user'):
-        abort(403, "Wrong user ID.")
+        return abort(403, "Wrong user ID.")
 
     file: FileStorage = request.files.get('file')
     if not file:
