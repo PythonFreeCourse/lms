@@ -1,3 +1,5 @@
+import json
+from datetime import datetime
 from urllib.parse import urljoin, urlparse
 
 import flask
@@ -10,9 +12,10 @@ from flask_login import (
     login_user,
     logout_user,
 )
+from werkzeug.datastructures import FileStorage
 
 from lms.lmsweb import webapp
-from lms.lmsweb.models import User
+from lms.lmsweb.models import User, Solution, Exercise
 
 from werkzeug.utils import redirect
 
@@ -22,9 +25,6 @@ login_manager.session_protection = 'strong'
 login_manager.login_view = 'login'
 
 PERMISSIVE_CORS = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-    'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE',
 }
 
 
@@ -104,6 +104,30 @@ def upload():
     # TODO: Extract the right exercise from the notebook
     #       (ask Efrat for code)
     # TODO: Check max filesize of (max notebook size + 20%)
+    exercise = Exercise.get_by_id(request.form.get('exercise', 0))
+    if not exercise:
+        # handle error
+        raise ValueError("exercise does not exist")
+    user = User.get_by_id(request.form.get('user', 0))
+    if not user:
+        # handle error
+        raise ValueError("invalid user")
+    file: FileStorage = request.files.get('file')
+    if not file:
+        # handle error
+        raise ValueError("no file was given")
+    json_file_data = file.read()
+    file_content = json.loads(json_file_data)
+    if 'cells' not in file_content:
+        # handle error
+        raise ValueError("Invalid file format - must be ipynb")
+
+    Solution.create(
+        exercise=exercise,
+        solver=user,
+        submission_timestamp=datetime.now(),
+        json_data_str=json_file_data,
+    )
     return 'yay'
 
 
