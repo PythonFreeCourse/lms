@@ -1,10 +1,13 @@
 html {
+  border: #f3f3f3;
   direction: rtl;
   text-align: right;
-  border: #f3f3f3;
 }
 
-code, input, pre, div#code-view {
+code,
+input,
+pre,
+div#code-view {
   direction: ltr;
   text-align: left;
 }
@@ -12,12 +15,15 @@ code, input, pre, div#code-view {
 ::-webkit-input-placeholder {
   text-align: right;
 }
-:-moz-placeholder {
-  text-align: right;
-}
+
 ::-moz-placeholder {
   text-align: right;
 }
+
+:-moz-placeholder {
+  text-align: right;
+}
+
 :-ms-input-placeholder {
   text-align: right;
 }
@@ -29,10 +35,10 @@ code, input, pre, div#code-view {
 }
 
 #login {
-  width: 100%;
+  margin: auto;
   max-width: 420px;
   padding: 15px;
-  margin: auto;
+  width: 100%;
 }
 
 #login-logo {
@@ -40,8 +46,8 @@ code, input, pre, div#code-view {
 }
 
 .page {
-  margin: 3rem 0rem;
   direction: rtl;
+  margin: 3rem 0;
   text-align: right;
 }
 
@@ -50,19 +56,20 @@ code, input, pre, div#code-view {
 }
 
 .exercise {
-  display: flex;
-  border: 1px solid;
-  border-radius: 5px;
-  padding: 1rem;
   align-items: center;
-  text-align: center;
+  background: #f8f8f8;
+  border-radius: 5px;
+  border: 1px solid;
+  display: flex;
   flex-direction: row;
   justify-content: space-between;
   margin-bottom: 0.5rem;
-  background: #f8f8f8;
+  padding: 1rem;
+  text-align: center;
 }
 
-.right-side, .left-side {
+.right-side,
+.left-side {
   display: flex;
 }
 
@@ -71,25 +78,25 @@ code, input, pre, div#code-view {
 }
 
 .exercise-id {
-  display: flex;
-  border: 1px solid;
+  align-items: center;
   border-radius: 100%;
-  width: 3rem;
+  border: 1px solid;
+  display: flex;
   height: 3rem;
   justify-content: center;
-  align-items: center;
-  text-align: center;
-  overflow: hidden;
   margin-left: 2em;
+  overflow: hidden;
+  text-align: center;
+  width: 3rem;
 }
 
 .exercise-name {
+  align-items: center;
   display: flex;
   font-size: 1.5em;
-  align-items: center;
+  height: 3rem;
   justify-content: center;
   text-align: center;
-  height: 3rem;
   white-space: nowrap;
 }
 
@@ -111,6 +118,7 @@ code, input, pre, div#code-view {
   background: #ffe066;
   color: #18150a;
 }
+
 .go-view:hover {
   color: #18150a;
 }
@@ -125,13 +133,13 @@ code, input, pre, div#code-view {
 }
 
 .our-button {
-  display: block;
-  width: 8em;
   border-radius: 8px;
-  padding: 0.55rem 1rem;
+  display: block;
   margin-right: 5rem;
-  white-space: nowrap;
   outline: none;
+  padding: 0.55rem 1rem;
+  white-space: nowrap;
+  width: 8em;
 }
 
 .our-button:hover {
@@ -145,57 +153,53 @@ i.fa {
 /* Upload */
 #send-head {
   margin-bottom: 5rem;
-  margin-right: auto;
   margin-left: auto;
+  margin-right: auto;
 }
 
 #uploads {
   display: block;
-  width: 50%;
-  margin-right: auto;
   margin-left: auto;
+  margin-right: auto;
+  width: 50%;
 }
 
 .dropzone {
+  align-items: center;
+  background: white;
+  border-radius: 5px !important;
+  border: 2px dashed #0087f7 !important;
   display: flex;
   justify-content: center;
-  align-items: center;
-  border: 2px dashed #0087F7 !important;
-  border-radius: 5px !important;
-  background: white;
   min-height: 30vh !important;
 }
 
-
 /* Check/see exercise view */
 #page-view {
+  display: flex;
+  flex-direction: column;
+  justify-items: center;
   padding: 3rem 2rem;
   width: 98vw;
-  display: flex;
-  justify-items: center;
-  flex-direction: column;
 }
 
 #view-head {
-  display: flex;
-  width: 100%;
-  direction: rtl;
-  margin-bottom: 2rem;
-  justify-content: center;
   align-items: center;
-  text-align: center;
+  direction: rtl;
+  display: flex;
   flex-direction: column;
+  justify-content: center;
+  margin-bottom: 2rem;
+  text-align: center;
+  width: 100%;
 }
 
 #view-body {
   display: flex;
-  width: 100%;
   flex-direction: row;
   justify-content: center;
   text-align: center;
-}
-
-.line-numbers-rows {
+  width: 100%;
 }
 
 /*
@@ -215,12 +219,13 @@ i.fa {
 
 #grader-comments p {
   margin-bottom: 0;
-}*/
+}
+*/
 
 #code-view {
-  width: 80%;
   direction: ltr;
   text-align: left;
+  width: 80%;
 }
 
 code {
@@ -229,34 +234,34 @@ code {
 
 #popular-comments {
   display: flex;
-  position: sticky;
-  height: 90vh;
-  top: 2rem;
   flex-direction: column;
+  height: 90vh;
   margin-right: 2rem;
+  position: sticky;
+  top: 2rem;
 }
 
 #popular-comments h2 {
-  font-size: 1.5rem;
-  text-align: right;
   direction: rtl;
-  margin-bottom: 1em;
+  font-size: 1.5rem;
   font-style: italic;
+  margin-bottom: 1em;
+  text-align: right;
 }
 
 ol.comments {
   direction: rtl;
-  text-align: right;
   list-style-type: none;
   padding: 1em;
+  text-align: right;
 }
 
 ol.comments > li {
+  background: #c3dbe5;
+  border: 1px solid #4b93b1;
+  cursor: grab;
   margin-bottom: 0.7em;
   padding: 0.5em;
-  background: #c3dbe5;
-  cursor: grab;
-  border: 1px solid #4b93b1;
 }
 
 ol.comments > li:active {
@@ -264,25 +269,25 @@ ol.comments > li:active {
 }
 
 span.line {
-  width: 100%;
-  display: inline-block;
-  direction: ltr;
-  text-align: left;
   cursor: pointer;
+  direction: ltr;
+  display: inline-block;
+  text-align: left;
+  width: 100%;
 }
 
 #grader-buttons {
+  align-items: center;
   display: flex;
   justify-content: center;
-  align-items: center;
   width: 100%;
 }
 
 #save-check {
-  display: flex;
-  width: 90%;
-  justify-content: center;
   align-items: center;
+  display: flex;
+  justify-content: center;
+  width: 90%;
 }
 
 /*

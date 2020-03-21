@@ -133,3 +133,4 @@ yarn-error.log*
 # Ours
 lmsweb/config.py
 db.sqlite
+vim.session
