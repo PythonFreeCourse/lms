@@ -1,11 +1,11 @@
-function sendComment(kind, exerciseId, line, commentData) {
+function sendComment(kind, solutionId, line, commentData) {
   const xhr = new XMLHttpRequest();
   xhr.open('POST', '/comments/add/', true);
   xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.onreadystatechange = () => {
     if (xhr.readyState === 4) {
       if (xhr.status === 200) {
-        console.log(xhr.responseText);
+        window.addCommentToLine(line, commentData);
       } else {
         console.log(xhr.status);
       }
@@ -14,7 +14,7 @@ function sendComment(kind, exerciseId, line, commentData) {
 
   xhr.send(
     JSON.stringify({
-      exercise: exerciseId,
+      solution: solutionId,
       line,
       comment: commentData,
       kind, // Should be 'text' or 'id'
@@ -23,18 +23,18 @@ function sendComment(kind, exerciseId, line, commentData) {
 }
 
 
-function sendNewComment(exerciseId, line, commentText) {
-  return sendComment('text', exerciseId, line, commentText);
+function sendNewComment(solutionId, line, commentText) {
+  return sendComment('text', solutionId, line, commentText);
 }
 
 
-function sendExistsComment(exerciseId, line, commentId) {
-  return sendComment('id', exerciseId, line, commentId);
+function sendExistsComment(solutionId, line, commentId) {
+  return sendComment('id', solutionId, line, commentId);
 }
 
 
 function trackDragAreas(items) {
-  const exerciseId = document.getElementById('code-view').dataset.id;
+  const solutionId = document.getElementById('code-view').dataset.id;
 
   function findElementToMark(e) {
     const span = (e.target.nodeType === 3) ? e.target.parentNode : e.target;
@@ -68,7 +68,7 @@ function trackDragAreas(items) {
       const { line } = target.dataset;
       const commentId = e.dataTransfer.getData('text/plain');
       window.markLine(target, false);
-      sendExistsComment(exerciseId, line, commentId);
+      sendExistsComment(solutionId, line, commentId);
     }, false);
   });
 }
@@ -83,7 +83,48 @@ function trackDraggables(elements) {
 }
 
 
+function trackTextArea(lineNumber) {
+  const solutionId = document.getElementById('code-view').dataset.id;
+  const target = `textarea[data-line='${lineNumber}']`;
+  const popoverElement = `.grader-add[data-line='${lineNumber}']`;
+  $(target).keypress((e) => {
+    if (e.ctrlKey && e.keyCode === 13) {
+      sendNewComment(solutionId, lineNumber, e.target.value);
+      $(popoverElement).popover('hide');
+    }
+  });
+}
+
+
+function registerNewCommentPopover(element) {
+  const lineNumber = element.dataset.line;
+  $(element).popover({
+    html: true,
+    title: `הערה חדשה לשורה ${lineNumber}`,
+    sanitize: false,
+    content: `<textarea data-line='${lineNumber}'></textarea>`,
+  });
+  $(element).on('inserted.bs.popover', () => {
+    trackTextArea(lineNumber);
+  });
+}
+
+
+function addNewCommentButtons(elements) {
+  Array.from(elements).forEach((item, lineNumber) => {
+    const newNode = document.createElement('span');
+    newNode.className = 'grader-add';
+    newNode.dataset.line = lineNumber + 1;
+    newNode.innerHTML = '<i class="fa fa-plus" aria-hidden="true"></i>';
+    item.parentNode.insertBefore(newNode, item);
+    registerNewCommentPopover(newNode);
+  });
+  $('[data-toggle=popover]').popover();
+}
+
+
 window.addEventListener('lines-numbered', () => {
   trackDragAreas(document.getElementsByClassName('line'));
   trackDraggables(document.getElementsByClassName('known-comment'));
+  addNewCommentButtons(document.getElementsByClassName('line'));
 });

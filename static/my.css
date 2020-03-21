@@ -299,3 +299,15 @@ code > code:last-of-type{
 .line[data-marked="true"] {
   background: #fac4c3;
 }
+
+.grader-add {
+  cursor: copy;  /* Very bad semantically, think of another UI solution */
+  display: none;
+}
+
+code > .grader-add {
+  display: block;
+  position: absolute;
+  right: 1em;
+  z-index: 100;
+}

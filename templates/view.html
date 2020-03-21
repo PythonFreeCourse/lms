@@ -8,8 +8,7 @@
   </div>
   <div id="view-body">
     <div id="code-view" data-id="{{ exercise_id or 1 }}">
-      <pre>
-        <code class="language-python line-numbers highlight">
+      <pre><code class="language-python line-numbers highlight">
   @webapp.route('/')
   def main():
       # TODO: If logged in exercises page
@@ -68,8 +67,7 @@
   @webapp.route('/view')
   def view():
       return render_template('view.html')
-        </code>
-      </pre>
+        </code></pre>
     </div>
     <!-- TODO: Add if user is admin -->
     <div id="popular-comments">
