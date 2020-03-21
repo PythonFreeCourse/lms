@@ -11,17 +11,35 @@ function markLine(target, color) {
   target.style.background = parsedColor;
 }
 
+function isUserGrader() {
+  // Obviously should not be trusted security-wise
+  return document.cookie.split(';').some(
+    (item) => (item.includes('role=grader') || item.includes('role=admin')),
+  );
+}
+
+function addSpecialCommentButtons(commentData) {
+  let changedCommentText = commentData.text;
+  if (isUserGrader()) {
+    const deleteButton = `<i class="fa fa-trash grader-delete" aria-hidden="true" data-deleteid="${commentData.id}" onclick="window.deleteComment(${commentData.id});"></i>`;
+    changedCommentText = `${deleteButton} ${commentData.text}`;
+  }
+  return changedCommentText;
+}
+
 function addCommentToLine(line, commentData) {
   const commentElement = $(`.line[data-line="${line}"]`);
   const existingPopover = $(commentElement).data('bs.popover');
+  const buttonizedComment = addSpecialCommentButtons(commentData);
+  const commentText = `<span data-commentid="${commentData.id}">${buttonizedComment}</span>`;
   if (existingPopover !== undefined) {
     const existingContent = `${existingPopover.config.content} <hr>`;
-    existingPopover.config.content = existingContent + commentData;
+    existingPopover.config.content = existingContent + commentText;
   } else {
     commentElement.popover({
       html: true,
       title: `שורה ${line}`,
-      content: commentData,
+      content: commentText,
       placement: 'left', // Actually right :P
     });
     commentElement[0].dataset.marked = true;
@@ -29,19 +47,19 @@ function addCommentToLine(line, commentData) {
 }
 
 function treatComments(comments) {
-  /* comments = [
-     { line: 5, text: 'הרצל אל תאכל כרובית בפיתה' },
-     { line: 5, text: `הרצל שוב פעם אכלת כרובית בפיתה.
+   comments = [
+     { id: 1, line: 5, text: 'הרצל אל תאכל כרובית בפיתה' },
+     { id: 2, line: 5, text: `הרצל שוב פעם אכלת כרובית בפיתה.
                        זו פעם מיליון שאני אומרת לך לא
                        לאכול כרובית בפיתה!!!` },
-     { line: 20, text: 'Hello' }
-     ]; // Mock data */
+     { id: 3, line: 20, text: 'Hello' }
+     ]; // Mock data 
   if (comments === undefined) {
     console.error('Probably bad xhr request');
     return;
   }
   comments.forEach((entry) => {
-    addCommentToLine(entry.line, entry.text);
+    addCommentToLine(entry.line, entry);
   });
   $('[data-toggle=popover]').popover();
 }
@@ -74,6 +92,7 @@ function addLineSpansToPre(items) {
 
 window.markLink = markLine;
 window.addCommentToLine = addCommentToLine;
+window.isUserGrader = isUserGrader;
 window.addEventListener('load', () => {
   const exerciseId = 1; //  TODO: Get exercise id from URL
   addLineSpansToPre(document.getElementsByTagName('pre'));

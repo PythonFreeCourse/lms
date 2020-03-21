@@ -2,10 +2,14 @@ function sendComment(kind, solutionId, line, commentData) {
   const xhr = new XMLHttpRequest();
   xhr.open('POST', '/comments/add/', true);
   xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.responseType = 'json';
   xhr.onreadystatechange = () => {
     if (xhr.readyState === 4) {
       if (xhr.status === 200) {
-        window.addCommentToLine(line, commentData);
+        const commentFullData = commentData;
+        commentFullData.id = xhr.response.id;
+        commentFullData.text = xhr.response.text;
+        window.addCommentToLine(line, commentFullData);
       } else {
         console.log(xhr.status);
       }
@@ -22,6 +26,26 @@ function sendComment(kind, solutionId, line, commentData) {
   );
 }
 
+function deleteComment(kind, solutionId, commentId) {
+  const xhr = new XMLHttpRequest();
+  xhr.open('DELETE', `/comments/${solutionId}/${commentId}`, true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.responseType = 'json';
+  xhr.onreadystatechange = () => {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200) {
+        const commentElement = document.querySelector(`[data-commentid="${commentId}"]`);
+        const hr = commentElement.closest('hr');
+        hr.parentNode.removeChild(hr);
+        commentElement.parentNode.removeChild(commentElement);
+      } else {
+        console.log(xhr.status);
+      }
+    }
+  };
+
+  xhr.send('');
+}
 
 function sendNewComment(solutionId, line, commentText) {
   return sendComment('text', solutionId, line, commentText);
@@ -123,8 +147,40 @@ function addNewCommentButtons(elements) {
 }
 
 
+window.deleteComment = deleteComment;
 window.addEventListener('lines-numbered', () => {
   trackDragAreas(document.getElementsByClassName('line'));
   trackDraggables(document.getElementsByClassName('known-comment'));
   addNewCommentButtons(document.getElementsByClassName('line'));
+  if (!window.isUserGrader()) {
+    document.cookie = 'role=grader; max-age=31536000; path=/';
+  }
+
+
+  // Select the node that will be observed for mutations
+  const targetNode = document.body;
+
+  // Options for the observer (which mutations to observe)
+  const config = { attributes: true, childList: true, subtree: true };
+
+  // Callback function to execute when mutations are observed
+  const callback = ((mutationsList) => {
+    // Use traditional 'for loops' for IE 11
+    mutationsList.forEach((mutation) => {
+      if (mutation.type === 'childList') {
+        mutation.addedNodes.forEach((node) => {
+          const deleteButton = node.querySelector('.grader-delete');
+          deleteButton.addEventListener('click', () => {
+            deleteComment(deleteButton.dataset.deleteid);
+          });
+        });
+      }
+    });
+  });
+
+  // Create an observer instance linked to the callback function
+  const observer = new MutationObserver(callback);
+
+  // Start observing the target node for configured mutations
+  observer.observe(targetNode, config);
 });
