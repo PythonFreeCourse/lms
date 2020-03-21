@@ -1,0 +1,7 @@
+DB_NAME = 'lms'
+DB_USER = 'lms'
+DB_PORT = 5432
+DB_HOST_IP = '127.0.0.1'
+DB_PASSWORD = ''
+
+SECRET_KEY = ''

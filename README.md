@@ -1,4 +1,4 @@
-# LMS
+# Python's Course LMS
 
 <p align="center">
   <img title="BSD-3 Clause" src="https://img.shields.io/github/license/PythonFreeCourse/LMS.svg">
@@ -9,28 +9,17 @@
 
 ## Project setup
 ```
-yarn install
+git clone https://github.com/PythonFreeCourse/lms
+cd lms
+mv lmsweb/config.py.example lmsweb/config.py
+echo "SECRET_KEY = $(python -c 'import os;print(os.urandom(32))')" > lmsweb/config.py
+
+# For debug only
+export FLASK_DEBUG=1
+# For production, edit the rest of config.py manually
+
+flask run
 ```
 
-### Compiles and hot-reloads for development
-```
-yarn run serve
-```
-
-### Compiles and minifies for production
-```
-yarn run build
-```
-
-### Run your tests
-```
-yarn run test
-```
-
-### Lints and fixes files
-```
-yarn run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+The initial credentials should appear in your terminal. :)
+After logging in, use 127.0.0.1:5000/admin to modify entries in the database.
