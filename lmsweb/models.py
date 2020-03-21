@@ -104,12 +104,13 @@ class Exercise(BaseModel):
 class Solution(BaseModel):
     exercise = ForeignKeyField(Exercise, backref='solutions')
     solver = ForeignKeyField(User, backref='solutions')
-    checker = ForeignKeyField(User, backref='solutions')
+    checker = ForeignKeyField(User, null=True, backref='solutions')
     is_checked = BooleanField(default=False)
     grade = IntegerField(
         default=0, constraints=[Check('grade <= 100'), Check('grade >= 0')]
     )
     submission_timestamp = DateTimeField()
+    json_data_str = TextField()
 
 
 class Comment(BaseModel):
