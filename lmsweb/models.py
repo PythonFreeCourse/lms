@@ -1,4 +1,6 @@
 import enum
+import secrets
+import string
 
 from flask_admin import Admin, AdminIndexView  # type: ignore
 from flask_admin.contrib.peewee import ModelView  # type: ignore
@@ -11,11 +13,11 @@ from peewee import (  # type: ignore
     ForeignKeyField,
     IntegerField,
     ManyToManyField,
-    Model,
     PostgresqlDatabase,
     SqliteDatabase,
     TextField,
 )
+from playhouse.signals import Model, pre_save
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from lms.lmsweb import webapp
@@ -72,21 +74,21 @@ class Role(BaseModel):
 class User(UserMixin, BaseModel):
     username = CharField(unique=True)
     fullname = CharField()
-    mail_address = CharField()
-    saltedhash = CharField()
+    mail_address = CharField(unique=True)
+    password = CharField()
     role = ForeignKeyField(Role, backref='users')
 
-    def set_password(self, password):
-        # TODO: Make this work in admin form? Seems like it works for
-        #  sqlalchemy...
-        self.saltedhash = generate_password_hash(password)
-        self.save()
-
     def is_password_valid(self, password):
-        return check_password_hash(self.saltedhash, password)
+        return check_password_hash(self.password, password)
 
     def __str__(self):
         return f'{self.username} - {self.fullname}'
+
+
+@pre_save(sender=User)
+def on_save_handler(model_class, instance, created):
+    if created:
+        instance.password = generate_password_hash(instance.password)
 
 
 class Exercise(BaseModel):
@@ -126,8 +128,8 @@ class CommentsToSolutions(BaseModel):
 class AccessibleByAdminMixin:
     def is_accessible(self):
         return (
-                current_user.is_authenticated
-                and current_user.role.is_administrator
+            current_user.is_authenticated
+            and current_user.role.is_administrator
         )
 
 
@@ -135,21 +137,43 @@ class MyAdminIndexView(AccessibleByAdminMixin, AdminIndexView):
     pass
 
 
-ALL_MODELS = (User, Exercise, Comment, Solution, Role)
-
-
 class AdminModelView(AccessibleByAdminMixin, ModelView):
     pass
 
 
 admin = Admin(
-        webapp,
-        name='LMS',
-        template_mode='bootstrap3',
-        index_view=MyAdminIndexView(),
+    webapp,
+    name='LMS',
+    template_mode='bootstrap3',
+    index_view=MyAdminIndexView(),
 )
 
-for m in (User, Role, Exercise):
+
+ALL_MODELS = (User, Exercise, Comment, Solution, Role)
+for m in ALL_MODELS:
     admin.add_view(AdminModelView(m))
 
 database.create_tables(ALL_MODELS, safe=True)
+
+
+def generate_password():
+    randomizer = secrets.SystemRandom()
+    length = randomizer.randrange(9, 16)
+    password = randomizer.choices(string.printable[:66], k=length)
+    return ''.join(password)
+
+
+if len(Role.select()) == 0:
+    for role in RoleOptions:
+        Role.create(name=role.value)
+
+if len(User.select()) == 0:
+    password = generate_password()
+    User.create(
+        username='lmsadmin',
+        fullname='LMS Admin',
+        password=password,
+        mail_address='lms@pythonic.guru',
+        role=Role.get(name=RoleOptions.ADMINISTRATOR_ROLE.value),
+    )
+    print(f"First run! Your login is lmsadmin:{password}")
