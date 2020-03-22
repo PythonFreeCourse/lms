@@ -1,7 +1,9 @@
+import json
+from datetime import datetime
 from urllib.parse import urljoin, urlparse
 
 import flask
-from flask import render_template, request, url_for
+from flask import abort, render_template, request, session, url_for
 
 from flask_login import (
     LoginManager,
@@ -10,9 +12,10 @@ from flask_login import (
     login_user,
     logout_user,
 )
+from werkzeug.datastructures import FileStorage
 
 from lms.lmsweb import webapp
-from lms.lmsweb.models import User
+from lms.lmsweb.models import User, Solution, Exercise
 
 from werkzeug.utils import redirect
 
@@ -70,9 +73,11 @@ def login():
 
     if user is not None and user.is_password_valid(password):
         login_user(user)
+        for field in ('username', 'role', 'id'):
+            session[field] = str(getattr(user, field))
         next_url = request.args.get('next_url')
         if not is_safe_url(next_url):
-            return flask.abort(400)
+            return abort(400)
         return redirect(next_url or url_for('main'))
 
     return render_template('login.html')
@@ -104,6 +109,31 @@ def upload():
     # TODO: Extract the right exercise from the notebook
     #       (ask Efrat for code)
     # TODO: Check max filesize of (max notebook size + 20%)
+    exercise = Exercise.get_by_id(request.form.get('exercise', 0))
+    if not exercise:
+        return abort(404, "Exercise does not exist.")
+
+    user = User.get_by_id(request.form.get('user', 0))
+    if not user:
+        return abort(403, "Invalid user.")
+    if session['id'] != request.form.get('user'):
+        return abort(403, "Wrong user ID.")
+
+    file: FileStorage = request.files.get('file')
+    if not file:
+        return abort(402, "no file was given")
+
+    json_file_data = file.read()
+    file_content = json.loads(json_file_data)
+    if 'cells' not in file_content:
+        return abort(422, "Invalid file format - must be ipynb")
+
+    Solution.create(
+        exercise=exercise,
+        solver=user,
+        submission_timestamp=datetime.now(),
+        json_data_str=json_file_data,
+    )
     return 'yay'
 
 
