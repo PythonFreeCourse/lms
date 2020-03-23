@@ -10,11 +10,11 @@ from flask_login import (  # type: ignore
     login_user,
     logout_user,
 )
+from lms.lmsweb import webapp
 from peewee import fn
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
-from lmsweb import webapp
 from lmsweb.models import (
     Comment, Exercise, RoleOptions, Solution, User,
     database, CommentsToSolutions,

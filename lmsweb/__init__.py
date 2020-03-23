@@ -16,3 +16,4 @@ webapp.config.from_pyfile('config.py')
 csrf = CSRFProtect(webapp)
 
 # Must import files after app's creation
+from lmsweb import models, views  # NOQA: F401

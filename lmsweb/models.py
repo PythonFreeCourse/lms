@@ -5,6 +5,7 @@ import string
 from flask_admin import Admin, AdminIndexView  # type: ignore
 from flask_admin.contrib.peewee import ModelView  # type: ignore
 from flask_login import (UserMixin, current_user)
+from lms.lmsweb import webapp
 from peewee import (  # type: ignore
     BooleanField,
     CharField,
@@ -19,8 +20,6 @@ from peewee import (  # type: ignore
 )
 from playhouse.signals import Model, pre_save
 from werkzeug.security import check_password_hash, generate_password_hash
-
-from lmsweb import webapp
 
 
 class RoleOptions(enum.Enum):
