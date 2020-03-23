@@ -14,7 +14,7 @@ webapp = Flask(
 )
 webapp.config.from_pyfile('config.py')
 
-# csrf = CSRFProtect(webapp) disable meanwhile until APIs are stable
+csrf = CSRFProtect(webapp)
 
 # Must import files after app's creation
 from lms.lmsweb import views, models  # NOQA F401

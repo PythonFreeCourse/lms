@@ -13,9 +13,7 @@ function markLine(target, color) {
 
 function isUserGrader() {
   // Obviously should not be trusted security-wise
-  return document.cookie.split(';').some(
-    (item) => (item.includes('role=grader') || item.includes('role=admin')),
-  );
+  return ['grader', 'admin'].includes(sessionStorage.getItem('role'));
 }
 
 function addSpecialCommentButtons(commentData) {
@@ -47,31 +45,32 @@ function addCommentToLine(line, commentData) {
 }
 
 function treatComments(comments) {
-   comments = [
-     { id: 1, line: 5, text: 'הרצל אל תאכל כרובית בפיתה' },
-     { id: 2, line: 5, text: `הרצל שוב פעם אכלת כרובית בפיתה.
-                       זו פעם מיליון שאני אומרת לך לא
-                       לאכול כרובית בפיתה!!!` },
-     { id: 3, line: 20, text: 'Hello' }
-     ]; // Mock data 
+  /*
+  comments = [
+    { id: 1, line: 5, text: 'הרצל אל תאכל כרובית בפיתה' },
+    { id: 2, line: 5, text: `הרצל שוב פעם אכלת כרובית בפיתה.
+                             זו פעם מיליון שאני אומרת לך לא
+                             לאכול כרובית בפיתה!!!` },
+    { id: 3, line: 20, text: 'Hello' },
+  ]; // Mock data */
   if (comments === undefined) {
     console.error('Probably bad xhr request');
     return;
   }
   comments.forEach((entry) => {
-    addCommentToLine(entry.line, entry);
+    addCommentToLine(entry.line_number, entry);
   });
   $('[data-toggle=popover]').popover();
 }
 
 
 function pullComments(exerciseId, callback) {
-  const url = `/comments/get/${exerciseId}`;
+  const url = `/comments?act=fetch&solutionId=${exerciseId}`;
   const xhr = new XMLHttpRequest();
 
-  xhr.onreadystatechange = function () {
+  xhr.onreadystatechange = () => {
     if (xhr.readyState === 4) {
-      callback(xhr.response.json);
+      callback(JSON.parse(xhr.response));
     }
   };
 

@@ -153,7 +153,7 @@ window.addEventListener('lines-numbered', () => {
   trackDraggables(document.getElementsByClassName('known-comment'));
   addNewCommentButtons(document.getElementsByClassName('line'));
   if (!window.isUserGrader()) {
-    document.cookie = 'role=grader; max-age=31536000; path=/';
+    sessionStorage.setItem('role', 'grader');
   }
 
 

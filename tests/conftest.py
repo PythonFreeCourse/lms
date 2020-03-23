@@ -40,7 +40,7 @@ def populate_roles():
 
 @pytest.fixture()
 def user(populate_roles):
-    admin_role = Role.get(Role.name == RoleOptions.STAFF_ROLE.value)
+    admin_role = Role.get(Role.name == RoleOptions.STAFF.value)
     return User.create(  # NOQA: S106
             username='Ido',
             fullname='Elk',
@@ -53,7 +53,7 @@ def user(populate_roles):
 
 @pytest.fixture()
 def admin_user(populate_roles):
-    admin_role = Role.get(Role.name == RoleOptions.ADMINISTRATOR_ROLE.value)
+    admin_role = Role.get(Role.name == RoleOptions.ADMINISTRATOR.value)
     return User.create(  # NOQA: S106
             username='Yam',
             fullname='Elk',

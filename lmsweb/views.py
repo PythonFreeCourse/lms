@@ -2,22 +2,25 @@ import json
 from datetime import datetime
 from urllib.parse import urljoin, urlparse
 
-import flask
-from flask import abort, render_template, request, session, url_for
+from flask import (
+    abort, jsonify, render_template, request, session, url_for,
+)
 
-from flask_login import (
+from flask_login import (  # type: ignore
     LoginManager,
     current_user,
     login_required,
     login_user,
     logout_user,
 )
+from playhouse.shortcuts import model_to_dict  # type: ignore
 from werkzeug.datastructures import FileStorage
+from werkzeug.utils import redirect
 
 from lms.lmsweb import webapp
-from lms.lmsweb.models import User, Solution, Exercise
-
-from werkzeug.utils import redirect
+from lms.lmsweb.models import (
+    Comment, Exercise, RoleOptions, Solution, User, database
+)
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
@@ -30,12 +33,25 @@ PERMISSIVE_CORS = {
     'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE',
 }
 
+HIGH_ROLES = {str(RoleOptions.STAFF), str(RoleOptions.ADMINISTRATOR)}
+
+
+@webapp.before_request
+def _db_connect():
+    database.connect()
+
 
 @webapp.after_request
 def after_request(response):
     for name, value in PERMISSIVE_CORS.items():
         response.headers.add(name, value)
     return response
+
+
+@webapp.teardown_request
+def _db_close(exc):
+    if not database.is_closed():
+        database.close()
 
 
 @login_manager.user_loader
@@ -94,6 +110,25 @@ def logout():
 @login_required
 def main():
     return render_template('exercises.html')
+
+
+@webapp.route('/comments', methods=['GET', 'POST'])
+@login_required
+def comment():
+    is_manager = session['role'] in HIGH_ROLES
+    if is_manager and request.method == 'POST':
+        solutionId = request.form['solutionId']
+        print(solutionId)
+        return jsonify('{"success": "true"}')
+
+    if request.method != 'GET':
+        return abort(405, "Must be GET or POST")
+
+    solution_id = request.args.get('solutionId')
+    solver = Solution.select(Solution.solver).where(Solution.id == solution_id)
+    if is_manager or solver == session['id']:
+        if request.args.get('act') == 'fetch':
+            return jsonify(Comment.by_solution(solution_id))
 
 
 @webapp.route('/send')
