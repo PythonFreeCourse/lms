@@ -26,18 +26,22 @@ function sendComment(kind, solutionId, line, commentData) {
   );
 }
 
-function deleteComment(kind, solutionId, commentId) {
+function deleteComment(solutionId, commentId) {
   const xhr = new XMLHttpRequest();
-  xhr.open('DELETE', `/comments/${solutionId}/${commentId}`, true);
+  const url = `/comments?act=delete&solutionId=${solutionId}&commentId=${commentId}`;
+  xhr.open('GET', url, true);
   xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.responseType = 'json';
   xhr.onreadystatechange = () => {
     if (xhr.readyState === 4) {
       if (xhr.status === 200) {
-        const commentElement = document.querySelector(`[data-commentid="${commentId}"]`);
+        const commentElement = document.querySelector(`.grader-delete[data-commentid="${commentId}"]`).closest('.comment');
         const hr = commentElement.closest('hr');
-        hr.parentNode.removeChild(hr);
+        if (hr !== null) {
+          hr.parentNode.removeChild(hr);
+        }
         commentElement.parentNode.removeChild(commentElement);
+        // TODO: If popover container is empty, destroy it
       } else {
         console.log(xhr.status);
       }
@@ -157,7 +161,9 @@ window.addEventListener('lines-numbered', () => {
   }
 
 
+  /*
   // Select the node that will be observed for mutations
+  const solutionId = 1; // # TODO: Fetch from URL
   const targetNode = document.body;
 
   // Options for the observer (which mutations to observe)
@@ -170,8 +176,9 @@ window.addEventListener('lines-numbered', () => {
       if (mutation.type === 'childList') {
         mutation.addedNodes.forEach((node) => {
           const deleteButton = node.querySelector('.grader-delete');
+          console.log(deleteButton);
           deleteButton.addEventListener('click', () => {
-            deleteComment(deleteButton.dataset.deleteid);
+            deleteComment(solutionId, deleteButton.dataset.commentid);
           });
         });
       }
@@ -183,4 +190,5 @@ window.addEventListener('lines-numbered', () => {
 
   // Start observing the target node for configured mutations
   observer.observe(targetNode, config);
+  */
 });
