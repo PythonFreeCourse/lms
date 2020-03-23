@@ -24,3 +24,4 @@ peewee==3.9.6
 pytest==5.0.1
 werkzeug==0.16.1
 wtf-peewee==3.0.0
+requests==2.23.0
