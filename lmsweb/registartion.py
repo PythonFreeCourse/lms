@@ -111,4 +111,4 @@ class UserRegistrationCreator(object):
                 F'username: {user.email}\npassword: {user.password}\n'
                 'You should change your password as soon as possible. '
                 'big snakes Out there to get your password!.\n'
-                'logging address is: {config.SERVER_ADDRESS}')
+                F'logging address is: {config.SERVER_ADDRESS}')
