@@ -3,7 +3,6 @@ from datetime import datetime
 from urllib.parse import urljoin, urlparse
 
 from flask import render_template, request, url_for, jsonify, abort, session
-
 from flask_login import (  # type: ignore
     LoginManager,
     current_user,
@@ -11,17 +10,15 @@ from flask_login import (  # type: ignore
     login_user,
     logout_user,
 )
+from peewee import fn
 from werkzeug.datastructures import FileStorage
+from werkzeug.utils import redirect
 
-from lms.lmsweb import webapp
-from lms.lmsweb.models import (
+from lmsweb import webapp
+from lmsweb.models import (
     Comment, Exercise, RoleOptions, Solution, User,
     database, CommentsToSolutions,
 )
-
-from peewee import fn
-
-from werkzeug.utils import redirect
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
