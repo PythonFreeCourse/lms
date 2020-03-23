@@ -1,4 +1,5 @@
 const COMMENTED_LINE_COLOR = '#fac4c3';
+const solutionId = 1; // TODO: Fetch from URL
 
 function markLine(target, color) {
   if (target.dataset && target.dataset.marked === 'true') { return; }
@@ -19,7 +20,7 @@ function isUserGrader() {
 function addSpecialCommentButtons(commentData) {
   let changedCommentText = commentData.text;
   if (isUserGrader()) {
-    const deleteButton = `<i class="fa fa-trash grader-delete" aria-hidden="true" data-deleteid="${commentData.id}" onclick="window.deleteComment(${commentData.id});"></i>`;
+    const deleteButton = `<i class="fa fa-trash grader-delete" aria-hidden="true" data-commentid="${commentData.id}" onclick="deleteComment(${solutionId}, ${commentData.id});"></i>`;
     changedCommentText = `${deleteButton} ${commentData.text}`;
   }
   return changedCommentText;
@@ -29,7 +30,7 @@ function addCommentToLine(line, commentData) {
   const commentElement = $(`.line[data-line="${line}"]`);
   const existingPopover = $(commentElement).data('bs.popover');
   const buttonizedComment = addSpecialCommentButtons(commentData);
-  const commentText = `<span data-commentid="${commentData.id}">${buttonizedComment}</span>`;
+  const commentText = `<span class="comment" data-commentid="${commentData.id}">${buttonizedComment}</span>`;
   if (existingPopover !== undefined) {
     const existingContent = `${existingPopover.config.content} <hr>`;
     existingPopover.config.content = existingContent + commentText;
@@ -38,6 +39,7 @@ function addCommentToLine(line, commentData) {
       html: true,
       title: `שורה ${line}`,
       content: commentText,
+      sanitize: false,
       placement: 'left', // Actually right :P
     });
     commentElement[0].dataset.marked = true;

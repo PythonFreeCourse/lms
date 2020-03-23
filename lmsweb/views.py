@@ -18,7 +18,8 @@ from werkzeug.utils import redirect
 
 from lms.lmsweb import webapp
 from lms.lmsweb.models import (
-    Comment, Exercise, RoleOptions, Solution, User, database
+    Comment, CommentsToSolutions, Exercise, RoleOptions, Solution, User,
+    database
 )
 
 login_manager = LoginManager()
@@ -123,11 +124,20 @@ def comment():
     if request.method != 'GET':
         return abort(405, "Must be GET or POST")
 
-    solution_id = request.args.get('solutionId')
+    solution_id = int(request.args.get('solutionId'))
     solver = Solution.select(Solution.solver).where(Solution.id == solution_id)
     if is_manager or solver == session['id']:
         if request.args.get('act') == 'fetch':
             return jsonify(Comment.by_solution(solution_id))
+        if request.args.get('act') == 'delete':
+            comment_id = int(request.args.get('commentId'))
+            # TODO: Handle if not found
+            CommentsToSolutions.get(
+                CommentsToSolutions.comment == comment_id,
+                CommentsToSolutions.solution == solution_id,
+            ).delete_instance()
+            return jsonify('{"success": "true"')
+
 
 
 @webapp.route('/send')
