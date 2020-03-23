@@ -1,12 +1,13 @@
-import os
 import csv
-import typing
 import logging
-
-import requests
+import os
+import typing
 
 from lms.lmsweb import config
 from lms.lmsweb import models
+
+import requests
+
 
 _logger = logging.getLogger(__name__)
 
@@ -35,7 +36,8 @@ class UserRegistrationCreator(object):
     @classmethod
     def from_csv_file(cls, file_path: str) -> 'UserRegistrationCreator':
         """
-        CSV file should be with three columns, and in the header: first_name,last_name,email and password[optional]
+        CSV file should be with three columns,
+        and in the header: first_name,last_name,email and password[optional]
         """
 
         if not os.path.exists(file_path):
@@ -64,7 +66,9 @@ class UserRegistrationCreator(object):
                 self._get_or_create_user_in_model(user)
                 self._send_user_email_registration(user)
             except Exception:
-                _logger.exception('Failed to create user %s, continue to next user', user.email)
+                _logger.exception(
+                    'Failed to create user %s, continue to next user',
+                    user.email)
                 self._failed_users.append(user)
 
     @staticmethod
@@ -81,22 +85,30 @@ class UserRegistrationCreator(object):
 
     def _send_user_email_registration(self, user: UserToCreate) -> None:
         response = None
+        text = self._build_user_text(user)
+        url = F'https://api.eu.mailgun.net/v3/{config.MAILGUN_DOMAIN}/messages'
         try:
             response = self._session.post(
-                url=F'https://api.eu.mailgun.net/v3/{config.MAILGUN_DOMAIN}/messages',
+                url=url,
                 data={
                     'from': F'no-reply@{config.MAILGUN_DOMAIN}',
                     'to': user,
                     'subject': 'Learn python - registration email',
-                    'text': 'Dear Student.\n A profile for login to the study program created just for you!\n'
-                            F'Your initial login details:\n'
-                            F'username: {user.email}\npassword: {user.password}\n'  # TODO: change password?
-                            'You should change your password as soon as possible. big snakes '
-                            F'Out there to get your password!.\n logging address is: {config.SERVER_ADDRESS}'
-                },
-                auth=('api', config.MAILGUN_API_KEY)
-            )
+                    'text': text},
+                auth=('api', config.MAILGUN_API_KEY))
             response.raise_for_status()
         except Exception:
-            _logger.exception('Failed to create user %s. response: %s', user.email, response.content)
+            _logger.exception(
+                'Failed to create user %s. response: %s',
+                user.email,
+                response.content)
             raise
+
+    @staticmethod
+    def _build_user_text(user: UserToCreate) -> str:
+        return ('Dear Student.\n A profile for login to the study program'
+                ' created just for you!\nYour initial login details:\n'
+                F'username: {user.email}\npassword: {user.password}\n'
+                'You should change your password as soon as possible. '
+                'big snakes Out there to get your password!.\n'
+                'logging address is: {config.SERVER_ADDRESS}')
