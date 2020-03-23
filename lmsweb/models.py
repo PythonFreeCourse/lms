@@ -119,13 +119,22 @@ class Solution(BaseModel):
 class Comment(BaseModel):
     commenter = ForeignKeyField(User, backref='comments')
     timestamp = DateTimeField()
-    solution = ForeignKeyField(Solution, backref='comments')
     text = TextField()
     line_number = IntegerField(constraints=[Check('line_number >= 1')])
 
     def by_solution(solution_id):
-        solution_matches = Comment.solution == solution_id
-        return list(Comment.select().where(solution_matches).dicts())
+        get_comment_ids = (
+            CommentsToSolutions
+            .select(CommentsToSolutions.comment)
+            .where(CommentsToSolutions.solution == solution_id)
+        )
+        comments = Comment.select().where(Comment.id << get_comment_ids)
+        return list(comments.dicts())
+
+
+class CommentsToSolutions(BaseModel):
+    comment = ForeignKeyField(Comment)
+    solution = ForeignKeyField(Solution)
 
 
 class AccessibleByAdminMixin:
@@ -152,7 +161,7 @@ admin = Admin(
 )
 
 
-ALL_MODELS = (User, Exercise, Comment, Solution, Role)
+ALL_MODELS = (User, Exercise, Comment, Solution, Role, CommentsToSolutions)
 for m in ALL_MODELS:
     admin.add_view(AdminModelView(m))
 
