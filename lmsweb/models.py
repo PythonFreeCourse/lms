@@ -125,12 +125,7 @@ class Comment(BaseModel):
 
     def by_solution(solution_id):
         solution_matches = Comment.solution == solution_id
-        return [
-            result
-            for result
-            in Comment.select().where(solution_matches).dicts()
-        ]
-
+        return list(Comment.select().where(solution_matches).dicts())
 
 
 class AccessibleByAdminMixin:

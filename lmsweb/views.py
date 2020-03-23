@@ -13,7 +13,6 @@ from flask_login import (  # type: ignore
     login_user,
     logout_user,
 )
-from playhouse.shortcuts import model_to_dict  # type: ignore
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
