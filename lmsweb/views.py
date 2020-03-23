@@ -193,8 +193,8 @@ def view():
 @webapp.route('/common_comments/<exercise_id>')
 @login_required
 def common_comments(exercise_id=None):
-    """Returns most common comments throughout all exercises, unless a specific
-     exercise was specified.
+    """Most common comments throughout all exercises.
+     Filter by exercise id when specified.
      """
     query = Comment.select(Comment.text)
     if exercise_id is not None:
