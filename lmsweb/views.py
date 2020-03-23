@@ -139,6 +139,12 @@ def comment():
             return jsonify('{"success": "true"')
 
 
+@webapp.route('/get-exercises', methods=['GET'])
+@login_required
+def exercises():
+    unarchived_exercises = Exercise.filter(**{Exercise.is_archived.name: False})
+    return jsonify(tuple(unarchived_exercises.dicts()))
+
 
 @webapp.route('/send')
 @login_required
