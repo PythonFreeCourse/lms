@@ -1,6 +1,8 @@
 import csv
 import logging
 import os
+import random
+import string
 import typing
 
 from lms.lmsweb import config
@@ -26,7 +28,7 @@ class UserToCreate(typing.NamedTuple):
         return cls._fields
 
 
-class UserRegistrationCreator(object):
+class UserRegistrationCreator:
     _session = requests.Session()
 
     def __init__(self, users_to_create: typing.Sequence[UserToCreate]):
@@ -49,7 +51,7 @@ class UserRegistrationCreator(object):
         users = []
         for record in csv_records:
             if 'password' not in record:
-                record['password'] = os.urandom(10).hex()
+                record['password'] = cls._random_password()
             users.append(UserToCreate(**record))
 
         return cls(users)
@@ -91,7 +93,7 @@ class UserRegistrationCreator(object):
             response = self._session.post(
                 url=url,
                 data={
-                    'from': F'no-reply@{config.MAILGUN_DOMAIN}',
+                    'from': f'no-reply@{config.MAILGUN_DOMAIN}',
                     'to': user,
                     'subject': 'Learn python - registration email',
                     'text': text},
@@ -108,7 +110,11 @@ class UserRegistrationCreator(object):
     def _build_user_text(user: UserToCreate) -> str:
         return ('Dear Student.\n A profile for login to the study program'
                 ' created just for you!\nYour initial login details:\n'
-                F'username: {user.email}\npassword: {user.password}\n'
+                f'username: {user.email}\npassword: {user.password}\n'
                 'You should change your password as soon as possible. '
                 'big snakes Out there to get your password!.\n'
-                F'logging address is: {config.SERVER_ADDRESS}')
+                f'logging address is: {config.SERVER_ADDRESS}')
+
+    @classmethod
+    def _random_password(cls) -> string:
+        return ''.join(random.choices(string.printable.strip(), k=12))
