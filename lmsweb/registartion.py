@@ -83,7 +83,7 @@ class UserRegistrationCreator(object):
         response = None
         try:
             response = self._session.post(
-                url=F'https://api.mailgun.net/v3/{config.MAILGUN_DOMAIN}/messages',
+                url=F'https://api.eu.mailgun.net/v3/{config.MAILGUN_DOMAIN}/messages',
                 data={
                     'from': F'no-reply@{config.MAILGUN_DOMAIN}',
                     'to': user,
@@ -91,7 +91,7 @@ class UserRegistrationCreator(object):
                     'text': 'Dear Student.\n A profile for login to the study program created just for you!\n'
                             F'Your initial login details:\n'
                             F'username: {user.email}\npassword: {user.password}\n'  # TODO: change password?
-                            'You should change your password as soon as possible. big snakes'
+                            'You should change your password as soon as possible. big snakes '
                             F'Out there to get your password!.\n logging address is: {config.SERVER_ADDRESS}'
                 },
                 auth=('api', config.MAILGUN_API_KEY)
