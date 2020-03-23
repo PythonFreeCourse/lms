@@ -103,11 +103,6 @@ class Exercise(BaseModel):
         return self.subject
 
 
-class UserToExercise(BaseModel):
-    user = ForeignKeyField(User)
-    exercise = ForeignKeyField(Exercise)
-
-
 class Solution(BaseModel):
     exercise = ForeignKeyField(Exercise, backref='solutions')
     solver = ForeignKeyField(User, backref='solutions')
@@ -124,6 +119,7 @@ class Comment(BaseModel):
     commenter = ForeignKeyField(User, backref='comments')
     timestamp = DateTimeField()
     text = TextField()
+    # TODO: Move to CommentsTexts. Is this good?
     line_number = IntegerField(constraints=[Check('line_number >= 1')])
 
     def by_solution(solution_id):
@@ -164,8 +160,7 @@ admin = Admin(
     index_view=MyAdminIndexView(),
 )
 
-ALL_MODELS = (User, Exercise, Comment, Solution, Role, CommentsToSolutions,
-              UserToExercise)
+ALL_MODELS = (User, Exercise, Comment, Solution, Role, CommentsToSolutions)
 for m in ALL_MODELS:
     admin.add_view(AdminModelView(m))
 
