@@ -2,7 +2,8 @@ import json
 from datetime import datetime
 from urllib.parse import urljoin, urlparse
 
-from flask import render_template, request, url_for, jsonify, abort, session
+from flask import abort, jsonify, render_template, request, session, url_for
+
 from flask_login import (  # type: ignore
     LoginManager,
     current_user,
@@ -10,15 +11,18 @@ from flask_login import (  # type: ignore
     login_user,
     logout_user,
 )
+
 from lms.lmsweb import webapp
-from peewee import fn
-from werkzeug.datastructures import FileStorage
-from werkzeug.utils import redirect
 
 from lmsweb.models import (
-    Comment, Exercise, RoleOptions, Solution, User,
-    database, CommentsToSolutions,
+    Comment, CommentsToSolutions, Exercise, RoleOptions, Solution, User,
+    database,
 )
+
+from peewee import fn
+
+from werkzeug.datastructures import FileStorage
+from werkzeug.utils import redirect
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
