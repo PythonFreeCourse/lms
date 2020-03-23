@@ -104,6 +104,11 @@ class Exercise(BaseModel):
         return self.subject
 
 
+class UserToExercise(BaseModel):
+    user = ForeignKeyField(User)
+    exercise = ForeignKeyField(Exercise)
+
+
 class Solution(BaseModel):
     exercise = ForeignKeyField(Exercise, backref='solutions')
     solver = ForeignKeyField(User, backref='solutions')
@@ -160,8 +165,8 @@ admin = Admin(
     index_view=MyAdminIndexView(),
 )
 
-
-ALL_MODELS = (User, Exercise, Comment, Solution, Role, CommentsToSolutions)
+ALL_MODELS = (User, Exercise, Comment, Solution, Role, CommentsToSolutions,
+              UserToExercise)
 for m in ALL_MODELS:
     admin.add_view(AdminModelView(m))
 
@@ -175,11 +180,11 @@ def generate_password():
     return ''.join(password)
 
 
-if len(Role.select()) == 0:
+if Role.select().count() == 0:
     for role in RoleOptions:
         Role.create(name=role.value)
 
-if len(User.select()) == 0:
+if User.select().count() == 0:
     password = generate_password()
     User.create(
         username='lmsadmin',
