@@ -136,13 +136,14 @@ def comment():
                 CommentsToSolutions.comment == comment_id,
                 CommentsToSolutions.solution == solution_id,
             ).delete_instance()
-            return jsonify('{"success": "true"')
+            return jsonify({"success": "true"})
 
 
-@webapp.route('/get-exercises', methods=['GET'])
+@webapp.route('/exercises', methods=['GET'])
 @login_required
 def exercises():
-    unarchived_exercises = Exercise.filter(**{Exercise.is_archived.name: False})
+    not_archived_filter = {Exercise.is_archived.name: False}
+    unarchived_exercises = Exercise.filter(**not_archived_filter)
     return jsonify(tuple(unarchived_exercises.dicts()))
 
 
