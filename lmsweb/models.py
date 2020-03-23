@@ -20,7 +20,7 @@ from peewee import (  # type: ignore
 from playhouse.signals import Model, pre_save
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from . import webapp
+from lms.lmsweb import webapp
 
 
 class RoleOptions(enum.Enum):
