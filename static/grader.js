@@ -26,6 +26,21 @@ function sendComment(kind, solutionId, line, commentData) {
   );
 }
 
+function visuallyRemoveComment(commentId) {
+  const commentElement = document.querySelector(`.grader-delete[data-commentid="${commentId}"]`).closest('.comment');
+  const lineElement = document.querySelector(`.line[data-line="${commentElement.dataset.line}"]`);
+  const hr = commentElement.nextElementSibling || commentElement.previousElementSibling;
+  if (hr === null) {
+    lineElement.dataset.marked = false;
+    window.markLine(lineElement, false);
+    $(lineElement).popover('dispose');
+  } else {
+    hr.parentNode.removeChild(hr);
+    commentElement.parentNode.removeChild(commentElement);
+  }
+}
+
+
 function deleteComment(solutionId, commentId) {
   const xhr = new XMLHttpRequest();
   const url = `/comments?act=delete&solutionId=${solutionId}&commentId=${commentId}`;
@@ -35,13 +50,7 @@ function deleteComment(solutionId, commentId) {
   xhr.onreadystatechange = () => {
     if (xhr.readyState === 4) {
       if (xhr.status === 200) {
-        const commentElement = document.querySelector(`.grader-delete[data-commentid="${commentId}"]`).closest('.comment');
-        const hr = commentElement.closest('hr');
-        if (hr !== null) {
-          hr.parentNode.removeChild(hr);
-        }
-        commentElement.parentNode.removeChild(commentElement);
-        // TODO: If popover container is empty, destroy it
+        visuallyRemoveComment(commentId);
       } else {
         console.log(xhr.status);
       }
