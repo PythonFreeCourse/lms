@@ -2,9 +2,7 @@ import json
 from datetime import datetime
 from urllib.parse import urljoin, urlparse
 
-from flask import (
-    abort, jsonify, render_template, request, session, url_for,
-)
+from flask import render_template, request, url_for, jsonify, abort, session
 
 from flask_login import (  # type: ignore
     LoginManager,
@@ -14,13 +12,16 @@ from flask_login import (  # type: ignore
     logout_user,
 )
 from werkzeug.datastructures import FileStorage
-from werkzeug.utils import redirect
 
 from lms.lmsweb import webapp
 from lms.lmsweb.models import (
-    Comment, CommentsToSolutions, Exercise, RoleOptions, Solution, User,
-    database
+    Comment, Exercise, RoleOptions, Solution, User,
+    database, CommentsToSolutions,
 )
+
+from peewee import fn
+
+from werkzeug.utils import redirect
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
@@ -63,8 +64,8 @@ def is_safe_url(target):
     ref_url = urlparse(request.host_url)
     test_url = urlparse(urljoin(request.host_url, target))
     return (
-            test_url.scheme in ('http', 'https')
-            and ref_url.netloc == test_url.netloc
+        test_url.scheme in ('http', 'https')
+        and ref_url.netloc == test_url.netloc
     )
 
 
@@ -139,7 +140,6 @@ def comment():
             return jsonify('{"success": "true"')
 
 
-
 @webapp.route('/send')
 @login_required
 def send():
@@ -147,6 +147,7 @@ def send():
 
 
 @webapp.route('/upload', methods=['POST'])
+@login_required
 def upload():
     # TODO: Save the files WITHOUT EXECUTION PERMISSIONS
     # TODO: Check that the file is ipynb/py
@@ -182,5 +183,31 @@ def upload():
 
 
 @webapp.route('/view')
+@login_required
 def view():
     return render_template('view.html')
+
+
+@webapp.route('/common_comments')
+@webapp.route('/common_comments/<exercise_id>')
+@login_required
+def common_comments(exercise_id=None):
+    """Returns most common comments throughout all exercises, unless a specific
+     exercise was specified.
+     """
+    query = Comment.select(Comment.text)
+    if exercise_id is not None:
+        query = (query
+                 .join(CommentsToSolutions)
+                 .join(Solution)
+                 .join(Exercise)
+                 .where(Exercise.id == exercise_id)
+                 )
+
+    query = (query
+             .group_by(Comment.text)
+             .order_by(fn.Count(Comment.text).desc())
+             .limit(5)
+             )
+
+    return jsonify(list(query.dicts()))
