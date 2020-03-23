@@ -24,9 +24,12 @@ from lms.lmsweb import webapp
 
 
 class RoleOptions(enum.Enum):
-    STUDENT_ROLE = 'Student'
-    STAFF_ROLE = 'Staff'
-    ADMINISTRATOR_ROLE = 'Administrator'
+    STUDENT = 'Student'
+    STAFF = 'Staff'
+    ADMINISTRATOR = 'Administrator'
+
+    def __str__(self):
+        return self.value
 
 
 if webapp.debug:
@@ -49,10 +52,10 @@ class BaseModel(Model):
 
 class Role(BaseModel):
     name = CharField(unique=True, choices=(
-        (RoleOptions.ADMINISTRATOR_ROLE.value,
-         RoleOptions.ADMINISTRATOR_ROLE.value),
-        (RoleOptions.STAFF_ROLE.value, RoleOptions.STAFF_ROLE.value),
-        (RoleOptions.STUDENT_ROLE.value, RoleOptions.STUDENT_ROLE.value),
+        (RoleOptions.ADMINISTRATOR.value,
+         RoleOptions.ADMINISTRATOR.value),
+        (RoleOptions.STAFF.value, RoleOptions.STAFF.value),
+        (RoleOptions.STUDENT.value, RoleOptions.STUDENT.value),
     ))
 
     def __str__(self):
@@ -60,15 +63,15 @@ class Role(BaseModel):
 
     @property
     def is_student(self):
-        return self.name == RoleOptions.STUDENT_ROLE.value
+        return self.name == RoleOptions.STUDENT.value
 
     @property
     def is_staff(self):
-        return self.name == RoleOptions.STAFF_ROLE.value
+        return self.name == RoleOptions.STAFF.value
 
     @property
     def is_administrator(self):
-        return self.name == RoleOptions.ADMINISTRATOR_ROLE.value
+        return self.name == RoleOptions.ADMINISTRATOR.value
 
 
 class User(UserMixin, BaseModel):
@@ -116,14 +119,18 @@ class Solution(BaseModel):
 class Comment(BaseModel):
     commenter = ForeignKeyField(User, backref='comments')
     timestamp = DateTimeField()
-    exercise = ForeignKeyField(Exercise, backref='comments')
-    comment_text = TextField()
+    solution = ForeignKeyField(Solution, backref='comments')
+    text = TextField()
     line_number = IntegerField(constraints=[Check('line_number >= 1')])
 
+    def by_solution(solution_id):
+        solution_matches = Comment.solution == solution_id
+        return [
+            result
+            for result
+            in Comment.select().where(solution_matches).dicts()
+        ]
 
-class CommentsToSolutions(BaseModel):
-    comment = ForeignKeyField(Comment)
-    solution = ForeignKeyField(Solution)
 
 
 class AccessibleByAdminMixin:
@@ -175,6 +182,6 @@ if len(User.select()) == 0:
         fullname='LMS Admin',
         password=password,
         mail_address='lms@pythonic.guru',
-        role=Role.get(name=RoleOptions.ADMINISTRATOR_ROLE.value),
+        role=Role.get(name=RoleOptions.ADMINISTRATOR.value),
     )
     print(f"First run! Your login is lmsadmin:{password}")

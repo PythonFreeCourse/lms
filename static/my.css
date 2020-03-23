@@ -305,6 +305,10 @@ code > code:last-of-type{
   display: none;
 }
 
+.grader-delete {
+  cursor: pointer;  /* Very bad semantically, think of another UI solution */
+}
+
 code > .grader-add {
   display: block;
   position: absolute;
