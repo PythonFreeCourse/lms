@@ -1,6 +1,7 @@
 import enum
 import secrets
 import string
+from datetime import datetime
 
 from flask_admin import Admin, AdminIndexView  # type: ignore
 from flask_admin.contrib.peewee import ModelView  # type: ignore
@@ -132,7 +133,7 @@ class CommentText(BaseModel):
 
 class Comment(BaseModel):
     commenter = ForeignKeyField(User, backref='comments')
-    timestamp = DateTimeField()
+    timestamp = DateTimeField(default=datetime.now)
     line_number = IntegerField(constraints=[Check('line_number >= 1')])
     comment = ForeignKeyField(CommentText)
     solution = ForeignKeyField(Solution)
