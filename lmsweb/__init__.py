@@ -1,8 +1,7 @@
 import os
 
 from flask import Flask
-
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import CSRFProtect  # type: ignore
 
 project_dir = os.path.abspath(os.path.curdir)
 template_dir = os.path.join(project_dir, 'templates')
@@ -17,4 +16,4 @@ webapp.config.from_pyfile('config.py')
 csrf = CSRFProtect(webapp)
 
 # Must import files after app's creation
-from lms.lmsweb import views, models  # NOQA F401
+from lms.lmsweb import models, views  # NOQA: F401

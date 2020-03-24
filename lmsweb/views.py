@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 from urllib.parse import urljoin, urlparse
 
+
 from flask import (
     abort, jsonify, render_template, request, session, url_for,
 )
@@ -12,15 +13,16 @@ from flask_login import (  # type: ignore
     login_user,
     logout_user,
 )
+from peewee import fn  # type: ignore
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
 from lms.lmsweb import webapp
 from lms.lmsweb.models import (
-    Comment, CommentsToSolutions, Exercise, RoleOptions, Solution, User,
-    database
+    Comment, CommentText, Exercise, RoleOptions, Solution, User, database,
 )
 from lms.lmsweb.tools.notebook_extractor import extract_exercises
+
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
@@ -64,8 +66,8 @@ def is_safe_url(target):
     ref_url = urlparse(request.host_url)
     test_url = urlparse(urljoin(request.host_url, target))
     return (
-            test_url.scheme in ('http', 'https')
-            and ref_url.netloc == test_url.netloc
+        test_url.scheme in ('http', 'https')
+        and ref_url.netloc == test_url.netloc
     )
 
 
@@ -145,20 +147,19 @@ def comment():
     if request.method != 'GET':
         return abort(405, "Must be GET or POST")
 
-    solution_id = int(request.args.get('solutionId'))
-    solver = Solution.select(Solution.solver).where(Solution.id == solution_id)
-    if is_manager or solver == session['id']:
+    solution_id = int(request.args['solutionId'])
+    solution = Solution.select(Solution).where(Solution.id == solution_id)
+    if is_manager or solution.solver == session['id']:
         if request.args.get('act') == 'fetch':
             return jsonify(Comment.by_solution(solution_id))
         if request.args.get('act') == 'delete':
             comment_id = int(request.args.get('commentId'))
             # TODO: Handle if not found
-            CommentsToSolutions.get(
-                CommentsToSolutions.comment == comment_id,
-                CommentsToSolutions.solution == solution_id,
+            Comment.get(
+                Comment.comment == comment_id,
+                Comment.solution == solution_id,
             ).delete_instance()
             return jsonify({"success": "true"})
-
 
 @webapp.route('/send')
 @login_required
@@ -167,6 +168,7 @@ def send():
 
 
 @webapp.route('/upload', methods=['POST'])
+@login_required
 def upload():
     user_id = request.form.get('user')
     if user_id is None or session['id'] != user_id:
@@ -223,5 +225,31 @@ def upload():
     })
 
 @webapp.route('/view')
+@login_required
 def view():
     return render_template('view.html')
+
+
+@webapp.route('/common_comments')
+@webapp.route('/common_comments/<exercise_id>')
+@login_required
+def common_comments(exercise_id=None):
+    """Most common comments throughout all exercises.
+     Filter by exercise id when specified.
+     """
+    query = CommentText.select(CommentText.text)
+    if exercise_id is not None:
+        query = (query
+                 .join(Comment)
+                 .join(Solution)
+                 .join(Exercise)
+                 .where(Exercise.id == exercise_id)
+                 )
+
+    query = (query
+             .group_by(CommentText.id)
+             .order_by(fn.Count(CommentText.id).desc())
+             .limit(5)
+             )
+
+    return jsonify(list(query.dicts()))
