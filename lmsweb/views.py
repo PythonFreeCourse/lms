@@ -172,17 +172,13 @@ def upload():
     if user_id is None or session['id'] != user_id:
         return abort(403, "Wrong user ID.")
 
-    exercise = Exercise.get_by_id(request.form.get('exercise', 0))
+    exercise = Exercise.get_by_id(request.form.get('exercise'))
     if not exercise:
         return abort(404, "Exercise does not exist.")
 
     user = User.get_by_id(user_id)
     if not user:
         return abort(403, "Invalid user.")
-
-    exercise = Exercise.get_by_id(request.form.get('exercise', 0))
-    if not exercise:
-        return abort(404, "Exercise does not exist.")
 
     if request.content_length > MAX_REQUEST_SIZE:
         return abort(402, "file is too heavy. 500KB allowed")
