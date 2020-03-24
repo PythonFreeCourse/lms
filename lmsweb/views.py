@@ -3,7 +3,6 @@ from datetime import datetime
 from urllib.parse import urljoin, urlparse
 
 from flask import abort, jsonify, render_template, request, session, url_for
-
 from flask_login import (  # type: ignore
     LoginManager,
     current_user,
@@ -11,17 +10,15 @@ from flask_login import (  # type: ignore
     login_user,
     logout_user,
 )
-
-from lms.lmsweb import webapp
-
-from lmsweb.models import (
-    Comments, Exercise, RoleOptions, Solution, User, database,
-)
-
-from peewee import fn
-
+from peewee import fn  # type: ignore
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
+
+from lms.lmsweb import webapp
+from lms.lmsweb.models import (
+    Comment, CommentText, Exercise, RoleOptions, Solution, User, database,
+)
+
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
@@ -125,17 +122,17 @@ def comment():
     if request.method != 'GET':
         return abort(405, "Must be GET or POST")
 
-    solution_id = int(request.args.get('solutionId'))
+    solution_id = int(request.args['solutionId'])
     solution = Solution.select(Solution).where(Solution.id == solution_id)
     if is_manager or solution.solver == session['id']:
         if request.args.get('act') == 'fetch':
-            return jsonify(Comments.get(Comments.solution == solution))
+            return jsonify(Comment.by_solution(solution_id))
         if request.args.get('act') == 'delete':
             comment_id = int(request.args.get('commentId'))
             # TODO: Handle if not found
-            Comments.get(
-                Comments.comment == comment_id,
-                Comments.solution == solution_id,
+            Comment.get(
+                Comment.comment == comment_id,
+                Comment.solution == solution_id,
             ).delete_instance()
             return jsonify('{"success": "true"')
 
@@ -198,7 +195,7 @@ def common_comments(exercise_id=None):
     query = CommentText.select(CommentText.text)
     if exercise_id is not None:
         query = (query
-                 .join(Comments)
+                 .join(Comment)
                  .join(Solution)
                  .join(Exercise)
                  .where(Exercise.id == exercise_id)
