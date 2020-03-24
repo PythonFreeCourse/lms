@@ -1,6 +1,7 @@
 import enum
 import secrets
 import string
+from datetime import datetime
 
 from flask_admin import Admin, AdminIndexView  # type: ignore
 from flask_admin.contrib.peewee import ModelView  # type: ignore
@@ -12,7 +13,6 @@ from peewee import (  # type: ignore
     DateTimeField,
     ForeignKeyField,
     IntegerField,
-    ManyToManyField,
     PostgresqlDatabase,
     SqliteDatabase,
     TextField,
@@ -104,7 +104,6 @@ def on_save_handler(model_class, instance, created):
 class Exercise(BaseModel):
     subject = CharField()
     date = DateTimeField()
-    users = ManyToManyField(User, backref='exercises')
     is_archived = BooleanField()
 
     def __str__(self):
@@ -129,7 +128,7 @@ class CommentText(BaseModel):
 
 class Comment(BaseModel):
     commenter = ForeignKeyField(User, backref='comments')
-    timestamp = DateTimeField()
+    timestamp = DateTimeField(default=datetime.now)
     line_number = IntegerField(constraints=[Check('line_number >= 1')])
     comment = ForeignKeyField(CommentText)
     solution = ForeignKeyField(Solution)
