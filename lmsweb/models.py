@@ -18,6 +18,7 @@ from peewee import (  # type: ignore
     TextField,
 )
 from playhouse.signals import Model, pre_save
+from playhouse.shortcuts import model_to_dict
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from lms.lmsweb import webapp
@@ -122,25 +123,21 @@ class Solution(BaseModel):
     json_data_str = TextField()
 
 
+class CommentText(BaseModel):
+    text = TextField(unique=True)
+
+
 class Comment(BaseModel):
     commenter = ForeignKeyField(User, backref='comments')
     timestamp = DateTimeField()
-    text = TextField()
     line_number = IntegerField(constraints=[Check('line_number >= 1')])
-
-    def by_solution(solution_id):
-        get_comment_ids = (
-            CommentsToSolutions
-            .select(CommentsToSolutions.comment)
-            .where(CommentsToSolutions.solution == solution_id)
-        )
-        comments = Comment.select().where(Comment.id << get_comment_ids)
-        return list(comments.dicts())
-
-
-class CommentsToSolutions(BaseModel):
-    comment = ForeignKeyField(Comment)
+    comment = ForeignKeyField(CommentText)
     solution = ForeignKeyField(Solution)
+
+    @classmethod
+    def by_solution(cls, solution_id: int):
+        comments = CommentText.select().join(Comment).where(Comment.solution == solution_id)
+        return tuple(comments.dicts())
 
 
 class AccessibleByAdminMixin:
@@ -166,8 +163,7 @@ admin = Admin(
     index_view=MyAdminIndexView(),
 )
 
-
-ALL_MODELS = (User, Exercise, Comment, Solution, Role, CommentsToSolutions)
+ALL_MODELS = (User, Exercise, CommentText, Solution, Role, Comment)
 for m in ALL_MODELS:
     admin.add_view(AdminModelView(m))
 
@@ -181,11 +177,11 @@ def generate_password():
     return ''.join(password)
 
 
-if len(Role.select()) == 0:
+if Role.select().count() == 0:
     for role in RoleOptions:
         Role.create(name=role.value)
 
-if len(User.select()) == 0:
+if User.select().count() == 0:
     password = generate_password()
     User.create(
         username='lmsadmin',
