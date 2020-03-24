@@ -13,7 +13,7 @@ function markLine(target, color) {
 
 function isUserGrader() {
   // Obviously should not be trusted security-wise
-  return ['grader', 'admin'].includes(sessionStorage.getItem('role'));
+  return ['staff', 'administrator'].includes(sessionStorage.getItem('role'));
 }
 
 function addSpecialCommentButtons(commentData) {
@@ -94,7 +94,9 @@ window.markLink = markLine;
 window.addCommentToLine = addCommentToLine;
 window.isUserGrader = isUserGrader;
 window.addEventListener('load', () => {
-  window.solutionId = document.getElementById('code-view').dataset.id;
+  const codeElement = document.getElementById('code-view').dataset;
+  window.solutionId = codeElement.id;
+  sessionStorage.setItem('role', codeElement.role);
   addLineSpansToPre(document.getElementsByTagName('pre'));
   pullComments(window.solutionId, treatComments);
 });
