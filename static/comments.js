@@ -1,5 +1,4 @@
 const COMMENTED_LINE_COLOR = '#fac4c3';
-const solutionId = 1; // TODO: Fetch from URL
 
 function markLine(target, color) {
   if (target.dataset && target.dataset.marked === 'true') { return; }
@@ -20,7 +19,7 @@ function isUserGrader() {
 function addSpecialCommentButtons(commentData) {
   let changedCommentText = commentData.text;
   if (isUserGrader()) {
-    const deleteButton = `<i class="fa fa-trash grader-delete" aria-hidden="true" data-commentid="${commentData.id}" onclick="deleteComment(${solutionId}, ${commentData.id});"></i>`;
+    const deleteButton = `<i class="fa fa-trash grader-delete" aria-hidden="true" data-commentid="${commentData.id}" onclick="deleteComment(${window.solutionId}, ${commentData.id});"></i>`;
     changedCommentText = `${deleteButton} ${commentData.text}`;
   }
   return changedCommentText;
@@ -66,8 +65,8 @@ function treatComments(comments) {
 }
 
 
-function pullComments(exerciseId, callback) {
-  const url = `/comments?act=fetch&solutionId=${exerciseId}`;
+function pullComments(solutionId, callback) {
+  const url = `/comments?act=fetch&solutionId=${solutionId}`;
   const xhr = new XMLHttpRequest();
 
   xhr.onreadystatechange = () => {
@@ -95,7 +94,7 @@ window.markLink = markLine;
 window.addCommentToLine = addCommentToLine;
 window.isUserGrader = isUserGrader;
 window.addEventListener('load', () => {
-  const exerciseId = 1; //  TODO: Get exercise id from URL
+  window.solutionId = document.getElementById('code-view').dataset.id;
   addLineSpansToPre(document.getElementsByTagName('pre'));
-  pullComments(exerciseId, treatComments);
+  pullComments(window.solutionId, treatComments);
 });

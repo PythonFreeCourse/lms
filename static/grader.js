@@ -1,6 +1,27 @@
+function trackFinished(solutionId, element) {
+  element.addEventListener('click', () => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `/checked/${solutionId}`, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.responseType = 'json';
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+          window.location.href = xhr.response.next;
+        } else {
+          console.log(xhr.status);
+        }
+      }
+    };
+
+    xhr.send(JSON.stringify({}));
+  });
+}
+
+
 function sendComment(kind, solutionId, line, commentData) {
   const xhr = new XMLHttpRequest();
-  xhr.open('POST', '/comments/add/', true);
+  xhr.open('POST', '/comments')
   xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.responseType = 'json';
   xhr.onreadystatechange = () => {
@@ -18,6 +39,7 @@ function sendComment(kind, solutionId, line, commentData) {
 
   xhr.send(
     JSON.stringify({
+      act: 'create',
       solution: solutionId,
       line,
       comment: commentData,
@@ -71,8 +93,6 @@ function sendExistsComment(solutionId, line, commentId) {
 
 
 function trackDragAreas(items) {
-  const solutionId = document.getElementById('code-view').dataset.id;
-
   function findElementToMark(e) {
     const span = (e.target.nodeType === 3) ? e.target.parentNode : e.target;
     const target = span.closest('.line');
@@ -105,7 +125,7 @@ function trackDragAreas(items) {
       const { line } = target.dataset;
       const commentId = e.dataTransfer.getData('text/plain');
       window.markLine(target, false);
-      sendExistsComment(solutionId, line, commentId);
+      sendExistsComment(window.solutionId, line, commentId);
     }, false);
   });
 }
@@ -121,12 +141,11 @@ function trackDraggables(elements) {
 
 
 function trackTextArea(lineNumber) {
-  const solutionId = document.getElementById('code-view').dataset.id;
   const target = `textarea[data-line='${lineNumber}']`;
   const popoverElement = `.grader-add[data-line='${lineNumber}']`;
   $(target).keypress((e) => {
     if (e.ctrlKey && e.keyCode === 13) {
-      sendNewComment(solutionId, lineNumber, e.target.value);
+      sendNewComment(window.solutionId, lineNumber, e.target.value);
       $(popoverElement).popover('hide');
     }
   });
@@ -164,6 +183,7 @@ window.deleteComment = deleteComment;
 window.addEventListener('lines-numbered', () => {
   trackDragAreas(document.getElementsByClassName('line'));
   trackDraggables(document.getElementsByClassName('known-comment'));
+  trackFinished(window.solutionId, document.getElementById('save-check'));
   addNewCommentButtons(document.getElementsByClassName('line'));
   if (!window.isUserGrader()) {
     sessionStorage.setItem('role', 'grader');

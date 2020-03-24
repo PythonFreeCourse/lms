@@ -14,6 +14,7 @@ from flask_login import (  # type: ignore
     logout_user,
 )
 from peewee import fn  # type: ignore
+from playhouse.shortcuts import model_to_dict  # type: ignore
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
@@ -118,7 +119,7 @@ def fetch_exercises():
 def fetch_solutions(user_id):
     fields = [
         Solution.id, Solution.is_checked, Solution.grade,
-        Solution.submission_timestamp, Solution.exercise
+        Solution.submission_timestamp, Solution.exercise,
     ]
     solutions = Solution.select(*fields).where(Solution.solver == user_id)
     return {d['id']: d for d in solutions.dicts()}
@@ -224,19 +225,51 @@ def upload():
             "exercise_duplications": list(duplications)
     })
 
-@webapp.route('/view')
+
+@webapp.route('/view/<int:solution_id>')
 @login_required
-def view():
-    return render_template('view.html')
+def view(solution_id):
+    solution = Solution.get_or_none(Solution.id == solution_id)
+    is_manager = session['role'] in HIGH_ROLES
+    if solution is None:
+        return abort(404, "Solution does not exist.")
+    if solution.solver != session['id'] and not is_manager:
+        return abort(403, "This user has no permissions to view this page.")
+
+    view_params = {
+        'solution': model_to_dict(solution), 'is_manager': is_manager,
+    }
+    if is_manager:
+        view_params = {
+            **view_params,
+            'exercise_common_comments': common_comments(solution.exercise),
+            'all_common_comments': common_comments(solution.exercise),
+        }
+
+    return render_template('view.html', **view_params)
 
 
-@webapp.route('/common_comments')
-@webapp.route('/common_comments/<exercise_id>')
+@webapp.route('/checked/<int:solution_id>', methods=['POST'])
 @login_required
+def done_checking(solution_id):
+    if session['role'] not in HIGH_ROLES:
+        return abort(403, "This user has no permissions to view this page.")
+
+    requested_solution = Solution.id == solution_id
+    changes = Solution.update(is_checked=True).where(requested_solution)
+    next_exercise = 1  # TODO: Change to get_next_unchecked()
+    return jsonify({'success': changes.execute() == 1, 'next': next_exercise})
+
+
 def common_comments(exercise_id=None):
-    """Most common comments throughout all exercises.
-     Filter by exercise id when specified.
-     """
+    # TODO: Add cache for 2 minute each time
+    """
+    Most common comments throughout all exercises.
+    Filter by exercise id when specified.
+    """
+    if session['role'] not in HIGH_ROLES:
+        return abort(403, "This user has no permissions to view this page.")
+
     query = CommentText.select(CommentText.text)
     if exercise_id is not None:
         query = (query
@@ -252,4 +285,11 @@ def common_comments(exercise_id=None):
              .limit(5)
              )
 
-    return jsonify(list(query.dicts()))
+    return tuple(query.dicts())
+
+
+@webapp.route('/common_comments')
+@webapp.route('/common_comments/<exercise_id>')
+@login_required
+def _common_comments(exercise_id=None):
+    return jsonify(common_comments(exercise_id=None))

@@ -117,7 +117,7 @@ class Solution(BaseModel):
     checker = ForeignKeyField(User, null=True, backref='solutions')
     is_checked = BooleanField(default=False)
     grade = IntegerField(
-        default=0, constraints=[Check('grade <= 100'), Check('grade >= 0')]
+        default=0, constraints=[Check('grade <= 100'), Check('grade >= 0')],
     )
     submission_timestamp = DateTimeField()
     json_data_str = TextField()
