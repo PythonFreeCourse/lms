@@ -1,3 +1,4 @@
+cachetools==4.0.0
 flake8
 flake8-alfred
 flake8-bandit
