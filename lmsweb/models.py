@@ -136,8 +136,12 @@ class Comment(BaseModel):
 
     @classmethod
     def by_solution(cls, solution_id: int):
-        comments = CommentText.select().join(Comment).where(Comment.solution == solution_id)
-        return tuple(comments.dicts())
+        return tuple((
+            Comment
+            .select(Comment, CommentText.text)
+            .join(CommentText)
+            .where(Comment.solution == solution_id)
+        ).dicts())
 
 
 class AccessibleByAdminMixin:
