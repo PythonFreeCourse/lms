@@ -5,7 +5,6 @@ import string
 from flask_admin import Admin, AdminIndexView  # type: ignore
 from flask_admin.contrib.peewee import ModelView  # type: ignore
 from flask_login import (UserMixin, current_user)
-from lms.lmsweb import webapp
 from peewee import (  # type: ignore
     BooleanField,
     CharField,
@@ -21,6 +20,8 @@ from peewee import (  # type: ignore
 from playhouse.signals import Model, pre_save
 from playhouse.shortcuts import model_to_dict
 from werkzeug.security import check_password_hash, generate_password_hash
+
+from lms.lmsweb import webapp
 
 
 class RoleOptions(enum.Enum):
@@ -120,12 +121,17 @@ class CommentText(BaseModel):
     text = TextField(unique=True)
 
 
-class Comments(BaseModel):
+class Comment(BaseModel):
     commenter = ForeignKeyField(User, backref='comments')
     timestamp = DateTimeField()
     line_number = IntegerField(constraints=[Check('line_number >= 1')])
     comment = ForeignKeyField(CommentText)
     solution = ForeignKeyField(Solution)
+
+    @classmethod
+    def by_solution(cls, solution_id: int):
+        comments = CommentText.select().join(Comment).where(Comment.solution == solution_id)
+        return tuple(comments.dicts())
 
 
 class AccessibleByAdminMixin:
@@ -151,7 +157,7 @@ admin = Admin(
     index_view=MyAdminIndexView(),
 )
 
-ALL_MODELS = (User, Exercise, CommentText, Solution, Role, Comments)
+ALL_MODELS = (User, Exercise, CommentText, Solution, Role, Comment)
 for m in ALL_MODELS:
     admin.add_view(AdminModelView(m))
 
