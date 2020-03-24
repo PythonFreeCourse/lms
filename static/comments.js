@@ -30,7 +30,7 @@ function addCommentToLine(line, commentData) {
   const commentElement = $(`.line[data-line="${line}"]`);
   const existingPopover = $(commentElement).data('bs.popover');
   const buttonizedComment = addSpecialCommentButtons(commentData);
-  const commentText = `<span class="comment" data-commentid="${commentData.id}">${buttonizedComment}</span>`;
+  const commentText = `<span class="comment" data-line="${line}" data-commentid="${commentData.id}">${buttonizedComment}</span>`;
   if (existingPopover !== undefined) {
     const existingContent = `${existingPopover.config.content} <hr>`;
     existingPopover.config.content = existingContent + commentText;

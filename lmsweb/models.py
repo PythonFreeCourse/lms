@@ -62,6 +62,12 @@ class Role(BaseModel):
     def __str__(self):
         return self.name
 
+    @classmethod
+    def get_student_role(cls):
+        return cls.get(**{
+            Role.name.name: RoleOptions.STUDENT.value
+        })
+
     @property
     def is_student(self):
         return self.name == RoleOptions.STUDENT.value

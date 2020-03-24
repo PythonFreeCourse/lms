@@ -22,5 +22,6 @@ flask_wtf==0.14.3
 mypy==0.720
 peewee==3.9.6
 pytest==5.0.1
+requests==2.23.0
 werkzeug==0.16.1
 wtf-peewee==3.0.0
