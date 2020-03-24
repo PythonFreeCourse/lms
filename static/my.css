@@ -100,7 +100,7 @@ div#code-view {
   white-space: nowrap;
 }
 
-.textish {
+.ex-title {
   display: flex;
   line-height: 3rem;
 }

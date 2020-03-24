@@ -20,7 +20,7 @@ from lms.lmsweb.models import (
     Comment, CommentsToSolutions, Exercise, RoleOptions, Solution, User,
     database
 )
-from lmsweb.tools.notebook_extractor import extract_exercises
+from lms.lmsweb.tools.notebook_extractor import extract_exercises
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
@@ -107,10 +107,30 @@ def logout():
     return redirect('login')
 
 
-@webapp.route('/')
+def fetch_exercises():
+    not_archived_filter = {Exercise.is_archived.name: False}
+    unarchived_exercises = Exercise.filter(**not_archived_filter)
+    return tuple(unarchived_exercises.dicts())
+
+
+def fetch_solutions(user_id):
+    fields = [
+        Solution.id, Solution.is_checked, Solution.grade,
+        Solution.submission_timestamp, Solution.exercise
+    ]
+    solutions = Solution.select(*fields).where(Solution.solver == user_id)
+    return {d['id']: d for d in solutions.dicts()}
+
+
+@webapp.route('/exercises')
 @login_required
-def main():
-    return render_template('exercises.html')
+def exercises_page():
+    user_id = session['id']
+    exercises = fetch_exercises()
+    solutions = fetch_solutions(user_id)
+    return render_template(
+        'exercises.html', exercises=exercises, solutions=solutions,
+    )
 
 
 @webapp.route('/comments', methods=['GET', 'POST'])
@@ -140,14 +160,6 @@ def comment():
             return jsonify({"success": "true"})
 
 
-@webapp.route('/exercises', methods=['GET'])
-@login_required
-def exercises():
-    not_archived_filter = {Exercise.is_archived.name: False}
-    unarchived_exercises = Exercise.filter(**not_archived_filter)
-    return jsonify(tuple(unarchived_exercises.dicts()))
-
-
 @webapp.route('/send')
 @login_required
 def send():
@@ -156,11 +168,21 @@ def send():
 
 @webapp.route('/upload', methods=['POST'])
 def upload():
-    user = User.get_by_id(request.form.get('user', 0))
+    user_id = request.form.get('user')
+    if user_id is None or session['id'] != user_id:
+        return abort(403, "Wrong user ID.")
+
+    exercise = Exercise.get_by_id(request.form.get('exercise', 0))
+    if not exercise:
+        return abort(404, "Exercise does not exist.")
+
+    user = User.get_by_id(user_id)
     if not user:
         return abort(403, "Invalid user.")
-    if session['id'] != request.form.get('user'):
-        return abort(403, "Wrong user ID.")
+
+    exercise = Exercise.get_by_id(request.form.get('exercise', 0))
+    if not exercise:
+        return abort(404, "Exercise does not exist.")
 
     if request.content_length > MAX_REQUEST_SIZE:
         return abort(402, "file is too heavy. 500KB allowed")
@@ -173,7 +195,7 @@ def upload():
     try:
         file_content = json.loads(json_file_data)
         exercises = list(extract_exercises(file_content))
-    except (ValueError, json.JSONDecodeError) as e:
+    except (ValueError, json.JSONDecodeError):
         return abort(422, "Invalid file format - must be ipynb")
 
     matches, misses, duplications = set(), set(), set()
@@ -198,13 +220,11 @@ def upload():
 
     valid = matches - duplications
 
-    return json.dumps(
-        {
+    return json.dumps({
             "exercise_matches": list(valid),
             "exercise_misses": list(misses),
             "exercise_duplications": list(duplications)
-        }
-    )
+    })
 
 @webapp.route('/view')
 def view():
