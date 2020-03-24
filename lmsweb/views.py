@@ -87,7 +87,7 @@ def redirect_logged_in(func):
 @redirect_logged_in
 @webapp.route('/login', methods=['GET', 'POST'])
 def login():
-    if session.get('id') is not None:
+    if session.get('id') is not None and session.get('invalid') is not True:
         return redirect(url_for('main'))
 
     username = request.form.get('username')
@@ -95,6 +95,7 @@ def login():
     user = User.get_or_none(username=username)
 
     if user is not None and user.is_password_valid(password):
+        session['invalid'] = False
         login_user(user)
         for field in ('username', 'role', 'id'):
             session[field] = str(getattr(user, field))
@@ -109,6 +110,7 @@ def login():
 @webapp.route('/logout')
 @login_required
 def logout():
+    session['invalid'] = True
     logout_user()
     return redirect('login')
 
@@ -139,7 +141,7 @@ def fetch_solutions(user_id):
 @webapp.route('/exercises')
 @login_required
 def exercises_page():
-    user_id = session['id']
+    user_id = int(session['id'])
     exercises = fetch_exercises()
     solutions = fetch_solutions(user_id)
     return render_template(
@@ -160,10 +162,12 @@ def comment():
         return abort(405, "Must be GET or POST")
 
     solution_id = int(request.args['solutionId'])
-    solution = Solution.select(Solution).where(Solution.id == solution_id)
-    if is_manager or solution.solver == session['id']:
+    solution = Solution.get(solution_id)
+    if is_manager or solution.solver.id == int(session['id']):
         if request.args.get('act') == 'fetch':
             return jsonify(Comment.by_solution(solution_id))
+        if not is_manager:
+            abort(403, "Permission denied")
         if request.args.get('act') == 'delete':
             comment_id = int(request.args.get('commentId'))
             # TODO: Handle if not found
@@ -184,7 +188,7 @@ def send(_exercise_id):
 @login_required
 def upload():
     user_id = request.form.get('user')
-    if user_id is None or session['id'] != user_id:
+    if user_id is None or int(session['id']) != user_id:
         return abort(403, "Wrong user ID.")
 
     exercise = Exercise.get_by_id(request.form.get('exercise'))
@@ -245,12 +249,14 @@ def view(solution_id):
     is_manager = session['role'] in HIGH_ROLES
     if solution is None:
         return abort(404, "Solution does not exist.")
-    if solution.solver != session['id'] and not is_manager:
+    if solution.solver.id != int(session['id']) and not is_manager:
         return abort(403, "This user has no permissions to view this page.")
 
     view_params = {
         'solution': model_to_dict(solution), 'is_manager': is_manager,
+        'role': session['role'].lower(),
     }
+
     if is_manager:
         view_params = {
             **view_params,
@@ -269,7 +275,7 @@ def done_checking(solution_id):
 
     requested_solution = Solution.id == solution_id
     changes = Solution.update(
-        is_checked=True, checker=session['id'],
+        is_checked=True, checker=int(session['id']),
     ).where(requested_solution)
     next_exercise = 1  # TODO: Change to get_next_unchecked()
     return jsonify({'success': changes.execute() == 1, 'next': next_exercise})
