@@ -13,13 +13,13 @@
         </div>
         <div class="left-side">
           <div class="exercise-send">
-              {% if exercise['id'] not in solutions %}
-              {% set details = {'page': 'upload', 'icon': 'upload', 'text': 'שלח', 'css': 'send'} %}
-              {% elif not solutions[exercise['id']]['is_checked'] %}
-              {% set details = {'page': 'view', 'icon': 'eye', 'text': 'הצצה', 'css': 'view'} %}
-              {% else %}
-              {% set details = {'page': 'view', 'icon': 'circle-check-o', 'text': 'לבדיקה', 'css': 'checked'} %}
-              {% endif %}
+            {%- if exercise['id'] not in solutions %}
+            {% set details = {'page': 'upload', 'icon': 'upload', 'text': 'שלח', 'css': 'send'} %}
+            {% elif not solutions[exercise['id']]['is_checked'] %}
+            {% set details = {'page': 'view', 'icon': 'eye', 'text': 'הצצה', 'css': 'view'} %}
+            {% else %}
+            {% set details = {'page': 'view', 'icon': 'circle-check-o', 'text': 'לבדיקה', 'css': 'checked'} %}
+            {% endif -%}
             <a class="our-button go-{{ details['css'] }}" href="{{ details['page'] }}/{{ exercise['id'] }}">
               <i class="fa fa-{{ details['icon'] }}" aria-hidden="true"></i> 
               {{ details['text'] }}
