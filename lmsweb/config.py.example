@@ -1,3 +1,5 @@
+import os
+
 DB_NAME = 'lms'
 DB_USER = 'lms'
 DB_PORT = 5432
@@ -6,3 +8,6 @@ DB_PASSWORD = ''
 WTF_CSRF_ENABLED = False  # On production, delete this line!
 
 SECRET_KEY = ''
+MAILGUN_API_KEY = os.getenv('MAILGUN_API_KEY')
+MAILGUN_DOMAIN = os.getenv('MAILGUN_DOMAIN', 'mail.pythonic.guru')
+SERVER_ADDRESS = os.getenv('SERVER_ADDRESS', '127.0.0.1:5000')
