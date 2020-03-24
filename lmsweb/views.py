@@ -2,7 +2,10 @@ import json
 from datetime import datetime
 from urllib.parse import urljoin, urlparse
 
-from flask import abort, jsonify, render_template, request, session, url_for
+
+from flask import (
+    abort, jsonify, render_template, request, session, url_for,
+)
 from flask_login import (  # type: ignore
     LoginManager,
     current_user,
@@ -18,6 +21,7 @@ from lms.lmsweb import webapp
 from lms.lmsweb.models import (
     Comment, CommentText, Exercise, RoleOptions, Solution, User, database,
 )
+from lms.lmsweb.tools.notebook_extractor import extract_exercises
 
 
 login_manager = LoginManager()
@@ -32,6 +36,7 @@ PERMISSIVE_CORS = {
 }
 
 HIGH_ROLES = {str(RoleOptions.STAFF), str(RoleOptions.ADMINISTRATOR)}
+MAX_REQUEST_SIZE = 550_000  # 550 KB
 
 
 @webapp.before_request
@@ -104,10 +109,30 @@ def logout():
     return redirect('login')
 
 
-@webapp.route('/')
+def fetch_exercises():
+    not_archived_filter = {Exercise.is_archived.name: False}
+    unarchived_exercises = Exercise.filter(**not_archived_filter)
+    return tuple(unarchived_exercises.dicts())
+
+
+def fetch_solutions(user_id):
+    fields = [
+        Solution.id, Solution.is_checked, Solution.grade,
+        Solution.submission_timestamp, Solution.exercise
+    ]
+    solutions = Solution.select(*fields).where(Solution.solver == user_id)
+    return {d['id']: d for d in solutions.dicts()}
+
+
+@webapp.route('/exercises')
 @login_required
-def main():
-    return render_template('exercises.html')
+def exercises_page():
+    user_id = session['id']
+    exercises = fetch_exercises()
+    solutions = fetch_solutions(user_id)
+    return render_template(
+        'exercises.html', exercises=exercises, solutions=solutions,
+    )
 
 
 @webapp.route('/comments', methods=['GET', 'POST'])
@@ -134,8 +159,7 @@ def comment():
                 Comment.comment == comment_id,
                 Comment.solution == solution_id,
             ).delete_instance()
-            return jsonify('{"success": "true"')
-
+            return jsonify({"success": "true"})
 
 @webapp.route('/send')
 @login_required
@@ -146,38 +170,59 @@ def send():
 @webapp.route('/upload', methods=['POST'])
 @login_required
 def upload():
-    # TODO: Save the files WITHOUT EXECUTION PERMISSIONS
-    # TODO: Check that the file is ipynb/py
-    # TODO: Extract the right exercise from the notebook
-    #       (ask Efrat for code)
-    # TODO: Check max filesize of (max notebook size + 20%)
-    exercise = Exercise.get_by_id(request.form.get('exercise', 0))
+    user_id = request.form.get('user')
+    if user_id is None or session['id'] != user_id:
+        return abort(403, "Wrong user ID.")
+
+    exercise = Exercise.get_by_id(request.form.get('exercise'))
     if not exercise:
         return abort(404, "Exercise does not exist.")
 
-    user = User.get_by_id(request.form.get('user', 0))
+    user = User.get_by_id(user_id)
     if not user:
         return abort(403, "Invalid user.")
-    if session['id'] != request.form.get('user'):
-        return abort(403, "Wrong user ID.")
+
+    if request.content_length > MAX_REQUEST_SIZE:
+        return abort(402, "file is too heavy. 500KB allowed")
 
     file: FileStorage = request.files.get('file')
     if not file:
         return abort(402, "no file was given")
 
     json_file_data = file.read()
-    file_content = json.loads(json_file_data)
-    if 'cells' not in file_content:
+    try:
+        file_content = json.loads(json_file_data)
+        exercises = list(extract_exercises(file_content))
+    except (ValueError, json.JSONDecodeError):
         return abort(422, "Invalid file format - must be ipynb")
 
-    Solution.create(
-        exercise=exercise,
-        solver=user,
-        submission_timestamp=datetime.now(),
-        json_data_str=json_file_data,
-    )
-    return 'yay'
+    matches, misses, duplications = set(), set(), set()
+    for exercise_id, code in exercises:
+        exercise = Exercise.get_or_none(Exercise.subject == exercise_id)
+        if exercise is None:
+            misses.add(exercise_id)
+            continue
+        solution, created = Solution.get_or_create(
+            exercise=exercise,
+            solver=user,
+            defaults={
+                'submission_timestamp': datetime.now(),
+                'json_data_str': code,
+            }
+        )
+        if created:
+            matches.add(exercise_id)
+        else:
+            solution.delete_instance()
+            duplications.add(exercise_id)
 
+    valid = matches - duplications
+
+    return json.dumps({
+            "exercise_matches": list(valid),
+            "exercise_misses": list(misses),
+            "exercise_duplications": list(duplications)
+    })
 
 @webapp.route('/view')
 @login_required
