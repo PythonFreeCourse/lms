@@ -1,6 +1,6 @@
 import datetime
 
-from lmsweb.models import ALL_MODELS, Role, RoleOptions, User, Exercise, Comment
+from lmsweb.models import ALL_MODELS, Role, RoleOptions, User, Exercise, CommentText
 
 from peewee import SqliteDatabase
 
@@ -74,7 +74,7 @@ def exercise(user):
 
 @pytest.fixture()
 def comment(user, exercise):
-    return Comment.create(
+    return CommentText.create(
             commenter=user,
             timestamp=datetime.datetime.now(),
             exercise=exercise,

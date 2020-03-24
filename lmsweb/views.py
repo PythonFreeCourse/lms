@@ -15,8 +15,7 @@ from flask_login import (  # type: ignore
 from lms.lmsweb import webapp
 
 from lmsweb.models import (
-    Comment, CommentsToSolutions, Exercise, RoleOptions, Solution, User,
-    database,
+    Comments, Exercise, RoleOptions, Solution, User, database,
 )
 
 from peewee import fn
@@ -127,16 +126,16 @@ def comment():
         return abort(405, "Must be GET or POST")
 
     solution_id = int(request.args.get('solutionId'))
-    solver = Solution.select(Solution.solver).where(Solution.id == solution_id)
-    if is_manager or solver == session['id']:
+    solution = Solution.select(Solution).where(Solution.id == solution_id)
+    if is_manager or solution.solver == session['id']:
         if request.args.get('act') == 'fetch':
-            return jsonify(Comment.by_solution(solution_id))
+            return jsonify(Comments.get(Comments.solution == solution))
         if request.args.get('act') == 'delete':
             comment_id = int(request.args.get('commentId'))
             # TODO: Handle if not found
-            CommentsToSolutions.get(
-                CommentsToSolutions.comment == comment_id,
-                CommentsToSolutions.solution == solution_id,
+            Comments.get(
+                Comments.comment == comment_id,
+                Comments.solution == solution_id,
             ).delete_instance()
             return jsonify('{"success": "true"')
 
@@ -196,18 +195,18 @@ def common_comments(exercise_id=None):
     """Most common comments throughout all exercises.
      Filter by exercise id when specified.
      """
-    query = Comment.select(Comment.text)
+    query = CommentText.select(CommentText.text)
     if exercise_id is not None:
         query = (query
-                 .join(CommentsToSolutions)
+                 .join(Comments)
                  .join(Solution)
                  .join(Exercise)
                  .where(Exercise.id == exercise_id)
                  )
 
     query = (query
-             .group_by(Comment.text)
-             .order_by(fn.Count(Comment.text).desc())
+             .group_by(CommentText.id)
+             .order_by(fn.Count(CommentText.id).desc())
              .limit(5)
              )
 

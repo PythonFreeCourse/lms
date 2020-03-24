@@ -19,6 +19,7 @@ from peewee import (  # type: ignore
     TextField,
 )
 from playhouse.signals import Model, pre_save
+from playhouse.shortcuts import model_to_dict
 from werkzeug.security import check_password_hash, generate_password_hash
 
 
@@ -115,25 +116,15 @@ class Solution(BaseModel):
     json_data_str = TextField()
 
 
-class Comment(BaseModel):
+class CommentText(BaseModel):
+    text = TextField(unique=True)
+
+
+class Comments(BaseModel):
     commenter = ForeignKeyField(User, backref='comments')
     timestamp = DateTimeField()
-    text = TextField()
-    # TODO: Move to CommentsTexts. Is this good?
     line_number = IntegerField(constraints=[Check('line_number >= 1')])
-
-    def by_solution(solution_id):
-        get_comment_ids = (
-            CommentsToSolutions
-            .select(CommentsToSolutions.comment)
-            .where(CommentsToSolutions.solution == solution_id)
-        )
-        comments = Comment.select().where(Comment.id << get_comment_ids)
-        return list(comments.dicts())
-
-
-class CommentsToSolutions(BaseModel):
-    comment = ForeignKeyField(Comment)
+    comment = ForeignKeyField(CommentText)
     solution = ForeignKeyField(Solution)
 
 
@@ -160,7 +151,7 @@ admin = Admin(
     index_view=MyAdminIndexView(),
 )
 
-ALL_MODELS = (User, Exercise, Comment, Solution, Role, CommentsToSolutions)
+ALL_MODELS = (User, Exercise, CommentText, Solution, Role, Comments)
 for m in ALL_MODELS:
     admin.add_view(AdminModelView(m))
 
