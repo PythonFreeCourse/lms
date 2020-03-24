@@ -1,6 +1,7 @@
 import enum
 import secrets
 import string
+from datetime import datetime
 
 from flask_admin import Admin, AdminIndexView  # type: ignore
 from flask_admin.contrib.peewee import ModelView  # type: ignore
@@ -18,7 +19,6 @@ from peewee import (  # type: ignore
     TextField,
 )
 from playhouse.signals import Model, pre_save
-from playhouse.shortcuts import model_to_dict
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from lms.lmsweb import webapp
@@ -97,7 +97,11 @@ class User(UserMixin, BaseModel):
 
 @pre_save(sender=User)
 def on_save_handler(model_class, instance, created):
-    if created:
+    """Hashes password on creation/save"""
+
+    # If password changed then it won't start with hash's method prefix
+    is_password_changed = not instance.password.startswith('pbkdf2:sha256')
+    if created or is_password_changed:
         instance.password = generate_password_hash(instance.password)
 
 
@@ -129,7 +133,7 @@ class CommentText(BaseModel):
 
 class Comment(BaseModel):
     commenter = ForeignKeyField(User, backref='comments')
-    timestamp = DateTimeField()
+    timestamp = DateTimeField(default=datetime.now)
     line_number = IntegerField(constraints=[Check('line_number >= 1')])
     comment = ForeignKeyField(CommentText)
     solution = ForeignKeyField(Solution)
@@ -181,17 +185,19 @@ def generate_password():
     return ''.join(password)
 
 
-if Role.select().count() == 0:
-    for role in RoleOptions:
-        Role.create(name=role.value)
+# Don't create sqlite file for tests
+if webapp.debug:
+    if Role.select().count() == 0:
+        for role in RoleOptions:
+            Role.create(name=role.value)
 
-if User.select().count() == 0:
-    password = generate_password()
-    User.create(
-        username='lmsadmin',
-        fullname='LMS Admin',
-        password=password,
-        mail_address='lms@pythonic.guru',
-        role=Role.get(name=RoleOptions.ADMINISTRATOR.value),
-    )
-    print(f"First run! Your login is lmsadmin:{password}")
+    if User.select().count() == 0:
+        password = generate_password()
+        User.create(
+            username='lmsadmin',
+            fullname='LMS Admin',
+            password=password,
+            mail_address='lms@pythonic.guru',
+            role=Role.get(name=RoleOptions.ADMINISTRATOR.value),
+        )
+        print(f"First run! Your login is lmsadmin:{password}")
