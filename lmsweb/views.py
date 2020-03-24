@@ -2,7 +2,6 @@ import json
 from datetime import datetime
 from urllib.parse import urljoin, urlparse
 
-
 from flask import (
     abort, jsonify, render_template, request, session, url_for,
 )
@@ -23,7 +22,6 @@ from lms.lmsweb.models import (
     Comment, CommentText, Exercise, RoleOptions, Solution, User, database,
 )
 from lms.lmsweb.tools.notebook_extractor import extract_exercises
-
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
@@ -156,26 +154,25 @@ def exercises_page():
     )
 
 
-def _create_comment(session_id: int, solution: Solution):
+def _create_comment(
+    session_id: int,
+    solution: Solution,
+    kind: str,
+    line_number: int,
+):
     user = User.get_or_none(User.id == session_id)
     if user is None:
         # should never happen, we checked session_id == solver_id
         return fail(404, 'No such user')
 
-    kind = request.form.get('kind', '')
     if (not kind) or (kind not in ('id', 'text')):
         return fail(400, "Invalid kind")
 
-    try:
-        line_number = int(request.form.get('line', 0))
-    except ValueError:
-        line_number = 0
     if line_number <= 0:
         return fail(422, f"Invalid line number: {line_number}")
 
     if kind == 'id':
         comment_id = int(request.form.get('comment', 0))
-
     elif kind == 'text':
         text = request.form.get('comment', '')
         if not text:
@@ -186,14 +183,14 @@ def _create_comment(session_id: int, solution: Solution):
         # should never happend, kind was checked before
         return fail(400, "Invalid kind")
 
-    Comment.create(
+    comment_ = Comment.create(
         commenter=user,
         timestamp=datetime.now(),
         line_number=line_number,
         comment=comment_id,
         solution=solution
     )
-    return jsonify({"success": "true"})
+    return jsonify({"success": "true", "id": comment_.id, 'text': comment_.comment})
 
 
 @webapp.route('/comments', methods=['GET', 'POST'])
@@ -201,7 +198,10 @@ def _create_comment(session_id: int, solution: Solution):
 def comment():
     act = request.args.get('act')
 
-    solution_id = int(request.form.get('solutionId', 0))
+    if request.method == 'POST':
+        solution_id = int(request.form.get('solutionId', 0))
+    else:  # it's a GET
+        solution_id = int(request.args.get('solutionId', 0))
     session_id = int(session['id'])
 
     solution = Solution.get_or_none(Solution.id == solution_id)
@@ -215,7 +215,7 @@ def comment():
     if act == 'fetch':
         return jsonify(Comment.by_solution(solution_id))
 
-    if session['role'] in HIGH_ROLES:
+    if session['role'] not in HIGH_ROLES:
         return fail(401, "You must be an admin to view this page.")
 
     if act == 'delete':
@@ -226,7 +226,14 @@ def comment():
         return jsonify({"success": "true"})
 
     if act == 'create':
-        return _create_comment(session_id, solution)
+        kind = request.form.get('kind', '')
+        try:
+            line_number = int(request.form.get('line', 0))
+        except ValueError:
+            line_number = 0
+        if line_number <= 0:
+            return fail(422, f"Invalid line number: {line_number}")
+        return _create_comment(session_id, solution, kind, line_number)
 
     return fail(400, f'Unknown or unset act value "{act}"')
 
