@@ -162,30 +162,38 @@ def _create_comment(session_id: int, solution: Solution):
         # should never happen, we checked session_id == solver_id
         return fail(404, 'No such user')
 
-    text = request.form.get('text', '')
-    if not text:
-        return fail(422, 'Empty comments are not allowed')
+    kind = request.form.get('kind', '')
+    if (not kind) or (kind not in ('id', 'text')):
+        return fail(400, "Invalid kind")
 
-    # TODO(LOW): Check if line number > MAX_SOLUTION_LINE_NUMBER
     try:
-        line_number = int(request.form.get('line_number', 0))
+        line_number = int(request.form.get('line', 0))
     except ValueError:
         line_number = 0
     if line_number <= 0:
         return fail(422, f"Invalid line number: {line_number}")
 
-    comment_data = {'timestamp': datetime.now(), 'text': request.form['text']}
-    comments_updated = Comment.update(comment_data).where(
-        Comment.commenter == user and Comment.line_number == line_number
-    ).execute()
-    if comments_updated:
-        action = 'replaced'
+    if kind == 'id':
+        comment_id = int(request.form.get('comment', 0))
+
+    elif kind == 'text':
+        text = request.form.get('comment', '')
+        if not text:
+            return fail(422, 'Empty comments are not allowed')
+            # TODO(LOW): Check if line number > MAX_SOLUTION_LINE_NUMBER
+        comment_id = CommentText.create(text=text).id
     else:
-        data = {'commenter': user, 'line_number': line_number, **comment_data}
-        new_comment = Comment.create(**data)
-        CommentsToSolutions.create(comment=new_comment, solution=solution)
-        action = 'created'
-    return jsonify({"success": "true", "action": action})
+        # should never happend, kind was checked before
+        return fail(400, "Invalid kind")
+
+    Comment.create(
+        commenter=user,
+        timestamp=datetime.now(),
+        line_number=line_number,
+        comment=comment_id,
+        solution=solution
+    )
+    return jsonify({"success": "true"})
 
 
 @webapp.route('/comments', methods=['GET', 'POST'])
@@ -212,11 +220,9 @@ def comment():
 
     if act == 'delete':
         comment_id = int(request.args.get('commentId'))
-        # TODO: Handle if not found
-        CommentsToSolutions.get(
-            CommentsToSolutions.comment == comment_id,
-            CommentsToSolutions.solution == solution_id,
-        ).delete_instance()
+        comment_ = Comment.get_or_none(Comment.id == comment_id)
+        if comment_ is not None:
+            comment_.delete_instance()
         return jsonify({"success": "true"})
 
     if act == 'create':
