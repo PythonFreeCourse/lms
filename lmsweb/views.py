@@ -149,33 +149,72 @@ def exercises_page():
     )
 
 
+def _create_comment(session_id: int, solution: Solution):
+    user = User.get_or_none(User.id == session_id)
+    if user is None:
+        # should never happen, we checked session_id == solver_id
+        return abort(404, f"No such user")
+    text = request.form.get('text', '')
+    if not text:
+        return abort(422, "try to create empty comment or no text was given")
+    try:
+        line_number = int(request.form.get('line_number', 0))
+    except ValueError:
+        line_number = 0
+    if line_number <= 0:
+        return abort(422, f"invalid line number: {line_number}")
+    comment_data = {'timestamp': datetime.now(), 'text': request.form['text'], }
+
+    q = Comment.update(comment_data).where(
+        Comment.commenter == user and Comment.line_number == line_number
+    )
+    changed = q.execute()
+    if changed:
+        action = 'replaced'
+    else:
+        data = {'commenter': user, 'line_number': line_number, **comment_data}
+        new_comment = Comment.create(**data)
+        CommentsToSolutions.create(comment=new_comment, solution=solution)
+        action = 'created'
+    return jsonify({"success": "true", "action": action})
+
+
 @webapp.route('/comments', methods=['GET', 'POST'])
 @login_required
 def comment():
-    is_manager = session['role'] in HIGH_ROLES
-    if is_manager and request.method == 'POST':
-        solutionId = request.form['solutionId']
-        print(solutionId)
-        return jsonify('{"success": "true"}')
-
-    if request.method != 'GET':
+    if request.method not in ('GET', 'POST'):
         return abort(405, "Must be GET or POST")
 
-    solution_id = int(request.args['solutionId'])
-    solution = Solution.get(solution_id)
-    if is_manager or solution.solver.id == int(session['id']):
-        if request.args.get('act') == 'fetch':
-            return jsonify(Comment.by_solution(solution_id))
-        if not is_manager:
-            abort(403, "Permission denied")
-        if request.args.get('act') == 'delete':
-            comment_id = int(request.args.get('commentId'))
-            # TODO: Handle if not found
-            Comment.get(
-                Comment.comment == comment_id,
-                Comment.solution == solution_id,
-            ).delete_instance()
-            return jsonify({"success": "true"})
+    act = request.args.get('act')
+
+    solution_id = int(request.form.get('solutionId', 0))
+    session_id = int(session['id'])
+
+    solution = Solution.get_or_none(Solution.id == solution_id)
+    if solution is None:
+        return abort(404, f"No such solution {solution_id}")
+
+    solver_id = solution.solver.id
+    is_manager = session['role'] in HIGH_ROLES
+    if not (is_manager or solver_id == session_id):
+        return abort(401, "You are not authorized to comment on this solution")
+
+    if act == 'fetch':
+        return jsonify(Comment.by_solution(solution_id))
+
+    if act == 'delete':
+        comment_id = int(request.args.get('commentId'))
+        # TODO: Handle if not found
+        CommentsToSolutions.get(
+            CommentsToSolutions.comment == comment_id,
+            CommentsToSolutions.solution == solution_id,
+        ).delete_instance()
+        return jsonify({"success": "true"})
+
+    if act == 'create':
+        return _create_comment(session_id, solution)
+
+    return abort(400, f'unknown or unset act value "{act}"')
 
 
 @webapp.route('/send/<int:_exercise_id>')
@@ -200,7 +239,7 @@ def upload():
         return abort(403, "Invalid user.")
 
     if request.content_length > MAX_REQUEST_SIZE:
-        return abort(402, "file is too heavy. 500KB allowed")
+        return abort(413, "file is too heavy. 500KB allowed")
 
     file: FileStorage = request.files.get('file')
     if not file:
