@@ -80,7 +80,7 @@ class UserRegistrationCreator:
             models.User.mail_address.name: user.email,
             models.User.username.name: user.email,
         }, defaults={
-            models.User.fullname.name: F'{user.first_name} {user.last_name}',
+            models.User.fullname.name: f'{user.first_name} {user.last_name}',
             models.User.role.name: models.Role.get_student_role(),
             models.User.password.name: user.password,
         })
@@ -88,7 +88,7 @@ class UserRegistrationCreator:
     def _send_user_email_registration(self, user: UserToCreate) -> None:
         response = None
         text = self._build_user_text(user)
-        url = F'https://api.eu.mailgun.net/v3/{config.MAILGUN_DOMAIN}/messages'
+        url = f'https://api.eu.mailgun.net/v3/{config.MAILGUN_DOMAIN}/messages'
         try:
             response = self._session.post(
                 url=url,
