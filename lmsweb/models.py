@@ -13,6 +13,7 @@ from peewee import (  # type: ignore
     DateTimeField,
     ForeignKeyField,
     IntegerField,
+    ManyToManyField,
     PostgresqlDatabase,
     SqliteDatabase,
     TextField,
@@ -104,6 +105,7 @@ def on_save_handler(model_class, instance, created):
 class Exercise(BaseModel):
     subject = CharField()
     date = DateTimeField()
+    users = ManyToManyField(User, backref='exercises')
     is_archived = BooleanField()
 
     def __str__(self):
