@@ -87,6 +87,9 @@ def redirect_logged_in(func):
 @redirect_logged_in
 @webapp.route('/login', methods=['GET', 'POST'])
 def login():
+    if session.get('id') is not None:
+        return redirect(url_for('main'))
+
     username = request.form.get('username')
     password = request.form.get('password')
     user = User.get_or_none(username=username)
@@ -108,6 +111,14 @@ def login():
 def logout():
     logout_user()
     return redirect('login')
+
+
+@webapp.route('/')
+@login_required
+def main():
+    if session.get('id') is not None:
+        return redirect(url_for('exercises_page'))
+    return redirect(url_for('login'))
 
 
 def fetch_exercises():
@@ -162,9 +173,10 @@ def comment():
             ).delete_instance()
             return jsonify({"success": "true"})
 
-@webapp.route('/send')
+
+@webapp.route('/send/<int:_exercise_id>')
 @login_required
-def send():
+def send(_exercise_id):
     return render_template('upload.html')
 
 
@@ -256,7 +268,9 @@ def done_checking(solution_id):
         return abort(403, "This user has no permissions to view this page.")
 
     requested_solution = Solution.id == solution_id
-    changes = Solution.update(is_checked=True).where(requested_solution)
+    changes = Solution.update(
+        is_checked=True, checker=session['id'],
+    ).where(requested_solution)
     next_exercise = 1  # TODO: Change to get_next_unchecked()
     return jsonify({'success': changes.execute() == 1, 'next': next_exercise})
 

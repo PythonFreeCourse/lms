@@ -151,6 +151,10 @@ i.fa {
 }
 
 /* Upload */
+#send-page-parent {
+  height: 100vh;
+}
+
 #send-head {
   margin-bottom: 5rem;
   margin-left: auto;

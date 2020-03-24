@@ -14,7 +14,7 @@
         <div class="left-side">
           <div class="exercise-send">
             {%- if exercise['id'] not in solutions %}
-            {% set details = {'page': 'upload', 'icon': 'upload', 'text': 'שלח', 'css': 'send'} %}
+            {% set details = {'page': 'send', 'icon': 'upload', 'text': 'שלח', 'css': 'send'} %}
             {% elif not solutions[exercise['id']]['is_checked'] %}
             {% set details = {'page': 'view', 'icon': 'eye', 'text': 'הצצה', 'css': 'view'} %}
             {% else %}
