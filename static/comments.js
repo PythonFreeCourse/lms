@@ -97,6 +97,6 @@ window.addEventListener('load', () => {
   const codeElement = document.getElementById('code-view').dataset;
   window.solutionId = codeElement.id;
   sessionStorage.setItem('role', codeElement.role);
-  addLineSpansToPre(document.getElementsByTagName('pre'));
+  addLineSpansToPre(document.getElementsByTagName('code'));
   pullComments(window.solutionId, treatComments);
 });
