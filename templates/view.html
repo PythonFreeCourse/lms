@@ -3,94 +3,38 @@
 {% block page_content %}
 <div id="page-view">
   <div id="view-head">
-    <h1>תצוגת תרגיל {{ exercise_number or "בעל מספר לא ידוע" }}: {{ exercise_name or "תרגיל לא ידוע" }}</h1>
+    <h1>תצוגת תרגיל {{ solution['exercise']['id'] }}: {{ solution['exercise']['subject'] }}</h1>
+    {% if solution['is_checked'] %}
     <p id="checked-msg"><strong>התרגיל שלך נבדק!</strong> לחצו על השורות האדומות כדי לראות את הערות הבודקים.</p>
+    {% endif %}
   </div>
   <div id="view-body">
-    <div id="code-view" data-id="{{ exercise_id or 1 }}">
-      <pre><code class="language-python line-numbers highlight">
-  @webapp.route('/')
-  def main():
-      # TODO: If logged in exercises page
-      return render_template('login.html', csrf_token=session['csrf'])
-
-
-  @webapp.route('/exercises')
-  def exercises():
-      return render_template('exercises.html')
-
-
-  @webapp.route('/send')
-  def send():
-      return render_template('upload.html')
-
-
-  @webapp.route('/upload', methods=['POST'])
-  def upload():
-      # TODO: Save the files WITHOUT EXECUTION PERMISSIONS
-      # TODO: Check that the file is ipynb/py
-      # TODO: Extract the right exercise from the notebook
-      #       (ask Efrat for code)
-      # TODO: Check max filesize of (max notebook size + 20%)
-      return 'yay'
-
-
-  @webapp.route('/view')
-  def view():
-      return render_template('view.html')
-  @webapp.route('/')
-  def main():
-      # TODO: If logged in exercises page
-      return render_template('login.html', csrf_token=session['csrf'])
-
-
-  @webapp.route('/exercises')
-  def exercises():
-      return render_template('exercises.html')
-
-
-  @webapp.route('/send')
-  def send():
-      return render_template('upload.html')
-
-
-  @webapp.route('/upload', methods=['POST'])
-  def upload():
-      # TODO: Save the files WITHOUT EXECUTION PERMISSIONS
-      # TODO: Check that the file is ipynb/py
-      # TODO: Extract the right exercise from the notebook
-      #       (ask Efrat for code)
-      # TODO: Check max filesize of (max notebook size + 20%)
-      return 'yay'
-
-
-  @webapp.route('/view')
-  def view():
-      return render_template('view.html')
-        </code></pre>
+    <div id="code-view" data-id="{{ solution['id'] }}">
+      <pre><code class="language-python line-numbers highlight">{{- solution['json_data_str'] -}}</code></pre>
     </div>
-    <!-- TODO: Add if user is admin -->
+    {% if is_manager %}
     <div id="popular-comments">
       <div id="exercise-comments">
         <h2>הערות על התרגיל</h2>
         <ol id="exercise-comments-list" class="comments exercise-comments">
-          <li class="known-comment" draggable="true" data-commentid="1">מומלץ לא לעשות רווח לפני נקודותיים.<br>תוכל לעיין ב-PEP8 כדי לראות למה זה בעייתי<br>כרובית בפיתה</li>
-          <li class="known-comment" draggable="true" data-commentid="2">שכחת נקודותיים אחרי ה-if</li>
-          <li class="known-comment" draggable="true" data-commentid="3">יש פה לולאה מיותרת.<br>תוכל לקצר אותה, במקרה?</li>
+          {%- for comment in exercise_common_comments %}
+          <li class="known-comment" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text }}</li>
+          {% endfor -%}
         </ol>
       </div>
       <div id="all-comments">
         <h2>הערות כלליות</h2>
         <ol id="all-comments-list" class="comments all-comments">
-          <li class="known-comment" draggable="true" data-commentid="4">מומלץ לא לעשות רווח לפני נקודותיים.<br>תוכל לעיין ב-PEP8 כדי לראות למה זה בעייתי<br>כרובית בפיתה</li>
-          <li class="known-comment" draggable="true" data-commentid="5">שכחת נקודותיים אחרי ה-if</li>
-          <li class="known-comment"draggable="true" data-commentid="6">יש פה לולאה מיותרת.<br>תוכל לקצר אותה, במקרה?</li>
+          {%- for comment in all_common_comments %}
+          <li class="known-comment" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text }}</li>
+          {% endfor -%}
         </ol>
       </div>
       <div id="grader-buttons">
         <button id="save-check" class="btn btn-success">סיימתי לבדוק!</button>
       </div>
     </div>
+    {% endif %}
   </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
