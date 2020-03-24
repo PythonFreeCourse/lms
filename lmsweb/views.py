@@ -75,22 +75,9 @@ def is_safe_url(target):
     )
 
 
-def redirect_logged_in(func):
-    """Must wrap the route"""
-
-    def wrapper(*args, **kwargs):
-        if current_user.is_authenticated:
-            return redirect(url_for('main'))
-        else:
-            return func(*args, **kwargs)
-
-    return wrapper
-
-
-@redirect_logged_in
 @webapp.route('/login', methods=['GET', 'POST'])
 def login():
-    if session.get('id') is not None:
+    if current_user.is_authenticated:
         return redirect(url_for('main'))
 
     username = request.form.get('username')
@@ -119,9 +106,7 @@ def logout():
 @webapp.route('/')
 @login_required
 def main():
-    if session.get('id') is not None:
-        return redirect(url_for('exercises_page'))
-    return redirect(url_for('login'))
+    return redirect(url_for('exercises_page'))
 
 
 def fetch_exercises():
@@ -257,8 +242,8 @@ def view(solution_id):
     if is_manager:
         view_params = {
             **view_params,
-            'exercise_common_comments': common_comments(solution.exercise),
-            'all_common_comments': common_comments(solution.exercise),
+            'exercise_common_comments': _common_comments(solution.exercise),
+            'all_common_comments': _common_comments(solution.exercise),
         }
 
     return render_template('view.html', **view_params)
@@ -279,7 +264,7 @@ def done_checking(solution_id):
 
 
 @cached(cache=TTLCache(maxsize=TLL_MAXSIZE, ttl=TTL_CACHE_SECONDS))
-def common_comments(exercise_id=None):
+def _common_comments(exercise_id=None):
     """
     Most common comments throughout all exercises.
     Filter by exercise id when specified.
@@ -308,5 +293,5 @@ def common_comments(exercise_id=None):
 @webapp.route('/common_comments')
 @webapp.route('/common_comments/<exercise_id>')
 @login_required
-def _common_comments(exercise_id=None):
-    return jsonify(common_comments(exercise_id=None))
+def common_comments(exercise_id=None):
+    return jsonify(_common_comments(exercise_id=exercise_id))
