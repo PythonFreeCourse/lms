@@ -88,7 +88,7 @@ class Role(BaseModel):
         return self.name == RoleOptions.ADMINISTRATOR.value
 
     @property
-    def is_high_privileges(self):
+    def is_admin(self):
         return self.is_staff or self.is_administrator
 
 
