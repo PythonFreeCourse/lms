@@ -212,14 +212,11 @@ def comment():
         return fail(404, f"No such solution {solution_id}")
 
     solver_id = solution.solver.id
-    if solver_id != session_id:
+    if solver_id != session_id and session['role'] not in HIGH_ROLES:
         return fail(401, "You aren't allowed to watch this page.")
 
     if act == 'fetch':
         return jsonify(Comment.by_solution(solution_id))
-
-    if session['role'] not in HIGH_ROLES:
-        return fail(401, "You must be an admin to view this page.")
 
     if act == 'delete':
         comment_id = int(request.args.get('commentId'))
@@ -309,9 +306,9 @@ def upload():
     valid = matches - duplications
 
     return jsonify({
-            "exercise_matches": list(valid),
-            "exercise_misses": list(misses),
-            "exercise_duplications": list(duplications)
+        "exercise_matches": list(valid),
+        "exercise_misses": list(misses),
+        "exercise_duplications": list(duplications)
     })
 
 
