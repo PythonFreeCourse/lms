@@ -179,7 +179,6 @@ def _create_comment(
 
     comment_ = Comment.create(
         commenter=user,
-        timestamp=datetime.now(),
         line_number=line_number,
         comment=new_comment_id,
         solution=solution
