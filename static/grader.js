@@ -19,6 +19,17 @@ function trackFinished(solutionId, element) {
 }
 
 
+function escapeUnicode(str) {
+  // Thanks to https://stackoverflow.com/a/45315988
+  const json = JSON.stringify(str);
+  return json.replace(/[\u007F-\uFFFF]/g, (chr) => {
+    const step1 = chr.charCodeAt(0).toString(16);
+    const step2 = `0000${step1}`.substr(-4);
+    return `\\u${step2}`;
+  });
+}
+
+
 function sendComment(kind, solutionId, line, commentData) {
   const xhr = new XMLHttpRequest();
   xhr.open('POST', '/comments');
@@ -27,10 +38,8 @@ function sendComment(kind, solutionId, line, commentData) {
   xhr.onreadystatechange = () => {
     if (xhr.readyState === 4) {
       if (xhr.status === 200) {
-        const commentFullData = commentData;
-        commentFullData.id = xhr.response.id;
-        commentFullData.text = xhr.response.text;
-        window.addCommentToLine(line, commentFullData);
+        const response = JSON.parse(escapeUnicode(xhr.response));
+        window.addCommentToLine(line, response);
       } else {
         console.log(xhr.status);
       }
@@ -40,10 +49,10 @@ function sendComment(kind, solutionId, line, commentData) {
   xhr.send(
     JSON.stringify({
       act: 'create',
-      solution: solutionId,
-      line,
       comment: commentData,
       kind, // Should be 'text' or 'id'
+      line,
+      solutionId,
     }),
   );
 }

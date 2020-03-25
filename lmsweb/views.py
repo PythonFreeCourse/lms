@@ -180,7 +180,7 @@ def _create_comment(
         if not comment_text:
             return fail(422, 'Empty comments are not allowed')
             # TODO(LOW): Check if line number > MAX_SOLUTION_LINE_NUMBER
-        new_comment_id = CommentText.create(text=comment_text).id
+        new_comment_id = CommentText.get_or_create(text=comment_text)[0].id
     else:
         # should never happend, kind was checked before
         return fail(400, "Invalid kind")
@@ -192,22 +192,25 @@ def _create_comment(
         comment=new_comment_id,
         solution=solution
     )
-    resp = {"success": "true", "id": comment_.id, 'text': comment_.comment}
-    return jsonify(resp)
+
+    return jsonify({
+        'success': 'true', 'id': comment_.id, 'text': comment_.comment.text,
+    })
 
 
 @webapp.route('/comments', methods=['GET', 'POST'])
 @login_required
 def comment():
-    act = request.args.get('act')
+    act = request.args.get('act') or request.json.get('act')
 
     if request.method == 'POST':
-        solution_id = int(request.form.get('solutionId', 0))
+        solution_id = int(request.json.get('solutionId', 0))
     else:  # it's a GET
         solution_id = int(request.args.get('solutionId', 0))
     session_id = int(session['id'])
 
     solution = Solution.get_or_none(Solution.id == solution_id)
+    print(solution_id, solution)
     if solution is None:
         return fail(404, f"No such solution {solution_id}")
 
@@ -226,16 +229,16 @@ def comment():
         return jsonify({"success": "true"})
 
     if act == 'create':
-        kind = request.form.get('kind', '')
+        kind = request.json.get('kind', '')
         comment_id, comment_text = None, None
         try:
-            line_number = int(request.form.get('line', 0))
+            line_number = int(request.json.get('line', 0))
         except ValueError:
             line_number = 0
         if kind.lower() == 'id':
-            comment_id = int(request.form.get("comment", 0))
+            comment_id = int(request.json.get("comment", 0))
         if kind.lower() == 'text':
-            comment_text = request.form.get("comment", '')
+            comment_text = request.json.get("comment", '')
         return _create_comment(
             session_id,
             solution,
@@ -360,7 +363,7 @@ def common_comments(exercise_id=None):
     if session['role'] not in HIGH_ROLES:
         return abort(403, "This user has no permissions to view this page.")
 
-    query = CommentText.select(CommentText.text)
+    query = CommentText.select(CommentText.id, CommentText.text)
     if exercise_id is not None:
         query = (query
                  .join(Comment)
