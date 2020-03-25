@@ -1,12 +1,32 @@
-from lmsweb.models import User, Exercise, CommentText
-from tests.conftest import SUBJECT, COMMENT_TEXT
+from lms.lmsweb.models import User
 
 
-class TestExercise:
-    def test_exercise(self, user: User, exercise: Exercise, comment: CommentText):
-        e = Exercise.get(Exercise.subject == SUBJECT)
-        c = CommentText.get(CommentText.commenter == user)
-        assert e and c
-        assert c.exercise == e
-        assert c.comment_text == COMMENT_TEXT
-        assert c.line_number == 1
+class TestUser:
+
+    def test_password_hashed_on_create(
+        self,
+        staff_user: User,
+        staff_password: str
+    ):
+        self.assert_password(staff_user, staff_password)
+
+    def test_password_hashed_on_save(self, staff_user: User):
+        new_password = 'woop'
+        staff_user.password = new_password
+        staff_user.save()
+        self.assert_password(staff_user, new_password)
+
+    def test_password_hashed_on_mmultiple_saves(self, staff_user: User):
+        new_password = 'woop2'
+        staff_user.password = new_password
+        staff_user.save()
+        staff_user.save()
+        self.assert_password(staff_user, new_password)
+        staff_user.save()
+        self.assert_password(staff_user, new_password)
+
+    @staticmethod
+    def assert_password(user, password):
+        assert user.password != password
+        assert password not in user.password
+        assert user.is_password_valid(password)

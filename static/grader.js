@@ -21,7 +21,7 @@ function trackFinished(solutionId, element) {
 
 function sendComment(kind, solutionId, line, commentData) {
   const xhr = new XMLHttpRequest();
-  xhr.open('POST', '/comments')
+  xhr.open('POST', '/comments');
   xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.responseType = 'json';
   xhr.onreadystatechange = () => {

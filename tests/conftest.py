@@ -1,13 +1,12 @@
 import datetime
 
-from lmsweb.models import ALL_MODELS, Role, RoleOptions, User, Exercise, CommentText
+from lms.lmsweb.models import (
+    ALL_MODELS, Role, RoleOptions, User, Exercise, CommentText,
+)
 
 from peewee import SqliteDatabase
 
 import pytest
-
-SUBJECT = 'python'
-COMMENT_TEXT = "very good!"
 
 
 @pytest.fixture(autouse=True, scope='session')
@@ -24,6 +23,12 @@ def db_in_memory():
     db.close()
 
 
+@pytest.fixture(autouse=True, scope='session')
+def populate_roles():
+    for role in RoleOptions:
+        Role.create(name=role.value)
+
+
 @pytest.fixture(autouse=True, scope='function')
 def db(db_in_memory):
     """Rollback all operations between each test-case"""
@@ -33,51 +38,49 @@ def db(db_in_memory):
 
 
 @pytest.fixture()
-def populate_roles():
-    for role in RoleOptions:
-        Role.create(name=role.value)
+def staff_password():
+    return 'fake pass'
 
 
 @pytest.fixture()
-def user(populate_roles):
-    admin_role = Role.get(Role.name == RoleOptions.STAFF.value)
+def staff_user(staff_password):
+    staff_role = Role.get(Role.name == RoleOptions.STAFF.value)
     return User.create(  # NOQA: S106
-            username='Ido',
-            fullname='Elk',
-            mail_address='mymail@mail.com',
-            password='fake pass',
-            saltedhash='asd',
-            role=admin_role,
+        username='Ido',
+        fullname='Elk',
+        mail_address='mymail@mail.com',
+        password=staff_password,
+        role=staff_role,
     )
 
 
 @pytest.fixture()
-def admin_user(populate_roles):
+def admin_user():
     admin_role = Role.get(Role.name == RoleOptions.ADMINISTRATOR.value)
     return User.create(  # NOQA: S106
-            username='Yam',
-            fullname='Elk',
-            mail_address='mymail@mail.com',
-            password='fake pass',
-            role=admin_role,
+        username='Yam',
+        fullname='Elk',
+        mail_address='mymail@mail.com',
+        password='fake pass',
+        role=admin_role,
     )
 
 
 @pytest.fixture()
-def exercise(user):
+def exercise():
     return Exercise.create(
-            subject=SUBJECT,
-            date=datetime.datetime.now(),
-            is_archived=False,
+        subject='python',
+        date=datetime.datetime.now(),
+        is_archived=False,
     )
 
 
 @pytest.fixture()
-def comment(user, exercise):
+def comment(staff_user, exercise):
     return CommentText.create(
-            commenter=user,
-            timestamp=datetime.datetime.now(),
-            exercise=exercise,
-            comment_text=COMMENT_TEXT,
-            line_number=1,
+        commenter=staff_user,
+        timestamp=datetime.datetime.now(),
+        exercise=exercise,
+        text='very good!',
+        line_number=1,
     )
