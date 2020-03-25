@@ -41,6 +41,8 @@ function addCommentToLine(line, commentData) {
       sanitize: false,
       placement: 'left', // Actually right :P
     });
+    $(commentElement).popover();
+    markLine(commentElement[0], true);
     commentElement[0].dataset.marked = true;
   }
 }
@@ -61,7 +63,6 @@ function treatComments(comments) {
   comments.forEach((entry) => {
     addCommentToLine(entry.line_number, entry);
   });
-  $('[data-toggle=popover]').popover();
 }
 
 
