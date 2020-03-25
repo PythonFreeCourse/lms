@@ -2,8 +2,6 @@ import json
 from datetime import datetime
 from urllib.parse import urljoin, urlparse
 
-from cachetools import cached, TTLCache
-
 from flask import (
     abort, jsonify, render_template, request, session, url_for,
 )
@@ -24,9 +22,6 @@ from lms.lmsweb.models import (
     Comment, CommentText, Exercise, RoleOptions, Solution, User, database,
 )
 from lms.lmsweb.tools.notebook_extractor import extract_exercises
-
-TLL_MAXSIZE = 1024
-TTL_CACHE_SECONDS = 120
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
@@ -263,7 +258,6 @@ def done_checking(solution_id):
     return jsonify({'success': changes.execute() == 1, 'next': next_exercise})
 
 
-@cached(cache=TTLCache(maxsize=TLL_MAXSIZE, ttl=TTL_CACHE_SECONDS))
 def _common_comments(exercise_id=None):
     """
     Most common comments throughout all exercises.
