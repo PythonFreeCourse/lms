@@ -87,6 +87,10 @@ class Role(BaseModel):
     def is_administrator(self):
         return self.name == RoleOptions.ADMINISTRATOR.value
 
+    @property
+    def is_manager(self):
+        return self.is_staff or self.is_administrator
+
 
 class User(UserMixin, BaseModel):
     username = CharField(unique=True)
