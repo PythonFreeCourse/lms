@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from threading import RLock
 from urllib.parse import urljoin, urlparse
 
 from cachetools import cached, TTLCache
@@ -27,6 +28,7 @@ from lms.lmsweb.tools.notebook_extractor import extract_exercises
 
 TLL_MAXSIZE = 1024
 TTL_CACHE_SECONDS = 120
+COMMON_COMMENTS_LOCK = RLock()
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
@@ -220,9 +222,9 @@ def upload():
     valid = matches - duplications
 
     return json.dumps({
-            "exercise_matches": list(valid),
-            "exercise_misses": list(misses),
-            "exercise_duplications": list(duplications)
+        "exercise_matches": list(valid),
+        "exercise_misses": list(misses),
+        "exercise_duplications": list(duplications)
     })
 
 
@@ -263,7 +265,10 @@ def done_checking(solution_id):
     return jsonify({'success': changes.execute() == 1, 'next': next_exercise})
 
 
-@cached(cache=TTLCache(maxsize=TLL_MAXSIZE, ttl=TTL_CACHE_SECONDS))
+@cached(
+    cache=TTLCache(maxsize=TLL_MAXSIZE, ttl=TTL_CACHE_SECONDS),
+    lock=COMMON_COMMENTS_LOCK
+)
 def _common_comments(exercise_id=None):
     """
     Most common comments throughout all exercises.
