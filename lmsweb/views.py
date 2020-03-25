@@ -258,7 +258,7 @@ def send(_exercise_id):
 def upload():
     user_id = request.form.get('user')
     if user_id is None or int(session['id']) != user_id:
-        return abort(403, "Wrong user ID.")
+        return fail(403, "Wrong user ID.")
 
     exercise = Exercise.get_by_id(request.form.get('exercise'))
     if not exercise:
@@ -317,9 +317,9 @@ def view(solution_id):
     solution = Solution.get_or_none(Solution.id == solution_id)
     is_manager = session['role'] in HIGH_ROLES
     if solution is None:
-        return abort(404, "Solution does not exist.")
+        return fail(404, "Solution does not exist.")
     if solution.solver.id != int(session['id']) and not is_manager:
-        return abort(403, "This user has no permissions to view this page.")
+        return fail(403, "This user has no permissions to view this page.")
 
     view_params = {
         'solution': model_to_dict(solution), 'is_manager': is_manager,
