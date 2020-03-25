@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
+from typing import Optional
 from urllib.parse import urljoin, urlparse
-
 
 from flask import (
     abort, jsonify, render_template, request, session, url_for,
@@ -23,7 +23,6 @@ from lms.lmsweb.models import (
     Comment, CommentText, Exercise, RoleOptions, Solution, User, database,
 )
 from lms.lmsweb.tools.notebook_extractor import extract_exercises
-
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
@@ -61,6 +60,13 @@ def _db_close(exc):
 @login_manager.user_loader
 def load_user(user_id):
     return User.get_or_none(id=user_id)
+
+
+def fail(status_code: int, error_msg: str):
+    return abort(
+        status_code,
+        jsonify({'status': 'failed', 'msg': error_msg}),
+    )
 
 
 def is_safe_url(target):
@@ -101,7 +107,7 @@ def login():
             session[field] = str(getattr(user, field))
         next_url = request.args.get('next_url')
         if not is_safe_url(next_url):
-            return abort(400)
+            return fail(400, "The URL isn't safe.")
         return redirect(next_url or url_for('main'))
 
     return render_template('login.html')
@@ -149,33 +155,97 @@ def exercises_page():
     )
 
 
+def _create_comment(
+    user_id: int,
+    solution: Solution,
+    kind: str,
+    line_number: int,
+    comment_text: Optional[str] = None,  # set when kind == text
+    comment_id: Optional[int] = None,  # set when kind == id
+):
+    user = User.get_or_none(User.id == user_id)
+    if user is None:
+        # should never happen, we checked session_id == solver_id
+        return fail(404, 'No such user')
+
+    if (not kind) or (kind not in ('id', 'text')):
+        return fail(400, "Invalid kind")
+
+    if line_number <= 0:
+        return fail(422, f"Invalid line number: {line_number}")
+
+    if kind == 'id':
+        new_comment_id = comment_id
+    elif kind == 'text':
+        if not comment_text:
+            return fail(422, 'Empty comments are not allowed')
+            # TODO(LOW): Check if line number > MAX_SOLUTION_LINE_NUMBER
+        new_comment_id = CommentText.create(text=comment_text).id
+    else:
+        # should never happend, kind was checked before
+        return fail(400, "Invalid kind")
+
+    comment_ = Comment.create(
+        commenter=user,
+        timestamp=datetime.now(),
+        line_number=line_number,
+        comment=new_comment_id,
+        solution=solution
+    )
+    resp = {"success": "true", "id": comment_.id, 'text': comment_.comment}
+    return jsonify(resp)
+
+
 @webapp.route('/comments', methods=['GET', 'POST'])
 @login_required
 def comment():
-    is_manager = session['role'] in HIGH_ROLES
-    if is_manager and request.method == 'POST':
-        solutionId = request.form['solutionId']
-        print(solutionId)
-        return jsonify('{"success": "true"}')
+    act = request.args.get('act')
 
-    if request.method != 'GET':
-        return abort(405, "Must be GET or POST")
+    if request.method == 'POST':
+        solution_id = int(request.form.get('solutionId', 0))
+    else:  # it's a GET
+        solution_id = int(request.args.get('solutionId', 0))
+    session_id = int(session['id'])
 
-    solution_id = int(request.args['solutionId'])
-    solution = Solution.get(solution_id)
-    if is_manager or solution.solver.id == int(session['id']):
-        if request.args.get('act') == 'fetch':
-            return jsonify(Comment.by_solution(solution_id))
-        if not is_manager:
-            abort(403, "Permission denied")
-        if request.args.get('act') == 'delete':
-            comment_id = int(request.args.get('commentId'))
-            # TODO: Handle if not found
-            Comment.get(
-                Comment.comment == comment_id,
-                Comment.solution == solution_id,
-            ).delete_instance()
-            return jsonify({"success": "true"})
+    solution = Solution.get_or_none(Solution.id == solution_id)
+    if solution is None:
+        return fail(404, f"No such solution {solution_id}")
+
+    solver_id = solution.solver.id
+    if solver_id != session_id and session['role'] not in HIGH_ROLES:
+        return fail(401, "You aren't allowed to watch this page.")
+
+    if act == 'fetch':
+        return jsonify(Comment.by_solution(solution_id))
+
+    if act == 'delete':
+        comment_id = int(request.args.get('commentId'))
+        comment_ = Comment.get_or_none(Comment.id == comment_id)
+        if comment_ is not None:
+            comment_.delete_instance()
+        return jsonify({"success": "true"})
+
+    if act == 'create':
+        kind = request.form.get('kind', '')
+        comment_id, comment_text = None, None
+        try:
+            line_number = int(request.form.get('line', 0))
+        except ValueError:
+            line_number = 0
+        if kind.lower() == 'id':
+            comment_id = int(request.form.get("comment", 0))
+        if kind.lower() == 'text':
+            comment_text = request.form.get("comment", '')
+        return _create_comment(
+            session_id,
+            solution,
+            kind,
+            line_number,
+            comment_text,
+            comment_id,
+        )
+
+    return fail(400, f'Unknown or unset act value "{act}"')
 
 
 @webapp.route('/send/<int:_exercise_id>')
@@ -193,25 +263,25 @@ def upload():
 
     exercise = Exercise.get_by_id(request.form.get('exercise'))
     if not exercise:
-        return abort(404, "Exercise does not exist.")
+        return fail(404, "Exercise does not exist.")
 
     user = User.get_by_id(user_id)
     if not user:
-        return abort(403, "Invalid user.")
+        return fail(403, "Invalid user.")
 
     if request.content_length > MAX_REQUEST_SIZE:
-        return abort(402, "file is too heavy. 500KB allowed")
+        return fail(413, "File is too heavy. 500KB allowed")
 
     file: FileStorage = request.files.get('file')
     if not file:
-        return abort(402, "no file was given")
+        return fail(402, "No file was given")
 
     json_file_data = file.read()
     try:
         file_content = json.loads(json_file_data)
         exercises = list(extract_exercises(file_content))
     except (ValueError, json.JSONDecodeError):
-        return abort(422, "Invalid file format - must be ipynb")
+        return fail(422, "Invalid file format - must be ipynb")
 
     matches, misses, duplications = set(), set(), set()
     for exercise_id, code in exercises:
@@ -235,10 +305,10 @@ def upload():
 
     valid = matches - duplications
 
-    return json.dumps({
-            "exercise_matches": list(valid),
-            "exercise_misses": list(misses),
-            "exercise_duplications": list(duplications)
+    return jsonify({
+        "exercise_matches": list(valid),
+        "exercise_misses": list(misses),
+        "exercise_duplications": list(duplications)
     })
 
 

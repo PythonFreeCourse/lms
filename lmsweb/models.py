@@ -68,6 +68,13 @@ class Role(BaseModel):
             Role.name.name: RoleOptions.STUDENT.value
         })
 
+    @classmethod
+    def by_name(cls, name):
+        if name.startswith('_'):
+            raise ValueError("That could lead to a security issue.")
+        role_name = getattr(RoleOptions, name.upper()).value
+        return cls.get(name=role_name)
+
     @property
     def is_student(self):
         return self.name == RoleOptions.STUDENT.value
@@ -191,13 +198,17 @@ if webapp.debug:
         for role in RoleOptions:
             Role.create(name=role.value)
 
-    if User.select().count() == 0:
+if User.select().count() == 0:
+    print("First run! Here are some users to get start with:")
+
+    fields = ['username', 'fullname', 'mail_address', 'role']
+    entities = [
+        ['lmsadmin', 'Admin', 'lms@pythonic.guru', Role.by_name('Administrator')],
+        ['user', 'Student', 'student@pythonic.guru', Role.by_name('Student')],
+    ]
+
+    for entity in entities:
+        user = dict(zip(fields, entity))
         password = generate_password()
-        User.create(
-            username='lmsadmin',
-            fullname='LMS Admin',
-            password=password,
-            mail_address='lms@pythonic.guru',
-            role=Role.get(name=RoleOptions.ADMINISTRATOR.value),
-        )
-        print(f"First run! Your login is lmsadmin:{password}")
+        User.create(**user, password=password)
+        print(f"User: {user['username']}, Password: {password}")
