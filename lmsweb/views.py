@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from typing import Optional
+from functools import wraps
 from urllib.parse import urljoin, urlparse
 
 from flask import (
@@ -60,6 +61,19 @@ def _db_close(exc):
 @login_manager.user_loader
 def load_user(user_id):
     return User.get_or_none(id=user_id)
+
+
+def high_privilege_only(func):
+    """Decorator enforrcing access for admins only"""
+    # Must have @wraps to work with endpoints.
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not current_user.role.is_high_privileges:
+            return fail(403, "This user has no permissions to view this page.")
+        else:
+            return func(*args, **kwargs)
+
+    return wrapper
 
 
 def fail(status_code: int, error_msg: str):
@@ -324,10 +338,8 @@ def view(solution_id):
 
 @webapp.route('/checked/<int:solution_id>', methods=['POST'])
 @login_required
+@high_privilege_only
 def done_checking(solution_id):
-    if session['role'] not in HIGH_ROLES:
-        return abort(403, "This user has no permissions to view this page.")
-
     requested_solution = Solution.id == solution_id
     changes = Solution.update(
         is_checked=True, checker=int(session['id']),
@@ -341,9 +353,6 @@ def _common_comments(exercise_id=None):
     Most common comments throughout all exercises.
     Filter by exercise id when specified.
     """
-    if session['role'] not in HIGH_ROLES:
-        return abort(403, "This user has no permissions to view this page.")
-
     query = CommentText.select(CommentText.text)
     if exercise_id is not None:
         query = (query
@@ -365,5 +374,6 @@ def _common_comments(exercise_id=None):
 @webapp.route('/common_comments')
 @webapp.route('/common_comments/<exercise_id>')
 @login_required
+@high_privilege_only
 def common_comments(exercise_id=None):
     return jsonify(_common_comments(exercise_id=exercise_id))
