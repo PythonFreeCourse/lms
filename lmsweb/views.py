@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from typing import Optional
 from urllib.parse import urljoin, urlparse
 
 from flask import (
@@ -155,12 +156,14 @@ def exercises_page():
 
 
 def _create_comment(
-    session_id: int,
+    user_id: int,
     solution: Solution,
     kind: str,
     line_number: int,
+    comment_text: Optional[str] = None,  # set when kind == text
+    comment_id: Optional[int] = None,  # set when kind == id
 ):
-    user = User.get_or_none(User.id == session_id)
+    user = User.get_or_none(User.id == user_id)
     if user is None:
         # should never happen, we checked session_id == solver_id
         return fail(404, 'No such user')
@@ -172,13 +175,12 @@ def _create_comment(
         return fail(422, f"Invalid line number: {line_number}")
 
     if kind == 'id':
-        comment_id = int(request.form.get('comment', 0))
+        new_comment_id = comment_id
     elif kind == 'text':
-        text = request.form.get('comment', '')
-        if not text:
+        if not comment_text:
             return fail(422, 'Empty comments are not allowed')
             # TODO(LOW): Check if line number > MAX_SOLUTION_LINE_NUMBER
-        comment_id = CommentText.create(text=text).id
+        new_comment_id = CommentText.create(text=comment_text).id
     else:
         # should never happend, kind was checked before
         return fail(400, "Invalid kind")
@@ -187,10 +189,11 @@ def _create_comment(
         commenter=user,
         timestamp=datetime.now(),
         line_number=line_number,
-        comment=comment_id,
+        comment=new_comment_id,
         solution=solution
     )
-    return jsonify({"success": "true", "id": comment_.id, 'text': comment_.comment})
+    resp = {"success": "true", "id": comment_.id, 'text': comment_.comment}
+    return jsonify(resp)
 
 
 @webapp.route('/comments', methods=['GET', 'POST'])
@@ -227,13 +230,23 @@ def comment():
 
     if act == 'create':
         kind = request.form.get('kind', '')
+        comment_id, comment_text = None, None
         try:
             line_number = int(request.form.get('line', 0))
         except ValueError:
             line_number = 0
-        if line_number <= 0:
-            return fail(422, f"Invalid line number: {line_number}")
-        return _create_comment(session_id, solution, kind, line_number)
+        if kind.lower() == 'id':
+            comment_id = int(request.form.get("comment", 0))
+        if kind.lower() == 'text':
+            comment_text = request.form.get("comment", '')
+        return _create_comment(
+            session_id,
+            solution,
+            kind,
+            line_number,
+            comment_text,
+            comment_id,
+        )
 
     return fail(400, f'Unknown or unset act value "{act}"')
 
