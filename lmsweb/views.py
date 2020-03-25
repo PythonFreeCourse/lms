@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
-from typing import Optional
 from functools import wraps
+from typing import Optional
 from urllib.parse import urljoin, urlparse
 
 from flask import (
