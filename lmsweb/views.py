@@ -1,10 +1,11 @@
 import json
 from datetime import datetime
 from typing import Optional
+from functools import wraps
 from urllib.parse import urljoin, urlparse
 
 from flask import (
-    abort, jsonify, render_template, request, session, url_for,
+    abort, jsonify, render_template, request, url_for,
 )
 from flask_login import (  # type: ignore
     LoginManager,
@@ -62,11 +63,28 @@ def load_user(user_id):
     return User.get_or_none(id=user_id)
 
 
+def managers_only(func):
+    """Decorator enforrcing access for managers only"""
+
+    # Must have @wraps to work with endpoints.
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not current_user.role.is_manager:
+            return fail(403, "This user has no permissions to view this page.")
+        else:
+            return func(*args, **kwargs)
+
+    return wrapper
+
+
 def fail(status_code: int, error_msg: str):
-    return abort(
-        status_code,
-        jsonify({'status': 'failed', 'msg': error_msg}),
-    )
+    data = {
+        'status': 'failed',
+        'msg': error_msg
+    }
+    response = jsonify(data)
+    response.status_code = status_code
+    return abort(response)
 
 
 def is_safe_url(target):
@@ -78,22 +96,9 @@ def is_safe_url(target):
     )
 
 
-def redirect_logged_in(func):
-    """Must wrap the route"""
-
-    def wrapper(*args, **kwargs):
-        if current_user.is_authenticated:
-            return redirect(url_for('main'))
-        else:
-            return func(*args, **kwargs)
-
-    return wrapper
-
-
-@redirect_logged_in
 @webapp.route('/login', methods=['GET', 'POST'])
 def login():
-    if session.get('id') is not None and session.get('invalid') is not True:
+    if current_user.is_authenticated:
         return redirect(url_for('main'))
 
     username = request.form.get('username')
@@ -101,10 +106,7 @@ def login():
     user = User.get_or_none(username=username)
 
     if user is not None and user.is_password_valid(password):
-        session['invalid'] = False
         login_user(user)
-        for field in ('username', 'role', 'id'):
-            session[field] = str(getattr(user, field))
         next_url = request.args.get('next_url')
         if not is_safe_url(next_url):
             return fail(400, "The URL isn't safe.")
@@ -116,7 +118,6 @@ def login():
 @webapp.route('/logout')
 @login_required
 def logout():
-    session['invalid'] = True
     logout_user()
     return redirect('login')
 
@@ -124,9 +125,7 @@ def logout():
 @webapp.route('/')
 @login_required
 def main():
-    if session.get('id') is not None:
-        return redirect(url_for('exercises_page'))
-    return redirect(url_for('login'))
+    return redirect(url_for('exercises_page'))
 
 
 def fetch_exercises():
@@ -147,9 +146,8 @@ def fetch_solutions(user_id):
 @webapp.route('/exercises')
 @login_required
 def exercises_page():
-    user_id = int(session['id'])
     exercises = fetch_exercises()
-    solutions = fetch_solutions(user_id)
+    solutions = fetch_solutions(current_user.id)
     return render_template(
         'exercises.html', exercises=exercises, solutions=solutions,
     )
@@ -187,7 +185,6 @@ def _create_comment(
 
     comment_ = Comment.create(
         commenter=user,
-        timestamp=datetime.now(),
         line_number=line_number,
         comment=new_comment_id,
         solution=solution
@@ -207,7 +204,6 @@ def comment():
         solution_id = int(request.json.get('solutionId', 0))
     else:  # it's a GET
         solution_id = int(request.args.get('solutionId', 0))
-    session_id = int(session['id'])
 
     solution = Solution.get_or_none(Solution.id == solution_id)
     print(solution_id, solution)
@@ -215,7 +211,7 @@ def comment():
         return fail(404, f"No such solution {solution_id}")
 
     solver_id = solution.solver.id
-    if solver_id != session_id and session['role'] not in HIGH_ROLES:
+    if solver_id != current_user.id and current_user.role.is_manager:
         return fail(401, "You aren't allowed to watch this page.")
 
     if act == 'fetch':
@@ -240,7 +236,7 @@ def comment():
         if kind.lower() == 'text':
             comment_text = request.json.get("comment", '')
         return _create_comment(
-            session_id,
+            current_user.id,
             solution,
             kind,
             line_number,
@@ -261,8 +257,8 @@ def send(_exercise_id):
 @login_required
 def upload():
     user_id = request.form.get('user')
-    if user_id is None or int(session['id']) != user_id:
-        return abort(403, "Wrong user ID.")
+    if user_id is None or user_id != current_user.id:
+        return fail(403, "Wrong user ID.")
 
     exercise = Exercise.get_by_id(request.form.get('exercise'))
     if not exercise:
@@ -319,22 +315,24 @@ def upload():
 @login_required
 def view(solution_id):
     solution = Solution.get_or_none(Solution.id == solution_id)
-    is_manager = session['role'] in HIGH_ROLES
     if solution is None:
-        return abort(404, "Solution does not exist.")
-    if solution.solver.id != int(session['id']) and not is_manager:
-        return abort(403, "This user has no permissions to view this page.")
+        return fail(404, "Solution does not exist.")
+
+    is_manager = current_user.role.is_manager
+    if solution.solver.id != current_user.id and not is_manager:
+        return fail(403, "This user has no permissions to view this page.")
 
     view_params = {
-        'solution': model_to_dict(solution), 'is_manager': is_manager,
-        'role': session['role'].lower(),
+        'solution': model_to_dict(solution),
+        'is_admin': is_manager,
+        'role': current_user.role.name.lower(),
     }
 
     if is_manager:
         view_params = {
             **view_params,
-            'exercise_common_comments': common_comments(solution.exercise),
-            'all_common_comments': common_comments(solution.exercise),
+            'exercise_common_comments': _common_comments(solution.exercise),
+            'all_common_comments': _common_comments(solution.exercise),
         }
 
     return render_template('view.html', **view_params)
@@ -342,27 +340,21 @@ def view(solution_id):
 
 @webapp.route('/checked/<int:solution_id>', methods=['POST'])
 @login_required
+@managers_only
 def done_checking(solution_id):
-    if session['role'] not in HIGH_ROLES:
-        return abort(403, "This user has no permissions to view this page.")
-
-    requested_solution = Solution.id == solution_id
+    requested_solution = (Solution.id == solution_id)
     changes = Solution.update(
-        is_checked=True, checker=int(session['id']),
+        is_checked=True, checker=current_user.id,
     ).where(requested_solution)
     next_exercise = 1  # TODO: Change to get_next_unchecked()
     return jsonify({'success': changes.execute() == 1, 'next': next_exercise})
 
 
-def common_comments(exercise_id=None):
-    # TODO: Add cache for 2 minute each time
+def _common_comments(exercise_id=None):
     """
     Most common comments throughout all exercises.
     Filter by exercise id when specified.
     """
-    if session['role'] not in HIGH_ROLES:
-        return abort(403, "This user has no permissions to view this page.")
-
     query = CommentText.select(CommentText.id, CommentText.text)
     if exercise_id is not None:
         query = (query
@@ -384,5 +376,6 @@ def common_comments(exercise_id=None):
 @webapp.route('/common_comments')
 @webapp.route('/common_comments/<exercise_id>')
 @login_required
-def _common_comments(exercise_id=None):
-    return jsonify(common_comments(exercise_id=None))
+@managers_only
+def common_comments(exercise_id=None):
+    return jsonify(_common_comments(exercise_id=exercise_id))
