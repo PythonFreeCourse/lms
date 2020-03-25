@@ -63,13 +63,13 @@ def load_user(user_id):
     return User.get_or_none(id=user_id)
 
 
-def admins_only(func):
-    """Decorator enforrcing access for admins only"""
+def managers_only(func):
+    """Decorator enforrcing access for managers only"""
 
     # Must have @wraps to work with endpoints.
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if not current_user.role.is_admin:
+        if not current_user.role.is_manager:
             return fail(403, "This user has no permissions to view this page.")
         else:
             return func(*args, **kwargs)
@@ -78,7 +78,13 @@ def admins_only(func):
 
 
 def fail(status_code: int, error_msg: str):
-    return abort(status_code, {'status': 'failed', 'msg': error_msg})
+    data = {
+        'status': 'failed',
+        'msg': error_msg
+    }
+    response = jsonify(data)
+    response.status_code = status_code
+    return abort(response)
 
 
 def is_safe_url(target):
@@ -202,7 +208,7 @@ def comment():
         return fail(404, f"No such solution {solution_id}")
 
     solver_id = solution.solver.id
-    if solver_id != current_user.id and current_user.role.is_admin:
+    if solver_id != current_user.id and current_user.role.is_manager:
         return fail(401, "You aren't allowed to watch this page.")
 
     if act == 'fetch':
@@ -309,17 +315,17 @@ def view(solution_id):
     if solution is None:
         return fail(404, "Solution does not exist.")
 
-    is_admin = current_user.role.is_admin
-    if solution.solver.id != current_user.id and not is_admin:
+    is_manager = current_user.role.is_manager
+    if solution.solver.id != current_user.id and not is_manager:
         return fail(403, "This user has no permissions to view this page.")
 
     view_params = {
         'solution': model_to_dict(solution),
-        'is_admin': is_admin,
+        'is_admin': is_manager,
         'role': current_user.role.name.lower(),
     }
 
-    if is_admin:
+    if is_manager:
         view_params = {
             **view_params,
             'exercise_common_comments': _common_comments(solution.exercise),
@@ -331,7 +337,7 @@ def view(solution_id):
 
 @webapp.route('/checked/<int:solution_id>', methods=['POST'])
 @login_required
-@admins_only
+@managers_only
 def done_checking(solution_id):
     requested_solution = (Solution.id == solution_id)
     changes = Solution.update(
@@ -367,6 +373,7 @@ def _common_comments(exercise_id=None):
 @webapp.route('/common_comments')
 @webapp.route('/common_comments/<exercise_id>')
 @login_required
-@admins_only
+@managers_only
 def common_comments(exercise_id=None):
+    return fail(404, 'test')
     return jsonify(_common_comments(exercise_id=exercise_id))
