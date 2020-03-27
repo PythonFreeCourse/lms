@@ -24,6 +24,11 @@
               <i class="fa fa-{{ details['icon'] }}" aria-hidden="true"></i> 
               {{ details['text'] }}
             </a>
+            {% if is_manager %}
+            <a class="our-button our-button-small go-grader" href="check/{{ exercise['id'] }}">
+              <i class="fa fa-graduation-cap" aria-hidden="true"></i>
+            </a>
+            {% endif %}
           </div>
         </div>
       </div>

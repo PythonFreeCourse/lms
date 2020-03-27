@@ -11,7 +11,7 @@
     {% endif %}
   </div>
   <div id="view-body">
-          <div id="code-view" data-id="{{ solution['id'] }}" data-role="{{ role }}">
+          <div id="code-view" data-id="{{ solution['id'] }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}">
       <pre><code class="language-python line-numbers highlight">{{- solution['json_data_str'] | trim(' ') -}}</code></pre>
     </div>
     {% if is_manager %}

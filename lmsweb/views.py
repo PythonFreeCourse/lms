@@ -148,8 +148,10 @@ def fetch_solutions(user_id):
 def exercises_page():
     exercises = fetch_exercises()
     solutions = fetch_solutions(current_user.id)
+    is_manager = current_user.role.is_manager
     return render_template(
-        'exercises.html', exercises=exercises, solutions=solutions,
+        'exercises.html',
+        exercises=exercises, solutions=solutions, is_manager=is_manager,
     )
 
 
@@ -337,17 +339,30 @@ def view(solution_id):
     return render_template('view.html', **view_params)
 
 
-@webapp.route('/checked/<int:solution_id>', methods=['POST'])
+@webapp.route('/checked/<int:exercise_id>/<int:solution_id>', methods=['POST'])
 @login_required
 @managers_only
-def done_checking(solution_id):
+def done_checking(exercise_id, solution_id):
     requested_solution = (Solution.id == solution_id)
     changes = Solution.update(
         is_checked=True, checker=current_user.id,
     ).where(requested_solution)
     is_updated = changes.execute() == 1
-    next_exercise = Solution.next_unchecked().get('id')
+    next_exercise = Solution.next_unchecked_of(exercise_id).get('id')
     return jsonify({'success': is_updated, 'next': next_exercise})
+
+
+@webapp.route('/check/<int:exercise_id>')
+@login_required
+@managers_only
+def start_checking(exercise_id):
+    if exercise_id != 0:
+        next_exercise = Solution.next_unchecked_of(exercise_id).get('id')
+    else:
+        next_exercise = Solution.next_unchecked().get('id')
+    if next_exercise is not None:
+        return redirect(f'/view/{next_exercise}')
+    return redirect('/exercises')
 
 
 def _common_comments(exercise_id=None):

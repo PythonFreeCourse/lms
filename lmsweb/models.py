@@ -5,7 +5,7 @@ from datetime import datetime
 
 from flask_admin import Admin, AdminIndexView  # type: ignore
 from flask_admin.contrib.peewee import ModelView  # type: ignore
-from flask_login import (UserMixin, current_user)
+from flask_login import UserMixin, current_user  # type: ignore
 from peewee import (  # type: ignore
     BooleanField,
     CharField,
@@ -18,7 +18,7 @@ from peewee import (  # type: ignore
     SqliteDatabase,
     TextField,
 )
-from playhouse.signals import Model, pre_save
+from playhouse.signals import Model, pre_save  # type: ignore
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from lms.lmsweb import webapp
@@ -139,11 +139,19 @@ class Solution(BaseModel):
 
     @classmethod
     def next_unchecked(cls):
+        unchecked_exercises = cls.select().where(cls.is_checked == False)  # NOQA: E712, E501
         try:
-            return (cls
-                .select()
-                .where(cls.is_checked == False)  # NOQA: E712
-            .dicts().get())
+            print('ku')
+            return unchecked_exercises.dicts().get()
+        except cls.DoesNotExist:
+            print('shi')
+            return {}
+
+    @classmethod
+    def next_unchecked_of(cls, exercise_id):
+        next_exercise = cls.is_checked == False & exercise_id == cls.exercise  # NOQA: E712, E501
+        try:
+            return cls.select().where(next_exercise).dicts().get()
         except cls.DoesNotExist:
             return {}
 
@@ -206,19 +214,14 @@ def generate_password():
     return ''.join(password)
 
 
-# Don't create sqlite file for tests
-if webapp.debug:
-    if Role.select().count() == 0:
-        for role in RoleOptions:
-            Role.create(name=role.value)
-
-if User.select().count() == 0:
+def create_demo_users():
     print("First run! Here are some users to get start with:")
-
     fields = ['username', 'fullname', 'mail_address', 'role']
+    student_role = Role.by_name('Student')
+    admin_role = Role.by_name('Administrator')
     entities = [
-        ['lmsadmin', 'Admin', 'lms@pythonic.guru', Role.by_name('Administrator')],
-        ['user', 'Student', 'student@pythonic.guru', Role.by_name('Student')],
+        ['lmsadmin', 'Admin', 'lms@pythonic.guru', admin_role],
+        ['user', 'Student', 'student@pythonic.guru', student_role],
     ]
 
     for entity in entities:
@@ -226,3 +229,15 @@ if User.select().count() == 0:
         password = generate_password()
         User.create(**user, password=password)
         print(f"User: {user['username']}, Password: {password}")
+
+
+def create_basic_roles():
+    for role in RoleOptions:
+        Role.create(name=role.value)
+
+
+with database.connection_context():
+    if Role.select().count() == 0:
+        create_basic_roles()
+    if User.select().count() == 0:
+        create_demo_users()

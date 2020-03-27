@@ -105,6 +105,12 @@ div#code-view {
   line-height: 3rem;
 }
 
+.exercise-send {
+  display: flex;
+  flex-direction: row;
+  align-items: left;
+}
+
 .go-send {
   background: #247ba0;
   color: #ebf3f6;
@@ -132,10 +138,19 @@ div#code-view {
   color: #0b1211;
 }
 
+.go-grader {
+  background: #b2dbbf;
+  color: #1f2d3d;
+}
+
+.go-grader:hover {
+  color: #1f2d3d;
+}
+
 .our-button {
   border-radius: 8px;
   display: block;
-  margin-right: 5rem;
+  margin-right: 0.5em;
   outline: none;
   padding: 0.55rem 1rem;
   white-space: nowrap;
@@ -146,8 +161,19 @@ div#code-view {
   text-decoration: none;
 }
 
+.our-button-small {
+  width: 2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 i.fa {
   margin-left: 0.3em;
+}
+
+.our-button-small > i.fa {
+  margin-left: 0;
 }
 
 /* Upload */

@@ -1,7 +1,7 @@
-function trackFinished(solutionId, element) {
+function trackFinished(exerciseId, solutionId, element) {
   element.addEventListener('click', () => {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `/checked/${solutionId}`, true);
+    xhr.open('POST', `/checked/${exerciseId}/${solutionId}`, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.responseType = 'json';
     xhr.onreadystatechange = () => {
@@ -194,9 +194,10 @@ function addNewCommentButtons(elements) {
 
 window.deleteComment = deleteComment;
 window.addEventListener('lines-numbered', () => {
+  const exerciseId = document.getElementById('code-view').dataset.exercise;
   trackDragAreas(document.getElementsByClassName('line'));
   trackDraggables(document.getElementsByClassName('known-comment'));
-  trackFinished(window.solutionId, document.getElementById('save-check'));
+  trackFinished(exerciseId, window.solutionId, document.getElementById('save-check'));
   addNewCommentButtons(document.getElementsByClassName('line'));
   if (!window.isUserGrader()) {
     sessionStorage.setItem('role', 'grader');
