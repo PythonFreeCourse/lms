@@ -206,7 +206,6 @@ def comment():
         solution_id = int(request.args.get('solutionId', 0))
 
     solution = Solution.get_or_none(Solution.id == solution_id)
-    print(solution_id, solution)
     if solution is None:
         return fail(404, f"No such solution {solution_id}")
 
@@ -324,7 +323,7 @@ def view(solution_id):
 
     view_params = {
         'solution': model_to_dict(solution),
-        'is_admin': is_manager,
+        'is_manager': is_manager,
         'role': current_user.role.name.lower(),
     }
 
@@ -346,7 +345,7 @@ def done_checking(solution_id):
     changes = Solution.update(
         is_checked=True, checker=current_user.id,
     ).where(requested_solution)
-    next_exercise = 1  # TODO: Change to get_next_unchecked()
+    next_exercise = Solution.next_unchecked()['id']
     return jsonify({'success': changes.execute() == 1, 'next': next_exercise})
 
 

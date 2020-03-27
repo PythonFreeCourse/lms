@@ -137,6 +137,13 @@ class Solution(BaseModel):
     submission_timestamp = DateTimeField()
     json_data_str = TextField()
 
+    @classmethod
+    def next_unchecked(cls):
+        return (cls
+            .select()
+            .where(cls.is_checked == False)  # NOQA: E712
+        .dicts().get())
+
 
 class CommentText(BaseModel):
     text = TextField(unique=True)
