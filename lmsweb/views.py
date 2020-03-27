@@ -333,7 +333,7 @@ def view(solution_id):
         view_params = {
             **view_params,
             'exercise_common_comments': _common_comments(solution.exercise),
-            'all_common_comments': _common_comments(solution.exercise),
+            'all_common_comments': _common_comments(),
         }
 
     return render_template('view.html', **view_params)
