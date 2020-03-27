@@ -4,7 +4,7 @@ from typing import Any, Iterator, Dict, Iterable, Tuple, List
 
 Notebook = Dict[str, Any]
 Cell = Dict[str, Any]
-ASSIGNMENT_NAME_REGEX = re.compile(r'\d+-\d+-[a-zA-Z0-9_-]+')
+ASSIGNMENT_NAME_REGEX = re.compile(r'Upload\s+\d+', re.IGNORECASE)
 
 
 def is_code_cell(cell: Cell):
@@ -19,9 +19,9 @@ def get_exercise(cell: Cell) -> Tuple[str, str]:
     code: List[str] = cell.get('source', [])
     if not code:
         return '', ''
-    header = code[0].strip().strip('#').strip().replace(' ', '')
+    header = code[0].strip().strip('#').strip()
     if ASSIGNMENT_NAME_REGEX.fullmatch(header):
-        return header, ''.join(code[1:])
+        return header.split()[1], ''.join(code[1:])
     return '', ''
 
 

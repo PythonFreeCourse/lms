@@ -19,6 +19,7 @@ from playhouse.shortcuts import model_to_dict  # type: ignore
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
+import sys
 from lms.lmsweb import webapp
 from lms.lmsweb.models import (
     Comment, CommentText, Exercise, RoleOptions, Solution, User, database,
@@ -257,18 +258,10 @@ def send(_exercise_id):
 @webapp.route('/upload', methods=['POST'])
 @login_required
 def upload():
-    user_id = request.form.get('user')
-    if user_id is None or user_id != current_user.id:
-        return fail(403, "Wrong user ID.")
-
-    exercise = Exercise.get_by_id(request.form.get('exercise'))
-    if not exercise:
-        return fail(404, "Exercise does not exist.")
-
-    user = User.get_by_id(user_id)
-    if not user:
-        return fail(403, "Invalid user.")
-
+    user_id = current_user.id
+    user = User.get_or_none(User.id == user_id) # should never happen
+    if user is None:
+        return fail(404, "user not found")
     if request.content_length > MAX_REQUEST_SIZE:
         return fail(413, "File is too heavy. 500KB allowed")
 
@@ -282,10 +275,13 @@ def upload():
         exercises = list(extract_exercises(file_content))
     except (ValueError, json.JSONDecodeError):
         return fail(422, "Invalid file format - must be ipynb")
-
+    if not exercises:
+        msg = "No exercises were found in the notebook" 
+        desc = "did you use Upload <number of exercise> ? (example: Upload 1)"
+        return fail(402, f'{msg}, {desc}') 
     matches, misses, duplications = set(), set(), set()
     for exercise_id, code in exercises:
-        exercise = Exercise.get_or_none(Exercise.subject == exercise_id)
+        exercise = Exercise.get_or_none(Exercise.id == exercise_id)
         if exercise is None:
             misses.add(exercise_id)
             continue
