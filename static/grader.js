@@ -7,7 +7,11 @@ function trackFinished(solutionId, element) {
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
-          window.location.href = xhr.response.next;
+          if (xhr.response.next !== null) {
+            window.location.href = xhr.response.next;
+          } else {
+            alert("Yay! That's it!");
+          }
         } else {
           console.log(xhr.status);
         }

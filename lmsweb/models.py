@@ -139,10 +139,13 @@ class Solution(BaseModel):
 
     @classmethod
     def next_unchecked(cls):
-        return (cls
-            .select()
-            .where(cls.is_checked == False)  # NOQA: E712
-        .dicts().get())
+        try:
+            return (cls
+                .select()
+                .where(cls.is_checked == False)  # NOQA: E712
+            .dicts().get())
+        except cls.DoesNotExist:
+            return {}
 
 
 class CommentText(BaseModel):

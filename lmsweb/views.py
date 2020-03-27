@@ -345,8 +345,9 @@ def done_checking(solution_id):
     changes = Solution.update(
         is_checked=True, checker=current_user.id,
     ).where(requested_solution)
-    next_exercise = Solution.next_unchecked()['id']
-    return jsonify({'success': changes.execute() == 1, 'next': next_exercise})
+    is_updated = changes.execute() == 1
+    next_exercise = Solution.next_unchecked().get('id')
+    return jsonify({'success': is_updated, 'next': next_exercise})
 
 
 def _common_comments(exercise_id=None):
