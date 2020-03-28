@@ -42,6 +42,7 @@ elif webapp.env == 'production':
         'port': webapp.config['DB_PORT'],
         'host': webapp.config['DB_HOST_IP'],
         'password': webapp.config['DB_PASSWORD'],
+        'autorollback': webapp.config['DB_AUTOROLLBACK'],
     }
     database = PostgresqlDatabase(**db_config)
 
@@ -198,21 +199,7 @@ def generate_password():
     password = randomizer.choices(string.printable[:66], k=length)
     return ''.join(password)
 
-with database.connection_context():
-    admin = Admin(
-        webapp,
-        name='LMS',
-        template_mode='bootstrap3',
-        index_view=MyAdminIndexView(),
-    )
 
-    ALL_MODELS = (User, Exercise, CommentText, Solution, Role, Comment)
-    for m in ALL_MODELS:
-        admin.add_view(AdminModelView(m))
-
-    database.create_tables(ALL_MODELS, safe=True)
-
-<<<<<<< HEAD
 def create_demo_users():
     print("First run! Here are some users to get start with:")
     fields = ['username', 'fullname', 'mail_address', 'role']
@@ -235,30 +222,22 @@ def create_basic_roles():
         Role.create(name=role.value)
 
 
+
 with database.connection_context():
+    admin = Admin(
+        webapp,
+        name='LMS',
+        template_mode='bootstrap3',
+        index_view=MyAdminIndexView(),
+    )
+
+    ALL_MODELS = (User, Exercise, CommentText, Solution, Role, Comment)
+    for m in ALL_MODELS:
+        admin.add_view(AdminModelView(m))
+
+    database.create_tables(ALL_MODELS, safe=True)
+
     if Role.select().count() == 0:
         create_basic_roles()
     if User.select().count() == 0:
         create_demo_users()
-=======
-# Don't create sqlite file for tests
-    if webapp.debug:
-        if Role.select().count() == 0:
-            for role in RoleOptions:
-                Role.create(name=role.value)
-    
-    if User.select().count() == 0:
-        print("First run! Here are some users to get start with:")
-    
-        fields = ['username', 'fullname', 'mail_address', 'role']
-        entities = [
-            ['lmsadmin', 'Admin', 'lms@pythonic.guru', Role.by_name('Administrator')],
-            ['user', 'Student', 'student@pythonic.guru', Role.by_name('Student')],
-        ]
-    
-        for entity in entities:
-            user = dict(zip(fields, entity))
-            password = generate_password()
-            User.create(**user, password=password)
-            print(f"User: {user['username']}, Password: {password}")
-

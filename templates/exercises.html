@@ -8,24 +8,24 @@
       {% for exercise in exercises %}
       <div class="exercise">
         <div class="right-side">
-          <div class="exercise-id">{{ exercise['id'] }}</div>
-          <div class="exercise-name"><div class="ex-title">{{ exercise['subject'] }}</div></div>
+          <div class="exercise-id">{{ exercise['exercise_id'] }}</div>
+          <div class="exercise-name"><div class="ex-title">{{ exercise['exercise_name'] }}</div></div>
         </div>
         <div class="left-side">
           <div class="exercise-send">
-            {%- if exercise['id'] not in solutions %}
+            {%- if exercise['is_checked'] is none %}
             {% set details = {'page': 'send', 'icon': 'upload', 'text': 'שלח', 'css': 'send'} %}
-            {% elif not solutions[exercise['id']]['is_checked'] %}
+            {% elif not exercise['is_checked'] %}
             {% set details = {'page': 'view', 'icon': 'eye', 'text': 'הצצה', 'css': 'view'} %}
             {% else %}
             {% set details = {'page': 'view', 'icon': 'circle-check-o', 'text': 'לבדיקה', 'css': 'checked'} %}
             {% endif -%}
-            <a class="our-button go-{{ details['css'] }}" href="{{ details['page'] }}/{{ exercise['id'] }}">
+            <a class="our-button go-{{ details['css'] }}" href="{{ details['page'] }}/{{ exercise['solution_id'] }}">
               <i class="fa fa-{{ details['icon'] }}" aria-hidden="true"></i> 
               {{ details['text'] }}
             </a>
             {% if is_manager %}
-            <a class="our-button our-button-small go-grader" href="check/{{ exercise['id'] }}">
+            <a class="our-button our-button-small go-grader" href="check/{{ exercise['exercise_id'] }}">
               <i class="fa fa-graduation-cap" aria-hidden="true"></i>
             </a>
             {% endif %}

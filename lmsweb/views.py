@@ -1,11 +1,14 @@
 import json
 from datetime import datetime
 from functools import wraps
+import os
+import sys
 from typing import Optional
 from urllib.parse import urljoin, urlparse
 
 from flask import (
-    abort, jsonify, render_template, request, url_for,
+    abort, jsonify, render_template, request,
+    send_from_directory, url_for,
 )
 from flask_login import (  # type: ignore
     LoginManager,
@@ -14,12 +17,11 @@ from flask_login import (  # type: ignore
     login_user,
     logout_user,
 )
-from peewee import fn  # type: ignore
+from peewee import JOIN, fn  # type: ignore
 from playhouse.shortcuts import model_to_dict  # type: ignore
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
-import sys
 from lms.lmsweb import webapp
 from lms.lmsweb.models import (
     Comment, CommentText, Exercise, RoleOptions, Solution, User, database,
@@ -123,36 +125,45 @@ def logout():
     return redirect('login')
 
 
+@webapp.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+
 @webapp.route('/')
 @login_required
 def main():
     return redirect(url_for('exercises_page'))
 
 
-def fetch_exercises():
-    not_archived_filter = {Exercise.is_archived.name: False}
-    unarchived_exercises = Exercise.filter(**not_archived_filter)
-    return tuple(unarchived_exercises.dicts())
-
-
 def fetch_solutions(user_id):
     fields = [
-        Solution.id, Solution.is_checked, Solution.grade,
-        Solution.submission_timestamp, Solution.exercise,
+        Exercise.id.alias('exercise_id'),
+        Exercise.subject.alias('exercise_name'),
+        Solution.id.alias('solution_id'),
+        Solution.is_checked,
     ]
-    solutions = Solution.select(*fields).where(Solution.solver == user_id)
-    return {d['id']: d for d in solutions.dicts()}
+    solutions_filter = (
+        (Solution.exercise == Exercise.id)
+        & (Solution.solver == user_id)
+    )
+    solutions = (Exercise
+        .select(*fields)
+        .join(Solution, 'LEFT OUTER', on=solutions_filter)
+        .where(Exercise.is_archived == False)
+    )
+    return tuple(solutions.dicts())
 
 
 @webapp.route('/exercises')
 @login_required
 def exercises_page():
-    exercises = fetch_exercises()
-    solutions = fetch_solutions(current_user.id)
+    exercises = fetch_solutions(current_user.id)
     is_manager = current_user.role.is_manager
     return render_template(
         'exercises.html',
-        exercises=exercises, solutions=solutions, is_manager=is_manager,
+        exercises=exercises, is_manager=is_manager,
     )
 
 
@@ -296,7 +307,9 @@ def upload():
         if created:
             matches.add(exercise_id)
         else:
-            solution.delete_instance()
+            solution.json_data_str = code
+            solution.submission_timestamp = datetime.now()
+            solution.save()
             duplications.add(exercise_id)
 
     valid = matches - duplications
