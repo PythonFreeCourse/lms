@@ -227,7 +227,7 @@ def comment():
         return fail(404, f"No such solution {solution_id}")
 
     solver_id = solution.solver.id
-    if solver_id != current_user.id and current_user.role.is_manager:
+    if solver_id != current_user.id and not current_user.role.is_manager:
         return fail(401, "You aren't allowed to watch this page.")
 
     if act == 'fetch':
