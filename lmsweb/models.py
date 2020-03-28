@@ -193,6 +193,7 @@ class MyAdminIndexView(AccessibleByAdminMixin, AdminIndexView):
 class AdminModelView(AccessibleByAdminMixin, ModelView):
     pass
 
+
 def generate_password():
     randomizer = secrets.SystemRandom()
     length = randomizer.randrange(9, 16)
@@ -220,7 +221,6 @@ def create_demo_users():
 def create_basic_roles():
     for role in RoleOptions:
         Role.create(name=role.value)
-
 
 
 with database.connection_context():

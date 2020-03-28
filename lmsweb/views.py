@@ -2,7 +2,6 @@ import json
 from datetime import datetime
 from functools import wraps
 import os
-import sys
 from typing import Optional
 from urllib.parse import urljoin, urlparse
 
@@ -17,7 +16,7 @@ from flask_login import (  # type: ignore
     login_user,
     logout_user,
 )
-from peewee import JOIN, fn  # type: ignore
+from peewee import fn  # type: ignore
 from playhouse.shortcuts import model_to_dict  # type: ignore
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
@@ -127,8 +126,11 @@ def logout():
 
 @webapp.route('/favicon.ico')
 def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    return send_from_directory(
+        os.path.join(webapp.root_path, 'static'),
+        'favicon.ico',
+        mimetype='image/vnd.microsoft.icon',
+    )
 
 
 @webapp.route('/')
@@ -148,10 +150,11 @@ def fetch_solutions(user_id):
         (Solution.exercise == Exercise.id)
         & (Solution.solver == user_id)
     )
-    solutions = (Exercise
+    solutions = (
+        Exercise
         .select(*fields)
         .join(Solution, 'LEFT OUTER', on=solutions_filter)
-        .where(Exercise.is_archived == False)
+        .where(Exercise.is_archived == False)  # NOQA: E712
     )
     return tuple(solutions.dicts())
 
@@ -270,7 +273,7 @@ def send(_exercise_id):
 @login_required
 def upload():
     user_id = current_user.id
-    user = User.get_or_none(User.id == user_id) # should never happen
+    user = User.get_or_none(User.id == user_id)  # should never happen
     if user is None:
         return fail(404, "user not found")
     if request.content_length > MAX_REQUEST_SIZE:
@@ -287,9 +290,9 @@ def upload():
     except (ValueError, json.JSONDecodeError):
         return fail(422, "Invalid file format - must be ipynb")
     if not exercises:
-        msg = "No exercises were found in the notebook" 
+        msg = "No exercises were found in the notebook"
         desc = "did you use Upload <number of exercise> ? (example: Upload 1)"
-        return fail(402, f'{msg}, {desc}') 
+        return fail(402, f'{msg}, {desc}')
     matches, misses, duplications = set(), set(), set()
     for exercise_id, code in exercises:
         exercise = Exercise.get_or_none(Exercise.id == exercise_id)

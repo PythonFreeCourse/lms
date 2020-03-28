@@ -1,6 +1,6 @@
 import re
-from io import StringIO
 from typing import Any, Iterator, Dict, Iterable, Tuple, List
+
 
 Notebook = Dict[str, Any]
 Cell = Dict[str, Any]
@@ -12,7 +12,8 @@ def is_code_cell(cell: Cell):
 
 
 def get_code_cells(notebook_data: Notebook) -> Iterator[Cell]:
-    return filter(is_code_cell, (cell for cell in notebook_data.get('cells', [])))
+    cells = (cell for cell in notebook_data.get('cells', []))
+    return filter(is_code_cell, cells)
 
 
 def get_exercise(cell: Cell) -> Tuple[str, str]:
@@ -25,8 +26,10 @@ def get_exercise(cell: Cell) -> Tuple[str, str]:
     return '', ''
 
 
-def get_exercises_from_code_cells(cells: Iterable[Cell]) -> Iterator[Tuple[str, str]]:
-    return filter((lambda x: x[0]), map(get_exercise, (c for c in cells)))
+def get_exercises_from_code_cells(
+        cells: Iterable[Cell]
+) -> Iterator[Tuple[str, str]]:
+    return filter(lambda x: x[0], map(get_exercise, (c for c in cells)))
 
 
 def extract_exercises(notebook_data: Notebook) -> Iterator[Tuple[str, str]]:
