@@ -150,7 +150,6 @@ class Solution(BaseModel):
 
     @classmethod
     def next_unchecked_of(cls, exercise_id):
-        # next_exercise =   # NOQA: E712, E501
         try:
             return cls.select().where(
                 (cls.is_checked == 0) & (exercise_id == cls.exercise)
