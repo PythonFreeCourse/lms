@@ -150,9 +150,11 @@ class Solution(BaseModel):
 
     @classmethod
     def next_unchecked_of(cls, exercise_id):
-        next_exercise = cls.is_checked == False & exercise_id == cls.exercise  # NOQA: E712, E501
+        # next_exercise =   # NOQA: E712, E501
         try:
-            return cls.select().where(next_exercise).dicts().get()
+            return cls.select().where(
+                (cls.is_checked == 0) & (exercise_id == cls.exercise)
+            ).dicts().get()
         except cls.DoesNotExist:
             return {}
 
