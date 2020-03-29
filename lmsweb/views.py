@@ -382,10 +382,9 @@ def _common_comments(exercise_id=None):
     Most common comments throughout all exercises.
     Filter by exercise id when specified.
     """
-    query = CommentText.select(CommentText.id, CommentText.text)
+    query = CommentText.select(CommentText.id, CommentText.text).join(Comment)
     if exercise_id is not None:
         query = (query
-                 .join(Comment)
                  .join(Solution)
                  .join(Exercise)
                  .where(Exercise.id == exercise_id)
