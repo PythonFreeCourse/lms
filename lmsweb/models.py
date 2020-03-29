@@ -142,10 +142,8 @@ class Solution(BaseModel):
     def next_unchecked(cls):
         unchecked_exercises = cls.select().where(cls.is_checked == False)  # NOQA: E712, E501
         try:
-            print('ku')
             return unchecked_exercises.dicts().get()
         except cls.DoesNotExist:
-            print('shi')
             return {}
 
     @classmethod

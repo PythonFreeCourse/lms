@@ -157,7 +157,7 @@ function trackTextArea(lineNumber) {
   const target = `textarea[data-line='${lineNumber}']`;
   const popoverElement = `.grader-add[data-line='${lineNumber}']`;
   $(target).keypress((e) => {
-    if (e.ctrlKey && e.keyCode === 13) {
+    if ((event.keyCode == 10 || event.keyCode == 13) && event.ctrlKey) {
       sendNewComment(window.solutionId, lineNumber, e.target.value);
       $(popoverElement).popover('hide');
     }

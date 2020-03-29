@@ -14,13 +14,13 @@
         <div class="left-side">
           <div class="exercise-send">
             {%- if exercise['is_checked'] is none %}
-            {% set details = {'page': 'send', 'icon': 'upload', 'text': 'שלח', 'css': 'send'} %}
+            {% set details = {'page': 'send', 'icon': 'upload', 'text': 'שלח', 'css': 'send', 'page_id': exercise['exercise_id']} %}
             {% elif not exercise['is_checked'] %}
-            {% set details = {'page': 'view', 'icon': 'eye', 'text': 'הצצה', 'css': 'view'} %}
+            {% set details = {'page': 'view', 'icon': 'eye', 'text': 'הצצה', 'css': 'view', 'page_id': exercise['solution_id']} %}
             {% else %}
-            {% set details = {'page': 'view', 'icon': 'circle-check-o', 'text': 'לבדיקה', 'css': 'checked'} %}
+            {% set details = {'page': 'view', 'icon': 'circle-check-o', 'text': 'לבדיקה', 'css': 'checked', 'page_id': exercise['solution_id']} %}
             {% endif -%}
-            <a class="our-button go-{{ details['css'] }}" href="{{ details['page'] }}/{{ exercise['solution_id'] }}">
+            <a class="our-button go-{{ details['css'] }}" href="{{ details['page'] }}/{{ details['page_id'] }}">
               <i class="fa fa-{{ details['icon'] }}" aria-hidden="true"></i> 
               {{ details['text'] }}
             </a>

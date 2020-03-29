@@ -147,6 +147,12 @@ div#code-view {
   color: #1f2d3d;
 }
 
+
+#back-to-exercises {
+  width: 100%;
+  margin-top: 5vh;
+}
+
 .our-button {
   border-radius: 8px;
   display: block;

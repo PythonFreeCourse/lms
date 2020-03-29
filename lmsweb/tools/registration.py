@@ -1,3 +1,6 @@
+import sys; sys.path.append('/home/yammesicka')
+
+
 import csv
 import logging
 import os
@@ -13,10 +16,8 @@ import requests
 
 _logger = logging.getLogger(__name__)
 
-
 class UserToCreate(typing.NamedTuple):
-    first_name: str
-    last_name: str
+    name: str
     email: str
     password: str
 
@@ -48,11 +49,11 @@ class UserRegistrationCreator:
         with open(file_path, 'r') as file_reader:
             csv_records = csv.DictReader(file_reader)
 
-        users = []
-        for record in csv_records:
-            if 'password' not in record:
-                record['password'] = cls._random_password()
-            users.append(UserToCreate(**record))
+            users = []
+            for record in csv_records:
+                if 'password' not in record:
+                    record['password'] = cls._random_password()
+                users.append(UserToCreate(**record))
 
         return cls(users)
 
@@ -80,7 +81,7 @@ class UserRegistrationCreator:
             models.User.mail_address.name: user.email,
             models.User.username.name: user.email,
         }, defaults={
-            models.User.fullname.name: f'{user.first_name} {user.last_name}',
+            models.User.fullname.name: f'{user.name}',
             models.User.role.name: models.Role.get_student_role(),
             models.User.password.name: user.password,
         })
@@ -93,10 +94,11 @@ class UserRegistrationCreator:
             response = self._session.post(
                 url=url,
                 data={
-                    'from': f'no-reply@{config.MAILGUN_DOMAIN}',
+                    'from': f'lms@{config.MAILGUN_DOMAIN}',
                     'to': user,
-                    'subject': 'Learn python - registration email',
-                    'text': text},
+                    'subject': 'Learn Python - מערכת הגשת התרגילים',
+                    'html': text
+                },
                 auth=('api', config.MAILGUN_API_KEY))
             response.raise_for_status()
         except Exception:
@@ -108,13 +110,23 @@ class UserRegistrationCreator:
 
     @staticmethod
     def _build_user_text(user: UserToCreate) -> str:
-        return ('Dear Student.\n A profile for login to the study program'
-                ' created just for you!\nYour initial login details:\n'
-                f'username: {user.email}\npassword: {user.password}\n'
-                'You should change your password as soon as possible. '
-                'big snakes Out there to get your password!.\n'
-                f'logging address is: {config.SERVER_ADDRESS}')
+        details = {
+            'username': user.email,
+            'password': user.password,
+            'url': config.SERVER_ADDRESS,
+        }
+        msg = config.MAIL_WELCOME_MESSAGE
+        for k, v in details.items():
+            msg = msg.replace(f'@@{k}@@', v)
+        return msg
 
     @classmethod
     def _random_password(cls) -> string:
-        return ''.join(random.choices(string.printable.strip(), k=12))
+        return ''.join(random.choices(string.printable.strip()[:65], k=12))
+
+
+if __name__ == '__main__':
+    registration = UserRegistrationCreator.from_csv_file(config.USERS_CSV)
+    print(registration._users_to_create)
+    registration.run_registration()
+    registration.dump_failed_users_to_csv(config.ERRORS_CSV)
