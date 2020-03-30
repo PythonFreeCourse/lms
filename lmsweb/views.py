@@ -179,6 +179,7 @@ def fetch_solutions(user_id):
         .select(*fields)
         .join(Solution, 'LEFT OUTER', on=solutions_filter)
         .where(Exercise.is_archived == False)  # NOQA: E712
+        .order_by(Exercise.id)
     )
     return tuple(solutions.dicts())
 

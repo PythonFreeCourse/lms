@@ -1,0 +1,34 @@
+
+{% extends 'base.html' %}
+
+{% block page_content %}
+<div id="page-status">
+  <div id="status-head">
+    <h1>חמ"ל תרגילים</h1>
+    <table class="table">
+      <thead>
+	<tr>
+          <th scope="col">#</th>
+          <th scope="col">שם</th>
+          <th scope="col">נבדקו</th>
+          <th scope="col">נפתרו</th>
+          <th scope="col">באחוזים</th>
+          <th scope="col">מדד</th>
+	</tr>
+      </thead>
+      <tbody>
+    {%- for exercise in exercises %}
+        <tr>
+    	  <th scope="row">{{ exercise['id'] }}</th>
+          <td><a href="/check/{{ exercise['id'] }}">{{ exercise['name'] }}</a></td>
+          <td>{{ exercise['checked'] }}</td>
+          <td>{{ exercise['submitted'] }}</td>
+          <td>{{ (exercise['checked'] * 100 / exercise['submitted']) | round(2, 'floor') }}%</td>
+	  <td><progress dir="ltr" value="{{ exercise['checked'] }}" max="{{ exercise['submitted'] }}"></progress></td>
+	</tr>
+    {% endfor -%}
+    </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
