@@ -12,7 +12,7 @@ DB_HOST = os.getenv('DB_HOST', '127.0.0.1')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_AUTOROLLBACK = os.getenv('DB_AUTOROLLBACK')
 
-if os.getenv("LOCAL_SETUP"):
+if os.getenv('LOCAL_SETUP'):
     database = SqliteDatabase('db.sqlite')
 else:
     db_config = {

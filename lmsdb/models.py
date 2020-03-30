@@ -4,8 +4,8 @@ import secrets
 import string
 from datetime import datetime
 
-from flask_login import UserMixin, current_user  # type: ignore
-from peewee import (  # type: ignore
+from flask_login import UserMixin
+from peewee import (  # noqa: I201
     BooleanField,
     CharField,
     Check,
@@ -13,9 +13,10 @@ from peewee import (  # type: ignore
     ForeignKeyField,
     IntegerField,
     ManyToManyField,
-    TextField,
-)
-from playhouse.signals import Model, pre_save  # type: ignore
+    TextField)
+
+from playhouse.signals import Model, pre_save
+
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from . import database_config
@@ -60,7 +61,7 @@ class Role(BaseModel):
     @classmethod
     def by_name(cls, name):
         if name.startswith('_'):
-            raise ValueError("That could lead to a security issue.")
+            raise ValueError('That could lead to a security issue.')
         role_name = getattr(RoleOptions, name.upper()).value
         return cls.get(name=role_name)
 
@@ -158,7 +159,7 @@ class Solution(BaseModel):
     def next_unchecked_of(cls, exercise_id):
         try:
             return cls.select().where(
-                (cls.is_checked == 0) & (exercise_id == cls.exercise)
+                (cls.is_checked == 0) & (exercise_id == cls.exercise),
             ).dicts().get()
         except cls.DoesNotExist:
             return {}
@@ -193,7 +194,7 @@ def generate_password():
 
 
 def create_demo_users():
-    print("First run! Here are some users to get start with:")
+    print('First run! Here are some users to get start with:')  # noqa: T001
     fields = ['username', 'fullname', 'mail_address', 'role']
     student_role = Role.by_name('Student')
     admin_role = Role.by_name('Administrator')
@@ -206,7 +207,7 @@ def create_demo_users():
         user = dict(zip(fields, entity))
         password = generate_password()
         User.create(**user, password=password)
-        print(f"User: {user['username']}, Password: {password}")
+        print(f"User: {user['username']}, Password: {password}")  # noqa: T001
 
 
 def create_basic_roles():

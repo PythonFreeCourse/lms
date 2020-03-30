@@ -1,11 +1,9 @@
-from lmsdb.models import (
-    User, database, ALL_MODELS, Role, create_basic_roles, create_demo_users
-)
+from lmsdb import models
 
-with database.connection_context():
-    database.create_tables(ALL_MODELS, safe=True)
+with models.database.connection_context():
+    models.database.create_tables(models.ALL_MODELS, safe=True)
 
-    if Role.select().count() == 0:
-        create_basic_roles()
-    if User.select().count() == 0:
-        create_demo_users()
+    if models.Role.select().count() == 0:
+        models.create_basic_roles()
+    if models.User.select().count() == 0:
+        models.create_demo_users()
