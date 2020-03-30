@@ -1,3 +1,5 @@
+celery
+ipython
 flake8
 flake8-alfred
 flake8-bandit
