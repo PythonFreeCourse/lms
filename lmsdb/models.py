@@ -92,12 +92,12 @@ class User(UserMixin, BaseModel):
         return check_password_hash(self.password, password)
 
     @classmethod
-    def get_system_user(cls) -> "User":
+    def get_system_user(cls) -> 'User':
         instance, _ = cls.get_or_create(**{
-            cls.mail_address.name: "linter-checks@python.guru",
-            User.username.name: "linter-checks@python.guru",
+            cls.mail_address.name: 'linter-checks@python.guru',
+            User.username.name: 'linter-checks@python.guru',
         }, defaults={
-            User.fullname.name: "Checker guru",
+            User.fullname.name: 'Checker guru',
             User.role.name: Role.get_staff_role(),
             User.password.name: cls.random_password(),
         })

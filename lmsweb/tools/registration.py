@@ -1,12 +1,11 @@
 import csv
 import logging
 import os
-import random
-import string
 import typing
 
-from lmsweb import config
 from lmsdb import models
+
+from lmsweb import config
 
 import requests
 
@@ -33,6 +32,14 @@ class UserRegistrationCreator:
     def __init__(self, users_to_create: typing.Sequence[UserToCreate]):
         self._users_to_create = users_to_create
         self._failed_users: typing.List[UserToCreate] = []
+
+    @property
+    def users_to_create(self):
+        return self._users_to_create
+
+    @property
+    def failed_users(self):
+        return self._failed_users
 
     @classmethod
     def from_csv_file(cls, file_path: str) -> 'UserRegistrationCreator':
@@ -95,7 +102,7 @@ class UserRegistrationCreator:
                     'from': f'lms@{config.MAILGUN_DOMAIN}',
                     'to': user,
                     'subject': 'Learn Python - מערכת הגשת התרגילים',
-                    'html': text
+                    'html': text,
                 },
                 auth=('api', config.MAILGUN_API_KEY))
             response.raise_for_status()
@@ -121,6 +128,6 @@ class UserRegistrationCreator:
 
 if __name__ == '__main__':
     registration = UserRegistrationCreator.from_csv_file(config.USERS_CSV)
-    print(registration._users_to_create)
+    print(registration.users_to_create)  # noqa: T001
     registration.run_registration()
     registration.dump_failed_users_to_csv(config.ERRORS_CSV)

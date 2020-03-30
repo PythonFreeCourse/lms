@@ -10,3 +10,4 @@ RUN chown -R app-user:app-user /opt/lms
 USER app-user
 COPY . /opt/lms/.
 WORKDIR /opt/lms
+ENV PYTHONPATH /opt/lms:$PYTHONPATH

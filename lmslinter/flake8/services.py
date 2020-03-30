@@ -1,5 +1,5 @@
-import typing
 import tempfile
+import typing
 
 from flake8.main import application
 
@@ -15,7 +15,7 @@ class PyFlakeResponse(typing.NamedTuple):
 
 
 FLAKE_ERRORS_MAPPING = {
-    'Q000': 'השתמש בצוקואים בודדים ולא בגרשיים'
+    'Q000': 'השתמש בצוקואים בודדים ולא בגרשיים',
 }
 
 FLAKE_SKIP_ERRORS = (
@@ -26,7 +26,7 @@ FLAKE_SKIP_ERRORS = (
 
 class PyFlakeChecker:
     def __init__(self, solution_check_pk: str, logger):
-        self.solution_check_pk = solution_check_pk
+        self.solution_id = solution_check_pk
         self._app = None
         self._solution = None
         self._logger = logger
@@ -34,7 +34,7 @@ class PyFlakeChecker:
     def initialize(self):
         self._app = application.Application()
         self._app.initialize(argv=[])
-        self._solution = models.Solution.get_by_id(self.solution_check_pk)
+        self._solution = models.Solution.get_by_id(self.solution_id)
 
     @property
     def app(self) -> application.Application:
@@ -45,35 +45,38 @@ class PyFlakeChecker:
         return self._solution
 
     def run_check(self):
-        self._logger.info("checks errors on solution %s", self.solution_check_pk)
+        self._logger.info('checks errors on solution %s', self.solution_id)
         errors = self._get_errors_from_solution()
 
         for error in errors:
             if error.error_code in FLAKE_SKIP_ERRORS:
-                self._logger.info("Skipping error %s to solution %s", error, self.solution_check_pk)
+                self._logger.info(
+                    'Skipping error %s to solution %s',
+                    error, self.solution_id)
                 continue
 
-            self._logger.info("Adding error %s to solution %s", error,  self.solution_check_pk)
-            text = FLAKE_ERRORS_MAPPING.get(error.error_code, f"{error.error_code}-{error.text}")
+            self._logger.info('Adding error %s to solution %s',
+                              error, self.solution_id)
+            text = FLAKE_ERRORS_MAPPING.get(
+                error.error_code, f'{error.error_code}-{error.text}')
             comment, _ = models.CommentText.get_or_create(text=text)
             models.Comment.create(
                 commenter=models.User.get_system_user(),
                 line_number=error.line_number,
                 comment=comment,
-                solution=self.solution
-            )
+                solution=self.solution)
 
     def _get_errors_from_solution(self) -> typing.List[PyFlakeResponse]:
         errors = []
         code_content = self.solution.code
         index_of_check = 0
-        with tempfile.NamedTemporaryFile("w") as temp_file:
+        with tempfile.NamedTemporaryFile('w') as temp_file:
             temp_file.write(code_content)
             temp_file.flush()
 
             self.app.run_checks([temp_file.name])
-            raw_results = self.app.file_checker_manager.checkers[index_of_check].results
-            for result in raw_results:
-                # yes, a library of types cannot use named tuples, thanks flake8
+            results = self.app.file_checker_manager.checkers[
+                index_of_check].results
+            for result in results:
                 errors.append(PyFlakeResponse(*result))
         return errors
