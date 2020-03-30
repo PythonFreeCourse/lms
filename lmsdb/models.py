@@ -215,4 +215,4 @@ def create_basic_roles():
         Role.create(name=role.value)
 
 
-ALL_MODELS = (User, Exercise, CommentText, Solution, Role, Comment)
+ALL_MODELS = BaseModel.__subclasses__()

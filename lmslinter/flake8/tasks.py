@@ -19,8 +19,3 @@ def run_flake8_on_solution(solution_pk):
         checker.run_check()
     except Exception:
         _logger.exception('Failed to check solution %s', solution_pk)
-
-
-@app.task
-def foo():
-    _logger.info('bar')
