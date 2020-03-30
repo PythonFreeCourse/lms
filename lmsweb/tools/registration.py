@@ -5,8 +5,8 @@ import random
 import string
 import typing
 
-from lms.lmsweb import config
-from lms.lmsweb import models
+from lmsweb import config
+from lmsdb import models
 
 import requests
 
@@ -50,7 +50,7 @@ class UserRegistrationCreator:
             users = []
             for record in csv_records:
                 if 'password' not in record:
-                    record['password'] = cls._random_password()
+                    record['password'] = models.User.random_password()
                 users.append(UserToCreate(**record))
 
         return cls(users)
@@ -117,10 +117,6 @@ class UserRegistrationCreator:
         for k, v in details.items():
             msg = msg.replace(f'@@{k}@@', v)
         return msg
-
-    @classmethod
-    def _random_password(cls) -> string:
-        return ''.join(random.choices(string.printable.strip()[:65], k=12))
 
 
 if __name__ == '__main__':

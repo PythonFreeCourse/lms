@@ -1,10 +1,9 @@
 import enum
+import random
 import secrets
 import string
 from datetime import datetime
 
-from flask_admin import Admin, AdminIndexView  # type: ignore
-from flask_admin.contrib.peewee import ModelView  # type: ignore
 from flask_login import UserMixin, current_user  # type: ignore
 from peewee import (  # type: ignore
     BooleanField,
@@ -19,8 +18,10 @@ from peewee import (  # type: ignore
 from playhouse.signals import Model, pre_save  # type: ignore
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from lmsweb import webapp
-from . import database
+from . import database_config
+
+
+database = database_config.get_db_instance()
 
 
 class RoleOptions(enum.Enum):
@@ -50,9 +51,11 @@ class Role(BaseModel):
 
     @classmethod
     def get_student_role(cls):
-        return cls.get(**{
-            Role.name.name: RoleOptions.STUDENT.value
-        })
+        return cls.get(Role.name == RoleOptions.STUDENT.value)
+
+    @classmethod
+    def get_staff_role(cls):
+        return cls.get(Role.name == RoleOptions.STAFF.value)
 
     @classmethod
     def by_name(cls, name):
@@ -88,6 +91,22 @@ class User(UserMixin, BaseModel):
     def is_password_valid(self, password):
         return check_password_hash(self.password, password)
 
+    @classmethod
+    def get_system_user(cls) -> "User":
+        instance, _ = cls.get_or_create(**{
+            cls.mail_address.name: "linter-checks@python.guru",
+            User.username.name: "linter-checks@python.guru",
+        }, defaults={
+            User.fullname.name: "Checker guru",
+            User.role.name: Role.get_staff_role(),
+            User.password.name: cls.random_password(),
+        })
+        return instance
+
+    @classmethod
+    def random_password(cls) -> string:
+        return ''.join(random.choices(string.printable.strip()[:65], k=12))
+
     def __str__(self):
         return f'{self.username} - {self.fullname}'
 
@@ -122,6 +141,10 @@ class Solution(BaseModel):
     )
     submission_timestamp = DateTimeField()
     json_data_str = TextField()
+
+    @property
+    def code(self):
+        return self.json_data_str
 
     @classmethod
     def next_unchecked(cls):

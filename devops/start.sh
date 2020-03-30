@@ -3,4 +3,5 @@
 SCRIPT_FILE_PATH=$(readlink -f "${0}")
 SCRIPT_FOLDER=$(dirname "${SCRIPT_FILE_PATH}")
 
-docker-compose -f "${SCRIPT_FOLDER}/lms.yaml" up -d
+docker-compose -p lms -f "${SCRIPT_FOLDER}/lms.yaml" down
+docker-compose -p lms -f "${SCRIPT_FOLDER}/lms.yaml" up -d

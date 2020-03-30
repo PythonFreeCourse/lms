@@ -58,7 +58,7 @@ services:
 
   http:
     image: lms:latest
-    command: gunicorn --bind 0.0.0.0:80 --workers 5 lmsweb
+    command: gunicorn --bind 0.0.0.0:8080 --workers 5 lmsweb
     volumes:
       - ../lmsweb:/opt/lms/lmsweb
       - ../lmsdb:/opt/lms/lmsdb
@@ -80,7 +80,7 @@ services:
     links:
       - db
     ports:
-      - 80:80
+      - 80:8080
     depends_on:
       - db
       - rabbitmq

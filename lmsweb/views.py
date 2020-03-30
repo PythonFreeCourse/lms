@@ -9,7 +9,7 @@ from flask import (
     abort, jsonify, render_template, request,
     send_from_directory, url_for,
 )
-from flask_admin import AdminIndexView
+from flask_admin import AdminIndexView, Admin
 from flask_admin.contrib.peewee import ModelView  # type: ignore
 from flask_login import (  # type: ignore
     LoginManager,
@@ -23,10 +23,11 @@ from playhouse.shortcuts import model_to_dict  # type: ignore
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
+from lmslinter.flake8 import tasks as flake8_tasks
 from lmsweb import webapp
 from lmsdb.models import (
     Comment, CommentText, Exercise, RoleOptions, Solution, User, database,
-    ALL_MODELS, Admin, Role, create_basic_roles, create_demo_users
+    ALL_MODELS
 )
 from lmsweb.tools.notebook_extractor import extract_exercises
 
@@ -296,11 +297,11 @@ def send(_exercise_id):
     return render_template('upload.html')
 
 
-
 @webapp.route('/send', methods=['GET'])
 @login_required
 def send_():
     return render_template('upload.html')
+
 
 @webapp.route('/upload', methods=['POST'])
 @login_required
@@ -340,6 +341,7 @@ def upload():
                 'json_data_str': code,
             }
         )
+        flake8_tasks.run_flake8_on_solution.apply_async(args=(solution.id,))
         if created:
             matches.add(exercise_id)
         else:
@@ -456,20 +458,12 @@ class AdminModelView(AccessibleByAdminMixin, ModelView):
     pass
 
 
-with database.connection_context():
-    admin = Admin(
-        webapp,
-        name='LMS',
-        template_mode='bootstrap3',
-        index_view=MyAdminIndexView(),
-    )
+admin = Admin(
+    webapp,
+    name='LMS',
+    template_mode='bootstrap3',
+    index_view=MyAdminIndexView(),
+)
 
-    for m in ALL_MODELS:
-        admin.add_view(AdminModelView(m))
-
-    database.create_tables(ALL_MODELS, safe=True)
-
-    if Role.select().count() == 0:
-        create_basic_roles()
-    if User.select().count() == 0:
-        create_demo_users()
+for m in ALL_MODELS:
+    admin.add_view(AdminModelView(m))
