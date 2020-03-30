@@ -16,7 +16,7 @@ from flask_login import (  # type: ignore
     login_user,
     logout_user,
 )
-from peewee import fn  # type: ignore
+from peewee import Case, fn  # type: ignore
 from playhouse.shortcuts import model_to_dict  # type: ignore
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
@@ -137,6 +137,30 @@ def favicon():
 @login_required
 def main():
     return redirect(url_for('exercises_page'))
+
+
+@webapp.route('/status')
+@managers_only
+@login_required
+def status():
+    fields = [
+        Exercise.id,
+        Exercise.subject.alias('name'),
+        fn.Count(Solution.id).alias('submitted'),
+        fn.Sum(Case(Solution.is_checked, ((True, 1),), 0)).alias('checked'),
+    ]
+    solutions = (
+        Exercise
+        .select(*fields)
+        .join(Solution, 'LEFT OUTER', on=(Solution.exercise == Exercise.id))
+        .where(Exercise.is_archived == False)  # NOQA: E712
+        .group_by(Exercise.subject, Exercise.id)
+        .order_by(Exercise.id)
+    )
+    return render_template(
+        'status.html',
+        exercises=solutions,
+    )
 
 
 def fetch_solutions(user_id):
@@ -268,6 +292,12 @@ def comment():
 def send(_exercise_id):
     return render_template('upload.html')
 
+
+
+@webapp.route('/send', methods=['GET'])
+@login_required
+def send_():
+    return render_template('upload.html')
 
 @webapp.route('/upload', methods=['POST'])
 @login_required

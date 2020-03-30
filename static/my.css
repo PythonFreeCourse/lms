@@ -359,3 +359,26 @@ code > .grader-add {
   right: 1em;
   z-index: 100;
 }
+
+
+/* Status page */
+#page-status {
+  direction: rtl;
+  text-align: right;
+}
+
+#status-head {
+  display: flex;
+  flex-direction: column;
+  justify-items: center;
+  align-items: center;
+}
+
+#page-status table {
+  width: 80vw;
+}
+
+#page-status h1 {
+  margin: 5vh 0;
+  text-align: center;
+}
