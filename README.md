@@ -26,6 +26,8 @@ flask run
 
 ## Full setup
 ```bash
+Note: you should have docker + docker-compose installed on your computer
+
 git clone https://github.com/PythonFreeCourse/lms
 cd lms
 mv lmsweb/config.py.example lmsweb/config.py
