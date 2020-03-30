@@ -14,14 +14,13 @@ from peewee import (  # type: ignore
     ForeignKeyField,
     IntegerField,
     ManyToManyField,
-    PostgresqlDatabase,
-    SqliteDatabase,
     TextField,
 )
 from playhouse.signals import Model, pre_save  # type: ignore
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from lms.lmsweb import webapp
+from lmsweb import webapp
+from . import database
 
 
 class RoleOptions(enum.Enum):
@@ -31,20 +30,6 @@ class RoleOptions(enum.Enum):
 
     def __str__(self):
         return self.value
-
-
-if webapp.debug:
-    database = SqliteDatabase('db.sqlite')
-elif webapp.env == 'production':
-    db_config = {
-        'database': webapp.config['DB_NAME'],
-        'user': webapp.config['DB_USER'],
-        'port': webapp.config['DB_PORT'],
-        'host': webapp.config['DB_HOST_IP'],
-        'password': webapp.config['DB_PASSWORD'],
-        'autorollback': webapp.config['DB_AUTOROLLBACK'],
-    }
-    database = PostgresqlDatabase(**db_config)
 
 
 class BaseModel(Model):
@@ -177,22 +162,6 @@ class Comment(BaseModel):
         ).dicts())
 
 
-class AccessibleByAdminMixin:
-    def is_accessible(self):
-        return (
-            current_user.is_authenticated
-            and current_user.role.is_administrator
-        )
-
-
-class MyAdminIndexView(AccessibleByAdminMixin, AdminIndexView):
-    pass
-
-
-class AdminModelView(AccessibleByAdminMixin, ModelView):
-    pass
-
-
 def generate_password():
     randomizer = secrets.SystemRandom()
     length = randomizer.randrange(9, 16)
@@ -222,21 +191,4 @@ def create_basic_roles():
         Role.create(name=role.value)
 
 
-with database.connection_context():
-    admin = Admin(
-        webapp,
-        name='LMS',
-        template_mode='bootstrap3',
-        index_view=MyAdminIndexView(),
-    )
-
-    ALL_MODELS = (User, Exercise, CommentText, Solution, Role, Comment)
-    for m in ALL_MODELS:
-        admin.add_view(AdminModelView(m))
-
-    database.create_tables(ALL_MODELS, safe=True)
-
-    if Role.select().count() == 0:
-        create_basic_roles()
-    if User.select().count() == 0:
-        create_demo_users()
+ALL_MODELS = (User, Exercise, CommentText, Solution, Role, Comment)

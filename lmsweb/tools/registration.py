@@ -1,6 +1,3 @@
-import sys; sys.path.append('/home/yammesicka')
-
-
 import csv
 import logging
 import os
@@ -15,6 +12,7 @@ import requests
 
 
 _logger = logging.getLogger(__name__)
+
 
 class UserToCreate(typing.NamedTuple):
     name: str

@@ -9,6 +9,8 @@ from flask import (
     abort, jsonify, render_template, request,
     send_from_directory, url_for,
 )
+from flask_admin import AdminIndexView
+from flask_admin.contrib.peewee import ModelView  # type: ignore
 from flask_login import (  # type: ignore
     LoginManager,
     current_user,
@@ -21,11 +23,12 @@ from playhouse.shortcuts import model_to_dict  # type: ignore
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
-from lms.lmsweb import webapp
-from lms.lmsweb.models import (
+from lmsweb import webapp
+from lmsdb.models import (
     Comment, CommentText, Exercise, RoleOptions, Solution, User, database,
+    ALL_MODELS, Admin, Role, create_basic_roles, create_demo_users
 )
-from lms.lmsweb.tools.notebook_extractor import extract_exercises
+from lmsweb.tools.notebook_extractor import extract_exercises
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
@@ -435,3 +438,38 @@ def _common_comments(exercise_id=None):
 @managers_only
 def common_comments(exercise_id=None):
     return jsonify(_common_comments(exercise_id=exercise_id))
+
+
+class AccessibleByAdminMixin:
+    def is_accessible(self):
+        return (
+            current_user.is_authenticated
+            and current_user.role.is_administrator
+        )
+
+
+class MyAdminIndexView(AccessibleByAdminMixin, AdminIndexView):
+    pass
+
+
+class AdminModelView(AccessibleByAdminMixin, ModelView):
+    pass
+
+
+with database.connection_context():
+    admin = Admin(
+        webapp,
+        name='LMS',
+        template_mode='bootstrap3',
+        index_view=MyAdminIndexView(),
+    )
+
+    for m in ALL_MODELS:
+        admin.add_view(AdminModelView(m))
+
+    database.create_tables(ALL_MODELS, safe=True)
+
+    if Role.select().count() == 0:
+        create_basic_roles()
+    if User.select().count() == 0:
+        create_demo_users()
