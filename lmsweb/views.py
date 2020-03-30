@@ -333,13 +333,10 @@ def upload():
         if exercise is None:
             misses.add(exercise_id)
             continue
-        solution, created = Solution.get_or_create(
+        solution, created = Solution.create_solution(
             exercise=exercise,
             solver=user,
-            defaults={
-                'submission_timestamp': datetime.now(),
-                'json_data_str': code,
-            }
+            json_data_str=code,
         )
         flake8_tasks.run_flake8_on_solution.apply_async(args=(solution.id,))
         if created:

@@ -148,6 +148,16 @@ class Solution(BaseModel):
         return self.json_data_str
 
     @classmethod
+    def create_solution(cls, exercise: Exercise, solver: User, json_data_str=""):
+        return cls.get_or_create(**{
+            cls.exercise.name: exercise,
+            cls.solver.name: solver
+        }, defaults={
+            cls.submission_timestamp.name: datetime.now(),
+            cls.json_data_str.name: json_data_str
+        })
+
+    @classmethod
     def next_unchecked(cls):
         unchecked_exercises = cls.select().where(cls.is_checked == False)  # NOQA: E712, E501
         try:
