@@ -18,6 +18,11 @@ FLAKE_ERRORS_MAPPING = {
     'Q000': 'השתמש בצוקואים בודדים ולא בגרשיים'
 }
 
+FLAKE_SKIP_ERRORS = (
+    'T001',  # print found
+    'W292',  # no new line in the end of the code
+)
+
 
 class PyFlakeChecker:
     def __init__(self, solution_check_pk: str, logger):
@@ -44,6 +49,10 @@ class PyFlakeChecker:
         errors = self._get_errors_from_solution()
 
         for error in errors:
+            if error.error_code in FLAKE_SKIP_ERRORS:
+                self._logger.info("Skipping error %s to solution %s", error, self.solution_check_pk)
+                continue
+
             self._logger.info("Adding error %s to solution %s", error,  self.solution_check_pk)
             text = FLAKE_ERRORS_MAPPING.get(error.error_code, f"{error.error_code}-{error.text}")
             comment, _ = models.CommentText.get_or_create(text=text)
