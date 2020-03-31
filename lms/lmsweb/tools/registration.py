@@ -3,9 +3,8 @@ import logging
 import os
 import typing
 
-from lmsdb import models
-
-from lmsweb import config
+from lms.lmsdb import models
+from lms.lmsweb import config
 
 import requests
 
