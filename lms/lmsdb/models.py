@@ -5,8 +5,7 @@ import string
 from datetime import datetime
 
 from flask_login import UserMixin
-
-from peewee import (
+from peewee import (  # noqa: I201
     BooleanField,
     CharField,
     Check,
@@ -16,10 +15,11 @@ from peewee import (
     ManyToManyField,
     TextField,
 )
-
-from playhouse.signals import Model, pre_save
-
-from werkzeug.security import check_password_hash, generate_password_hash
+from playhouse.signals import Model, pre_save  # noqa: I201
+from werkzeug.security import (  # noqa: I201
+    check_password_hash,
+    generate_password_hash,
+)
 
 from lms.lmsdb import database_config  # noqa: I100
 
