@@ -1,7 +1,7 @@
 import datetime
 
 from lmsdb.models import (
-    ALL_MODELS, Role, RoleOptions, User, Exercise, CommentText, Solution
+    ALL_MODELS, CommentText, Exercise, Role, RoleOptions, Solution, User,
 )
 
 from peewee import SqliteDatabase

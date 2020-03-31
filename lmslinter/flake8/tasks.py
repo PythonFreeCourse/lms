@@ -11,7 +11,7 @@ _logger.setLevel(logging.INFO)
 
 
 @app.task
-def run_flake8_on_solution(solution_pk):
+def run_flake8_on_solution(solution_pk: str) -> None:
     try:
         _logger.info('Start running check solution %s', solution_pk)
         checker = services.PyFlakeChecker(solution_pk, _logger)

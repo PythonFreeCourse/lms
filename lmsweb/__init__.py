@@ -22,4 +22,5 @@ from lmsdb import models  # NOQA: F401
 from lmsweb import views  # NOQA: F401
 
 
+# gunicorn search for application
 application = webapp

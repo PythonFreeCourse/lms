@@ -1,3 +1,4 @@
+import logging
 import tempfile
 import typing
 
@@ -25,7 +26,7 @@ FLAKE_SKIP_ERRORS = (
 
 
 class PyFlakeChecker:
-    def __init__(self, solution_check_pk: str, logger):
+    def __init__(self, solution_check_pk: str, logger: logging.Logger):
         self.solution_id = solution_check_pk
         self._app = None
         self._solution = None
@@ -64,7 +65,8 @@ class PyFlakeChecker:
                 commenter=models.User.get_system_user(),
                 line_number=error.line_number,
                 comment=comment,
-                solution=self.solution)
+                solution=self.solution,
+            )
 
     def _get_errors_from_solution(self) -> typing.List[PyFlakeResponse]:
         errors = []

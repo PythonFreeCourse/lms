@@ -5,7 +5,8 @@ import string
 from datetime import datetime
 
 from flask_login import UserMixin
-from peewee import (  # noqa: I201
+
+from peewee import (
     BooleanField,
     CharField,
     Check,
@@ -13,13 +14,14 @@ from peewee import (  # noqa: I201
     ForeignKeyField,
     IntegerField,
     ManyToManyField,
-    TextField)
+    TextField,
+)
 
 from playhouse.signals import Model, pre_save
 
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from . import database_config
+from lmsdb import database_config  # noqa: I100
 
 
 database = database_config.get_db_instance()
@@ -148,13 +150,17 @@ class Solution(BaseModel):
         return self.json_data_str
 
     @classmethod
-    def create_solution(cls, exercise: Exercise, solver: User, json_data_str=""):
+    def create_solution(
+            cls,
+            exercise: Exercise,
+            solver: User,
+            json_data_str=''):
         return cls.get_or_create(**{
             cls.exercise.name: exercise,
-            cls.solver.name: solver
+            cls.solver.name: solver,
         }, defaults={
             cls.submission_timestamp.name: datetime.now(),
-            cls.json_data_str.name: json_data_str
+            cls.json_data_str.name: json_data_str,
         })
 
     @classmethod
