@@ -130,6 +130,8 @@ class Exercise(BaseModel):
     date = DateTimeField()
     users = ManyToManyField(User, backref='exercises')
     is_archived = BooleanField()
+    notebook_num = IntegerField(default=0)
+    order = IntegerField(default=0)
 
     def __str__(self):
         return self.subject
@@ -204,6 +206,7 @@ class Comment(BaseModel):
     line_number = IntegerField(constraints=[Check('line_number >= 1')])
     comment = ForeignKeyField(CommentText)
     solution = ForeignKeyField(Solution)
+    is_auto = BooleanField(default=False)
 
     @classmethod
     def by_solution(cls, solution_id: int):
