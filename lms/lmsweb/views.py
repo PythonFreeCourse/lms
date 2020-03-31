@@ -345,7 +345,10 @@ def upload():
         else:
             solution.json_data_str = code
             solution.submission_timestamp = datetime.now()
+            solution.is_checked = False
             solution.save()
+            old_comments = Comment.delete().where(Comment.solution == solution)
+            old_comments.execute()
             duplications.add(exercise_id)
 
     valid = matches - duplications
