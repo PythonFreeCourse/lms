@@ -2,6 +2,7 @@ const COMMENTED_LINE_COLOR = '#fac4c3';
 
 function markLine(target, color) {
   if (target.dataset && target.dataset.marked === 'true') { return; }
+  if (target.dataset && target.dataset.vimbackground === 'true') { return; }
   let parsedColor = color;
   if (color === true) {
     parsedColor = COMMENTED_LINE_COLOR;
@@ -48,14 +49,6 @@ function addCommentToLine(line, commentData) {
 }
 
 function treatComments(comments) {
-  /*
-  comments = [
-    { id: 1, line: 5, text: 'הרצל אל תאכל כרובית בפיתה' },
-    { id: 2, line: 5, text: `הרצל שוב פעם אכלת כרובית בפיתה.
-                             זו פעם מיליון שאני אומרת לך לא
-                             לאכול כרובית בפיתה!!!` },
-    { id: 3, line: 20, text: 'Hello' },
-  ]; // Mock data */
   if (comments === undefined) {
     console.error('Probably bad xhr request');
     return;

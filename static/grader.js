@@ -193,6 +193,7 @@ function addNewCommentButtons(elements) {
 
 
 window.deleteComment = deleteComment;
+window.sendExistsComment = sendExistsComment;
 window.addEventListener('lines-numbered', () => {
   const exerciseId = document.getElementById('code-view').dataset.exercise;
   trackDragAreas(document.getElementsByClassName('line'));
