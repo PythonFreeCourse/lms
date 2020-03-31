@@ -50,6 +50,7 @@ function listenToKeys() {
   }
 
   document.addEventListener('keydown', function(event) {
+    if (['textarea', 'input'].includes(event.target.tagName.toLowerCase())) { return; }
     let key = event.key.toLowerCase();
     if (key.toLowerCase() == 'q') {
       if (lineMode === true) {
