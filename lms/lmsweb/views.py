@@ -224,7 +224,7 @@ def _create_comment(
         if not comment_text:
             return fail(422, 'Empty comments are not allowed')
             # TODO(LOW): Check if line number > MAX_SOLUTION_LINE_NUMBER
-        new_comment_id = CommentText.get_or_create(text=comment_text)[0].id
+        new_comment_id = CommentText.create_comment(text=comment_text).id
     else:
         # should never happend, kind was checked before
         return fail(400, "Invalid kind")

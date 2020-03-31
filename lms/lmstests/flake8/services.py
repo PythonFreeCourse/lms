@@ -68,7 +68,7 @@ FLAKE_SKIP_ERRORS = (
     'T002',  # Python 2.x reserved word print used
     'Q003',  # Change outer quotes for internal escaping
     'E127',  # continuation line over-indented for visual indent
-),
+)
 
 
 class PyFlakeChecker:
@@ -106,7 +106,10 @@ class PyFlakeChecker:
                               error, self.solution_id)
             text = FLAKE_ERRORS_MAPPING.get(
                 error.error_code, f'{error.error_code}-{error.text}')
-            comment, _ = models.CommentText.get_or_create(text=text)
+            comment = models.CommentText.create_comment(
+                text=text,
+                flake_key=error.error_code,
+            )
             models.Comment.create(
                 commenter=models.User.get_system_user(),
                 line_number=error.line_number,
