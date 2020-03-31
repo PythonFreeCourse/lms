@@ -131,6 +131,6 @@ yarn-error.log*
 
 
 # Ours
-lmsweb/config.py
+lms/lmsweb/config.py
 db.sqlite
 vim.session

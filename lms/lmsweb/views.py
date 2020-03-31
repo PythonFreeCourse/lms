@@ -9,6 +9,8 @@ from flask import (
     abort, jsonify, render_template, request,
     send_from_directory, url_for,
 )
+from flask_admin import AdminIndexView, Admin
+from flask_admin.contrib.peewee import ModelView  # type: ignore
 from flask_login import (  # type: ignore
     LoginManager,
     current_user,
@@ -21,9 +23,11 @@ from playhouse.shortcuts import model_to_dict  # type: ignore
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
+from lms.lmstests.flake8 import tasks as flake8_tasks
 from lms.lmsweb import webapp
-from lms.lmsweb.models import (
+from lms.lmsdb.models import (
     Comment, CommentText, Exercise, RoleOptions, Solution, User, database,
+    ALL_MODELS
 )
 from lms.lmsweb.tools.notebook_extractor import extract_exercises
 
@@ -294,11 +298,11 @@ def send(_exercise_id):
     return render_template('upload.html')
 
 
-
 @webapp.route('/send', methods=['GET'])
 @login_required
 def send_():
     return render_template('upload.html')
+
 
 @webapp.route('/upload', methods=['POST'])
 @login_required
@@ -330,14 +334,12 @@ def upload():
         if exercise is None:
             misses.add(exercise_id)
             continue
-        solution, created = Solution.get_or_create(
+        solution, created = Solution.create_solution(
             exercise=exercise,
             solver=user,
-            defaults={
-                'submission_timestamp': datetime.now(),
-                'json_data_str': code,
-            }
+            json_data_str=code,
         )
+        flake8_tasks.run_flake8_on_solution.apply_async(args=(solution.id,))
         if created:
             matches.add(exercise_id)
         else:
@@ -436,3 +438,30 @@ def _common_comments(exercise_id=None):
 @managers_only
 def common_comments(exercise_id=None):
     return jsonify(_common_comments(exercise_id=exercise_id))
+
+
+class AccessibleByAdminMixin:
+    def is_accessible(self):
+        return (
+            current_user.is_authenticated
+            and current_user.role.is_administrator
+        )
+
+
+class MyAdminIndexView(AccessibleByAdminMixin, AdminIndexView):
+    pass
+
+
+class AdminModelView(AccessibleByAdminMixin, ModelView):
+    pass
+
+
+admin = Admin(
+    webapp,
+    name='LMS',
+    template_mode='bootstrap3',
+    index_view=MyAdminIndexView(),
+)
+
+for m in ALL_MODELS:
+    admin.add_view(AdminModelView(m))

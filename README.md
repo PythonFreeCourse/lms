@@ -7,19 +7,38 @@
   <img title="LGTM JavaScript Grade" src="https://img.shields.io/lgtm/grade/javascript/github/PythonFreeCourse/LMS.svg">
 </p>
 
-## Project setup
+## Project minimized setup (sqlite & FE only)
 ```bash
 git clone https://github.com/PythonFreeCourse/lms
-cd lms
+cd lms/lms
 pip install -r --user requirements.txt
 mv lmsweb/config.py.example lmsweb/config.py
-echo "SECRET_KEY = \"$(python -c 'import os;print(os.urandom(32).hex())')\"" >> lmsweb/config.py
+echo "SECRET_KEY = \"$(python -c 'import os;print(os.urandom(32).hex())')\"" >> lms/lmsweb/config.py
 
 # For debug only
 export FLASK_DEBUG=1
+export LOCAL_SETUP=true
 # For production, edit the rest of config.py manually
 
 flask run
+```
+
+## Full setup
+```bash
+Note: you should have docker + docker-compose installed on your computer
+
+git clone https://github.com/PythonFreeCourse/lms
+cd lms
+mv lms/lmsweb/config.py.example lms/lmsweb/config.py
+echo "SECRET_KEY = \"$(python -c 'import os;print(os.urandom(32).hex())')\"" >> lms/lmsweb/config.py
+
+./devops/build.sh
+./devops/start.sh
+```
+```
+In case you want to add the stub data to postgres db, run:
+docker exec -it lms_http_1 bash
+python lmsdb/bootstrap.py
 ```
 
 Enter http://127.0.0.1:5000, and the initial credentials should appear in your terminal. :)

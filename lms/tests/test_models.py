@@ -1,4 +1,4 @@
-from lms.lmsweb.models import User
+from lms.lmsdb.models import User
 
 
 class TestUser:

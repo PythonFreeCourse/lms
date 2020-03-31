@@ -1,20 +1,16 @@
-import sys; sys.path.append('/home/yammesicka')
-
-
 import csv
 import logging
 import os
-import random
-import string
 import typing
 
+from lms.lmsdb import models
 from lms.lmsweb import config
-from lms.lmsweb import models
 
 import requests
 
 
 _logger = logging.getLogger(__name__)
+
 
 class UserToCreate(typing.NamedTuple):
     name: str
@@ -36,6 +32,14 @@ class UserRegistrationCreator:
         self._users_to_create = users_to_create
         self._failed_users: typing.List[UserToCreate] = []
 
+    @property
+    def users_to_create(self):
+        return self._users_to_create
+
+    @property
+    def failed_users(self):
+        return self._failed_users
+
     @classmethod
     def from_csv_file(cls, file_path: str) -> 'UserRegistrationCreator':
         """
@@ -52,7 +56,7 @@ class UserRegistrationCreator:
             users = []
             for record in csv_records:
                 if 'password' not in record:
-                    record['password'] = cls._random_password()
+                    record['password'] = models.User.random_password()
                 users.append(UserToCreate(**record))
 
         return cls(users)
@@ -97,7 +101,7 @@ class UserRegistrationCreator:
                     'from': f'lms@{config.MAILGUN_DOMAIN}',
                     'to': user,
                     'subject': 'Learn Python - מערכת הגשת התרגילים',
-                    'html': text
+                    'html': text,
                 },
                 auth=('api', config.MAILGUN_API_KEY))
             response.raise_for_status()
@@ -120,13 +124,9 @@ class UserRegistrationCreator:
             msg = msg.replace(f'@@{k}@@', v)
         return msg
 
-    @classmethod
-    def _random_password(cls) -> string:
-        return ''.join(random.choices(string.printable.strip()[:65], k=12))
-
 
 if __name__ == '__main__':
     registration = UserRegistrationCreator.from_csv_file(config.USERS_CSV)
-    print(registration._users_to_create)
+    print(registration.users_to_create)  # noqa: T001
     registration.run_registration()
     registration.dump_failed_users_to_csv(config.ERRORS_CSV)

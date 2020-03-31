@@ -1,7 +1,7 @@
 import datetime
 
-from lms.lmsweb.models import (
-    ALL_MODELS, Role, RoleOptions, User, Exercise, CommentText,
+from lms.lmsdb.models import (
+    ALL_MODELS, CommentText, Exercise, Role, RoleOptions, Solution, User,
 )
 
 from peewee import SqliteDatabase
@@ -55,6 +55,22 @@ def staff_user(staff_password):
 
 
 @pytest.fixture()
+def user_password():
+    return 'fake pass'
+
+
+@pytest.fixture()
+def student_user(user_password):
+    return User.create(  # NOQA: S106
+        username='student',
+        fullname='Astudent',
+        mail_address='so-student@mail.com',
+        password=user_password,
+        role=Role.get_student_role(),
+    )
+
+
+@pytest.fixture()
 def admin_user():
     admin_role = Role.get(Role.name == RoleOptions.ADMINISTRATOR.value)
     return User.create(  # NOQA: S106
@@ -73,6 +89,15 @@ def exercise():
         date=datetime.datetime.now(),
         is_archived=False,
     )
+
+
+@pytest.fixture()
+def solution(exercise, student_user):
+    instance, _ = Solution.create_solution(
+        exercise=exercise,
+        solver=student_user,
+    )
+    return instance
 
 
 @pytest.fixture()

@@ -1,0 +1,82 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:11-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - db-data-volume:/pg_data
+    environment:
+      - PGDATA=/pg_data
+      - POSTGRES_DB=${DB_NAME:-db}
+      - POSTGRES_USER=${DB_USERNAME:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-U", "$DB_NAME"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
+  rabbitmq:
+    image: rabbitmq:3.7-management-alpine
+    hostname: celery-mq
+    environment:
+      - RABBITMQ_ERLANG_COOKIE=${RABBITMQ_ERLANG_COOKIE:-AAVyo5djdSMGIZXiwEQs3JeVaBx5l14z}
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER:-rabbit-user}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS:-YgKlCvnYVzpTa3T9adG3NrMoUNe4Z5aZ}
+      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST:-/}
+    volumes:
+      - rabbit-data-volume:/var/lib/rabbitmq
+
+  checks:
+    image: lms:latest
+    command: celery -A lms.lmstests worker
+    volumes:
+      - ../lms:/app_dir/lms/
+    environment:
+      - DB_NAME=${DB_NAME:-db}
+      - DB_USER=${DB_USERNAME:-postgres}
+      - DB_PORT=5432
+      - DB_HOST=db
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - CELERY_RABBITMQ_ERLANG_COOKIE=${RABBITMQ_ERLANG_COOKIE:-AAVyo5djdSMGIZXiwEQs3JeVaBx5l14z}
+      - CELERY_RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER:-rabbit-user}
+      - CELERY_RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS:-YgKlCvnYVzpTa3T9adG3NrMoUNe4Z5aZ}
+      - CELERY_RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST:-/}
+      - CELERY_RABBITMQ_HOST=rabbitmq
+      - CELERY_RABBITMQ_PORT=5672
+    links:
+      - db
+    depends_on:
+      - db
+      - rabbitmq
+
+  http:
+    image: lms:latest
+    command: gunicorn --bind 0.0.0.0:8080 --workers 5 lms.lmsweb
+    volumes:
+      - ../lms:/app_dir/lms
+    environment:
+      - DB_NAME=${DB_NAME:-db}
+      - DB_USER=${DB_USERNAME:-postgres}
+      - DB_PORT=5432
+      - DB_HOST=db
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - CELERY_RABBITMQ_ERLANG_COOKIE=${RABBITMQ_ERLANG_COOKIE:-AAVyo5djdSMGIZXiwEQs3JeVaBx5l14z}
+      - CELERY_RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER:-rabbit-user}
+      - CELERY_RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS:-YgKlCvnYVzpTa3T9adG3NrMoUNe4Z5aZ}
+      - CELERY_RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST:-/}
+      - CELERY_RABBITMQ_HOST=rabbitmq
+      - CELERY_RABBITMQ_PORT=5672
+    links:
+      - db
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+      - rabbitmq
+
+volumes:
+  db-data-volume:
+  rabbit-data-volume:

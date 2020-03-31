@@ -1,12 +1,11 @@
 import enum
+import random
 import secrets
 import string
 from datetime import datetime
 
-from flask_admin import Admin, AdminIndexView  # type: ignore
-from flask_admin.contrib.peewee import ModelView  # type: ignore
-from flask_login import UserMixin, current_user  # type: ignore
-from peewee import (  # type: ignore
+from flask_login import UserMixin
+from peewee import (  # noqa: I201
     BooleanField,
     CharField,
     Check,
@@ -14,14 +13,18 @@ from peewee import (  # type: ignore
     ForeignKeyField,
     IntegerField,
     ManyToManyField,
-    PostgresqlDatabase,
-    SqliteDatabase,
     TextField,
 )
-from playhouse.signals import Model, pre_save  # type: ignore
-from werkzeug.security import check_password_hash, generate_password_hash
+from playhouse.signals import Model, pre_save  # noqa: I201
+from werkzeug.security import (  # noqa: I201
+    check_password_hash,
+    generate_password_hash,
+)
 
-from lms.lmsweb import webapp
+from lms.lmsdb import database_config  # noqa: I100
+
+
+database = database_config.get_db_instance()
 
 
 class RoleOptions(enum.Enum):
@@ -31,20 +34,6 @@ class RoleOptions(enum.Enum):
 
     def __str__(self):
         return self.value
-
-
-if webapp.debug:
-    database = SqliteDatabase('db.sqlite')
-elif webapp.env == 'production':
-    db_config = {
-        'database': webapp.config['DB_NAME'],
-        'user': webapp.config['DB_USER'],
-        'port': webapp.config['DB_PORT'],
-        'host': webapp.config['DB_HOST_IP'],
-        'password': webapp.config['DB_PASSWORD'],
-        'autorollback': webapp.config['DB_AUTOROLLBACK'],
-    }
-    database = PostgresqlDatabase(**db_config)
 
 
 class BaseModel(Model):
@@ -65,14 +54,16 @@ class Role(BaseModel):
 
     @classmethod
     def get_student_role(cls):
-        return cls.get(**{
-            Role.name.name: RoleOptions.STUDENT.value
-        })
+        return cls.get(Role.name == RoleOptions.STUDENT.value)
+
+    @classmethod
+    def get_staff_role(cls):
+        return cls.get(Role.name == RoleOptions.STAFF.value)
 
     @classmethod
     def by_name(cls, name):
         if name.startswith('_'):
-            raise ValueError("That could lead to a security issue.")
+            raise ValueError('That could lead to a security issue.')
         role_name = getattr(RoleOptions, name.upper()).value
         return cls.get(name=role_name)
 
@@ -102,6 +93,22 @@ class User(UserMixin, BaseModel):
 
     def is_password_valid(self, password):
         return check_password_hash(self.password, password)
+
+    @classmethod
+    def get_system_user(cls) -> 'User':
+        instance, _ = cls.get_or_create(**{
+            cls.mail_address.name: 'linter-checks@python.guru',
+            User.username.name: 'linter-checks@python.guru',
+        }, defaults={
+            User.fullname.name: 'Checker guru',
+            User.role.name: Role.get_staff_role(),
+            User.password.name: cls.random_password(),
+        })
+        return instance
+
+    @classmethod
+    def random_password(cls) -> string:
+        return ''.join(random.choices(string.printable.strip()[:65], k=12))
 
     def __str__(self):
         return f'{self.username} - {self.fullname}'
@@ -138,6 +145,24 @@ class Solution(BaseModel):
     submission_timestamp = DateTimeField()
     json_data_str = TextField()
 
+    @property
+    def code(self):
+        return self.json_data_str
+
+    @classmethod
+    def create_solution(
+            cls,
+            exercise: Exercise,
+            solver: User,
+            json_data_str=''):
+        return cls.get_or_create(**{
+            cls.exercise.name: exercise,
+            cls.solver.name: solver,
+        }, defaults={
+            cls.submission_timestamp.name: datetime.now(),
+            cls.json_data_str.name: json_data_str,
+        })
+
     @classmethod
     def next_unchecked(cls):
         unchecked_exercises = cls.select().where(cls.is_checked == False)  # NOQA: E712, E501
@@ -150,7 +175,7 @@ class Solution(BaseModel):
     def next_unchecked_of(cls, exercise_id):
         try:
             return cls.select().where(
-                (cls.is_checked == 0) & (exercise_id == cls.exercise)
+                (cls.is_checked == 0) & (exercise_id == cls.exercise),
             ).dicts().get()
         except cls.DoesNotExist:
             return {}
@@ -177,22 +202,6 @@ class Comment(BaseModel):
         ).dicts())
 
 
-class AccessibleByAdminMixin:
-    def is_accessible(self):
-        return (
-            current_user.is_authenticated
-            and current_user.role.is_administrator
-        )
-
-
-class MyAdminIndexView(AccessibleByAdminMixin, AdminIndexView):
-    pass
-
-
-class AdminModelView(AccessibleByAdminMixin, ModelView):
-    pass
-
-
 def generate_password():
     randomizer = secrets.SystemRandom()
     length = randomizer.randrange(9, 16)
@@ -201,7 +210,7 @@ def generate_password():
 
 
 def create_demo_users():
-    print("First run! Here are some users to get start with:")
+    print('First run! Here are some users to get start with:')  # noqa: T001
     fields = ['username', 'fullname', 'mail_address', 'role']
     student_role = Role.by_name('Student')
     admin_role = Role.by_name('Administrator')
@@ -214,7 +223,7 @@ def create_demo_users():
         user = dict(zip(fields, entity))
         password = generate_password()
         User.create(**user, password=password)
-        print(f"User: {user['username']}, Password: {password}")
+        print(f"User: {user['username']}, Password: {password}")  # noqa: T001
 
 
 def create_basic_roles():
@@ -222,21 +231,4 @@ def create_basic_roles():
         Role.create(name=role.value)
 
 
-with database.connection_context():
-    admin = Admin(
-        webapp,
-        name='LMS',
-        template_mode='bootstrap3',
-        index_view=MyAdminIndexView(),
-    )
-
-    ALL_MODELS = (User, Exercise, CommentText, Solution, Role, Comment)
-    for m in ALL_MODELS:
-        admin.add_view(AdminModelView(m))
-
-    database.create_tables(ALL_MODELS, safe=True)
-
-    if Role.select().count() == 0:
-        create_basic_roles()
-    if User.select().count() == 0:
-        create_demo_users()
+ALL_MODELS = BaseModel.__subclasses__()
