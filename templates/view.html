@@ -38,6 +38,7 @@
       </div>
       <div id="grader-buttons">
         <button id="save-check" class="btn btn-success">סיימתי לבדוק!</button>
+        <a id="ninja" href="#" class="badge badge-dark" style="display: none;">Ninja Mode</a>
       </div>
     </div>
     {% endif %}
@@ -49,5 +50,6 @@
 <script src="{{ url_for('static', filename='comments.js') }}"></script>
 {%- if is_manager %}
 <script src="{{ url_for('static', filename='grader.js') }}"></script>
+<script src="{{ url_for('static', filename='keyboard.js') }}"></script>
 {% endif -%}
 {% endblock %}
