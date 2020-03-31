@@ -68,7 +68,7 @@ FLAKE_SKIP_ERRORS = (
     'T002',  # Python 2.x reserved word print used
     'Q003',  # Change outer quotes for internal escaping
     'E127',  # continuation line over-indented for visual indent
-),
+)
 
 
 class PyFlakeChecker:
