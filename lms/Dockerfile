@@ -4,10 +4,10 @@ COPY requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
 RUN adduser --disabled-password --gecos '' app-user
 
-RUN mkdir -p /opt/lms/
-RUN chown -R app-user:app-user /opt/lms
+RUN mkdir -p /app_dir/lms
+RUN chown -R app-user:app-user /app_dir
 
 USER app-user
-COPY . /opt/lms/.
-WORKDIR /opt/lms
-ENV PYTHONPATH /opt/lms:$PYTHONPATH
+COPY . /app_dir/lms/.
+WORKDIR /app_dir/lms
+ENV PYTHONPATH /app_dir/:$PYTHONPATH

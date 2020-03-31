@@ -4,7 +4,7 @@ import typing
 
 from flake8.main import application
 
-from lmsdb import models
+from lms.lmsdb import models
 
 
 class PyFlakeResponse(typing.NamedTuple):

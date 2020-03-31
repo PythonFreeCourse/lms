@@ -1,6 +1,6 @@
 import datetime
 
-from lmsdb.models import (
+from lms.lmsdb.models import (
     ALL_MODELS, CommentText, Exercise, Role, RoleOptions, Solution, User,
 )
 

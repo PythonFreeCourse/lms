@@ -1,4 +1,4 @@
-from lmslinter.config import celery
+from lms.lmstests.config import celery
 
 celery_app = celery.app
 

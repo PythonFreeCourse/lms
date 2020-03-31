@@ -10,14 +10,13 @@
 ## Project minimized setup (sqlite & FE only)
 ```bash
 git clone https://github.com/PythonFreeCourse/lms
-cd lms
+cd lms/lms
 pip install -r --user requirements.txt
 mv lmsweb/config.py.example lmsweb/config.py
-echo "SECRET_KEY = \"$(python -c 'import os;print(os.urandom(32).hex())')\"" >> lmsweb/config.py
+echo "SECRET_KEY = \"$(python -c 'import os;print(os.urandom(32).hex())')\"" >> lms/lmsweb/config.py
 
 # For debug only
 export FLASK_DEBUG=1
-export PYTHONPATH=`pwd`
 export LOCAL_SETUP=true
 # For production, edit the rest of config.py manually
 
@@ -30,8 +29,8 @@ Note: you should have docker + docker-compose installed on your computer
 
 git clone https://github.com/PythonFreeCourse/lms
 cd lms
-mv lmsweb/config.py.example lmsweb/config.py
-echo "SECRET_KEY = \"$(python -c 'import os;print(os.urandom(32).hex())')\"" >> lmsweb/config.py
+mv lms/lmsweb/config.py.example lms/lmsweb/config.py
+echo "SECRET_KEY = \"$(python -c 'import os;print(os.urandom(32).hex())')\"" >> lms/lmsweb/config.py
 
 ./devops/build.sh
 ./devops/start.sh

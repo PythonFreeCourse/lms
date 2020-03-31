@@ -21,7 +21,7 @@ from playhouse.signals import Model, pre_save
 
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from lmsdb import database_config  # noqa: I100
+from lms.lmsdb import database_config  # noqa: I100
 
 
 database = database_config.get_db_instance()

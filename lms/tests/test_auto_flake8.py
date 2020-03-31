@@ -1,5 +1,5 @@
-from lmsdb import models
-from lmslinter.flake8 import tasks
+from lms.lmsdb import models
+from lms.lmstests.flake8 import tasks
 
 INVALID_CODE = 'print("Hello Word")'
 INVALID_CODE_MESSAGE = 'השתמש בצוקואים בודדים ולא בגרשיים'

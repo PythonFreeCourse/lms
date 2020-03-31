@@ -23,13 +23,13 @@ from playhouse.shortcuts import model_to_dict  # type: ignore
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
-from lmslinter.flake8 import tasks as flake8_tasks
-from lmsweb import webapp
-from lmsdb.models import (
+from lms.lmstests.flake8 import tasks as flake8_tasks
+from lms.lmsweb import webapp
+from lms.lmsdb.models import (
     Comment, CommentText, Exercise, RoleOptions, Solution, User, database,
     ALL_MODELS
 )
-from lmsweb.tools.notebook_extractor import extract_exercises
+from lms.lmsweb.tools.notebook_extractor import extract_exercises
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)

@@ -1,4 +1,4 @@
-from lmsdb import models
+from lms.lmsdb import models
 
 
 def main():

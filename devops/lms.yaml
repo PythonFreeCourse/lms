@@ -29,15 +29,11 @@ services:
     volumes:
       - rabbit-data-volume:/var/lib/rabbitmq
 
-  excercises-linter:
+  checks:
     image: lms:latest
-    command: celery -A lmslinter worker
+    command: celery -A lms.lmstests worker
     volumes:
-      - ../lmsweb:/opt/lms/lmsweb
-      - ../lmsdb:/opt/lms/lmsdb
-      - ../static:/opt/lms/static
-      - ../templates:/opt/lms/templates
-      - ../lmslinter:/opt/lms/lmslinter
+      - ../lms:/app_dir/lms/
     environment:
       - DB_NAME=${DB_NAME:-db}
       - DB_USER=${DB_USERNAME:-postgres}
@@ -58,13 +54,9 @@ services:
 
   http:
     image: lms:latest
-    command: gunicorn --bind 0.0.0.0:8080 --workers 5 lmsweb
+    command: gunicorn --bind 0.0.0.0:8080 --workers 5 lms.lmsweb
     volumes:
-      - ../lmsweb:/opt/lms/lmsweb
-      - ../lmsdb:/opt/lms/lmsdb
-      - ../static:/opt/lms/static
-      - ../templates:/opt/lms/templates
-      - ../lmslinter:/opt/lms/lmslinter
+      - ../lms:/app_dir/lms
     environment:
       - DB_NAME=${DB_NAME:-db}
       - DB_USER=${DB_USERNAME:-postgres}

@@ -1,5 +1,5 @@
-from lmslinter import config
-from lmslinter import flake8
+from lms.lmstests import config
+from lms.lmstests import flake8
 
 celery_app = config.celery_app
 

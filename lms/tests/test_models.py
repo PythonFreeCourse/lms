@@ -1,4 +1,4 @@
-from lmsdb.models import User
+from lms.lmsdb.models import User
 
 
 class TestUser:
