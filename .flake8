@@ -1,2 +1,2 @@
 [flake8]
-per-file-ignores=tests/*.py:S101
+per-file-ignores=tests/*.py:S101, lms/lmstests/services.py:E501
