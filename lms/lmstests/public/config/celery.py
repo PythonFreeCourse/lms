@@ -13,9 +13,9 @@ public_broker_url = (f'amqp://{CELERY_RABBITMQ_DEFAULT_USER}:'
                      f'{CELERY_RABBITMQ_DEFAULT_PASS}@'
                      f'{CELERY_RABBITMQ_HOST}:{CELERY_RABBITMQ_PORT}/'
                      f'{CELERY_CHECKS_PUBLIC_VHOST}')
-public_app = Celery('lmstests-public', broker=public_broker_url)
+app = Celery('lmstests-public', broker=public_broker_url)
 
-public_app.conf.update(
+app.conf.update(
     task_serializer='json',
     accept_content=['json'],  # Ignore other content
     result_serializer='json',
