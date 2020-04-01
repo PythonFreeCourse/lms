@@ -2,8 +2,8 @@ import logging
 
 from celery.utils.log import get_task_logger
 
-from lms.lmstests.config.celery import app
-from lms.lmstests.flake8 import services
+from lms.lmstests.public.config.celery import app
+from lms.lmstests.public.flake8 import services
 
 
 _logger: logging.Logger = get_task_logger(__name__)

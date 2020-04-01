@@ -23,7 +23,7 @@ from playhouse.shortcuts import model_to_dict  # type: ignore
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
-from lms.lmstests.flake8 import tasks as flake8_tasks
+from lms.lmstests.public.flake8 import tasks as flake8_tasks
 from lms.lmsweb import webapp
 from lms.lmsdb.models import (
     Comment, CommentText, Exercise, RoleOptions, Solution, User, database,

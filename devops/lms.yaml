@@ -22,16 +22,33 @@ services:
     image: rabbitmq:3.7-management-alpine
     hostname: celery-mq
     environment:
-      - RABBITMQ_ERLANG_COOKIE=${RABBITMQ_ERLANG_COOKIE:-AAVyo5djdSMGIZXiwEQs3JeVaBx5l14z}
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER:-rabbit-user}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS:-YgKlCvnYVzpTa3T9adG3NrMoUNe4Z5aZ}
-      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST:-/}
+      - RABBITMQ_ERLANG_COOKIE=AAVyo5djdSMGIZXiwEQs3JeVaBx5l14z
+      - RABBITMQ_DEFAULT_USER=rabbit-user
+      - RABBITMQ_DEFAULT_PASS=YgKlCvnYVzpTa3T9adG3NrMoUNe4Z5aZ
+      - RABBITMQ_DEFAULT_VHOST=/
     volumes:
       - rabbit-data-volume:/var/lib/rabbitmq
 
-  checks:
+  checks-sandbox:
     image: lms:latest
-    command: celery -A lms.lmstests worker
+    command: celery -A lms.lmstests.sandbox worker
+    volumes:
+      - ../lms/lmstests/sandbox/:/app_dir/lms/lmstests/sandbox/
+    environment:
+      - CELERY_RABBITMQ_ERLANG_COOKIE=AAVyo5djdSMGIZXiwEQs3JeVaBx5l14z
+      - CELERY_RABBITMQ_DEFAULT_USER=rabbit-user
+      - CELERY_RABBITMQ_DEFAULT_PASS=YgKlCvnYVzpTa3T9adG3NrMoUNe4Z5aZ
+      - CELERY_CHECKS_SANDBOX_VHOST=lmstests-sandbox
+      - CELERY_RABBITMQ_HOST=rabbitmq
+      - CELERY_RABBITMQ_PORT=5672
+    links:
+      - rabbitmq
+    depends_on:
+      - rabbitmq
+
+  checks-public:
+    image: lms:latest
+    command: celery -A lms.lmstests.public worker
     volumes:
       - ../lms:/app_dir/lms/
     environment:
@@ -40,14 +57,16 @@ services:
       - DB_PORT=5432
       - DB_HOST=db
       - DB_PASSWORD=${DB_PASSWORD:-postgres}
-      - CELERY_RABBITMQ_ERLANG_COOKIE=${RABBITMQ_ERLANG_COOKIE:-AAVyo5djdSMGIZXiwEQs3JeVaBx5l14z}
-      - CELERY_RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER:-rabbit-user}
-      - CELERY_RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS:-YgKlCvnYVzpTa3T9adG3NrMoUNe4Z5aZ}
-      - CELERY_RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST:-/}
+      - CELERY_RABBITMQ_ERLANG_COOKIE=AAVyo5djdSMGIZXiwEQs3JeVaBx5l14z
+      - CELERY_RABBITMQ_DEFAULT_USER=rabbit-user
+      - CELERY_RABBITMQ_DEFAULT_PASS=YgKlCvnYVzpTa3T9adG3NrMoUNe4Z5aZ
+      - CELERY_CHECKS_PUBLIC_VHOST=lmstests-public
+      - CELERY_CHECKS_SANDBOX_VHOST=lmstests-sandbox
       - CELERY_RABBITMQ_HOST=rabbitmq
       - CELERY_RABBITMQ_PORT=5672
     links:
       - db
+      - rabbitmq
     depends_on:
       - db
       - rabbitmq
@@ -63,14 +82,15 @@ services:
       - DB_PORT=5432
       - DB_HOST=db
       - DB_PASSWORD=${DB_PASSWORD:-postgres}
-      - CELERY_RABBITMQ_ERLANG_COOKIE=${RABBITMQ_ERLANG_COOKIE:-AAVyo5djdSMGIZXiwEQs3JeVaBx5l14z}
-      - CELERY_RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER:-rabbit-user}
-      - CELERY_RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS:-YgKlCvnYVzpTa3T9adG3NrMoUNe4Z5aZ}
-      - CELERY_RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST:-/}
+      - CELERY_RABBITMQ_ERLANG_COOKIE=AAVyo5djdSMGIZXiwEQs3JeVaBx5l14z
+      - CELERY_RABBITMQ_DEFAULT_USER=rabbit-user
+      - CELERY_RABBITMQ_DEFAULT_PASS=YgKlCvnYVzpTa3T9adG3NrMoUNe4Z5aZ
+      - CELERY_CHECKS_PUBLIC_VHOST=lmstests-public
       - CELERY_RABBITMQ_HOST=rabbitmq
       - CELERY_RABBITMQ_PORT=5672
     links:
       - db
+      - rabbitmq
     ports:
       - 8080:8080
     depends_on:

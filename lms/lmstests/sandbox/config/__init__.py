@@ -1,4 +1,4 @@
-from lms.lmstests.config import celery
+from lms.lmstests.sandbox.config import celery
 
 celery_app = celery.app
 
