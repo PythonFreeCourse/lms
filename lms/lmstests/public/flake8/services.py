@@ -1,5 +1,5 @@
-import typing
 import logging
+import typing
 
 from celery.result import allow_join_result
 
@@ -37,27 +37,30 @@ class PyFlakeChecker:
 
     def _run_in_sandbox_and_populate_errors(self):
         self._logger.info(
-            "Start running in remote sandbox flake8 checks on solution %s",
+            'Start running in remote sandbox flake8 checks on solution %s',
             self._solution_id,
         )
         response = self._run_in_sandbox()
         self._logger.info(
-            "End running in remote sandbox flake8 checks on solution %s",
+            'End running in remote sandbox flake8 checks on solution %s',
             self._solution_id,
         )
         for error in response:
             self._errors.append(PyFlakeResponse(*error))
 
     def _run_in_sandbox(self):
-        async_result = self.sandbox_tasks.run_flake8_on_sandbox_on_code.apply_async(
+        result = self.sandbox_tasks.run_flake8_on_sandbox_on_code.apply_async(
             args=(self._solution_id, self.solution.json_data_str),
         )
         with allow_join_result():
-            response = async_result.get()
+            response = result.get()
         return response
 
     def _populate_comments(self):
-        self._logger.info('populate comments to solution %s', self._solution_id)
+        self._logger.info(
+            'populate comments to solution %s',
+            self._solution_id,
+        )
 
         for error in self._errors:
             self._logger.info('Adding error %s to solution %s',

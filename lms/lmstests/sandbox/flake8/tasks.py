@@ -17,7 +17,7 @@ def run_flake8_on_sandbox_on_code(solution_id: str, code: str):
         checker = services.PyFlakeFileScanner(
             logger=_logger,
             code=code,
-            solution_id=solution_id
+            solution_id=solution_id,
         )
         checker.initialize()
         response = checker.run_check()
