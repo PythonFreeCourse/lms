@@ -4,8 +4,6 @@ import typing
 
 from flake8.main import application
 
-from lms.lmsdb import models
-
 
 class PyFlakeResponse(typing.NamedTuple):
     error_code: str
@@ -77,58 +75,50 @@ FLAKE_SKIP_ERRORS = (
 )
 
 
-class PyFlakeChecker:
-    def __init__(self, solution_check_pk: str, logger: logging.Logger):
-        self.solution_id = solution_check_pk
+class PyFlakeFileScanner:
+    def __init__(self, logger: logging.Logger, code: str, solution_id: str):
         self._app = None
-        self._solution = None
+        self._code = code
         self._logger = logger
+        self._solution_id = solution_id
 
     def initialize(self):
         self._app = application.Application()
         self._app.initialize(argv=[])
-        self._solution = models.Solution.get_by_id(self.solution_id)
 
     @property
     def app(self) -> application.Application:
         return self._app
 
-    @property
-    def solution(self) -> models.Solution:
-        return self._solution
-
-    def run_check(self):
-        self._logger.info('checks errors on solution %s', self.solution_id)
+    def run_check(self) -> typing.Sequence[PyFlakeResponse]:
+        self._logger.info('checks errors on solution %s', self._solution_id)
         errors = self._get_errors_from_solution()
-
+        response = []
         for error in errors:
             if error.error_code in FLAKE_SKIP_ERRORS:
                 self._logger.info(
                     'Skipping error %s to solution %s',
-                    error, self.solution_id)
+                    error, self._solution_id)
                 continue
 
             self._logger.info('Adding error %s to solution %s',
-                              error, self.solution_id)
-            text = FLAKE_ERRORS_MAPPING.get(
+                              error, self._solution_id)
+            custom_text = FLAKE_ERRORS_MAPPING.get(
                 error.error_code, f'{error.error_code}-{error.text}')
-            comment = models.CommentText.create_comment(
-                text=text,
-                flake_key=error.error_code,
-            )
-            models.Comment.create(
-                commenter=models.User.get_system_user(),
+            response.append(PyFlakeResponse(
+                error_code=error.error_code,
                 line_number=error.line_number,
-                comment=comment,
-                solution=self.solution,
-            )
+                column=error.column,
+                text=custom_text,
+                physical_line=error.physical_line,
+            ))
+        return response
 
     def _get_errors_from_solution(self) -> typing.List[PyFlakeResponse]:
         errors = []
-        code_content = self.solution.code
         index_of_check = 0
         with tempfile.NamedTemporaryFile('w') as temp_file:
-            temp_file.write(code_content)
+            temp_file.write(self._code)
             temp_file.flush()
 
             self.app.run_checks([temp_file.name])

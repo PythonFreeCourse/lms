@@ -8,6 +8,7 @@ RUN mkdir -p /app_dir/lms
 RUN chown -R app-user:app-user /app_dir
 
 USER app-user
-COPY . /app_dir/lms/.
+# Note: we don't copy the code to container because we mount the code in different ways
+# on each setup
 WORKDIR /app_dir/lms
 ENV PYTHONPATH /app_dir/:$PYTHONPATH

@@ -2,15 +2,15 @@ import logging
 
 from celery.utils.log import get_task_logger
 
-from lms.lmstests.config.celery import app
-from lms.lmstests.flake8 import services
+from lms.lmstests.public.config.celery import public_app
+from lms.lmstests.public.flake8 import services
 
 
 _logger: logging.Logger = get_task_logger(__name__)
 _logger.setLevel(logging.INFO)
 
 
-@app.task
+@public_app.task
 def run_flake8_on_solution(solution_pk: str) -> None:
     try:
         _logger.info('Start running check solution %s', solution_pk)
