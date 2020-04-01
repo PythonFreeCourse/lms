@@ -33,6 +33,7 @@ def _add_flake8_key_if_needed():
 
 
 def _update_flake8_texts():
+    print('Update flake8 texts')  # noqa: T001
     with database_config.database.atomic():
         for flake8_key, text in defines.FLAKE_ERRORS_MAPPING.items():
             models.CommentText.update(**{
@@ -41,6 +42,7 @@ def _update_flake8_texts():
 
 
 def _delete_whitelist_comments():
+    print('Delete comments that listed in whitelist')  # noqa: T001
     with database_config.database.atomic():
         for flake8_key in defines.FLAKE_SKIP_ERRORS:
             for comment in models.Comment.select().join(
