@@ -74,7 +74,7 @@ FLAKE_SKIP_ERRORS = (
     'C813',  # missing trailing comma
     'E800',  # commented-out code
     'E122',  # continuation line outdented or dedented
-),
+)
 
 
 class PyFlakeChecker:
@@ -112,7 +112,10 @@ class PyFlakeChecker:
                               error, self.solution_id)
             text = FLAKE_ERRORS_MAPPING.get(
                 error.error_code, f'{error.error_code}-{error.text}')
-            comment, _ = models.CommentText.get_or_create(text=text)
+            comment = models.CommentText.create_comment(
+                text=text,
+                flake_key=error.error_code,
+            )
             models.Comment.create(
                 commenter=models.User.get_system_user(),
                 line_number=error.line_number,

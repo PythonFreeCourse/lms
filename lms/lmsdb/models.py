@@ -2,6 +2,7 @@ import enum
 import random
 import secrets
 import string
+import typing
 from datetime import datetime
 
 from flask_login import UserMixin
@@ -183,6 +184,18 @@ class Solution(BaseModel):
 
 class CommentText(BaseModel):
     text = TextField(unique=True)
+    flake8_key = TextField(null=True)
+
+    @classmethod
+    def create_comment(
+            cls, text: str, flake_key: typing.Optional[str] = None,
+    ) -> 'CommentText':
+        instance, created = CommentText.get_or_create(**{
+            CommentText.text.name: text,
+        }, defaults={
+            CommentText.flake8_key.name: flake_key,
+        })
+        return instance
 
 
 class Comment(BaseModel):

@@ -3,6 +3,7 @@ from lms.lmstests.flake8 import tasks
 
 INVALID_CODE = 'print("Hello Word")'
 INVALID_CODE_MESSAGE = 'השתמש בצוקואים בודדים ולא בגרשיים'
+INVALID_CODE_KEY = 'Q000'
 VALID_CODE = 'print(0)'
 
 
@@ -14,8 +15,9 @@ class TestAutoFlake8:
         comments = tuple(models.Comment.filter(models.Comment.solution == solution))
         assert comments
         assert len(comments) == 1
-        comment_text = comments[0].comment.text
-        assert comment_text == INVALID_CODE_MESSAGE
+        comment = comments[0].comment
+        assert comment.text == INVALID_CODE_MESSAGE
+        assert comment.flake8_key == INVALID_CODE_KEY
 
     def test_valid_solution(self, solution: models.Solution):
         solution.json_data_str = VALID_CODE
