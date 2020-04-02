@@ -108,7 +108,7 @@ class User(UserMixin, BaseModel):
         return instance
 
     @classmethod
-    def random_password(cls) -> string:
+    def random_password(cls) -> str:
         return ''.join(random.choices(string.printable.strip()[:65], k=12))
 
     def __str__(self):
@@ -136,6 +136,24 @@ class Exercise(BaseModel):
     def __str__(self):
         return self.subject
 
+    @classmethod
+    def create_exercise(
+        cls,
+        subject: str,
+        is_archived: bool,
+        notebook_num: int,
+        order: int,
+        date: typing.Optional[datetime] = None
+    ):
+        return cls.get_or_create(**{
+            cls.subject.name: subject,
+            cls.is_archived.name: is_archived,
+            cls.notebook_num.name: notebook_num,
+            cls.order.name: order,
+            cls.date.name: date or datetime.now()
+        }
+                                 )
+
 
 class Solution(BaseModel):
     exercise = ForeignKeyField(Exercise, backref='solutions')
@@ -154,10 +172,11 @@ class Solution(BaseModel):
 
     @classmethod
     def create_solution(
-            cls,
-            exercise: Exercise,
-            solver: User,
-            json_data_str=''):
+        cls,
+        exercise: Exercise,
+        solver: User,
+        json_data_str='',
+    ):
         return cls.get_or_create(**{
             cls.exercise.name: exercise,
             cls.solver.name: solver,
@@ -190,7 +209,7 @@ class CommentText(BaseModel):
 
     @classmethod
     def create_comment(
-            cls, text: str, flake_key: typing.Optional[str] = None,
+        cls, text: str, flake_key: typing.Optional[str] = None,
     ) -> 'CommentText':
         instance, created = CommentText.get_or_create(**{
             CommentText.text.name: text,
@@ -223,6 +242,17 @@ def generate_password():
     length = randomizer.randrange(9, 16)
     password = randomizer.choices(string.printable[:66], k=length)
     return ''.join(password)
+
+
+def fill_tables_test_data():
+    dummy_exercise_data = {
+        'subject': 'subj', 'date': datetime.now(),
+        'is_archived': False,
+        'notebook_num': 1,
+    }
+    dummy_exercise = Exercise.create(**dummy_exercise_data)
+    CommentText.create_comment('dummy222', 'DUMMY222')
+    Solution.create_solution(dummy_exercise, User.get_by_id(1), '')
 
 
 def create_demo_users():
