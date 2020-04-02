@@ -1,7 +1,7 @@
 import json
+import os
 from datetime import datetime
 from functools import wraps
-import os
 from typing import Optional
 from urllib.parse import urljoin, urlparse
 
@@ -23,12 +23,12 @@ from playhouse.shortcuts import model_to_dict  # type: ignore
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
-from lms.lmstests.public.flake8 import tasks as flake8_tasks
-from lms.lmsweb import webapp
 from lms.lmsdb.models import (
     Comment, CommentText, Exercise, RoleOptions, Solution, User, database,
     ALL_MODELS
 )
+from lms.lmstests.public.flake8 import tasks as flake8_tasks
+from lms.lmsweb import webapp
 from lms.lmsweb.tools.notebook_extractor import extract_exercises
 
 login_manager = LoginManager()
@@ -183,6 +183,8 @@ def fetch_solutions(user_id):
         .select(*fields)
         .join(Solution, 'LEFT OUTER', on=solutions_filter)
         .where(Exercise.is_archived == False)  # NOQA: E712
+        .group_by(Exercise)
+        .having(fn.Max(Solution.submission_timestamp) == Solution.submission_timestamp)
         .order_by(Exercise.id)
     )
     return tuple(solutions.dicts())
@@ -328,35 +330,23 @@ def upload():
         msg = "No exercises were found in the notebook"
         desc = "did you use Upload <number of exercise> ? (example: Upload 1)"
         return fail(402, f'{msg}, {desc}')
-    matches, misses, duplications = set(), set(), set()
+    matches, misses = set(), set()
     for exercise_id, code in exercises:
         exercise = Exercise.get_or_none(Exercise.id == exercise_id)
         if exercise is None:
             misses.add(exercise_id)
             continue
-        solution, created = Solution.create_solution(
+        solution = Solution.create(
             exercise=exercise,
             solver=user,
             json_data_str=code,
+            submission_timestamp=datetime.now()
         )
         flake8_tasks.run_flake8_on_solution.apply_async(args=(solution.id,))
-        if created:
-            matches.add(exercise_id)
-        else:
-            solution.json_data_str = code
-            solution.submission_timestamp = datetime.now()
-            solution.is_checked = False
-            solution.save()
-            old_comments = Comment.delete().where(Comment.solution == solution)
-            old_comments.execute()
-            duplications.add(exercise_id)
-
-    valid = matches - duplications
 
     return jsonify({
-        "exercise_matches": list(valid),
+        "exercise_matches": list(matches),
         "exercise_misses": list(misses),
-        "exercise_duplications": list(duplications)
     })
 
 
