@@ -4,7 +4,7 @@ from playhouse.migrate import migrate
 
 from lms.lmsdb import database_config  # noqa: I100
 from lms.lmsdb import models
-from lms.lmstests.sandbox.flake8 import defines
+from lms.lmstests.public.flake8 import text_fixer
 
 
 def _add_flake8_key_if_needed():
@@ -42,6 +42,7 @@ def main():
             models.create_demo_users()
 
     _add_flake8_key_if_needed()
+    text_fixer.fix_texts()
 
 
 if __name__ == '__main__':

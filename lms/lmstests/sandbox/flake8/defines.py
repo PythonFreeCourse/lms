@@ -57,6 +57,7 @@ FLAKE_SKIP_ERRORS = (
     'E124',  # closing brackets indentation
     'C813',  # missing trailing comma
     'E800',  # commented-out code
+    'E800:',  # For some reason flake8 sends this key with ':', that's a bug, but not ours
     'E122',  # continuation line outdented or dedented
     'E117',  # over-indented
 )
