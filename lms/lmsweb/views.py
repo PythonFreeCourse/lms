@@ -180,13 +180,18 @@ def fetch_solutions(user_id):
     )
     solutions = (
         Exercise
-        .select(*fields)
-        .join(Solution, 'LEFT OUTER', on=solutions_filter)
-        .where(Exercise.is_archived == False)  # NOQA: E712
-        .group_by(Exercise)
-        .having(fn.Max(Solution.submission_timestamp) == Solution.submission_timestamp)
-        .order_by(Exercise.id)
+            .select(*fields)
+            .join(Solution, 'LEFT OUTER', on=solutions_filter)
+            .where(Exercise.is_archived == False)  # NOQA: E712
+            .group_by(Exercise)
+            .order_by(Exercise.id)
     )
+    if Solution.select().count():
+        latest = (
+            fn.Max(Solution.submission_timestamp) ==
+            Solution.submission_timestamp
+        )
+        solutions = solutions.having(latest)
     return tuple(solutions.dicts())
 
 
