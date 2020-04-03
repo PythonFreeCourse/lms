@@ -5,26 +5,7 @@ from playhouse.migrate import migrate
 
 from lms.lmsdb import database_config, database  # noqa: I100
 from lms.lmsdb import models
-from lmsdb.models import User
 from lms.lmstests.public.flake8 import text_fixer
-
-_DUMMY_EXERCISE_DATA = {
-    models.Exercise.subject.name: 'subj',
-    models.Exercise.date.name: datetime.now(),
-    models.Exercise.is_archived.name: False,
-    models.Exercise.notebook_num.name: 1,
-}
-_DUMMY_COMMENT_TEXT = {
-    models.CommentText.text.name: 'test',
-    models.CommentText.flake8_key.name: 'DUMMY',
-}
-
-_DUMMY_SOLUTION = {
-    models.Solution.exercise.name: models.Exercise.create(**_DUMMY_EXERCISE_DATA),
-    models.Solution.solver.name: User.get_by_id(1),
-    models.Solution.json_data_str.name: 'test',
-    models.Solution.submission_timestamp.name: datetime.now(),
-}
 
 
 def _migrate_column_in_table_if_needed(
