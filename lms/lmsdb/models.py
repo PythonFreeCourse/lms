@@ -166,7 +166,7 @@ class Solution(BaseModel):
         return cls.select().filter(
             cls.exercise == exercise,
             cls.solver == solver,
-            cls.json_data_str == json_data_str
+            cls.json_data_str == json_data_str,
         ).exists()
 
     @classmethod
