@@ -220,12 +220,14 @@ class Comment(BaseModel):
             line_number: int,
             comment_text: CommentText,
             solution: Solution,
+            is_auto: bool,
     ) -> 'Comment':
         return cls.get_or_create(
             commenter=commenter,
             line_number=line_number,
             comment=comment_text,
             solution=solution,
+            is_auto=is_auto,
         )
 
     @classmethod

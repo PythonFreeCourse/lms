@@ -107,4 +107,5 @@ def comment(staff_user, solution):
         solution=solution,
         comment_text=CommentText.create_comment(text='very good!'),
         line_number=1,
+        is_auto=False,
     )[0]
