@@ -155,11 +155,11 @@ def status():
     ]
     solutions = (
         Exercise
-        .select(*fields)
-        .join(Solution, 'LEFT OUTER', on=(Solution.exercise == Exercise.id))
-        .where(Exercise.is_archived == False)  # NOQA: E712
-        .group_by(Exercise.subject, Exercise.id)
-        .order_by(Exercise.id)
+            .select(*fields)
+            .join(Solution, 'LEFT OUTER', on=(Solution.exercise == Exercise.id))
+            .where(Exercise.is_archived == False)  # NOQA: E712
+            .group_by(Exercise.subject, Exercise.id)
+            .order_by(Exercise.id)
     )
     return render_template(
         'status.html',
@@ -186,12 +186,6 @@ def fetch_solutions(user_id):
             .group_by(Exercise)
             .order_by(Exercise.id)
     )
-    if Solution.select().count():
-        latest = (
-            fn.Max(Solution.submission_timestamp) ==
-            Solution.submission_timestamp
-        )
-        solutions = solutions.having(latest)
     return tuple(solutions.dicts())
 
 
@@ -341,7 +335,7 @@ def upload():
         if exercise is None:
             misses.add(exercise_id)
             continue
-        solution = Solution.create_solution(exercise, user, code,)
+        solution = Solution.create_solution(exercise, user, code, )
         flake8_tasks.run_flake8_on_solution.apply_async(args=(solution.id,))
 
     return jsonify({
