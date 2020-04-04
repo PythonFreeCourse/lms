@@ -69,10 +69,10 @@ def main():
             models.create_demo_users()
 
     _add_flake8_key_if_needed()
-    text_fixer.fix_texts()
     _add_notebook_num_if_needed()
     _add_is_auto_needed()
     _add_order_if_needed()
+    text_fixer.fix_texts()
 
 
 if __name__ == '__main__':
