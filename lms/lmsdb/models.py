@@ -157,16 +157,28 @@ class Solution(BaseModel):
         return Comment.select().join(Solution).filter(Comment.solution == self)
 
     @classmethod
+    def solution_exists(
+            cls,
+            exercise: Exercise,
+            solver: User,
+            json_data_str: str,
+    ):
+        return cls.select().filter(
+            cls.exercise == exercise,
+            cls.solver == solver,
+            cls.json_data_str == json_data_str
+        ).exists()
+
+    @classmethod
     def create_solution(
         cls,
         exercise: Exercise,
         solver: User,
         json_data_str='',
     ):
-        return cls.get_or_create(**{
+        return cls.create(**{
             cls.exercise.name: exercise,
             cls.solver.name: solver,
-        }, defaults={
             cls.submission_timestamp.name: datetime.now(),
             cls.json_data_str.name: json_data_str,
         })
