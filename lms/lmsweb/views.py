@@ -337,6 +337,9 @@ def upload():
         if exercise is None:
             misses.add(exercise_id)
             continue
+        if exercise.is_archived:
+            misses.add(exercise_id)
+            continue
         solution, _ = Solution.create_solution(
             exercise=exercise,
             solver=user,
