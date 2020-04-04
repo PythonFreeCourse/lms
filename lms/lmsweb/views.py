@@ -341,6 +341,7 @@ def upload():
             json_data_str=code,
             submission_timestamp=datetime.now()
         )
+        matches.add(exercise_id)
         flake8_tasks.run_flake8_on_solution.apply_async(args=(solution.id,))
 
     return jsonify({
