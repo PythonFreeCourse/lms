@@ -27,6 +27,7 @@ from lms.lmsdb.models import (
     ALL_MODELS
 )
 from lms.lmstests.public.flake8 import tasks as flake8_tasks
+from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmsweb import webapp
 from lms.lmsweb.tools.notebook_extractor import extract_exercises
 
@@ -264,7 +265,7 @@ def comment():
         return fail(401, "You aren't allowed to watch this page.")
 
     if act == 'fetch':
-        return jsonify(Comment.by_solution(solution_id))
+        return jsonify(Comment.get_solutions(solution_id))
 
     if act == 'delete':
         comment_id = int(request.args.get('commentId'))
@@ -354,6 +355,8 @@ def upload():
             json_data_str=code,
         )
         flake8_tasks.run_flake8_on_solution.apply_async(args=(solution.id,))
+        identical_tests_tasks.solve_solution_with_identical_code.apply_async(
+            args=(solution.id,))
         matches.add(exercise_id)
     return jsonify({
         "exercise_matches": list(matches),
@@ -397,6 +400,8 @@ def done_checking(exercise_id, solution_id):
         is_checked=True, checker=current_user.id,
     ).where(requested_solution)
     is_updated = changes.execute() == 1
+    identical_tests_tasks.solve_solution_with_identical_code.apply_async(
+        args=(solution_id,))
     next_exercise = Solution.next_unchecked_of(exercise_id).get('id')
     return jsonify({'success': is_updated, 'next': next_exercise})
 

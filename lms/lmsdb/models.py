@@ -152,6 +152,10 @@ class Solution(BaseModel):
     def code(self):
         return self.json_data_str
 
+    @property
+    def comments(self):
+        return Comment.select().join(Solution).filter(Comment.solution == self)
+
     @classmethod
     def solution_exists(
             cls,
@@ -162,7 +166,7 @@ class Solution(BaseModel):
         return cls.select().filter(
             cls.exercise == exercise,
             cls.solver == solver,
-            cls.json_data_str == json_data_str
+            cls.json_data_str == json_data_str,
         ).exists()
 
     @classmethod
@@ -222,13 +226,34 @@ class Comment(BaseModel):
     is_auto = BooleanField(default=False)
 
     @classmethod
+    def create_comment(
+            cls,
+            commenter: User,
+            line_number: int,
+            comment_text: CommentText,
+            solution: Solution,
+            is_auto: bool,
+    ) -> 'Comment':
+        return cls.get_or_create(
+            commenter=commenter,
+            line_number=line_number,
+            comment=comment_text,
+            solution=solution,
+            is_auto=is_auto,
+        )
+
+    @classmethod
     def by_solution(cls, solution_id: int):
-        return tuple((
-            Comment
-            .select(Comment, CommentText.text)
-            .join(CommentText)
-            .where(Comment.solution == solution_id)
-        ).dicts())
+        return Comment.select(
+            Comment, CommentText.text,
+            CommentText.flake8_key, CommentText.id,
+        ).join(CommentText).where(
+            Comment.solution == solution_id,
+        )
+
+    @classmethod
+    def get_solutions(cls, solution_id: int) -> typing.Sequence[dict]:
+        return tuple(cls.by_solution(solution_id).dicts())
 
 
 def generate_password():

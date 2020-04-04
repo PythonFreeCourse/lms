@@ -65,14 +65,14 @@ class PyFlakeChecker:
         for error in self._errors:
             self._logger.info('Adding error %s to solution %s',
                               error, self._solution_id)
-            comment = models.CommentText.create_comment(
+            comment_text = models.CommentText.create_comment(
                 text=error.text,
                 flake_key=error.error_code,
             )
-            models.Comment.create(
+            models.Comment.create_comment(
                 commenter=models.User.get_system_user(),
                 line_number=error.line_number,
-                comment=comment,
+                comment_text=comment_text,
                 solution=self.solution,
                 is_auto=True,
             )
