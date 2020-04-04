@@ -341,7 +341,14 @@ def upload():
         if exercise.is_archived:
             misses.add(exercise_id)
             continue
-        solution, _ = Solution.create_solution(
+
+        if Solution.solution_exists(
+                exercise=exercise,
+                solver=user,
+                json_data_str=code,
+        ):
+            continue
+        solution = Solution.create_solution(
             exercise=exercise,
             solver=user,
             json_data_str=code,

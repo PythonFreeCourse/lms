@@ -93,11 +93,10 @@ def exercise():
 
 @pytest.fixture()
 def solution(exercise, student_user):
-    instance, _ = Solution.create_solution(
+    return Solution.create_solution(
         exercise=exercise,
         solver=student_user,
     )
-    return instance
 
 
 @pytest.fixture()
