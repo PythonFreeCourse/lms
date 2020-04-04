@@ -60,12 +60,18 @@ class IdenticalSolutionSolver:
     ) -> None:
         for comment in models.Comment.by_solution(
                 from_solution.id,
-        ).join(models.CommentText).filter(
-            models.CommentText.flake8_key == None,
-        ):
-            comment[models.Comment.solution.name] = to_solution
-            comment.pop("id")
-            models.Comment.create(**comment)
+        ).filter(**{
+            '__'.join((
+                models.Comment.comment.name,
+                models.CommentText.flake8_key.name
+            )): None
+        }):
+            models.Comment.create_comment(
+                commenter=models.User.get_system_user(),
+                line_number=comment.line_number,
+                comment_text=comment.comment,
+                solution=to_solution
+            )
 
         to_solution.checker = from_solution.checker
         to_solution.is_checked = from_solution.is_checked

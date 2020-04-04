@@ -210,9 +210,25 @@ class Comment(BaseModel):
     solution = ForeignKeyField(Solution)
 
     @classmethod
+    def create_comment(
+            cls,
+            commenter: User,
+            line_number: int,
+            comment_text: CommentText,
+            solution: Solution,
+    ) -> 'Comment':
+        return cls.get_or_create(
+            commenter=commenter,
+            line_number=line_number,
+            comment=comment_text,
+            solution=solution,
+        )
+
+    @classmethod
     def by_solution(cls, solution_id: int):
         return Comment.select(
             Comment, CommentText.text,
+            CommentText.flake8_key, CommentText.id,
         ).join(CommentText).where(
             Comment.solution == solution_id,
         )

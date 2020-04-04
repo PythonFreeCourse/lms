@@ -101,10 +101,9 @@ def solution(exercise, student_user):
 
 @pytest.fixture()
 def comment(staff_user, solution):
-    return Comment.create(
+    return Comment.create_comment(
         commenter=staff_user,
-        timestamp=datetime.datetime.now(),
         solution=solution,
-        comment=CommentText.create_comment(text='very good!'),
+        comment_text=CommentText.create_comment(text='very good!'),
         line_number=1,
-    )
+    )[0]
