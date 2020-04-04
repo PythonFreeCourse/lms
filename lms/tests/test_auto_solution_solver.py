@@ -74,7 +74,7 @@ class TestAutoSolutionSolver:
         first_solution.is_checked = True
         first_solution.save()
         student_user: models.User = conftest.create_student_user(index=1)
-        second_solution, _ = models.Solution.create_solution(
+        second_solution = models.Solution.create_solution(
             exercise=first_solution.exercise,
             solver=student_user,
             json_data_str=second_solution_code,
