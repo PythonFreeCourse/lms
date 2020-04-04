@@ -335,15 +335,13 @@ def upload():
         if exercise is None:
             misses.add(exercise_id)
             continue
-        solution = Solution.create(
+        solution, _ = Solution.create_solution(
             exercise=exercise,
             solver=user,
             json_data_str=code,
-            submission_timestamp=datetime.now()
         )
-        matches.add(exercise_id)
         flake8_tasks.run_flake8_on_solution.apply_async(args=(solution.id,))
-
+        matches.add(exercise_id)
     return jsonify({
         "exercise_matches": list(matches),
         "exercise_misses": list(misses),
