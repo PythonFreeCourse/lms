@@ -3,18 +3,16 @@ import shutil
 import tempfile
 
 from lms.lmsdb import models
-from lms.lmstests.public.flake8 import tasks
 from lms.lmstests.public.flake8 import services
+from lms.lmstests.public.flake8 import tasks
 
 INVALID_CODE = 'print "Hello Word" '
-INVALID_CODE_MESSAGE = 'כשהבודק שלנו ניסה להריץ את הקוד שלך, הוא ראה שלפייתון יש בעיה להבין אותו. כדאי לוודא שהקוד רץ כהלכה לפני שמגישים אותו.'
+INVALID_CODE_MESSAGE = 'כשהבודק שלנו ניסה להריץ את הקוד שלך, הוא ראה שלפייתון יש בעיה להבין אותו. כדאי לוודא שהקוד רץ כהלכה לפני שמגישים אותו.'  # noqa E501
 INVALID_CODE_KEY = 'E999'
 VALID_CODE = 'print(0)'
 
-EXECUTE_CODE = '''
-import os
-eval('os.system("touch {}")')
-'''
+EXECUTE_CODE = ('import os\n'
+                'eval(\'os.system("touch {}")\')')
 
 
 class WrappedPyFlakeChecker(services.PyFlakeChecker):
@@ -47,17 +45,19 @@ class TestAutoFlake8:
         solution.json_data_str = self.execute_script
         solution.save()
         tasks.run_flake8_on_solution(solution.id)
-        comments = tuple(models.Comment.filter(models.Comment.solution == solution))
+        comments = tuple(
+            models.Comment.filter(models.Comment.solution == solution))
         assert not os.listdir(self.test_directory)
         assert len(comments) == 2
-        exec(compile(self.execute_script, '', 'exec'))
+        exec(compile(self.execute_script, '', 'exec'))  # noqa S102
         assert os.listdir(self.test_directory) == ['some-file']
 
     def test_invalid_solution(self, solution: models.Solution):
         solution.json_data_str = INVALID_CODE
         solution.save()
         tasks.run_flake8_on_solution(solution.id)
-        comments = tuple(models.Comment.filter(models.Comment.solution == solution))
+        comments = tuple(
+            models.Comment.filter(models.Comment.solution == solution))
         assert comments
         assert len(comments) == 1
         comment = comments[0].comment
@@ -68,5 +68,6 @@ class TestAutoFlake8:
         solution.json_data_str = VALID_CODE
         solution.save()
         tasks.run_flake8_on_solution(solution.id)
-        comments = tuple(models.Comment.filter(models.Comment.solution == solution))
+        comments = tuple(
+            models.Comment.filter(models.Comment.solution == solution))
         assert not comments
