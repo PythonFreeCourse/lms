@@ -1,6 +1,5 @@
 import json
 import os
-from datetime import datetime
 from functools import wraps
 from typing import Optional
 from urllib.parse import urljoin, urlparse
@@ -168,25 +167,43 @@ def status():
 
 
 def fetch_solutions(user_id):
-    fields = [
-        Exercise.id.alias('exercise_id'),
-        Exercise.subject.alias('exercise_name'),
-        Solution.id.alias('solution_id'),
-        Solution.is_checked,
-    ]
     solutions_filter = (
         (Solution.exercise == Exercise.id)
         & (Solution.solver == user_id)
     )
-    solutions = (
-        Exercise
-            .select(*fields)
+
+    not_solved_yet = (
+        Exercise.select(
+            Exercise.id.alias('exercise_id'),
+            Exercise.subject.alias('exercise_name')
+        )
             .join(Solution, 'LEFT OUTER', on=solutions_filter)
-            .where(Exercise.is_archived == False)  # NOQA: E712
-            .group_by(Exercise)
-            .order_by(Exercise.id)
+            .where(Solution.id.is_null())
     )
-    return tuple(solutions.dicts())
+
+    subquery = (
+        Solution.select(
+            Solution.id.alias('solution_id'),
+            Solution.exercise.alias('exercise'),
+            Solution.is_checked.alias('is_checked'),
+            fn.Max(Solution.submission_timestamp),
+        )
+            .group_by(Solution.exercise)
+            .alias('subquery')
+    )
+
+    fields = [
+        Exercise.id.alias('exercise_id'),
+        Exercise.subject.alias('exercise_name'),
+        subquery.c.solution_id,
+        subquery.c.is_checked,
+    ]
+
+    solutions = (
+        Exercise.select(*fields)
+            .join(subquery, on=(Exercise.id == subquery.c.exercise))
+    )
+    return tuple(solutions.dicts()) + tuple(not_solved_yet.dicts())
 
 
 @webapp.route('/exercises')
