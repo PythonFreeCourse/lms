@@ -74,4 +74,5 @@ class PyFlakeChecker:
                 line_number=error.line_number,
                 comment_text=comment_text,
                 solution=self.solution,
+                is_auto=True,
             )

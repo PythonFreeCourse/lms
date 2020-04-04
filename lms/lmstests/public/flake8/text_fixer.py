@@ -25,6 +25,7 @@ def _join_flake8_errors(flake8_key: str) -> None:
         for comment in models.Comment.select().join(
                 models.CommentText,
         ).filter(models.Comment.comment == extra):
+            comment.is_auto = True
             comment.comment = primary
             comment.save()
         extra.delete_instance()
