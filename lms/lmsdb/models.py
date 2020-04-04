@@ -108,7 +108,7 @@ class User(UserMixin, BaseModel):
         return instance
 
     @classmethod
-    def random_password(cls) -> string:
+    def random_password(cls) -> str:
         return ''.join(random.choices(string.printable.strip()[:65], k=12))
 
     def __str__(self):
@@ -130,6 +130,8 @@ class Exercise(BaseModel):
     date = DateTimeField()
     users = ManyToManyField(User, backref='exercises')
     is_archived = BooleanField()
+    notebook_num = IntegerField(default=0)
+    order = IntegerField(default=0)
 
     def __str__(self):
         return self.subject
@@ -152,10 +154,11 @@ class Solution(BaseModel):
 
     @classmethod
     def create_solution(
-            cls,
-            exercise: Exercise,
-            solver: User,
-            json_data_str=''):
+        cls,
+        exercise: Exercise,
+        solver: User,
+        json_data_str='',
+    ):
         return cls.get_or_create(**{
             cls.exercise.name: exercise,
             cls.solver.name: solver,
@@ -204,6 +207,7 @@ class Comment(BaseModel):
     line_number = IntegerField(constraints=[Check('line_number >= 1')])
     comment = ForeignKeyField(CommentText)
     solution = ForeignKeyField(Solution)
+    is_auto = BooleanField(default=False)
 
     @classmethod
     def by_solution(cls, solution_id: int):

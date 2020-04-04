@@ -1,7 +1,6 @@
 import json
-from datetime import datetime
-from functools import wraps
 import os
+from functools import wraps
 from typing import Optional
 from urllib.parse import urljoin, urlparse
 
@@ -23,12 +22,12 @@ from playhouse.shortcuts import model_to_dict  # type: ignore
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
-from lms.lmstests.public.flake8 import tasks as flake8_tasks
-from lms.lmsweb import webapp
 from lms.lmsdb.models import (
     Comment, CommentText, Exercise, RoleOptions, Solution, User, database,
     ALL_MODELS
 )
+from lms.lmstests.public.flake8 import tasks as flake8_tasks
+from lms.lmsweb import webapp
 from lms.lmsweb.tools.notebook_extractor import extract_exercises
 
 login_manager = LoginManager()
@@ -155,11 +154,11 @@ def status():
     ]
     solutions = (
         Exercise
-        .select(*fields)
-        .join(Solution, 'LEFT OUTER', on=(Solution.exercise == Exercise.id))
-        .where(Exercise.is_archived == False)  # NOQA: E712
-        .group_by(Exercise.subject, Exercise.id)
-        .order_by(Exercise.id)
+            .select(*fields)
+            .join(Solution, 'LEFT OUTER', on=(Solution.exercise == Exercise.id))
+            .where(Exercise.is_archived == False)  # NOQA: E712
+            .group_by(Exercise.subject, Exercise.id)
+            .order_by(Exercise.id)
     )
     return render_template(
         'status.html',
@@ -167,31 +166,36 @@ def status():
     )
 
 
-def fetch_solutions(user_id):
-    fields = [
-        Exercise.id.alias('exercise_id'),
-        Exercise.subject.alias('exercise_name'),
-        Solution.id.alias('solution_id'),
-        Solution.is_checked,
-    ]
-    solutions_filter = (
-        (Solution.exercise == Exercise.id)
-        & (Solution.solver == user_id)
-    )
-    solutions = (
+def fetch_exercises(user_id):
+    exercises = (
         Exercise
-        .select(*fields)
-        .join(Solution, 'LEFT OUTER', on=solutions_filter)
+        .select()
         .where(Exercise.is_archived == False)  # NOQA: E712
         .order_by(Exercise.id)
     )
-    return tuple(solutions.dicts())
+    exercises_dict = {item.id: {
+        'exercise_id': item.id,
+        'exercise_name': item.subject,
+        'is_archived': item.is_archived,
+        'is_checked': None,
+        'solution_id': None,
+        } for item in exercises
+    }
+    for solution in Solution.filter(
+            Solution.exercise.in_(exercises),
+            Solution.solver == user_id,
+    ).order_by(Solution.submission_timestamp.desc()):
+        if exercises_dict[solution.exercise_id]['solution_id'] is None:
+            exercises_dict[solution.exercise_id]['solution_id'] = solution.id
+            exercises_dict[solution.exercise_id]['is_checked'] = solution.is_checked
+
+    return tuple(exercises_dict.values())
 
 
 @webapp.route('/exercises')
 @login_required
 def exercises_page():
-    exercises = fetch_solutions(current_user.id)
+    exercises = fetch_exercises(current_user.id)
     is_manager = current_user.role.is_manager
     return render_template(
         'exercises.html',
@@ -328,32 +332,25 @@ def upload():
         msg = "No exercises were found in the notebook"
         desc = "did you use Upload <number of exercise> ? (example: Upload 1)"
         return fail(402, f'{msg}, {desc}')
-    matches, misses, duplications = set(), set(), set()
+    matches, misses = set(), set()
     for exercise_id, code in exercises:
         exercise = Exercise.get_or_none(Exercise.id == exercise_id)
         if exercise is None:
             misses.add(exercise_id)
             continue
-        solution, created = Solution.create_solution(
+        if exercise.is_archived:
+            misses.add(exercise_id)
+            continue
+        solution, _ = Solution.create_solution(
             exercise=exercise,
             solver=user,
             json_data_str=code,
         )
         flake8_tasks.run_flake8_on_solution.apply_async(args=(solution.id,))
-        if created:
-            matches.add(exercise_id)
-        else:
-            solution.json_data_str = code
-            solution.submission_timestamp = datetime.now()
-            solution.save()
-            duplications.add(exercise_id)
-
-    valid = matches - duplications
-
+        matches.add(exercise_id)
     return jsonify({
-        "exercise_matches": list(valid),
+        "exercise_matches": list(matches),
         "exercise_misses": list(misses),
-        "exercise_duplications": list(duplications)
     })
 
 

@@ -1,5 +1,6 @@
-from peewee import ProgrammingError
+from typing import Type
 
+from peewee import Model, Field
 from playhouse.migrate import migrate
 
 from lms.lmsdb import database_config  # noqa: I100
@@ -7,29 +8,55 @@ from lms.lmsdb import models
 from lms.lmstests.public.flake8 import text_fixer
 
 
-def _add_flake8_key_if_needed():
-    exists = True
-    try:
-        with database_config.database.atomic():
-            models.CommentText.create_comment('dummy222', 'dummy222')
-            database_config.database.rollback()
-    except ProgrammingError:
-        exists = False
-        database_config.database.close()
+def _migrate_column_in_table_if_needed(
+    table: Type[Model],
+    field_instance: Field,
+):
+    column_name = field_instance.name
+    table_name = table.__name__.lower()
+    cols = {col.name for col in database_config.database.get_columns(table_name)}
 
-    if exists:
-        print('No need to create flake8_key')  # noqa: T001
+    if column_name in cols:
+        print(f'No need to create {column_name} column for table {table}')  # noqa: T001
         return
 
-    print('create flake_key field')  # noqa: T001
+    print(f'create {column_name} field in {table}')  # noqa: T001
     migrator = database_config.get_migrator_instance()
     with database_config.database.transaction():
         migrate(migrator.add_column(
-            'commenttext',
-            models.CommentText.flake8_key.name,
-            models.CommentText.flake8_key,
+            table_name,
+            field_instance.name,
+            field_instance,
         ))
         database_config.database.commit()
+
+
+def _add_flake8_key_if_needed():
+    return _migrate_column_in_table_if_needed(
+        models.CommentText,
+        models.CommentText.flake8_key,
+    )
+
+
+def _add_notebook_num_if_needed():
+    return _migrate_column_in_table_if_needed(
+        models.Exercise,
+        models.Exercise.notebook_num,
+    )
+
+
+def _add_order_if_needed():
+    return _migrate_column_in_table_if_needed(
+        models.Exercise,
+        models.Exercise.order,
+    )
+
+
+def _add_is_auto_needed():
+    return _migrate_column_in_table_if_needed(
+        models.Comment,
+        models.Comment.is_auto,
+    )
 
 
 def main():
@@ -42,6 +69,9 @@ def main():
             models.create_demo_users()
 
     _add_flake8_key_if_needed()
+    _add_notebook_num_if_needed()
+    _add_is_auto_needed()
+    _add_order_if_needed()
     text_fixer.fix_texts()
 
 
