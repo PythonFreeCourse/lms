@@ -167,43 +167,28 @@ def status():
 
 
 def fetch_solutions(user_id):
-    solutions_filter = (
-        (Solution.exercise == Exercise.id)
-        & (Solution.solver == user_id)
+    exercises = (
+        Exercise
+        .select()
+        .where(Exercise.is_archived == False)  # NOQA: E712
+        .order_by(Exercise.id)
     )
+    exercises_dict = {item.id: {
+        'exercise_id': item.id,
+        'exercise_name': item.subject,
+        'is_checked': None,
+        'solution_id': None
+        } for item in exercises
+    }
+    for solution in Solution.filter(
+            Solution.exercise.in_(exercises),
+            Solution.solver == user_id,
+    ).order_by(Solution.submission_timestamp.desc()):
+        if exercises_dict[solution.exercise_id]['solution_id'] is None:
+            exercises_dict[solution.exercise_id]['solution_id'] = solution.id
+            exercises_dict[solution.exercise_id]['is_checked'] = True
 
-    not_solved_yet = (
-        Exercise.select(
-            Exercise.id.alias('exercise_id'),
-            Exercise.subject.alias('exercise_name')
-        )
-            .join(Solution, 'LEFT OUTER', on=solutions_filter)
-            .where(Solution.id.is_null())
-    )
-
-    subquery = (
-        Solution.select(
-            Solution.id.alias('solution_id'),
-            Solution.exercise.alias('exercise'),
-            Solution.is_checked.alias('is_checked'),
-            fn.Max(Solution.submission_timestamp),
-        )
-            .group_by(Solution.exercise)
-            .alias('subquery')
-    )
-
-    fields = [
-        Exercise.id.alias('exercise_id'),
-        Exercise.subject.alias('exercise_name'),
-        subquery.c.solution_id,
-        subquery.c.is_checked,
-    ]
-
-    solutions = (
-        Exercise.select(*fields)
-            .join(subquery, on=(Exercise.id == subquery.c.exercise))
-    )
-    return tuple(solutions.dicts()) + tuple(not_solved_yet.dicts())
+    return tuple(exercises_dict.values())
 
 
 @webapp.route('/exercises')
