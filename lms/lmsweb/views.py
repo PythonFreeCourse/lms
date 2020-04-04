@@ -24,6 +24,7 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
 from lms.lmstests.public.flake8 import tasks as flake8_tasks
+from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmsweb import webapp
 from lms.lmsdb.models import (
     Comment, CommentText, Exercise, RoleOptions, Solution, User, database,
@@ -340,6 +341,7 @@ def upload():
             json_data_str=code,
         )
         flake8_tasks.run_flake8_on_solution.apply_async(args=(solution.id,))
+        identical_tests_tasks.solve_solution_with_identical_code.apply_async(args=(solution.id,))
         if created:
             matches.add(exercise_id)
         else:
@@ -393,6 +395,7 @@ def done_checking(exercise_id, solution_id):
         is_checked=True, checker=current_user.id,
     ).where(requested_solution)
     is_updated = changes.execute() == 1
+    identical_tests_tasks.check_if_other_solutions_can_be_solved.apply_async(args=(solution_id,))
     next_exercise = Solution.next_unchecked_of(exercise_id).get('id')
     return jsonify({'success': is_updated, 'next': next_exercise})
 
