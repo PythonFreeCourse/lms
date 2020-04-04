@@ -166,7 +166,7 @@ def status():
     )
 
 
-def fetch_solutions(user_id):
+def fetch_exercises(user_id):
     exercises = (
         Exercise
         .select()
@@ -176,8 +176,9 @@ def fetch_solutions(user_id):
     exercises_dict = {item.id: {
         'exercise_id': item.id,
         'exercise_name': item.subject,
+        'is_archived': item.is_archived,
         'is_checked': None,
-        'solution_id': None
+        'solution_id': None,
         } for item in exercises
     }
     for solution in Solution.filter(
@@ -194,7 +195,7 @@ def fetch_solutions(user_id):
 @webapp.route('/exercises')
 @login_required
 def exercises_page():
-    exercises = fetch_solutions(current_user.id)
+    exercises = fetch_exercises(current_user.id)
     is_manager = current_user.role.is_manager
     return render_template(
         'exercises.html',
