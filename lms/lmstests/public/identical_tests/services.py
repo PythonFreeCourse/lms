@@ -21,24 +21,29 @@ class IdenticalSolutionSolver:
     def solution(self) -> models.Solution:
         return self._solution
 
-    def clone_comments_from_identical_solution(self):
-        for solution in models.Solution.select().join(
-                models.Exercise,
+    def check_identical(self):
+        solution = self._get_first_identical_solution()
+        if solution is None:
+            return
+
+        self._logger.info(
+            'solution %s matched to an checked solution %s. '
+            'fork the comments and solve',
+            self.solution.id, solution.id,
+        )
+        self._clone_solution_comments(
+            from_solution=solution,
+            to_solution=self.solution,
+        )
+
+    def _get_first_identical_solution(self):
+        return models.Solution.select().join(
+            models.Exercise,
         ).filter(**{
             models.Solution.exercise.name: self.solution.exercise,
             models.Solution.is_checked.name: True,
             models.Solution.json_data_str.name: self.solution.json_data_str,
-        }):
-            self._logger.info(
-                'solution %s matched to an checked solution %s. '
-                'fork the comments and solve',
-                self.solution.id, solution.id,
-            )
-            self._clone_solution_comments(
-                from_solution=solution,
-                to_solution=self.solution,
-            )
-            break
+        }).first()
 
     def check_for_match_solutions_to_solve(self):
         for solution in models.Solution.select().join(

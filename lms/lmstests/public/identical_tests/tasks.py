@@ -19,7 +19,7 @@ def solve_solution_with_identical_code(solution_pk: str) -> None:
         )
         checker = services.IdenticalSolutionSolver(solution_pk, _logger)
         checker.initialize()
-        checker.clone_comments_from_identical_solution()
+        checker.check_identical()
     except Exception:
         _logger.exception(
             'Failed check_if_other_solutions_can_be_solved solution %s',
