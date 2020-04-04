@@ -3,7 +3,7 @@ from typing import Type
 from peewee import Model, Field
 from playhouse.migrate import migrate
 
-from lms.lmsdb import database_config, database  # noqa: I100
+from lms.lmsdb import database_config  # noqa: I100
 from lms.lmsdb import models
 from lms.lmstests.public.flake8 import text_fixer
 
@@ -14,7 +14,7 @@ def _migrate_column_in_table_if_needed(
 ):
     column_name = field_instance.name
     table_name = table.__name__.lower()
-    cols = {col.name for col in database.get_columns(table_name)}
+    cols = {col.name for col in database_config.database.get_columns(table_name)}
 
     if column_name in cols:
         print(f'No need to create {column_name} column for table {table}')  # noqa: T001
