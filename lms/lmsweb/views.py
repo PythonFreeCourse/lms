@@ -186,7 +186,7 @@ def fetch_solutions(user_id):
     ).order_by(Solution.submission_timestamp.desc()):
         if exercises_dict[solution.exercise_id]['solution_id'] is None:
             exercises_dict[solution.exercise_id]['solution_id'] = solution.id
-            exercises_dict[solution.exercise_id]['is_checked'] = True
+            exercises_dict[solution.exercise_id]['is_checked'] = solution.is_checked
 
     return tuple(exercises_dict.values())
 
