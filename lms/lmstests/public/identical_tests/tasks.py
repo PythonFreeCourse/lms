@@ -19,7 +19,7 @@ def solve_solution_with_identical_code(solution_pk: str) -> None:
         )
         checker = services.IdenticalSolutionSolver(solution_pk, _logger)
         checker.initialize()
-        checker.check_identical()
+        checker.clone_comments_from_identical_solution()
     except Exception:
         _logger.exception(
             'Failed check_if_other_solutions_can_be_solved solution %s',
@@ -36,7 +36,7 @@ def check_if_other_solutions_can_be_solved(solution_pk: str) -> None:
         )
         checker = services.IdenticalSolutionSolver(solution_pk, _logger)
         checker.initialize()
-        checker.check_if_can_solve_other_solutions()
+        checker.check_for_match_solutions_to_solve()
     except Exception:
         _logger.exception(
             'Failed check_if_other_solutions_can_be_solved solution %s',

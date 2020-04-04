@@ -21,7 +21,7 @@ class IdenticalSolutionSolver:
     def solution(self) -> models.Solution:
         return self._solution
 
-    def check_identical(self):
+    def clone_comments_from_identical_solution(self):
         for solution in models.Solution.select().join(
                 models.Exercise,
         ).filter(**{
@@ -40,7 +40,7 @@ class IdenticalSolutionSolver:
             )
             break
 
-    def check_if_can_solve_other_solutions(self):
+    def check_for_match_solutions_to_solve(self):
         for solution in models.Solution.select().join(
                 models.Exercise,
         ).filter(**{
@@ -58,14 +58,17 @@ class IdenticalSolutionSolver:
             from_solution: models.Solution,
             to_solution: models.Solution,
     ) -> None:
-        for comment in models.Comment.by_solution(
-                from_solution.id,
-        ).filter(**{
-            '__'.join((
-                models.Comment.comment.name,
-                models.CommentText.flake8_key.name,
-            )): None,
-        }):
+        user_comments = models.Comment.by_solution(
+            from_solution.id,
+        ).filter(
+            **{
+                '__'.join((
+                    models.Comment.comment.name,
+                    models.CommentText.flake8_key.name,
+                )): None,
+            },
+        )
+        for comment in user_comments:
             models.Comment.create_comment(
                 commenter=models.User.get_system_user(),
                 line_number=comment.line_number,

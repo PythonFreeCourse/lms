@@ -234,7 +234,7 @@ class Comment(BaseModel):
         )
 
     @classmethod
-    def solution_dicts(cls, solution_id: int) -> typing.Sequence[dict]:
+    def get_solutions(cls, solution_id: int) -> typing.Sequence[dict]:
         return tuple(cls.by_solution(solution_id).dicts())
 
 
