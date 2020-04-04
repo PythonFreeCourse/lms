@@ -150,6 +150,10 @@ class Solution(BaseModel):
     def code(self):
         return self.json_data_str
 
+    @property
+    def comments(self):
+        return Comment.select().join(Solution).filter(Comment.solution == self)
+
     @classmethod
     def create_solution(
             cls,
@@ -207,12 +211,15 @@ class Comment(BaseModel):
 
     @classmethod
     def by_solution(cls, solution_id: int):
-        return tuple((
-            Comment
-            .select(Comment, CommentText.text)
-            .join(CommentText)
-            .where(Comment.solution == solution_id)
-        ).dicts())
+        return Comment.select(
+            Comment, CommentText.text,
+        ).join(CommentText).where(
+            Comment.solution == solution_id,
+        )
+
+    @classmethod
+    def solution_dicts(cls, solution_id: int) -> typing.Sequence[dict]:
+        return tuple(cls.by_solution(solution_id).dicts())
 
 
 def generate_password():

@@ -1,7 +1,7 @@
 import datetime
 
 from lms.lmsdb.models import (
-    ALL_MODELS, CommentText, Exercise, Role, RoleOptions, Solution, User,
+    ALL_MODELS, Comment, CommentText, Exercise, Role, RoleOptions, Solution, User,
 )
 
 from peewee import SqliteDatabase
@@ -55,17 +55,16 @@ def staff_user(staff_password):
 
 
 @pytest.fixture()
-def user_password():
-    return 'fake pass'
+def student_user():
+    return create_student_user()
 
 
-@pytest.fixture()
-def student_user(user_password):
+def create_student_user(index=0):
     return User.create(  # NOQA: S106
-        username='student',
+        username=f'student-{index}',
         fullname='Astudent',
-        mail_address='so-student@mail.com',
-        password=user_password,
+        mail_address=f'so-student-{index}@mail.com',
+        password='fake pass',
         role=Role.get_student_role(),
     )
 
@@ -101,11 +100,11 @@ def solution(exercise, student_user):
 
 
 @pytest.fixture()
-def comment(staff_user, exercise):
-    return CommentText.create(
+def comment(staff_user, solution):
+    return Comment.create(
         commenter=staff_user,
         timestamp=datetime.datetime.now(),
-        exercise=exercise,
-        text='very good!',
+        solution=solution,
+        comment=CommentText.create_comment(text='very good!'),
         line_number=1,
     )

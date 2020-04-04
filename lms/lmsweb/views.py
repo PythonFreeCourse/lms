@@ -260,7 +260,7 @@ def comment():
         return fail(401, "You aren't allowed to watch this page.")
 
     if act == 'fetch':
-        return jsonify(Comment.by_solution(solution_id))
+        return jsonify(Comment.solution_dicts(solution_id))
 
     if act == 'delete':
         comment_id = int(request.args.get('commentId'))
