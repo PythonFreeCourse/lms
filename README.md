@@ -11,7 +11,7 @@
 ```bash
 git clone https://github.com/PythonFreeCourse/lms
 cd lms/lms
-pip install -r --user requirements.txt
+pip install --user -r requirements.txt
 mv lmsweb/config.py.example lmsweb/config.py
 echo "SECRET_KEY = \"$(python -c 'import os;print(os.urandom(32).hex())')\"" >> lms/lmsweb/config.py
 
