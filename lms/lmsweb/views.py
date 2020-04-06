@@ -384,8 +384,12 @@ def view(solution_id):
     if is_manager:
         view_params = {
             **view_params,
-            'exercise_common_comments': _common_comments(solution.exercise),
-            'all_common_comments': _common_comments(),
+            'exercise_common_comments':
+                _common_comments(exercise_id=solution.exercise),
+            'all_common_comments':
+                _common_comments(),
+            'user_comments':
+                _common_comments(user_id=current_user.id),
         }
 
     return render_template('view.html', **view_params)
@@ -419,7 +423,7 @@ def start_checking(exercise_id):
     return redirect('/exercises')
 
 
-def _common_comments(exercise_id=None):
+def _common_comments(exercise_id=None, user_id=None):
     """
     Most common comments throughout all exercises.
     Filter by exercise id when specified.
@@ -432,6 +436,10 @@ def _common_comments(exercise_id=None):
                  .join(Solution)
                  .join(Exercise)
                  .where(Exercise.id == exercise_id)
+                 )
+    if user_id is not None:
+        query = (query
+                 .filter(Comment.commenter == user_id)
                  )
 
     query = (query
