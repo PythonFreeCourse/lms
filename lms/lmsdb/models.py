@@ -152,6 +152,20 @@ class Solution(BaseModel):
     def code(self):
         return self.json_data_str
 
+    def previous_solutions(self) -> typing.Iterable['Solution']:
+        return Solution.select().filter(
+            Solution.exercise == self.exercise,
+            Solution.solver == self.solver,
+            Solution.id < self.id,
+        ).order_by(Solution.submission_timestamp.desc())
+
+    def next_solutions(self) -> typing.Iterable['Solution']:
+        return Solution.select().filter(
+            Solution.exercise == self.exercise,
+            Solution.solver == self.solver,
+            Solution.id > self.id,
+        ).order_by(Solution.submission_timestamp.asc())
+
     @property
     def comments(self):
         return Comment.select().join(Solution).filter(Comment.solution == self)

@@ -13,6 +13,26 @@
     {% else %}
     <p id="solver"><strong>מגיש:</strong> {{ solution['solver']['fullname'] }}</p>
     {% endif %}
+    {% set index = namespace(value=-(previous_solutions | length)) %}
+    <div id="previous-solutions">
+        {% for previous_solution in previous_solutions %}
+            <a class="our-button" href="{{ previous_solution['id'] }}">
+                {{ index.value }}
+            </a>
+            {% set index.value = index.value + 1 %}
+        {% endfor %}
+    </div>
+    <div>
+        YOU
+    </div>
+    <div id="next-solutions">
+        {% for next_solution in next_solutions %}
+            <a class="our-button" href="{{ next_solution['id'] }}">
+                {{ index.value }}
+            </a>
+            {% set index.value = index.value + 1 %}
+        {% endfor %}
+    </div>
   </div>
   <div id="view-body">
           <div id="code-view" data-id="{{ solution['id'] }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}">

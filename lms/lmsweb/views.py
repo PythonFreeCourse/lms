@@ -392,10 +392,20 @@ def view(solution_id):
     if solution.solver.id != current_user.id and not is_manager:
         return fail(403, "This user has no permissions to view this page.")
 
+    previous_solutions = tuple(
+        model_to_dict(previous_solution)
+        for previous_solution in solution.previous_solutions()
+    )
+    next_solutions = tuple(
+        model_to_dict(previous_solution)
+        for previous_solution in solution.next_solutions()
+    )
     view_params = {
         'solution': model_to_dict(solution),
         'is_manager': is_manager,
         'role': current_user.role.name.lower(),
+        'previous_solutions': previous_solutions,
+        'next_solutions': next_solutions
     }
 
     if is_manager:
