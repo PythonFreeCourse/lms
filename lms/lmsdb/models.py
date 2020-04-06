@@ -157,7 +157,7 @@ class Solution(BaseModel):
             Solution.exercise == self.exercise,
             Solution.solver == self.solver,
             Solution.id < self.id,
-        ).order_by(Solution.submission_timestamp.desc())
+        ).order_by(Solution.submission_timestamp.asc())
 
     def next_solutions(self) -> typing.Iterable['Solution']:
         return Solution.select().filter(
