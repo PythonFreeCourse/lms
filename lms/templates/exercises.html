@@ -4,6 +4,13 @@
 <div class="container">
   <div id="exercises-page" class="page">
     <h1 id="exercises-head">תרגילים</h1>
+    {% if not fetch_archived %}
+      <div id="show-all-exercises">
+        <a class="our-button" href="/all_exercises">
+            <h1 id="exercises-head">רשימת כל התרגילים</h1>
+        </a>
+    </div>
+    {% endif %}
     <div id="exercises">
       {% for exercise in exercises %}
       <div class="exercise">

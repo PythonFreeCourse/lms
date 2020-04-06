@@ -167,13 +167,14 @@ def status():
     )
 
 
-def fetch_exercises(user_id):
+def fetch_exercises(user_id, fetch_archived=False):
     exercises = (
         Exercise
         .select()
-        .where(Exercise.is_archived == False)  # NOQA: E712
         .order_by(Exercise.id)
     )
+    if not fetch_archived:
+        exercises = exercises.where(Exercise.is_archived == False)  # NOQA: E712
     exercises_dict = {item.id: {
         'exercise_id': item.id,
         'exercise_name': item.subject,
@@ -196,11 +197,27 @@ def fetch_exercises(user_id):
 @webapp.route('/exercises')
 @login_required
 def exercises_page():
-    exercises = fetch_exercises(current_user.id)
+    fetch_archived = request.args.get('fetch_archived', False)
+    exercises = fetch_exercises(current_user.id, fetch_archived)
     is_manager = current_user.role.is_manager
     return render_template(
         'exercises.html',
-        exercises=exercises, is_manager=is_manager,
+        exercises=exercises,
+        is_manager=is_manager,
+        fetch_archived=fetch_archived
+    )
+
+
+@webapp.route('/all_exercises')
+@login_required
+def all_exercises_page():
+    exercises = fetch_exercises(current_user.id, fetch_archived=True)
+    is_manager = current_user.role.is_manager
+    return render_template(
+        'exercises.html',
+        exercises=exercises,
+        is_manager=is_manager,
+        fetch_archived=True
     )
 
 
