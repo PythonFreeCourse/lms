@@ -45,10 +45,11 @@ class TestSolution:
         assert not first_solution.get().latest_solution  # refresh results
 
         assert Solution.next_unchecked()['id'] == second_solution.id
-        assert Solution.next_unchecked_of(
-            exercise.id,
-        )['id'] == second_solution.id
+        next_unchecked_id = Solution.next_unchecked_of(exercise.id)['id']
+        assert next_unchecked_id == second_solution.id
+
         second_solution.is_checked = True
         second_solution.save()
+
         assert Solution.next_unchecked() == {}
         assert Solution.next_unchecked_of(exercise.id) == {}

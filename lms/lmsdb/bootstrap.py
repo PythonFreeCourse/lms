@@ -20,7 +20,7 @@ def _migrate_column_in_table_if_needed(
     }
 
     if column_name in cols:
-        print(f'No need to create {column_name} column for table {table}')  # noqa: T001,E501
+        print(f'No need to create {column_name} column for table {table}')  # noqa: T001, E501
         return
 
     print(f'create {column_name} field in {table}')  # noqa: T001
