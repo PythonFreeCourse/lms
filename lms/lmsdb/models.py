@@ -189,7 +189,7 @@ class Solution(BaseModel):
         }).where(
             cls.exercise == exercise,
             cls.solver == solver,
-            cls.id < instance.id,
+            cls.id != instance.id,
         ).execute()
         return instance
 
