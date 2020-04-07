@@ -145,6 +145,7 @@ class Solution(BaseModel):
     grade = IntegerField(
         default=0, constraints=[Check('grade <= 100'), Check('grade >= 0')],
     )
+    latest_solution = BooleanField(default=True)
     submission_timestamp = DateTimeField()
     json_data_str = TextField()
 
@@ -176,16 +177,28 @@ class Solution(BaseModel):
         solver: User,
         json_data_str='',
     ):
-        return cls.create(**{
+        instance = cls.create(**{
             cls.exercise.name: exercise,
             cls.solver.name: solver,
             cls.submission_timestamp.name: datetime.now(),
             cls.json_data_str.name: json_data_str,
         })
+        # update old solutions for this exercise
+        cls.update(**{
+            cls.latest_solution.name: False,
+        }).where(
+            cls.exercise == exercise,
+            cls.solver == solver,
+            cls.id != instance.id,
+        ).execute()
+        return instance
 
     @classmethod
     def next_unchecked(cls):
-        unchecked_exercises = cls.select().where(cls.is_checked == False)  # NOQA: E712, E501
+        unchecked_exercises = cls.select().where(
+            cls.is_checked == False,  # NOQA: E712
+            cls.latest_solution == True,  # NOQA: E712
+        )
         try:
             return unchecked_exercises.dicts().get()
         except cls.DoesNotExist:
@@ -195,7 +208,9 @@ class Solution(BaseModel):
     def next_unchecked_of(cls, exercise_id):
         try:
             return cls.select().where(
-                (cls.is_checked == 0) & (exercise_id == cls.exercise),
+                cls.is_checked == 0,
+                cls.exercise == exercise_id,
+                cls.latest_solution == True,  # NOQA: E712
             ).dicts().get()
         except cls.DoesNotExist:
             return {}

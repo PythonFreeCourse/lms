@@ -1,7 +1,7 @@
 from typing import Type
 
-from peewee import Model, Field
-from playhouse.migrate import migrate
+from peewee import Field, Model
+from playhouse.migrate import migrate  # noqa: I201
 
 from lms.lmsdb import database_config  # noqa: I100
 from lms.lmsdb import models
@@ -14,10 +14,11 @@ def _migrate_column_in_table_if_needed(
 ):
     column_name = field_instance.name
     table_name = table.__name__.lower()
-    cols = {col.name for col in database_config.database.get_columns(table_name)}
+    columns = database_config.database.get_columns(table_name)
+    cols = {col.name for col in columns}
 
     if column_name in cols:
-        print(f'No need to create {column_name} column for table {table}')  # noqa: T001
+        print(f'No need to create {column_name} column for table {table}')  # noqa: T001, E501
         return
 
     print(f'create {column_name} field in {table}')  # noqa: T001
@@ -52,10 +53,17 @@ def _add_order_if_needed():
     )
 
 
-def _add_is_auto_needed():
+def _add_is_auto_if_needed():
     return _migrate_column_in_table_if_needed(
         models.Comment,
         models.Comment.is_auto,
+    )
+
+
+def _add_latest_solution_if_needed():
+    return _migrate_column_in_table_if_needed(
+        models.Solution,
+        models.Solution.latest_solution,
     )
 
 
@@ -70,7 +78,8 @@ def main():
 
     _add_flake8_key_if_needed()
     _add_notebook_num_if_needed()
-    _add_is_auto_needed()
+    _add_is_auto_if_needed()
+    _add_latest_solution_if_needed()
     _add_order_if_needed()
     text_fixer.fix_texts()
 
