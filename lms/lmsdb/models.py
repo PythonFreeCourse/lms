@@ -196,8 +196,8 @@ class Solution(BaseModel):
     @classmethod
     def next_unchecked(cls):
         unchecked_exercises = cls.select().where(
-            cls.is_checked == False,  # NOQA: E712, E501
-            cls.latest_solution == True,  # NOQA: E712, E501
+            cls.is_checked == False,  # NOQA: E712
+            cls.latest_solution == True,  # NOQA: E712
         )
         try:
             return unchecked_exercises.dicts().get()
@@ -210,7 +210,7 @@ class Solution(BaseModel):
             return cls.select().where(
                 cls.is_checked == 0,
                 cls.exercise == exercise_id,
-                cls.latest_solution == True,  # NOQA: E712, E501
+                cls.latest_solution == True,  # NOQA: E712
             ).dicts().get()
         except cls.DoesNotExist:
             return {}
