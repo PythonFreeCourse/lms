@@ -152,18 +152,10 @@ class Solution(BaseModel):
     def code(self):
         return self.json_data_str
 
-    def previous_solutions(self) -> typing.Iterable['Solution']:
+    def ordered_versions(self) -> typing.Iterable['Solution']:
         return Solution.select().filter(
             Solution.exercise == self.exercise,
             Solution.solver == self.solver,
-            Solution.id < self.id,
-        ).order_by(Solution.submission_timestamp.asc())
-
-    def next_solutions(self) -> typing.Iterable['Solution']:
-        return Solution.select().filter(
-            Solution.exercise == self.exercise,
-            Solution.solver == self.solver,
-            Solution.id > self.id,
         ).order_by(Solution.submission_timestamp.asc())
 
     @property
