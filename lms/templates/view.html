@@ -36,6 +36,14 @@
           {% endfor -%}
         </ol>
       </div>
+      <div id="all-comments">
+        <h2>הערות בודק</h2>
+        <ol id="all-comments-list" class="comments all-comments">
+          {%- for comment in user_comments %}
+          <li class="known-comment" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text }}</li>
+          {% endfor -%}
+        </ol>
+      </div>
       <div id="grader-buttons">
         <button id="save-check" class="btn btn-success">סיימתי לבדוק!</button>
         <a id="ninja" href="#" class="badge badge-dark" style="display: none;">Ninja Mode</a>
