@@ -14,10 +14,8 @@ def _migrate_column_in_table_if_needed(
 ):
     column_name = field_instance.name
     table_name = table.__name__.lower()
-    cols = {
-        col.name
-        for col in database_config.database.get_columns(table_name)
-    }
+    columns = database_config.database.get_columns(table_name)
+    cols = {col.name for col in columns}
 
     if column_name in cols:
         print(f'No need to create {column_name} column for table {table}')  # noqa: T001, E501
