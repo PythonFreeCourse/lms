@@ -7,8 +7,8 @@ from typing import Any, Dict, Iterable, Optional, Tuple
 
 from flask_login import UserMixin  # type: ignore
 from peewee import (  # type: ignore
-    BooleanField, CharField, Check, DateTimeField, ForeignKeyField,
-    IntegerField, ManyToManyField, TextField,
+    BooleanField, Case, CharField, Check, DateTimeField, ForeignKeyField,
+    IntegerField, ManyToManyField, TextField, fn,
 )
 from playhouse.signals import Model, pre_save  # type: ignore
 from werkzeug.security import (
@@ -253,6 +253,27 @@ class Solution(BaseModel):
             ).dicts().get()
         except cls.DoesNotExist:
             return {}
+
+    @classmethod
+    def status(cls):
+        one_if_is_checked = Case(Solution.is_checked, ((True, 1),), 0)
+        fields = [
+            Exercise.id,
+            Exercise.subject.alias('name'),
+            Exercise.is_archived.alias('is_archived'),
+            fn.Count(Solution.id).alias('submitted'),
+            fn.Sum(one_if_is_checked).alias('checked'),
+        ]
+
+        join_by_exercise = (Solution.exercise == Exercise.id)
+        return (
+            Exercise
+            .select(*fields)
+            .join(Solution, 'LEFT OUTER', on=join_by_exercise)
+            .group_by(Exercise.subject, Exercise.id, Solution.latest_solution)
+            .having(Solution.latest_solution == True)  # NOQA: E712
+            .order_by(Exercise.id)
+        )
 
 
 class CommentText(BaseModel):
