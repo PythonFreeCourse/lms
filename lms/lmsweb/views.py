@@ -12,7 +12,7 @@ from flask_admin.contrib.peewee import ModelView  # type: ignore
 from flask_login import (  # type: ignore
     LoginManager, current_user, login_required, login_user, logout_user,
 )
-from peewee import Case, fn  # type: ignore
+from peewee import fn  # type: ignore
 from playhouse.shortcuts import model_to_dict  # type: ignore
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
@@ -65,13 +65,11 @@ def load_user(user_id):
 
 
 def managers_only(func):
-    """Decorator enforrcing access for managers only"""
-
     # Must have @wraps to work with endpoints.
     @wraps(func)
     def wrapper(*args, **kwargs):
         if not current_user.role.is_manager:
-            return fail(403, "This user has no permissions to view this page.")
+            return fail(403, 'This user has no permissions to view this page.')
         else:
             return func(*args, **kwargs)
 
@@ -81,7 +79,7 @@ def managers_only(func):
 def fail(status_code: int, error_msg: str):
     data = {
         'status': 'failed',
-        'msg': error_msg
+        'msg': error_msg,
     }
     response = jsonify(data)
     response.status_code = status_code
@@ -176,27 +174,26 @@ def _create_comment(
         return fail(404, 'No such user')
 
     if (not kind) or (kind not in ('id', 'text')):
-        return fail(400, "Invalid kind")
+        return fail(400, 'Invalid kind')
 
     if line_number <= 0:
-        return fail(422, f"Invalid line number: {line_number}")
+        return fail(422, f'Invalid line number: {line_number}')
 
     if kind == 'id':
         new_comment_id = comment_id
     elif kind == 'text':
         if not comment_text:
             return fail(422, 'Empty comments are not allowed')
-            # TODO(LOW): Check if line number > MAX_SOLUTION_LINE_NUMBER
         new_comment_id = CommentText.create_comment(text=comment_text).id
     else:
         # should never happend, kind was checked before
-        return fail(400, "Invalid kind")
+        return fail(400, 'Invalid kind')
 
     comment_ = Comment.create(
         commenter=user,
         line_number=line_number,
         comment=new_comment_id,
-        solution=solution
+        solution=solution,
     )
 
     return jsonify({
@@ -216,7 +213,7 @@ def comment():
 
     solution = Solution.get_or_none(Solution.id == solution_id)
     if solution is None:
-        return fail(404, f"No such solution {solution_id}")
+        return fail(404, f'No such solution {solution_id}')
 
     solver_id = solution.solver.id
     if solver_id != current_user.id and not current_user.role.is_manager:
@@ -230,7 +227,7 @@ def comment():
         comment_ = Comment.get_or_none(Comment.id == comment_id)
         if comment_ is not None:
             comment_.delete_instance()
-        return jsonify({"success": "true"})
+        return jsonify({'success': 'true'})
 
     if act == 'create':
         kind = request.json.get('kind', '')
@@ -240,9 +237,9 @@ def comment():
         except ValueError:
             line_number = 0
         if kind.lower() == 'id':
-            comment_id = int(request.json.get("comment", 0))
+            comment_id = int(request.json.get('comment', 0))
         if kind.lower() == 'text':
-            comment_text = request.json.get("comment", '')
+            comment_text = request.json.get('comment', '')
         return _create_comment(
             current_user.id,
             solution,
@@ -273,23 +270,23 @@ def upload():
     user_id = current_user.id
     user = User.get_or_none(User.id == user_id)  # should never happen
     if user is None:
-        return fail(404, "user not found")
+        return fail(404, 'user not found')
     if request.content_length > MAX_REQUEST_SIZE:
-        return fail(413, "File is too heavy. 500KB allowed")
+        return fail(413, 'File is too heavy. 500KB allowed')
 
     file: FileStorage = request.files.get('file')
     if not file:
-        return fail(422, "No file was given")
+        return fail(422, 'No file was given')
 
     json_file_data = file.read()
     try:
         file_content = json.loads(json_file_data)
         exercises = list(extract_exercises(file_content))
     except (ValueError, json.JSONDecodeError):
-        return fail(422, "Invalid file format - must be ipynb")
+        return fail(422, 'Invalid file format - must be ipynb')
     if not exercises:
-        msg = "No exercises were found in the notebook"
-        desc = "did you use Upload <number of exercise> ? (example: Upload 1)"
+        msg = 'No exercises were found in the notebook'
+        desc = 'did you use Upload <number of exercise> ? (example: Upload 1)'
         return fail(422, f'{msg}, {desc}')
     matches, misses = set(), set()
     for exercise_id, code in exercises:
@@ -317,8 +314,8 @@ def upload():
             args=(solution.id,))
         matches.add(exercise_id)
     return jsonify({
-        "exercise_matches": list(matches),
-        "exercise_misses": list(misses),
+        'exercise_matches': list(matches),
+        'exercise_misses': list(misses),
     })
 
 
@@ -327,11 +324,11 @@ def upload():
 def view(solution_id):
     solution = Solution.get_or_none(Solution.id == solution_id)
     if solution is None:
-        return fail(404, "Solution does not exist.")
+        return fail(404, 'Solution does not exist.')
 
     is_manager = current_user.role.is_manager
     if solution.solver.id != current_user.id and not is_manager:
-        return fail(403, "This user has no permissions to view this page.")
+        return fail(403, 'This user has no permissions to view this page.')
 
     versions = solution.ordered_versions()
     view_params = {
