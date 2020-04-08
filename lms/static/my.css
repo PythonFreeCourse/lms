@@ -270,6 +270,22 @@ i.fa {
   color: #247ba0;
 }
 
+.pagination {
+  padding-right: 0;
+  padding-left: 0;
+}
+
+/* RTL Fix for pagination */
+.pagination .page-item:first-child .page-link {
+    border-top-right-radius: .25rem;
+    border-bottom-right-radius: .25rem;
+}
+
+.pagination .page-item:last-child .page-link {
+    border-top-left-radius: .25rem;
+    border-bottom-left-radius: .25rem;
+}
+
 /*
   background: #dfdfdf;
   border-radius: 4px;
