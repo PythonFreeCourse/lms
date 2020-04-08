@@ -2,30 +2,24 @@ import enum
 import random
 import secrets
 import string
-import typing
 from datetime import datetime
+from typing import Any, Dict, Iterable, Optional, Tuple
 
-from flask_login import UserMixin
-from peewee import (  # noqa: I201
-    BooleanField,
-    CharField,
-    Check,
-    DateTimeField,
-    ForeignKeyField,
-    IntegerField,
-    ManyToManyField,
-    TextField,
+from flask_login import UserMixin  # type: ignore
+from peewee import (  # type: ignore
+    BooleanField, CharField, Check, DateTimeField, ForeignKeyField,
+    IntegerField, ManyToManyField, TextField,
 )
-from playhouse.signals import Model, pre_save  # noqa: I201
-from werkzeug.security import (  # noqa: I201
-    check_password_hash,
-    generate_password_hash,
+from playhouse.signals import Model, pre_save  # type: ignore
+from werkzeug.security import (
+    check_password_hash, generate_password_hash,
 )
 
-from lms.lmsdb import database_config  # noqa: I100
+from lms.lmsdb import database_config
 
 
 database = database_config.get_db_instance()
+ExercisesDictById = Dict[int, Dict[str, Any]]
 
 
 class RoleOptions(enum.Enum):
@@ -133,6 +127,25 @@ class Exercise(BaseModel):
     notebook_num = IntegerField(default=0)
     order = IntegerField(default=0)
 
+    @classmethod
+    def get_objects(cls, fetch_archived: bool = False):
+        exercises = cls.select().order_by(Exercise.id)
+        if not fetch_archived:
+            exercises = exercises.where(cls.is_archived == False)  # NOQA: E712
+        return exercises
+
+    def as_dict(self) -> Dict[str, Any]:
+        return {
+            'exercise_id': self.id,
+            'exercise_name': self.subject,
+            'is_archived': self.is_archived,
+            'notebook': self.notebook_num,
+        }
+
+    @staticmethod
+    def as_dicts(exercises: Iterable['Exercise']) -> ExercisesDictById:
+        return {exercise.id: exercise.as_dict() for exercise in exercises}
+
     def __str__(self):
         return self.subject
 
@@ -152,6 +165,32 @@ class Solution(BaseModel):
     @property
     def code(self):
         return self.json_data_str
+
+    def ordered_versions(self) -> Iterable['Solution']:
+        return Solution.select().filter(
+            Solution.exercise == self.exercise,
+            Solution.solver == self.solver,
+        ).order_by(Solution.submission_timestamp.asc())
+
+    @classmethod
+    def of_user(
+            cls, user_id: int, with_archived: bool = False,
+    ) -> Iterable[Dict[str, Any]]:
+        db_exercises = Exercise.get_objects(fetch_archived=with_archived)
+        exercises = Exercise.as_dicts(db_exercises)
+
+        solutions = (
+            cls
+            .select(cls.exercise, cls.id, cls.is_checked)
+            .where(cls.exercise.in_(db_exercises), cls.solver == user_id)
+            .order_by(cls.submission_timestamp.desc())
+        )
+        for solution in solutions:
+            exercise = exercises[solution.exercise_id]
+            if exercise.get('solution_id') is None:
+                exercise['solution_id'] = solution.id
+                exercise['is_checked'] = solution.is_checked
+        return tuple(exercises.values())
 
     @property
     def comments(self):
@@ -222,13 +261,12 @@ class CommentText(BaseModel):
 
     @classmethod
     def create_comment(
-            cls, text: str, flake_key: typing.Optional[str] = None,
+            cls, text: str, flake_key: Optional[str] = None,
     ) -> 'CommentText':
-        instance, created = CommentText.get_or_create(**{
-            CommentText.text.name: text,
-        }, defaults={
-            CommentText.flake8_key.name: flake_key,
-        })
+        instance, _ = CommentText.get_or_create(
+            **{CommentText.text.name: text},
+            defaults={CommentText.flake8_key.name: flake_key},
+        )
         return instance
 
 
@@ -259,15 +297,14 @@ class Comment(BaseModel):
 
     @classmethod
     def by_solution(cls, solution_id: int):
-        return Comment.select(
-            Comment, CommentText.text,
-            CommentText.flake8_key, CommentText.id,
-        ).join(CommentText).where(
-            Comment.solution == solution_id,
-        )
+        fields = [
+            Comment, CommentText.text, CommentText.flake8_key, CommentText.id,
+        ]
+        the_solution = Comment.solution == solution_id
+        return Comment.select(*fields).join(CommentText).where(the_solution)
 
     @classmethod
-    def get_solutions(cls, solution_id: int) -> typing.Sequence[dict]:
+    def get_solutions(cls, solution_id: int) -> Tuple[Dict[Any, Any], ...]:
         return tuple(cls.by_solution(solution_id).dicts())
 
 

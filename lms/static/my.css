@@ -51,8 +51,28 @@ div#code-view {
   text-align: right;
 }
 
-#exercises-head {
+#exercises-page {
+  display: flex;
+  flex-direction: column;
+}
+
+#exercises-header {
+  display: flex;
   margin-bottom: 2rem;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+#show-all-exercises-action {
+  font-size: 1.5rem;
+  text-decoration: none;
+  color: black;
+  border: none;
+  outline: none;
+}
+
+#exercises-head {
+  display: flex;
 }
 
 .exercise {
@@ -66,6 +86,10 @@ div#code-view {
   margin-bottom: 0.5rem;
   padding: 1rem;
   text-align: center;
+}
+
+.centered {
+  justify-content: center;
 }
 
 .right-side,
@@ -246,6 +270,22 @@ i.fa {
   color: #247ba0;
 }
 
+.pagination {
+  padding-right: 0;
+  padding-left: 0;
+}
+
+/* RTL Fix for pagination */
+.pagination .page-item:first-child .page-link {
+    border-top-right-radius: .25rem;
+    border-bottom-right-radius: .25rem;
+}
+
+.pagination .page-item:last-child .page-link {
+    border-top-left-radius: .25rem;
+    border-bottom-left-radius: .25rem;
+}
+
 /*
   background: #dfdfdf;
   border-radius: 4px;
@@ -390,5 +430,9 @@ code > .grader-add {
 
 #page-status h1 {
   margin: 5vh 0;
+  text-align: center;
+}
+
+#archive-row {
   text-align: center;
 }

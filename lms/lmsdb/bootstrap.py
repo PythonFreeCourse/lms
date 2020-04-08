@@ -1,9 +1,9 @@
 from typing import Type
 
-from peewee import Field, Model
-from playhouse.migrate import migrate  # noqa: I201
+from peewee import Field, Model, fn  # type: ignore
+from playhouse.migrate import migrate  # type: ignore
 
-from lms.lmsdb import database_config  # noqa: I100
+from lms.lmsdb import database_config as db_config
 from lms.lmsdb import models
 from lms.lmstests.public.flake8 import text_fixer
 
@@ -11,25 +11,25 @@ from lms.lmstests.public.flake8 import text_fixer
 def _migrate_column_in_table_if_needed(
     table: Type[Model],
     field_instance: Field,
-):
+) -> bool:
     column_name = field_instance.name
     table_name = table.__name__.lower()
-    columns = database_config.database.get_columns(table_name)
-    cols = {col.name for col in columns}
+    cols = {col.name for col in db_config.database.get_columns(table_name)}
 
     if column_name in cols:
-        print(f'No need to create {column_name} column for table {table}')  # noqa: T001, E501
-        return
+        print(f'Column {column_name} already exists in {table}')  # noqa: T001
+        return False
 
-    print(f'create {column_name} field in {table}')  # noqa: T001
-    migrator = database_config.get_migrator_instance()
-    with database_config.database.transaction():
+    print(f'Create {column_name} field in {table}')  # noqa: T001
+    migrator = db_config.get_migrator_instance()
+    with db_config.database.transaction():
         migrate(migrator.add_column(
             table_name,
             field_instance.name,
             field_instance,
         ))
-        database_config.database.commit()
+        db_config.database.commit()
+    return True
 
 
 def _add_flake8_key_if_needed():

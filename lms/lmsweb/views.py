@@ -5,17 +5,12 @@ from typing import Optional
 from urllib.parse import urljoin, urlparse
 
 from flask import (
-    abort, jsonify, render_template, request,
-    send_from_directory, url_for,
+    abort, jsonify, render_template, request, send_from_directory, url_for,
 )
-from flask_admin import AdminIndexView, Admin
+from flask_admin import Admin, AdminIndexView  # type: ignore
 from flask_admin.contrib.peewee import ModelView  # type: ignore
 from flask_login import (  # type: ignore
-    LoginManager,
-    current_user,
-    login_required,
-    login_user,
-    logout_user,
+    LoginManager, current_user, login_required, login_user, logout_user,
 )
 from peewee import Case, fn  # type: ignore
 from playhouse.shortcuts import model_to_dict  # type: ignore
@@ -23,8 +18,8 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
-    Comment, CommentText, Exercise, RoleOptions, Solution, User, database,
-    ALL_MODELS
+    ALL_MODELS, Comment, CommentText, Exercise, RoleOptions, Solution, User,
+    database,
 )
 from lms.lmstests.public.flake8 import tasks as flake8_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
@@ -150,16 +145,16 @@ def status():
     fields = [
         Exercise.id,
         Exercise.subject.alias('name'),
+        Exercise.is_archived.alias('is_archived'),
         fn.Count(Solution.id).alias('submitted'),
         fn.Sum(Case(Solution.is_checked, ((True, 1),), 0)).alias('checked'),
     ]
     solutions = (
         Exercise
-            .select(*fields)
-            .join(Solution, 'LEFT OUTER', on=(Solution.exercise == Exercise.id))
-            .where(Exercise.is_archived == False)  # NOQA: E712
-            .group_by(Exercise.subject, Exercise.id)
-            .order_by(Exercise.id)
+        .select(*fields)
+        .join(Solution, 'LEFT OUTER', on=(Solution.exercise == Exercise.id))
+        .group_by(Exercise.subject, Exercise.id)
+        .order_by(Exercise.id)
     )
     return render_template(
         'status.html',
@@ -167,40 +162,17 @@ def status():
     )
 
 
-def fetch_exercises(user_id):
-    exercises = (
-        Exercise
-        .select()
-        .where(Exercise.is_archived == False)  # NOQA: E712
-        .order_by(Exercise.id)
-    )
-    exercises_dict = {item.id: {
-        'exercise_id': item.id,
-        'exercise_name': item.subject,
-        'is_archived': item.is_archived,
-        'is_checked': None,
-        'solution_id': None,
-        } for item in exercises
-    }
-    for solution in Solution.filter(
-            Solution.exercise.in_(exercises),
-            Solution.solver == user_id,
-    ).order_by(Solution.submission_timestamp.desc()):
-        if exercises_dict[solution.exercise_id]['solution_id'] is None:
-            exercises_dict[solution.exercise_id]['solution_id'] = solution.id
-            exercises_dict[solution.exercise_id]['is_checked'] = solution.is_checked
-
-    return tuple(exercises_dict.values())
-
-
 @webapp.route('/exercises')
 @login_required
 def exercises_page():
-    exercises = fetch_exercises(current_user.id)
+    fetch_archived = bool(request.args.get('archived'))
+    exercises = Solution.of_user(current_user.id, fetch_archived)
     is_manager = current_user.role.is_manager
     return render_template(
         'exercises.html',
-        exercises=exercises, is_manager=is_manager,
+        exercises=exercises,
+        is_manager=is_manager,
+        fetch_archived=fetch_archived,
     )
 
 
@@ -321,7 +293,7 @@ def upload():
 
     file: FileStorage = request.files.get('file')
     if not file:
-        return fail(402, "No file was given")
+        return fail(422, "No file was given")
 
     json_file_data = file.read()
     try:
@@ -332,7 +304,7 @@ def upload():
     if not exercises:
         msg = "No exercises were found in the notebook"
         desc = "did you use Upload <number of exercise> ? (example: Upload 1)"
-        return fail(402, f'{msg}, {desc}')
+        return fail(422, f'{msg}, {desc}')
     matches, misses = set(), set()
     for exercise_id, code in exercises:
         exercise = Exercise.get_or_none(Exercise.id == exercise_id)
@@ -375,10 +347,12 @@ def view(solution_id):
     if solution.solver.id != current_user.id and not is_manager:
         return fail(403, "This user has no permissions to view this page.")
 
+    versions = solution.ordered_versions()
     view_params = {
         'solution': model_to_dict(solution),
         'is_manager': is_manager,
         'role': current_user.role.name.lower(),
+        'versions': versions,
     }
 
     if is_manager:
