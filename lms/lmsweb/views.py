@@ -153,7 +153,8 @@ def status():
         Exercise
         .select(*fields)
         .join(Solution, 'LEFT OUTER', on=(Solution.exercise == Exercise.id))
-        .group_by(Exercise.subject, Exercise.id)
+        .group_by(Exercise.subject, Exercise.id, Solution.latest_solution)
+        .having(Solution.latest_solution == True)  # NOQA: E712
         .order_by(Exercise.id)
     )
     return render_template(
