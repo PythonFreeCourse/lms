@@ -145,16 +145,16 @@ def status():
     fields = [
         Exercise.id,
         Exercise.subject.alias('name'),
+        Exercise.is_archived.alias('is_archived'),
         fn.Count(Solution.id).alias('submitted'),
         fn.Sum(Case(Solution.is_checked, ((True, 1),), 0)).alias('checked'),
     ]
     solutions = (
         Exercise
-            .select(*fields)
-            .join(Solution, 'LEFT OUTER', on=(Solution.exercise == Exercise.id))
-            .where(Exercise.is_archived == False)  # NOQA: E712
-            .group_by(Exercise.subject, Exercise.id)
-            .order_by(Exercise.id)
+        .select(*fields)
+        .join(Solution, 'LEFT OUTER', on=(Solution.exercise == Exercise.id))
+        .group_by(Exercise.subject, Exercise.id)
+        .order_by(Exercise.id)
     )
     return render_template(
         'status.html',
