@@ -24,7 +24,7 @@
             {% else %}
             {% set details = {'page': 'view', 'icon': 'circle-check-o', 'text': 'לבדיקה', 'css': 'checked', 'page_id': exercise['solution_id']} %}
             {% endif -%}
-            {%- if not exercise.get('is_archived') %}
+            {%- if not exercise.get('is_archived') or exercise.get('is_checked') is not none %}
             <a class="our-button go-{{ details['css'] }}" href="{{ details['page'] }}/{{ details['page_id'] }}">
               <i class="fa fa-{{ details['icon'] }}" aria-hidden="true"></i>
               {{ details['text'] }}
