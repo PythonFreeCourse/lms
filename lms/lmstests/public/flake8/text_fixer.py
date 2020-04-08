@@ -33,8 +33,15 @@ def _join_flake8_errors(flake8_key: str) -> None:
 
 def _fix_text(flake8_key: str, text: str) -> None:
     comments = models.CommentText.filter(models.CommentText.text == text)
+    if len(comments) == 0:
+        return
+
+    primary = comments[0]
+    primary.text = text
+    primary.flake8_key = flake8_key
+    primary.save()
+
     try:
-        primary = comments[0]
         extras = comments[1:]
     except IndexError:
         return
@@ -46,10 +53,6 @@ def _fix_text(flake8_key: str, text: str) -> None:
             comment.comment = primary
             comment.save()
         extra.delete_instance()
-
-    primary.text = text
-    primary.flake8_key = flake8_key
-    primary.save()
 
 
 def _delete_comments_by_flake8_key(flake8_key: str) -> None:
