@@ -13,16 +13,14 @@
     {% else %}
     <p id="solver"><strong>מגיש:</strong> {{ solution['solver']['fullname'] }}</p>
     {% endif %}
-    {% set index = namespace(value=0) %}
     <div id="versions">
         {% for version in versions %}
             <a class="our-button" href="{{ version['id'] }}">
-                {{ index.value }}
-                {% if version['id'] ==  solution['id']%}
+                {{ loop.index }}
+                {% if version['id'] == solution['id'] %}
                     (Current)
                 {% endif %}
             </a>
-            {% set index.value = index.value + 1 %}
         {% endfor %}
     </div>
   </div>
