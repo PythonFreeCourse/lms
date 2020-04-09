@@ -454,5 +454,6 @@ code > .grader-add {
 
 .which-notebook {
   align-self: center;
-  padding-left: 1em;
+  margin-left: 0.5em;
+  padding: 0.55rem 1rem;
 }
