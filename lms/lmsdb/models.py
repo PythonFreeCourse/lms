@@ -173,15 +173,15 @@ class SolutionState(enum.Enum):
 
 
 class Solution(BaseModel):
-    SOLUTION_STATES = SolutionState
-    SOLUTION_IN_CHECKING_TIMEOUT_SECONDS = 60 * 10
+    STATES = SolutionState
+    MAX_CHECK_TIME_SECONDS = 60 * 10
 
     exercise = ForeignKeyField(Exercise, backref='solutions')
     solver = ForeignKeyField(User, backref='solutions')
     checker = ForeignKeyField(User, null=True, backref='solutions')
     state = CharField(
-        choices=SOLUTION_STATES.to_choices(),
-        default=SOLUTION_STATES.CREATED.name,
+        choices=STATES.to_choices(),
+        default=STATES.CREATED.name,
     )
     grade = IntegerField(
         default=0, constraints=[Check('grade <= 100'), Check('grade >= 0')],
@@ -191,10 +191,10 @@ class Solution(BaseModel):
 
     @property
     def is_checked(self):
-        return self.state == self.SOLUTION_STATES.DONE.name
+        return self.state == self.STATES.DONE.name
 
     def start_checking(self):
-        return self.set_state(Solution.SOLUTION_STATES.IN_CHECKING)
+        return self.set_state(Solution.STATES.IN_CHECKING)
 
     def set_state(self, new_state: SolutionState, **kwargs) -> bool:
         # Optional: filter the old state of the object
@@ -275,13 +275,13 @@ class Solution(BaseModel):
             cls.id != instance.id,
         )
         for old_solution in other_solutions:
-            old_solution.set_state(Solution.SOLUTION_STATES.OLD_SOLUTION)
+            old_solution.set_state(Solution.STATES.OLD_SOLUTION)
         return instance
 
     @classmethod
     def next_unchecked(cls) -> Optional['Solution']:
         unchecked_exercises = cls.select().where(
-            cls.state == Solution.SOLUTION_STATES.CREATED.name,
+            cls.state == Solution.STATES.CREATED.name,
         )
         try:
             return unchecked_exercises.get()
@@ -292,7 +292,7 @@ class Solution(BaseModel):
     def next_unchecked_of(cls, exercise_id) -> Optional['Solution']:
         try:
             return cls.select().where(
-                cls.state == cls.SOLUTION_STATES.CREATED.name,
+                cls.state == cls.STATES.CREATED.name,
                 cls.exercise == exercise_id,
             ).get()
         except cls.DoesNotExist:
@@ -301,7 +301,7 @@ class Solution(BaseModel):
     @classmethod
     def status(cls):
         one_if_is_checked = Case(
-            Solution.state, ((Solution.SOLUTION_STATES.DONE.name, 1),), 0)
+            Solution.state, ((Solution.STATES.DONE.name, 1),), 0)
         fields = [
             Exercise.id,
             Exercise.subject.alias('name'),
@@ -312,7 +312,7 @@ class Solution(BaseModel):
 
         join_by_exercise = (Solution.exercise == Exercise.id)
         active_solutions = Solution.state.in_(
-            Solution.SOLUTION_STATES.active_solutions())
+            Solution.STATES.active_solutions())
         return (
             Exercise
             .select(*fields)

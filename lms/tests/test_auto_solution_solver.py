@@ -69,7 +69,7 @@ class TestAutoSolutionSolver:
             second_solution_code: str,
     ) -> typing.Tuple[models.Solution, models.Solution]:
         first_solution: models.Solution = comment.solution
-        first_solution.set_state(models.Solution.SOLUTION_STATES.DONE)
+        first_solution.set_state(models.Solution.STATES.DONE)
         first_solution = first_solution.refresh()
         first_solution.json_data_str = first_solution_code
         first_solution.save()

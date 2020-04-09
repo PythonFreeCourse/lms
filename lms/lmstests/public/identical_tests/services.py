@@ -43,7 +43,7 @@ class IdenticalSolutionSolver:
             models.Solution.exercise.name:
                 self.solution.exercise,
             models.Solution.state.name:
-                models.Solution.SOLUTION_STATES.DONE.name,
+                models.Solution.STATES.DONE.name,
             models.Solution.json_data_str.name:
                 self.solution.json_data_str,
         }).first()
@@ -55,7 +55,7 @@ class IdenticalSolutionSolver:
             models.Solution.exercise.name:
                 self.solution.exercise,
             models.Solution.state.name:
-                models.Solution.SOLUTION_STATES.CREATED.name,
+                models.Solution.STATES.CREATED.name,
             models.Solution.json_data_str.name:
                 self.solution.json_data_str,
         }):

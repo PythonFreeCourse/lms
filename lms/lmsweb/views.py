@@ -358,7 +358,7 @@ def view(solution_id):
 @managers_only
 def done_checking(exercise_id, solution_id):
     checked_solution: Solution = Solution.get_by_id(solution_id)
-    is_updated = checked_solution.set_state(new_state=Solution.SOLUTION_STATES.DONE)
+    is_updated = checked_solution.set_state(new_state=Solution.STATES.DONE)
     identical_tests_tasks.solve_solution_with_identical_code.apply_async(
         args=(solution_id,))
     next_exercise = None
@@ -366,7 +366,7 @@ def done_checking(exercise_id, solution_id):
     if solution and solution.start_checking():
         general_tasks.reset_solution_state_if_needed.apply_async(
             args=(solution.id,),
-            countdown=Solution.SOLUTION_IN_CHECKING_TIMEOUT_SECONDS,
+            countdown=Solution.MAX_CHECK_TIME_SECONDS,
         )
         next_exercise = solution.id
     return jsonify({'success': is_updated, 'next': next_exercise})
@@ -383,7 +383,7 @@ def start_checking(exercise_id):
     if next_exercise and next_exercise.start_checking():
         general_tasks.reset_solution_state_if_needed.apply_async(
             args=(next_exercise.id,),
-            countdown=Solution.SOLUTION_IN_CHECKING_TIMEOUT_SECONDS,
+            countdown=Solution.MAX_CHECK_TIME_SECONDS,
         )
         return redirect(f'/view/{next_exercise.id}')
     return redirect('/exercises')
@@ -446,7 +446,7 @@ class AdminSolutionView(AdminModelView):
         Solution.state.name,
     )
     column_choices = {
-        Solution.state.name: Solution.SOLUTION_STATES.to_choices(),
+        Solution.state.name: Solution.STATES.to_choices(),
     }
 
 

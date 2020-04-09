@@ -94,7 +94,7 @@ def add_solution_state_if_needed():
             'update solution set state=%s '
             'where latest_solution = %s',
             params=(
-                models.Solution.SOLUTION_STATES.OLD_SOLUTION.name,
+                models.Solution.STATES.OLD_SOLUTION.name,
                 False,
             ),
         )
@@ -108,7 +108,7 @@ def add_solution_state_if_needed():
             'update solution set state=%s '
             'where is_checked = %s',
             params=(
-                models.Solution.SOLUTION_STATES.DONE.name,
+                models.Solution.STATES.DONE.name,
                 True,
             ),
         )

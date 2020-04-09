@@ -18,9 +18,9 @@ def reset_solution_state_if_needed(solution_pk: str) -> None:
             solution_pk,
         )
         solution = models.Solution.get_by_id(solution_pk)
-        if solution.state == models.Solution.SOLUTION_STATES.IN_CHECKING.name:
+        if solution.state == models.Solution.STATES.IN_CHECKING.name:
             _logger.info('Reset solution %s to CREATED state', solution_pk)
-            solution.set_state(models.Solution.SOLUTION_STATES.CREATED)
+            solution.set_state(models.Solution.STATES.CREATED)
     except Exception:
         _logger.exception(
             'Failed reset_solution_state_if_needed solution %s',

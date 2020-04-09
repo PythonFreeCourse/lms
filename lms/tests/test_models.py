@@ -34,9 +34,9 @@ class TestUser:
 
 
 class TestSolution:
-    old_solution_state = Solution.SOLUTION_STATES.OLD_SOLUTION.name
-    in_checking_state = Solution.SOLUTION_STATES.IN_CHECKING.name
-    created_state = Solution.SOLUTION_STATES.CREATED.name
+    old_solution_state = Solution.STATES.OLD_SOLUTION.name
+    in_checking_state = Solution.STATES.IN_CHECKING.name
+    created_state = Solution.STATES.CREATED.name
 
     def test_new_solution_override_old_solutions(
             self,
