@@ -436,3 +436,23 @@ code > .grader-add {
 #archive-row {
   text-align: center;
 }
+
+
+/* Navigation bar */
+
+.mr-auto .dropdown-menu {
+    right: auto !important;
+    left: 0px;
+}
+
+
+.nav-item {
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+
+.which-notebook {
+  align-self: center;
+  padding-left: 1em;
+}

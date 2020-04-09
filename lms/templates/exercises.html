@@ -16,6 +16,12 @@
           <div class="exercise-name"><div class="ex-title">{{ exercise['exercise_name'] }}</div></div>
         </div>
         <div class="left-side">
+          {%- if exercise['notebook'] %}
+          <div class="which-notebook">
+            <i class="fa fa-book" aria-hidden="true"></i>
+            {{ exercise['notebook'] }}
+          </div>
+          {%- endif %}
           <div class="exercise-send">
             {%- if exercise.get('is_checked') is none %}
             {% set details = {'page': 'send', 'icon': 'upload', 'text': 'שלח', 'css': 'send', 'page_id': exercise['exercise_id']} %}

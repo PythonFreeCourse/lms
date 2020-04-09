@@ -1,0 +1,44 @@
+{% if request.path != '/login' %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#">
+    <img src="{{ url_for('static', filename='avatar.jpg') }}" width="30" height="30" class="d-inline-block align-top" alt="הלוגו של פרויקט לומדים פייתון: נחש צהוב על רקע עיגול בצבע תכלת, ומתחתיו כתוב 'לומדים פייתון'.">
+  </a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNavDropdown">
+    <ul class="navbar-nav">
+      {%- if not exercises or fetch_archived %}
+      <li class="nav-item">
+        <a href="/exercises">
+          <i class="fa fa-book" aria-hidden="true"></i>
+          רשימת התרגילים
+        </a>
+      </li>
+      {% endif -%}
+      {%- if exercises and not fetch_archived %}
+      <li class="nav-item">
+        <a href="/exercises?archived=1">
+          <i class="fa fa-archive" aria-hidden="true"></i>
+          ארכיון התרגילים
+        </a>
+      </li>
+      {% endif -%}
+      <li class="nav-item">
+        <a href="/send">
+          <i class="fa fa-upload" aria-hidden="true"></i>
+          העלאת תרגילים
+        </a>
+      </li>
+    </ul>
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a href="/logout">
+          <i class="fa fa-sign-out" aria-hidden="true"></i>
+          התנתקות
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>
+{% endif %}
