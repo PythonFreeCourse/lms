@@ -3,7 +3,6 @@ import shutil
 import tempfile
 
 from lms.lmsdb import models
-from lms.lmstests.public.flake8 import services
 from lms.lmstests.public.flake8 import tasks
 
 INVALID_CODE = 'print "Hello Word" '
@@ -13,18 +12,6 @@ VALID_CODE = 'print(0)'
 
 EXECUTE_CODE = ('import os\n'
                 'eval(\'os.system("touch {}")\')')
-
-
-class WrappedPyFlakeChecker(services.PyFlakeChecker):
-    def _run_in_sandbox(self):
-        # In tests we don't want to actually go to the sandbox
-        return self.sandbox_tasks.run_flake8_on_sandbox_on_code(
-            self._solution_id,
-            self.solution.json_data_str,
-        )
-
-
-services.PyFlakeChecker = WrappedPyFlakeChecker
 
 
 class TestAutoFlake8:

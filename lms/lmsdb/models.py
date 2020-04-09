@@ -35,6 +35,9 @@ class BaseModel(Model):
     class Meta:
         database = database
 
+    def refresh(self):
+        return type(self).get(self._pk_expr())
+
 
 class Role(BaseModel):
     name = CharField(unique=True, choices=(
@@ -150,17 +153,52 @@ class Exercise(BaseModel):
         return self.subject
 
 
+class SolutionState(enum.Enum):
+    CREATED = 'Created'
+    IN_CHECKING = 'In checking'
+    DONE = 'Done'
+    OLD_SOLUTION = 'Old solution'
+
+    @classmethod
+    def to_choices(cls) -> Tuple[Tuple[str, str]]:
+        return tuple((choice.name, choice.value) for choice in tuple(cls))
+
+
 class Solution(BaseModel):
+    SOLUTION_STATES = SolutionState
+    SOLUTION_IN_CHECKING_TIMEOUT_SECONDS = 60 * 10
+
     exercise = ForeignKeyField(Exercise, backref='solutions')
     solver = ForeignKeyField(User, backref='solutions')
     checker = ForeignKeyField(User, null=True, backref='solutions')
-    is_checked = BooleanField(default=False)
+    state = CharField(
+        choices=SOLUTION_STATES.to_choices(),
+        default=SOLUTION_STATES.CREATED.name,
+    )
     grade = IntegerField(
         default=0, constraints=[Check('grade <= 100'), Check('grade >= 0')],
     )
-    latest_solution = BooleanField(default=True)
     submission_timestamp = DateTimeField()
     json_data_str = TextField()
+
+    @property
+    def is_checked(self):
+        return self.state == self.SOLUTION_STATES.DONE.name
+
+    def start_checking(self):
+        # To avoid import loop
+        return self.set_state(Solution.SOLUTION_STATES.IN_CHECKING)
+
+    def set_state(self, new_state: SolutionState, **kwargs) -> bool:
+        # Optional: filter the old state of the object
+        # to make sure that no two processes set the state together
+        requested_solution = (Solution.id == self.id)
+        changes = Solution.update(
+            **{Solution.state.name: new_state.name},
+            **kwargs,
+        ).where(requested_solution)
+        updated = changes.execute() == 1
+        return updated
 
     @property
     def code(self):
@@ -181,7 +219,7 @@ class Solution(BaseModel):
 
         solutions = (
             cls
-            .select(cls.exercise, cls.id, cls.is_checked)
+            .select(cls.exercise, cls.id, cls.state)
             .where(cls.exercise.in_(db_exercises), cls.solver == user_id)
             .order_by(cls.submission_timestamp.desc())
         )
@@ -222,41 +260,41 @@ class Solution(BaseModel):
             cls.submission_timestamp.name: datetime.now(),
             cls.json_data_str.name: json_data_str,
         })
+
         # update old solutions for this exercise
-        cls.update(**{
-            cls.latest_solution.name: False,
-        }).where(
+        other_solutions: Iterable[Solution] = cls.select().filter(
             cls.exercise == exercise,
             cls.solver == solver,
             cls.id != instance.id,
-        ).execute()
+        )
+        for old_solution in other_solutions:
+            old_solution.set_state(Solution.SOLUTION_STATES.OLD_SOLUTION)
         return instance
 
     @classmethod
-    def next_unchecked(cls):
+    def next_unchecked(cls) -> Optional['Solution']:
         unchecked_exercises = cls.select().where(
-            cls.is_checked == False,  # NOQA: E712
-            cls.latest_solution == True,  # NOQA: E712
+            cls.state == Solution.SOLUTION_STATES.CREATED.name,
         )
         try:
-            return unchecked_exercises.dicts().get()
+            return unchecked_exercises.get()
         except cls.DoesNotExist:
-            return {}
+            return None
 
     @classmethod
-    def next_unchecked_of(cls, exercise_id):
+    def next_unchecked_of(cls, exercise_id) -> Optional['Solution']:
         try:
             return cls.select().where(
-                cls.is_checked == 0,
+                cls.state == cls.SOLUTION_STATES.CREATED.name,
                 cls.exercise == exercise_id,
-                cls.latest_solution == True,  # NOQA: E712
-            ).dicts().get()
+            ).get()
         except cls.DoesNotExist:
-            return {}
+            return None
 
     @classmethod
     def status(cls):
-        one_if_is_checked = Case(Solution.is_checked, ((True, 1),), 0)
+        one_if_is_checked = Case(
+            Solution.state, ((Solution.SOLUTION_STATES.DONE.name, 1),), 0)
         fields = [
             Exercise.id,
             Exercise.subject.alias('name'),
@@ -266,12 +304,13 @@ class Solution(BaseModel):
         ]
 
         join_by_exercise = (Solution.exercise == Exercise.id)
+        having = Solution.state == Solution.SOLUTION_STATES.DONE.name
         return (
             Exercise
             .select(*fields)
             .join(Solution, 'LEFT OUTER', on=join_by_exercise)
-            .group_by(Exercise.subject, Exercise.id, Solution.latest_solution)
-            .having(Solution.latest_solution == True)  # NOQA: E712
+            .group_by(Exercise.subject, Exercise.id, Solution.state)
+            .having(having)
             .order_by(Exercise.id)
         )
 

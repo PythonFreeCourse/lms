@@ -4,6 +4,8 @@ from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText,
     Exercise, Role, RoleOptions, Solution, User,
 )
+from lms.lmstests.public import celery_app as public_app
+from lms.lmstests.sandbox import celery_app as sandbox_app
 
 from peewee import SqliteDatabase
 
@@ -36,6 +38,12 @@ def db(db_in_memory):
     with db_in_memory.atomic():
         yield db_in_memory
         db_in_memory.rollback()
+
+
+@pytest.fixture(autouse=True, scope='session')
+def celery_eager():
+    public_app.conf.update(task_always_eager=True)
+    sandbox_app.conf.update(task_always_eager=True)
 
 
 @pytest.fixture()
