@@ -35,7 +35,7 @@ class BaseModel(Model):
     class Meta:
         database = database
 
-    def refresh(self):
+    def refresh(self) -> 'BaseModel':
         return type(self).get(self._pk_expr())
 
 
