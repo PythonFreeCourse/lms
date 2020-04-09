@@ -186,7 +186,6 @@ class Solution(BaseModel):
         return self.state == self.SOLUTION_STATES.DONE.name
 
     def start_checking(self):
-        # To avoid import loop
         return self.set_state(Solution.SOLUTION_STATES.IN_CHECKING)
 
     def set_state(self, new_state: SolutionState, **kwargs) -> bool:

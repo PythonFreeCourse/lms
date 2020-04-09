@@ -9,7 +9,7 @@ SOME_CODE = "print('Hello Word')"
 
 class TestAutoSolutionSolver:
     def test_solve_solution_with_identical_code(self, comment: models.Comment):
-        first_solution, another_solution = self._duplicate_solution_from_comment(
+        _, another_solution = self._duplicate_solution_from_comment(
             comment=comment,
             first_solution_code=SOME_CODE,
             second_solution_code=SOME_CODE,
