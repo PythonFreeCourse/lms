@@ -2,6 +2,10 @@ function isNumeric(str){
     return /^\d+$/.test(str);
 }
 
+function hideAllOpenComments() {
+  $("[data-toggle='popover']").popover('hide'); 
+}
+
 function destroyCommentsNotations(comments) {
   Array.from(comments).forEach((comment) => {
     comment.removeAttribute('data-vimkey');
@@ -34,10 +38,10 @@ function listenToKeys() {
   const ninja = document.getElementById('ninja');
   const knownComments = document.getElementsByClassName('known-comment');
 
-  let vim = false;
-  let lineMode = false;
-  let letterMode = false;
-  let lineNumber = '';
+  let vim;
+  let lineMode;
+  let letterMode;
+  let lineNumber;
 
   function resetStatus() {
     ninja.style.display = 'none';
@@ -46,13 +50,16 @@ function listenToKeys() {
     letterMode = false;
     lineNumber = '';
     destroyCommentsNotations(knownComments);
+    hideAllOpenComments();
     highlightLinesThatStartsWith('', false);
   }
 
+  resetStatus();
   document.addEventListener('keydown', function(event) {
     if (['textarea', 'input'].includes(event.target.tagName.toLowerCase())) { return; }
     let key = event.key.toLowerCase();
-    if (key.toLowerCase() == 'q') {
+    if (key == 'q') {
+      event.preventDefault();
       if (lineMode === true) {
         if (document.querySelectorAll(`.line[data-line="${lineNumber}"]`).length != 1) {
           alert('You must select only a unique, single line.');
@@ -70,28 +77,35 @@ function listenToKeys() {
         lineNumber = '';
       }
     } else if (isNumeric(key) && (lineMode === true)) {
+      event.preventDefault();
       highlightLinesThatStartsWith(lineNumber, false);
       lineNumber += key;
       highlightLinesThatStartsWith(lineNumber);
-    } else if (letterMode && (key >= 'a') && (key <= 'z')) {
+    } else if (['-', '='].includes(key)) {
+      event.preventDefault();
+      highlightLinesThatStartsWith(lineNumber, false);
+      lineNumber = document.querySelector(".line:last-of-type").dataset.line;
+      highlightLinesThatStartsWith(lineNumber);
+    } else if (letterMode && key.length == 1 && key >= 'a' && key <= 'z') {
+      event.preventDefault();
       const comment = document.querySelector(`.known-comment[data-vimkey="${key}"]`);
       const commentId = comment.dataset.commentid;
       if (commentId && lineNumber) {
         window.sendExistsComment(window.solutionId, lineNumber, commentId);
         resetStatus();
       }
+    } else if (letterMode && (key == "`" || key == ";")) {
+      event.preventDefault();
+      document.querySelector(`[data-line="${lineNumber}"]`).click();
     } else if (key == 'escape') {
+      event.preventDefault();
       if ((lineMode === true) || (letterMode === true)) {
-        lineMode = false;
-        letterMode = false;
-        highlightLinesThatStartsWith('', false);
-        $('.known-comment').popover('dispose');
-      } else if (vim === true) {
-        vim = false;
+        resetStatus();
       }
     } else if (key == '!') {
       event.preventDefault();
       return document.getElementById('save-check').click();
+    } else {
     }
 
     if (vim === false) {

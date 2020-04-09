@@ -153,12 +153,23 @@ function trackDraggables(elements) {
 }
 
 
+function focusTextArea(lineNumber) {
+  const target = document.querySelector(`textarea[data-line='${lineNumber}']`);
+  target.focus();
+}
+
+
 function trackTextArea(lineNumber) {
   const target = `textarea[data-line='${lineNumber}']`;
   const popoverElement = `.grader-add[data-line='${lineNumber}']`;
-  $(target).keypress((e) => {
-    if ((event.keyCode == 10 || event.keyCode == 13) && event.ctrlKey) {
-      sendNewComment(window.solutionId, lineNumber, e.target.value);
+  $(target).keydown((ev) => {
+    console.log(ev.which);
+    if ((ev.which == 10 || ev.which == 13) && ev.ctrlKey) {  // CTRL + ENTER
+      sendNewComment(window.solutionId, lineNumber, ev.target.value);
+      $(popoverElement).popover('hide');
+    } else if (ev.key == 'Escape') {  // Escape
+      ev.preventDefault();
+      console.log('nobody knows it');
       $(popoverElement).popover('hide');
     }
   });
@@ -175,6 +186,7 @@ function registerNewCommentPopover(element) {
   });
   $(element).on('inserted.bs.popover', () => {
     trackTextArea(lineNumber);
+    focusTextArea(lineNumber);
   });
 }
 
@@ -203,36 +215,4 @@ window.addEventListener('lines-numbered', () => {
   if (!window.isUserGrader()) {
     sessionStorage.setItem('role', 'grader');
   }
-
-
-  /*
-  // Select the node that will be observed for mutations
-  const solutionId = 1; // # TODO: Fetch from URL
-  const targetNode = document.body;
-
-  // Options for the observer (which mutations to observe)
-  const config = { attributes: true, childList: true, subtree: true };
-
-  // Callback function to execute when mutations are observed
-  const callback = ((mutationsList) => {
-    // Use traditional 'for loops' for IE 11
-    mutationsList.forEach((mutation) => {
-      if (mutation.type === 'childList') {
-        mutation.addedNodes.forEach((node) => {
-          const deleteButton = node.querySelector('.grader-delete');
-          console.log(deleteButton);
-          deleteButton.addEventListener('click', () => {
-            deleteComment(solutionId, deleteButton.dataset.commentid);
-          });
-        });
-      }
-    });
-  });
-
-  // Create an observer instance linked to the callback function
-  const observer = new MutationObserver(callback);
-
-  // Start observing the target node for configured mutations
-  observer.observe(targetNode, config);
-  */
 });
