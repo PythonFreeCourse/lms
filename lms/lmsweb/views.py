@@ -441,6 +441,35 @@ class AdminModelView(AccessibleByAdminMixin, ModelView):
     pass
 
 
+class AdminSolutionView(AdminModelView):
+    column_filters = (
+        Solution.state.name,
+    )
+    column_choices = {
+        Solution.state.name: Solution.SOLUTION_STATES.to_choices(),
+    }
+
+
+class AdminCommentView(AdminModelView):
+    column_filters = (
+        Comment.timestamp.name,
+        Comment.is_auto.name,
+    )
+
+
+class AdminCommentTextView(AdminModelView):
+    column_filters = (
+        CommentText.text.name,
+        CommentText.flake8_key.name,
+    )
+
+
+SPECIAL_MAPPING = {
+    Solution: AdminSolutionView,
+    Comment: AdminCommentView,
+    CommentText: AdminCommentTextView,
+}
+
 admin = Admin(
     webapp,
     name='LMS',
@@ -449,4 +478,4 @@ admin = Admin(
 )
 
 for m in ALL_MODELS:
-    admin.add_view(AdminModelView(m))
+    admin.add_view(SPECIAL_MAPPING.get(m, AdminModelView)(m))

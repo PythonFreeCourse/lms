@@ -160,6 +160,14 @@ class SolutionState(enum.Enum):
     OLD_SOLUTION = 'Old solution'
 
     @classmethod
+    def active_solutions(cls) -> Iterable[str]:
+        return (
+            cls.DONE.name,
+            cls.IN_CHECKING.name,
+            cls.CREATED.name,
+        )
+
+    @classmethod
     def to_choices(cls) -> Tuple[Tuple[str, str]]:
         return tuple((choice.name, choice.value) for choice in tuple(cls))
 
@@ -303,13 +311,14 @@ class Solution(BaseModel):
         ]
 
         join_by_exercise = (Solution.exercise == Exercise.id)
-        having = Solution.state == Solution.SOLUTION_STATES.DONE.name
+        active_solutions = Solution.state.in_(
+            Solution.SOLUTION_STATES.active_solutions())
         return (
             Exercise
             .select(*fields)
             .join(Solution, 'LEFT OUTER', on=join_by_exercise)
-            .group_by(Exercise.subject, Exercise.id, Solution.state)
-            .having(having)
+            .where(active_solutions)
+            .group_by(Exercise.subject, Exercise.id)
             .order_by(Exercise.id)
         )
 
