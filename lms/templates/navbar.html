@@ -10,7 +10,7 @@
     <ul class="navbar-nav">
       {%- if not exercises or fetch_archived %}
       <li class="nav-item">
-        <a href="/exercises">
+        <a href="/exercises" class="nav-link">
           <i class="fa fa-book" aria-hidden="true"></i>
           רשימת התרגילים
         </a>
@@ -18,14 +18,14 @@
       {% endif -%}
       {%- if exercises and not fetch_archived %}
       <li class="nav-item">
-        <a href="/exercises?archived=1">
+        <a href="/exercises?archived=1" class="nav-link">
           <i class="fa fa-archive" aria-hidden="true"></i>
           ארכיון התרגילים
         </a>
       </li>
       {% endif -%}
       <li class="nav-item">
-        <a href="/send">
+        <a href="/send" class="nav-link">
           <i class="fa fa-upload" aria-hidden="true"></i>
           העלאת תרגילים
         </a>
@@ -33,7 +33,7 @@
     </ul>
     <ul class="navbar-nav mr-auto">
       <li class="nav-item">
-        <a href="/logout">
+        <a href="/logout" class="nav-link">
           <i class="fa fa-sign-out" aria-hidden="true"></i>
           התנתקות
         </a>
