@@ -359,7 +359,7 @@ def view(solution_id):
 def done_checking(exercise_id, solution_id):
     checked_solution: Solution = Solution.get_by_id(solution_id)
     is_updated = checked_solution.set_state(new_state=Solution.STATES.DONE)
-    identical_tests_tasks.solve_solution_with_identical_code.apply_async(
+    identical_tests_tasks.check_if_other_solutions_can_be_solved.apply_async(
         args=(solution_id,))
     next_exercise = None
     solution = Solution.next_unchecked_of(exercise_id)
