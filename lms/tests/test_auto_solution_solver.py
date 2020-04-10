@@ -14,7 +14,6 @@ class TestAutoSolutionSolver:
             first_solution_code=SOME_CODE,
             second_solution_code=SOME_CODE,
         )
-
         assert len(tuple(another_solution.comments)) == 0
         tasks.solve_solution_with_identical_code(another_solution.id)
         assert len(tuple(another_solution.comments)) == 1
@@ -70,8 +69,9 @@ class TestAutoSolutionSolver:
             second_solution_code: str,
     ) -> typing.Tuple[models.Solution, models.Solution]:
         first_solution: models.Solution = comment.solution
+        first_solution.set_state(models.Solution.STATES.DONE)
+        first_solution = first_solution.refresh()
         first_solution.json_data_str = first_solution_code
-        first_solution.is_checked = True
         first_solution.save()
         student_user: models.User = conftest.create_student_user(index=1)
         second_solution = models.Solution.create_solution(

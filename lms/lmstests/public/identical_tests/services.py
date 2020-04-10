@@ -40,18 +40,24 @@ class IdenticalSolutionSolver:
         return models.Solution.select().join(
             models.Exercise,
         ).filter(**{
-            models.Solution.exercise.name: self.solution.exercise,
-            models.Solution.is_checked.name: True,
-            models.Solution.json_data_str.name: self.solution.json_data_str,
+            models.Solution.exercise.name:
+                self.solution.exercise,
+            models.Solution.state.name:
+                models.Solution.STATES.DONE.name,
+            models.Solution.json_data_str.name:
+                self.solution.json_data_str,
         }).first()
 
     def check_for_match_solutions_to_solve(self):
         for solution in models.Solution.select().join(
                 models.Exercise,
         ).filter(**{
-            models.Solution.exercise.name: self.solution.exercise,
-            models.Solution.is_checked.name: False,
-            models.Solution.json_data_str.name: self.solution.json_data_str,
+            models.Solution.exercise.name:
+                self.solution.exercise,
+            models.Solution.state.name:
+                models.Solution.STATES.CREATED.name,
+            models.Solution.json_data_str.name:
+                self.solution.json_data_str,
         }):
             self._clone_solution_comments(
                 from_solution=self.solution,
@@ -76,7 +82,7 @@ class IdenticalSolutionSolver:
             )
 
         to_solution.checker = from_solution.checker
-        to_solution.is_checked = from_solution.is_checked
+        to_solution.state = from_solution.state
         to_solution.save()
 
     @staticmethod

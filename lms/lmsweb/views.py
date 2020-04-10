@@ -22,6 +22,7 @@ from lms.lmsdb.models import (
     database,
 )
 from lms.lmstests.public.flake8 import tasks as flake8_tasks
+from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmsweb import webapp
 from lms.lmsweb.tools.notebook_extractor import extract_exercises
@@ -356,14 +357,18 @@ def view(solution_id):
 @login_required
 @managers_only
 def done_checking(exercise_id, solution_id):
-    requested_solution = (Solution.id == solution_id)
-    changes = Solution.update(
-        is_checked=True, checker=current_user.id,
-    ).where(requested_solution)
-    is_updated = changes.execute() == 1
+    checked_solution: Solution = Solution.get_by_id(solution_id)
+    is_updated = checked_solution.set_state(new_state=Solution.STATES.DONE)
     identical_tests_tasks.solve_solution_with_identical_code.apply_async(
         args=(solution_id,))
-    next_exercise = Solution.next_unchecked_of(exercise_id).get('id')
+    next_exercise = None
+    solution = Solution.next_unchecked_of(exercise_id)
+    if solution and solution.start_checking():
+        general_tasks.reset_solution_state_if_needed.apply_async(
+            args=(solution.id,),
+            countdown=Solution.MAX_CHECK_TIME_SECONDS,
+        )
+        next_exercise = solution.id
     return jsonify({'success': is_updated, 'next': next_exercise})
 
 
@@ -372,11 +377,15 @@ def done_checking(exercise_id, solution_id):
 @managers_only
 def start_checking(exercise_id):
     if exercise_id != 0:
-        next_exercise = Solution.next_unchecked_of(exercise_id).get('id')
+        next_exercise = Solution.next_unchecked_of(exercise_id)
     else:
-        next_exercise = Solution.next_unchecked().get('id')
-    if next_exercise is not None:
-        return redirect(f'/view/{next_exercise}')
+        next_exercise = Solution.next_unchecked()
+    if next_exercise and next_exercise.start_checking():
+        general_tasks.reset_solution_state_if_needed.apply_async(
+            args=(next_exercise.id,),
+            countdown=Solution.MAX_CHECK_TIME_SECONDS,
+        )
+        return redirect(f'/view/{next_exercise.id}')
     return redirect('/exercises')
 
 
@@ -432,6 +441,35 @@ class AdminModelView(AccessibleByAdminMixin, ModelView):
     pass
 
 
+class AdminSolutionView(AdminModelView):
+    column_filters = (
+        Solution.state.name,
+    )
+    column_choices = {
+        Solution.state.name: Solution.STATES.to_choices(),
+    }
+
+
+class AdminCommentView(AdminModelView):
+    column_filters = (
+        Comment.timestamp.name,
+        Comment.is_auto.name,
+    )
+
+
+class AdminCommentTextView(AdminModelView):
+    column_filters = (
+        CommentText.text.name,
+        CommentText.flake8_key.name,
+    )
+
+
+SPECIAL_MAPPING = {
+    Solution: AdminSolutionView,
+    Comment: AdminCommentView,
+    CommentText: AdminCommentTextView,
+}
+
 admin = Admin(
     webapp,
     name='LMS',
@@ -440,4 +478,4 @@ admin = Admin(
 )
 
 for m in ALL_MODELS:
-    admin.add_view(AdminModelView(m))
+    admin.add_view(SPECIAL_MAPPING.get(m, AdminModelView)(m))

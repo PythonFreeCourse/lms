@@ -1,4 +1,5 @@
 from lms.lmsdb.models import Exercise, Solution, User
+from lms.lmstests.public.general import tasks as general_tasks
 
 
 class TestUser:
@@ -33,6 +34,9 @@ class TestUser:
 
 
 class TestSolution:
+    old_solution_state = Solution.STATES.OLD_SOLUTION.name
+    in_checking_state = Solution.STATES.IN_CHECKING.name
+    created_state = Solution.STATES.CREATED.name
 
     def test_new_solution_override_old_solutions(
             self,
@@ -41,15 +45,18 @@ class TestSolution:
     ):
         first_solution = Solution.create_solution(exercise, student_user)
         second_solution = Solution.create_solution(exercise, student_user)
-        assert second_solution.latest_solution
-        assert not first_solution.get().latest_solution  # refresh results
+        assert second_solution.state == self.created_state
+        assert first_solution.refresh().state == self.old_solution_state
 
-        assert Solution.next_unchecked()['id'] == second_solution.id
-        next_unchecked_id = Solution.next_unchecked_of(exercise.id)['id']
-        assert next_unchecked_id == second_solution.id
+        assert Solution.next_unchecked().id == second_solution.id
+        next_unchecked = Solution.next_unchecked_of(exercise.id)
+        assert next_unchecked.id == second_solution.id
+        assert next_unchecked.start_checking()
+        assert next_unchecked.refresh().state == self.in_checking_state
 
-        second_solution.is_checked = True
-        second_solution.save()
-
-        assert Solution.next_unchecked() == {}
-        assert Solution.next_unchecked_of(exercise.id) == {}
+        assert Solution.next_unchecked() is None
+        assert Solution.next_unchecked_of(exercise.id) is None
+        general_tasks.reset_solution_state_if_needed(
+            second_solution.id)
+        assert Solution.next_unchecked().id == second_solution.id
+        assert Solution.next_unchecked_of(exercise.id).id == second_solution.id
