@@ -6,7 +6,7 @@ from peewee import (
 )
 from playhouse.migrate import PostgresqlMigrator, SqliteMigrator  # noqa: I201
 
-DB_NAME = os.getenv('DB_NAME', 'lms')
+DB_NAME = os.getenv('DB_NAME', 'db')
 DB_USER = os.getenv('DB_USER', 'lms')
 DB_PORT = int(os.getenv('DB_PORT', 5432))
 DB_HOST = os.getenv('DB_HOST', '127.0.0.1')

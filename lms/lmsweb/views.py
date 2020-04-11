@@ -289,8 +289,12 @@ def upload():
         msg = 'No exercises were found in the notebook'
         desc = 'did you use Upload <number of exercise> ? (example: Upload 1)'
         return fail(422, f'{msg}, {desc}')
-    matches, misses = set(), set()
+    matches, misses, errors = set(), set(), list()
     for exercise_id, code in exercises:
+        if not exercise_id:
+            # when exercise_id is empty str, code is the error message
+            errors.append(code)
+            continue
         exercise = Exercise.get_or_none(Exercise.id == exercise_id)
         if exercise is None:
             misses.add(exercise_id)
@@ -300,9 +304,9 @@ def upload():
             continue
 
         if Solution.solution_exists(
-                exercise=exercise,
-                solver=user,
-                json_data_str=code,
+            exercise=exercise,
+            solver=user,
+            json_data_str=code,
         ):
             continue
         solution = Solution.create_solution(
@@ -314,9 +318,12 @@ def upload():
         identical_tests_tasks.solve_solution_with_identical_code.apply_async(
             args=(solution.id,))
         matches.add(exercise_id)
+    if not matches:
+        errors.append("no # Upload <exercise num> headers found!")
     return jsonify({
         'exercise_matches': list(matches),
         'exercise_misses': list(misses),
+        'errors': errors
     })
 
 
