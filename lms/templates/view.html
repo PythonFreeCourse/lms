@@ -5,8 +5,12 @@
   <div id="view-head">
     <h1>תצוגת תרגיל {{ solution['exercise']['id'] }}: {{ solution['exercise']['subject'] }}</h1>
     {% if not is_manager %}
-      {% if solution['is_checked'] %}
-      <p id="checked-msg"><strong>התרגיל שלך נבדק!</strong> לחצו על השורות האדומות כדי לראות את הערות הבודקים.</p>
+      {% if solution['state'] == 'DONE' %}
+          <p id="checked-msg"><strong>התרגיל שלך נבדק!</strong> לחצו על השורות האדומות כדי לראות את הערות הבודקים.</p>
+      {% elif solution['state'] == 'IN_CHECKING' %}
+        <p id="unchecked-msg"><strong>התרגיל שלך נבדק ברגעים אלו!</strong></p>
+      {% elif solution['state'] == 'OLD_SOLUTION' %}
+        <p id="unchecked-msg"><strong>פתרון זה אינו פתרון עדכני!</strong></p>
       {% else %}
       <p id="unchecked-msg"><strong>התרגיל שלך מחכה לבדיקה.</strong> חשוב לנו שכל תרגיל יעבור בדיקה של עין אנושית.</p>
       {% endif %}
