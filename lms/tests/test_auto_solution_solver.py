@@ -1,5 +1,6 @@
 import typing
 
+from lms import lmsnotifications
 from lms.lmsdb import models
 from lms.lmstests.public.identical_tests import tasks
 from lms.tests import conftest
@@ -9,7 +10,7 @@ SOME_CODE = "print('Hello Word')"
 
 class TestAutoSolutionSolver:
     def test_solve_solution_with_identical_code(self, comment: models.Comment):
-        _, another_solution = self._duplicate_solution_from_comment(
+        first_solution, another_solution = self._duplicate_solution_from_comment(
             comment=comment,
             first_solution_code=SOME_CODE,
             second_solution_code=SOME_CODE,
@@ -17,6 +18,18 @@ class TestAutoSolutionSolver:
         assert len(tuple(another_solution.comments)) == 0
         tasks.solve_solution_with_identical_code(another_solution.id)
         assert len(tuple(another_solution.comments)) == 1
+
+        messages = lmsnotifications.get_messages_for_user(for_user=another_solution.solver)
+        assert len(messages) == 1
+        expected = self.get_notification_text(another_solution)
+        assert expected == messages[0][models.Notification.MESSAGE_FIELD_NAME]
+
+        messages = lmsnotifications.get_messages_for_user(for_user=first_solution.solver)
+        assert len(messages) == 0
+
+    @staticmethod
+    def get_notification_text(solution: models.Solution) -> str:
+        return f'תרגיל {solution.exercise.subject} נבדק. צפה בתוצאות!'
 
     def test_solve_solution_with_identical_code_not_identical_code(
             self,
@@ -31,6 +44,7 @@ class TestAutoSolutionSolver:
         assert len(tuple(another_solution.comments)) == 0
         tasks.solve_solution_with_identical_code(another_solution.id)
         assert len(tuple(another_solution.comments)) == 0
+        assert another_solution.state == models.Solution.STATES.CREATED.name
 
     def test_check_if_other_solutions_can_be_solved(
             self,
@@ -46,6 +60,11 @@ class TestAutoSolutionSolver:
         assert len(tuple(another_solution.comments)) == 0
         tasks.check_if_other_solutions_can_be_solved(first_solution.id)
         assert len(tuple(another_solution.comments)) == 1
+
+        messages = lmsnotifications.get_messages_for_user(for_user=another_solution.solver)
+        assert len(messages) == 1
+        expected = self.get_notification_text(another_solution)
+        assert expected == messages[0][models.Notification.MESSAGE_FIELD_NAME]
 
     def test_check_if_other_solutions_can_be_solved_not_identical_code(
             self,

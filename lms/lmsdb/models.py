@@ -1,4 +1,5 @@
 import enum
+import json
 import random
 import secrets
 import string
@@ -122,6 +123,34 @@ def on_save_handler(model_class, instance, created):
         instance.password = generate_password_hash(instance.password)
 
 
+class Notification(BaseModel):
+    MESSAGE_FIELD_NAME = 'message'
+
+    user = ForeignKeyField(User)
+    notification_type = CharField()
+    message_parameters = CharField()
+    related_object_id = IntegerField()
+
+    @classmethod
+    def notifications_for_user(cls, for_user: User) -> Iterable['Notification']:
+        return cls.select().join(User).filter(cls.user == for_user)
+
+    @classmethod
+    def create_notification(
+            cls,
+            user: User,
+            notification_type: str,
+            message_parameters: dict,
+            related_object_id: int
+    ) -> 'Notification':
+        return cls.create(**{
+            cls.user.name: user,
+            cls.notification_type.name: notification_type,
+            cls.message_parameters.name: json.dumps(message_parameters),
+            cls.related_object_id.name: related_object_id,
+        })
+
+
 class Exercise(BaseModel):
     subject = CharField()
     date = DateTimeField()
@@ -193,7 +222,7 @@ class Solution(BaseModel):
     def is_checked(self):
         return self.state == self.STATES.DONE.name
 
-    def start_checking(self):
+    def start_checking(self) -> bool:
         return self.set_state(Solution.STATES.IN_CHECKING)
 
     def set_state(self, new_state: SolutionState, **kwargs) -> bool:
