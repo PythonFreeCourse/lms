@@ -1,5 +1,5 @@
 import re
-from typing import Any, Iterator, Dict, Iterable, Tuple, List
+from typing import Any, Dict, Iterable, Iterator, List, Tuple
 
 
 Notebook = Dict[str, Any]
@@ -27,7 +27,7 @@ def get_exercise(cell: Cell) -> Tuple[str, str]:
 
 
 def get_exercises_from_code_cells(
-        cells: Iterable[Cell]
+        cells: Iterable[Cell],
 ) -> Iterator[Tuple[str, str]]:
     return filter(lambda x: x[0], map(get_exercise, (c for c in cells)))
 
@@ -35,7 +35,7 @@ def get_exercises_from_code_cells(
 def extract_exercises(notebook_data: Notebook) -> Iterator[Tuple[str, str]]:
     """yield exercise ID and relevant code for that exercise from notebook"""
     if 'cells' not in notebook_data:
-        raise ValueError("Invalid file format - must be ipynb")
+        raise ValueError('Invalid file format - must be ipynb')
 
     cells = get_code_cells(notebook_data)
     return get_exercises_from_code_cells(cells)

@@ -132,7 +132,10 @@ class Notification(BaseModel):
     related_object_id = IntegerField()
 
     @classmethod
-    def notifications_for_user(cls, for_user: User) -> Iterable['Notification']:
+    def notifications_for_user(
+            cls,
+            for_user: User,
+    ) -> Iterable['Notification']:
         return cls.select().join(User).filter(cls.user == for_user)
 
     @classmethod
@@ -141,7 +144,7 @@ class Notification(BaseModel):
             user: User,
             notification_type: str,
             message_parameters: dict,
-            related_object_id: int
+            related_object_id: int,
     ) -> 'Notification':
         return cls.create(**{
             cls.user.name: user,

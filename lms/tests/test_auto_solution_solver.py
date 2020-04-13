@@ -10,21 +10,23 @@ SOME_CODE = "print('Hello Word')"
 
 class TestAutoSolutionSolver:
     def test_solve_solution_with_identical_code(self, comment: models.Comment):
-        first_solution, another_solution = self._duplicate_solution_from_comment(
+        f_solution, s_solution = self._duplicate_solution_from_comment(
             comment=comment,
             first_solution_code=SOME_CODE,
             second_solution_code=SOME_CODE,
         )
-        assert len(tuple(another_solution.comments)) == 0
-        tasks.solve_solution_with_identical_code(another_solution.id)
-        assert len(tuple(another_solution.comments)) == 1
+        assert len(tuple(s_solution.comments)) == 0
+        tasks.solve_solution_with_identical_code(s_solution.id)
+        assert len(tuple(s_solution.comments)) == 1
 
-        messages = lmsnotifications.get_messages_for_user(for_user=another_solution.solver)
+        messages = lmsnotifications.get_messages_for_user(
+            for_user=s_solution.solver)
         assert len(messages) == 1
-        expected = self.get_notification_text(another_solution)
+        expected = self.get_notification_text(s_solution)
         assert expected == messages[0][models.Notification.MESSAGE_FIELD_NAME]
 
-        messages = lmsnotifications.get_messages_for_user(for_user=first_solution.solver)
+        messages = lmsnotifications.get_messages_for_user(
+            for_user=f_solution.solver)
         assert len(messages) == 0
 
     @staticmethod
@@ -61,7 +63,8 @@ class TestAutoSolutionSolver:
         tasks.check_if_other_solutions_can_be_solved(first_solution.id)
         assert len(tuple(another_solution.comments)) == 1
 
-        messages = lmsnotifications.get_messages_for_user(for_user=another_solution.solver)
+        messages = lmsnotifications.get_messages_for_user(
+            for_user=another_solution.solver)
         assert len(messages) == 1
         expected = self.get_notification_text(another_solution)
         assert expected == messages[0][models.Notification.MESSAGE_FIELD_NAME]

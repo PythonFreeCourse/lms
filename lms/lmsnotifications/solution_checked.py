@@ -6,7 +6,7 @@ class SolutionCheckedNotification(base.BaseNotification):
     @staticmethod
     def build_parameters_for_db(solution: models.Solution, **kwargs):
         return {
-            "exercise_name": solution.exercise.subject
+            'exercise_name': solution.exercise.subject,
         }
 
     @staticmethod
@@ -21,8 +21,8 @@ class SolutionWithFlake8Errors(base.BaseNotification):
     @staticmethod
     def build_parameters_for_db(solution: models.Solution, errors: int):
         return {
-            "exercise_name": solution.exercise.subject,
-            "errors": errors
+            'exercise_name': solution.exercise.subject,
+            'errors': errors,
         }
 
     @staticmethod
@@ -30,4 +30,4 @@ class SolutionWithFlake8Errors(base.BaseNotification):
         return solution.id
 
     def get_text_template(self) -> str:
-        return 'נמצאו {errors} תקלות בבדיקה האוטומטית עבור התרגיל {exercise_name}'
+        return 'נמצאו {errors} תקלות בבדיקה האוטומטית עבור התרגיל {exercise_name}'  # NOQA: E501

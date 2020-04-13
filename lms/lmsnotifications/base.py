@@ -30,7 +30,9 @@ class BaseNotification(abc.ABC):
         pass
 
     def format_message(self):
-        return self.get_text_template().format(**self.notification_parameters())
+        return self.get_text_template().format(
+            **self.notification_parameters(),
+        )
 
     @classmethod
     def create_notification(cls, for_user: models.User, **kwargs) -> None:
@@ -39,5 +41,5 @@ class BaseNotification(abc.ABC):
             user=for_user,
             notification_type=cls.notification_type(),
             message_parameters=message_parameters,
-            related_object_id=cls.build_related_object_id(**kwargs)
+            related_object_id=cls.build_related_object_id(**kwargs),
         )

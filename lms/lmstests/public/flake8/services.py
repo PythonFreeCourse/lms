@@ -85,8 +85,9 @@ class PyFlakeChecker:
             return
 
         lmsnotifications.create_notification(
-            notification_type=lmsnotifications.SolutionWithFlake8Errors.notification_type(),
+            notification_type=(lmsnotifications.SolutionWithFlake8Errors.
+                               notification_type()),
             for_user=self.solution.solver,
             solution=self.solution,
-            errors=errors_length
+            errors=errors_length,
         )

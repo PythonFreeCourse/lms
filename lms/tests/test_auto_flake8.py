@@ -51,9 +51,10 @@ class TestAutoFlake8:
         comment = comments[0].comment
         assert comment.text == INVALID_CODE_MESSAGE
         assert comment.flake8_key == INVALID_CODE_KEY
-        messages = lmsnotifications.get_messages_for_user(for_user=solution.solver)
+        messages = lmsnotifications.get_messages_for_user(
+            for_user=solution.solver)
         assert len(messages) == 1
-        expected = f'נמצאו 1 תקלות בבדיקה האוטומטית עבור התרגיל {solution.exercise.subject}'
+        expected = f'נמצאו 1 תקלות בבדיקה האוטומטית עבור התרגיל {solution.exercise.subject}'  # NOQA: E501
         assert expected == messages[0][models.Notification.MESSAGE_FIELD_NAME]
 
     def test_valid_solution(self, solution: models.Solution):
