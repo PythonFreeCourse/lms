@@ -203,6 +203,20 @@ def _create_comment(
     })
 
 
+@webapp.route('/notifications', methods=['GET', 'POST'])
+@login_required
+def notifications():
+    if request.method == 'POST':
+        if not lmsnotifications.mark_as_read(
+                from_user=current_user,
+                notification_id=int(request.json.get('notificationId', 0))):
+            return fail(401, 'Invalid')
+        return jsonify({})
+    else:  # it's a GET
+        response = lmsnotifications.get_notifications_for_user(current_user)
+        return jsonify(response)
+
+
 @webapp.route('/comments', methods=['GET', 'POST'])
 @login_required
 def comment():

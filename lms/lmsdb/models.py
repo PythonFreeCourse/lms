@@ -11,7 +11,7 @@ from peewee import (  # type: ignore
     BooleanField, Case, CharField, Check, DateTimeField, ForeignKeyField,
     IntegerField, ManyToManyField, TextField, fn,
 )
-from playhouse.signals import Model, pre_save  # type: ignore
+from playhouse.signals import Model, post_save, pre_save  # type: ignore
 from werkzeug.security import (
     check_password_hash, generate_password_hash,
 )
@@ -125,18 +125,27 @@ def on_save_handler(model_class, instance, created):
 
 class Notification(BaseModel):
     MESSAGE_FIELD_NAME = 'message'
+    ID_FIELD_NAME = 'id'
+    NOTIFICATIONS_LIMIT_PER_USER = 50
 
     user = ForeignKeyField(User)
+    created = DateTimeField(default=datetime.now)
     notification_type = CharField()
     message_parameters = CharField()
     related_object_id = IntegerField()
+    marked_read = BooleanField(default=False)
+
+    def mark_as_read(self):
+        self.marked_read = True
+        self.save()
 
     @classmethod
     def notifications_for_user(
             cls,
             for_user: User,
     ) -> Iterable['Notification']:
-        return cls.select().join(User).filter(cls.user == for_user)
+        return cls.select().join(User).filter(
+            cls.user == for_user.id).limit(cls.NOTIFICATIONS_LIMIT_PER_USER)
 
     @classmethod
     def create_notification(
@@ -152,6 +161,15 @@ class Notification(BaseModel):
             cls.message_parameters.name: json.dumps(message_parameters),
             cls.related_object_id.name: related_object_id,
         })
+
+
+@post_save(sender=Notification)
+def no_notification_saved(model_class, instance, created):
+    Notification.delete().where(
+        Notification.user == instance.user.id,
+    ).order_by(
+        Notification.created.desc(),
+    ).offset(Notification.NOTIFICATIONS_LIMIT_PER_USER).execute()
 
 
 class Exercise(BaseModel):
