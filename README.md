@@ -23,6 +23,11 @@ export LOCAL_SETUP=true
 flask run
 ```
 
+Enter http://127.0.0.1:5000, and the initial credentials should appear in your terminal. :)
+
+After logging in, use https://127.0.0.1:5000/admin to modify entries in the database.
+
+
 ## Full setup
 ```bash
 Note: you should have docker + docker-compose installed on your computer
@@ -41,10 +46,15 @@ docker exec -it lms_http_1 bash
 python lmsdb/bootstrap.py
 ```
 
+Enter http://127.0.0.1:8080, and the initial credentials should appear in your terminal. :)
+
+After logging in, use https://127.0.0.1:8080/admin to modify entries in the database.
+
+
 ## Dev checks to run
 * Run flake8
 ```
-# on flake root directory
+# on lms root directory
 flake8 lms
 ```
 * run tests
@@ -54,7 +64,3 @@ pip install -r lms/requirements.txt
 pip install -r dev_requirements.txt
 py.test -vvv
 ```
-
-Enter http://127.0.0.1:5000, and the initial credentials should appear in your terminal. :)
-
-After logging in, use https://127.0.0.1:5000/admin to modify entries in the database.
