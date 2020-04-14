@@ -1,0 +1,31 @@
+name: CI checks
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r lms/requirements.txt
+        pip install -r dev_requirements.txt
+    - name: Lint
+      run: |
+        flake8 lms --count --show-source --statistics
+    - name: Test
+      run: |
+        export PYTHONPATH=`pwd`
+        pytest -vvv --junitxml=junit/test-results.xml
