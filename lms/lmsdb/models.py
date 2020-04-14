@@ -167,12 +167,16 @@ class Notification(BaseModel):
 
 
 @post_save(sender=Notification)
-def no_notification_saved(model_class, instance, created):
-    Notification.delete().where(
+def on_notification_saved(model_class, instance, created):
+    # sqlite supports delete query with order
+    # but when we use postgres, peewee is stupid
+    old_notifications = Notification.select().where(
         Notification.user == instance.user.id,
     ).order_by(
         Notification.created.desc(),
-    ).offset(Notification.MAX_PER_USER).execute()
+    ).offset(Notification.MAX_PER_USER)
+    for instance in old_notifications:
+        instance.delete_instance()
 
 
 class Exercise(BaseModel):
