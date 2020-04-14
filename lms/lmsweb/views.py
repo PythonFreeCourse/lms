@@ -207,9 +207,12 @@ def _create_comment(
 @login_required
 def get_notifications():
     if request.method == 'POST':
+        explicit_id = (
+            int(request.json.get('notificationId', 0))
+            if request.json else 0)
         if not notifications.mark_as_read(
                 from_user=current_user,
-                notification_id=int(request.json.get('notificationId', 0))):
+                notification_id=explicit_id):
             return fail(401, 'Invalid')
         return jsonify({'success': True})
 

@@ -52,17 +52,24 @@ def get_notifications_for_user(for_user: models.User) -> typing.Sequence[dict]:
 
 def mark_as_read(
         from_user: models.User,
-        notification_id: int,
+        notification_id: typing.Optional[int] = 0,
 ) -> bool:
-    try:
-        notification = models.Notification.get_by_id(notification_id)
-    except models.Notification.DoesNotExist:
-        return False
+    # explicit notification
+    if notification_id:
+        try:
+            notification = models.Notification.get_by_id(notification_id)
+        except models.Notification.DoesNotExist:
+            return False
 
-    if notification.user.id != from_user.id:
-        return False
+        if notification.user.id != from_user.id:
+            return False
 
-    notification.mark_as_read()
+        notification.mark_as_read()
+        return True
+
+    # all notifications of the user
+    for notification in models.Notification.notifications_for_user(from_user):
+        notification.mark_as_read()
     return True
 
 
