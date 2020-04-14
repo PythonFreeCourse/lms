@@ -3,7 +3,7 @@ import random
 import secrets
 import string
 from datetime import datetime
-from typing import Any, Dict, Iterable, Optional, Tuple
+from typing import Any, ClassVar, Dict, Iterable, Optional, Tuple
 
 from flask_login import UserMixin  # type: ignore
 from peewee import (  # type: ignore
@@ -162,7 +162,11 @@ class Notification(BaseModel):
 
 
 @post_save(sender=Notification)
-def on_notification_saved(model_class, instance, created):
+def on_notification_saved(
+        model_class: ClassVar,
+        instance: Notification,
+        created: datetime,
+):
     # sqlite supports delete query with order
     # but when we use postgres, peewee is stupid
     old_notifications = Notification.select().where(

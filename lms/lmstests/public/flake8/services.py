@@ -80,10 +80,10 @@ class PyFlakeChecker:
             )
 
     def _fire_notification_if_needed(self):
-        errors_length = len(self._errors)
-        if not errors_length:
+        if not self._errors:
             return
 
+        errors_length = len(self._errors)
         notifications.create_notification(
             notification_type=(notifications.SolutionWithFlake8Errors.
                                notification_type()),

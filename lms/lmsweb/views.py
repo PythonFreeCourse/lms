@@ -207,13 +207,14 @@ def _create_comment(
 @login_required
 def get_notifications():
     if request.method == 'POST':
-        explicit_id = (
-            int(request.json.get('notificationId', 0))
-            if request.json else 0)
-        if not notifications.mark_as_read(
-                from_user=current_user,
-                notification_id=explicit_id):
-            return fail(401, 'Invalid')
+        if request.json:
+            explicit_id = int(request.json.get('notificationId', 0))
+        else:
+            explicit_id = 0
+        changed = notifications.mark_as_read(
+            from_user=current_user, notification_id=explicit_id)
+        if not changed:
+            return fail(401, 'Invalid notification')
         return jsonify({'success': True})
 
     # it's a GET
