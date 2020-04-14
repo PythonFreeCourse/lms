@@ -1,5 +1,6 @@
 import typing
 
+from lms import notifications
 from lms.lmsdb import models
 from lms.lmstests.public.identical_tests import tasks
 from lms.tests import conftest
@@ -9,14 +10,24 @@ SOME_CODE = "print('Hello Word')"
 
 class TestAutoSolutionSolver:
     def test_solve_solution_with_identical_code(self, comment: models.Comment):
-        _, another_solution = self._duplicate_solution_from_comment(
+        f_solution, s_solution = self._duplicate_solution_from_comment(
             comment=comment,
             first_solution_code=SOME_CODE,
             second_solution_code=SOME_CODE,
         )
-        assert len(tuple(another_solution.comments)) == 0
-        tasks.solve_solution_with_identical_code(another_solution.id)
-        assert len(tuple(another_solution.comments)) == 1
+        assert len(tuple(s_solution.comments)) == 0
+        tasks.solve_solution_with_identical_code(s_solution.id)
+        assert len(tuple(s_solution.comments)) == 1
+
+        user_notifications = notifications.get_notifications_for_user(
+            for_user=s_solution.solver)
+        assert len(user_notifications) == 1
+        subject = user_notifications[0]['message_parameters']['exercise_name']
+        assert s_solution.exercise.subject == subject
+
+        user_notifications = notifications.get_notifications_for_user(
+            for_user=f_solution.solver)
+        assert len(user_notifications) == 0
 
     def test_solve_solution_with_identical_code_not_identical_code(
             self,
@@ -31,6 +42,7 @@ class TestAutoSolutionSolver:
         assert len(tuple(another_solution.comments)) == 0
         tasks.solve_solution_with_identical_code(another_solution.id)
         assert len(tuple(another_solution.comments)) == 0
+        assert another_solution.state == models.Solution.STATES.CREATED.name
 
     def test_check_if_other_solutions_can_be_solved(
             self,
@@ -46,6 +58,13 @@ class TestAutoSolutionSolver:
         assert len(tuple(another_solution.comments)) == 0
         tasks.check_if_other_solutions_can_be_solved(first_solution.id)
         assert len(tuple(another_solution.comments)) == 1
+
+        user_notifications = notifications.get_notifications_for_user(
+            for_user=another_solution.solver)
+        assert len(user_notifications) == 1
+
+        subject = user_notifications[0]['message_parameters']['exercise_name']
+        assert another_solution.exercise.subject == subject
 
     def test_check_if_other_solutions_can_be_solved_not_identical_code(
             self,

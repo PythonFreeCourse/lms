@@ -3,6 +3,7 @@ import typing
 
 from celery.result import allow_join_result
 
+from lms import notifications
 from lms.lmsdb import models
 from lms.lmstests.sandbox import flake8
 
@@ -34,6 +35,7 @@ class PyFlakeChecker:
     def run_check(self):
         self._run_in_sandbox_and_populate_errors()
         self._populate_comments()
+        self._fire_notification_if_needed()
 
     def _run_in_sandbox_and_populate_errors(self):
         self._logger.info(
@@ -76,3 +78,16 @@ class PyFlakeChecker:
                 solution=self.solution,
                 is_auto=True,
             )
+
+    def _fire_notification_if_needed(self):
+        if not self._errors:
+            return
+
+        errors_length = len(self._errors)
+        notifications.create_notification(
+            notification_type=(notifications.SolutionWithFlake8Errors.
+                               notification_type()),
+            for_user=self.solution.solver,
+            solution=self.solution,
+            errors=errors_length,
+        )

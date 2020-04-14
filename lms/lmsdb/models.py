@@ -3,14 +3,14 @@ import random
 import secrets
 import string
 from datetime import datetime
-from typing import Any, Dict, Iterable, Optional, Tuple
+from typing import Any, ClassVar, Dict, Iterable, Optional, Tuple
 
 from flask_login import UserMixin  # type: ignore
 from peewee import (  # type: ignore
     BooleanField, Case, CharField, Check, DateTimeField, ForeignKeyField,
     IntegerField, ManyToManyField, TextField, fn,
 )
-from playhouse.signals import Model, pre_save  # type: ignore
+from playhouse.signals import Model, post_save, pre_save  # type: ignore
 from werkzeug.security import (
     check_password_hash, generate_password_hash,
 )
@@ -122,6 +122,62 @@ def on_save_handler(model_class, instance, created):
         instance.password = generate_password_hash(instance.password)
 
 
+class Notification(BaseModel):
+    ID_FIELD_NAME = 'id'
+    MAX_PER_USER = 10
+
+    user = ForeignKeyField(User)
+    created = DateTimeField(default=datetime.now)
+    notification_type = CharField()
+    message_parameters = database_config.JsonField()
+    related_object_id = IntegerField()
+    marked_read = BooleanField(default=False)
+
+    def mark_as_read(self):
+        self.marked_read = True
+        self.save()
+
+    @classmethod
+    def notifications_for_user(
+            cls,
+            for_user: User,
+    ) -> Iterable['Notification']:
+        return cls.select().join(User).filter(
+            cls.user == for_user.id).limit(cls.MAX_PER_USER)
+
+    @classmethod
+    def create_notification(
+            cls,
+            user: User,
+            notification_type: str,
+            message_parameters: dict,
+            related_object_id: int,
+    ) -> 'Notification':
+        return cls.create(**{
+            cls.user.name: user,
+            cls.notification_type.name: notification_type,
+            cls.message_parameters.name: message_parameters,
+            cls.related_object_id.name: related_object_id,
+        })
+
+
+@post_save(sender=Notification)
+def on_notification_saved(
+        model_class: ClassVar,
+        instance: Notification,
+        created: datetime,
+):
+    # sqlite supports delete query with order
+    # but when we use postgres, peewee is stupid
+    old_notifications = Notification.select().where(
+        Notification.user == instance.user.id,
+    ).order_by(
+        Notification.created.desc(),
+    ).offset(Notification.MAX_PER_USER)
+    for instance in old_notifications:
+        instance.delete_instance()
+
+
 class Exercise(BaseModel):
     subject = CharField()
     date = DateTimeField()
@@ -193,7 +249,7 @@ class Solution(BaseModel):
     def is_checked(self):
         return self.state == self.STATES.DONE.name
 
-    def start_checking(self):
+    def start_checking(self) -> bool:
         return self.set_state(Solution.STATES.IN_CHECKING)
 
     def set_state(self, new_state: SolutionState, **kwargs) -> bool:

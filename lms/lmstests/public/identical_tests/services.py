@@ -1,6 +1,7 @@
 import collections
 import logging
 
+from lms import notifications
 from lms.lmsdb import models
 
 
@@ -84,6 +85,12 @@ class IdenticalSolutionSolver:
         to_solution.checker = from_solution.checker
         to_solution.state = from_solution.state
         to_solution.save()
+        notifications.create_notification(
+            notification_type=(notifications.SolutionCheckedNotification
+                               .notification_type()),
+            for_user=to_solution.solver,
+            solution=to_solution,
+        )
 
     @staticmethod
     def check_identical_solutions_per_exercise():

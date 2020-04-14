@@ -2,6 +2,7 @@ import os
 import shutil
 import tempfile
 
+from lms import notifications
 from lms.lmsdb import models
 from lms.lmstests.public.flake8 import tasks
 
@@ -50,6 +51,15 @@ class TestAutoFlake8:
         comment = comments[0].comment
         assert comment.text == INVALID_CODE_MESSAGE
         assert comment.flake8_key == INVALID_CODE_KEY
+        user_notifications = notifications.get_notifications_for_user(
+            for_user=solution.solver)
+        assert len(user_notifications) == 1
+        assert user_notifications
+        parameters = user_notifications[0]['message_parameters']
+        subject = parameters['exercise_name']
+        errors = parameters['errors']
+        assert solution.exercise.subject == subject
+        assert 1 == errors
 
     def test_valid_solution(self, solution: models.Solution):
         solution.json_data_str = VALID_CODE

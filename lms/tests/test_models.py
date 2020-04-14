@@ -1,4 +1,4 @@
-from lms.lmsdb.models import Exercise, Solution, User
+from lms.lmsdb.models import Exercise, Notification, Solution, User
 from lms.lmstests.public.general import tasks as general_tasks
 
 
@@ -60,3 +60,22 @@ class TestSolution:
             second_solution.id)
         assert Solution.next_unchecked().id == second_solution.id
         assert Solution.next_unchecked_of(exercise.id).id == second_solution.id
+
+
+class TestNotification:
+    def test_notification_auto_deletion(self, student_user: User):
+        extra = 3
+        start = Notification.MAX_PER_USER
+        for _ in range(Notification.MAX_PER_USER + extra - 1):
+            Notification.create_notification(
+                user=student_user,
+                notification_type='',
+                message_parameters={},
+                related_object_id=1,
+            )
+
+        assert Notification.select().count() == start
+        expected = start + extra - 1
+        actual = Notification.select().order_by(
+            Notification.created.desc()).get().id
+        assert expected == actual

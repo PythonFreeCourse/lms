@@ -21,6 +21,7 @@ from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Exercise, RoleOptions, Solution, User,
     database,
 )
+from lms import notifications
 from lms.lmstests.public.flake8 import tasks as flake8_tasks
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
@@ -202,6 +203,25 @@ def _create_comment(
     })
 
 
+@webapp.route('/notifications', methods=['GET', 'POST'])
+@login_required
+def get_notifications():
+    if request.method == 'POST':
+        if request.json:
+            explicit_id = int(request.json.get('notificationId', 0))
+        else:
+            explicit_id = 0
+        changed = notifications.mark_as_read(
+            from_user=current_user, notification_id=explicit_id)
+        if not changed:
+            return fail(401, 'Invalid notification')
+        return jsonify({'success': True})
+
+    # it's a GET
+    response = notifications.get_notifications_for_user(current_user)
+    return jsonify(response)
+
+
 @webapp.route('/comments', methods=['GET', 'POST'])
 @login_required
 def comment():
@@ -359,6 +379,13 @@ def view(solution_id):
 def done_checking(exercise_id, solution_id):
     checked_solution: Solution = Solution.get_by_id(solution_id)
     is_updated = checked_solution.set_state(new_state=Solution.STATES.DONE)
+    if is_updated:
+        notifications.create_notification(
+            notification_type=(notifications.SolutionCheckedNotification
+                               .notification_type()),
+            for_user=checked_solution.solver,
+            solution=checked_solution,
+        )
     identical_tests_tasks.check_if_other_solutions_can_be_solved.apply_async(
         args=(solution_id,))
     next_exercise = None
