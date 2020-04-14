@@ -41,6 +41,20 @@ docker exec -it lms_http_1 bash
 python lmsdb/bootstrap.py
 ```
 
+## Dev checks to run
+* Run flake8
+```
+# on flake root directory
+flake8 lms
+```
+* run tests
+```
+export PYTHONPATH=`pwd`
+pip install -r lms/requirements.txt
+pip install -r dev_requirements.txt
+py.test -vvv
+```
+
 Enter http://127.0.0.1:5000, and the initial credentials should appear in your terminal. :)
 
 After logging in, use https://127.0.0.1:5000/admin to modify entries in the database.

@@ -1,5 +1,4 @@
 import enum
-import json
 import random
 import secrets
 import string
@@ -130,13 +129,9 @@ class Notification(BaseModel):
     user = ForeignKeyField(User)
     created = DateTimeField(default=datetime.now)
     notification_type = CharField()
-    message_parameters = CharField()
+    message_parameters = database_config.JsonField()
     related_object_id = IntegerField()
     marked_read = BooleanField(default=False)
-
-    @property
-    def message_parameters_dict(self) -> dict:
-        return json.loads(self.message_parameters)
 
     def mark_as_read(self):
         self.marked_read = True
@@ -161,7 +156,7 @@ class Notification(BaseModel):
         return cls.create(**{
             cls.user.name: user,
             cls.notification_type.name: notification_type,
-            cls.message_parameters.name: json.dumps(message_parameters),
+            cls.message_parameters.name: message_parameters,
             cls.related_object_id.name: related_object_id,
         })
 

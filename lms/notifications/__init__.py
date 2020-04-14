@@ -41,7 +41,7 @@ def get_notifications_for_user(for_user: models.User) -> typing.Sequence[dict]:
             models.Notification.marked_read.name:
                 notification.marked_read,
             models.Notification.message_parameters.name:
-                notification.message_parameters_dict,
+                notification.message_parameters,
             models.Notification.notification_type.name:
                 notification.notification_type,
         }
