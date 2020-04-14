@@ -32,4 +32,5 @@ jobs:
         flake8 lms --count --show-source --statistics
     - name: Test with pytest
       run: |
-        pytest -vvv --pdb
+        export PYTHONPATH=`pwd`
+        pytest -vvv --junitxml=junit/test-results.xml
