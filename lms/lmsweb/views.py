@@ -21,7 +21,7 @@ from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Exercise, RoleOptions, Solution, User,
     database,
 )
-from lms import lmsnotifications
+from lms import notifications
 from lms.lmstests.public.flake8 import tasks as flake8_tasks
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
@@ -205,16 +205,17 @@ def _create_comment(
 
 @webapp.route('/notifications', methods=['GET', 'POST'])
 @login_required
-def notifications():
+def get_notifications():
     if request.method == 'POST':
-        if not lmsnotifications.mark_as_read(
+        if not notifications.mark_as_read(
                 from_user=current_user,
                 notification_id=int(request.json.get('notificationId', 0))):
             return fail(401, 'Invalid')
-        return jsonify({})
-    else:  # it's a GET
-        response = lmsnotifications.get_notifications_for_user(current_user)
-        return jsonify(response)
+        return jsonify({'success': True})
+
+    # it's a GET
+    response = notifications.get_notifications_for_user(current_user)
+    return jsonify(response)
 
 
 @webapp.route('/comments', methods=['GET', 'POST'])
@@ -375,8 +376,8 @@ def done_checking(exercise_id, solution_id):
     checked_solution: Solution = Solution.get_by_id(solution_id)
     is_updated = checked_solution.set_state(new_state=Solution.STATES.DONE)
     if is_updated:
-        lmsnotifications.create_notification(
-            notification_type=(lmsnotifications.SolutionCheckedNotification
+        notifications.create_notification(
+            notification_type=(notifications.SolutionCheckedNotification
                                .notification_type()),
             for_user=checked_solution.solver,
             solution=checked_solution,

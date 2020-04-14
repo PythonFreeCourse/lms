@@ -1,6 +1,6 @@
 import typing
 
-from lms import lmsnotifications
+from lms import notifications
 from lms.lmsdb import models
 from lms.lmstests.public.identical_tests import tasks
 from lms.tests import conftest
@@ -19,20 +19,15 @@ class TestAutoSolutionSolver:
         tasks.solve_solution_with_identical_code(s_solution.id)
         assert len(tuple(s_solution.comments)) == 1
 
-        notifications = lmsnotifications.get_notifications_for_user(
+        user_notifications = notifications.get_notifications_for_user(
             for_user=s_solution.solver)
-        assert len(notifications) == 1
-        expected = self.get_notification_text(s_solution)
-        actual = notifications[0][models.Notification.MESSAGE_FIELD_NAME]
-        assert expected == actual
+        assert len(user_notifications) == 1
+        subject = user_notifications[0]['message_parameters']['exercise_name']
+        assert s_solution.exercise.subject == subject
 
-        notifications = lmsnotifications.get_notifications_for_user(
+        user_notifications = notifications.get_notifications_for_user(
             for_user=f_solution.solver)
-        assert len(notifications) == 0
-
-    @staticmethod
-    def get_notification_text(solution: models.Solution) -> str:
-        return f'תרגיל {solution.exercise.subject} נבדק. צפה בתוצאות!'
+        assert len(user_notifications) == 0
 
     def test_solve_solution_with_identical_code_not_identical_code(
             self,
@@ -64,12 +59,12 @@ class TestAutoSolutionSolver:
         tasks.check_if_other_solutions_can_be_solved(first_solution.id)
         assert len(tuple(another_solution.comments)) == 1
 
-        notifications = lmsnotifications.get_notifications_for_user(
+        user_notifications = notifications.get_notifications_for_user(
             for_user=another_solution.solver)
-        assert len(notifications) == 1
-        expected = self.get_notification_text(another_solution)
-        actual = notifications[0][models.Notification.MESSAGE_FIELD_NAME]
-        assert expected == actual
+        assert len(user_notifications) == 1
+
+        subject = user_notifications[0]['message_parameters']['exercise_name']
+        assert another_solution.exercise.subject == subject
 
     def test_check_if_other_solutions_can_be_solved_not_identical_code(
             self,

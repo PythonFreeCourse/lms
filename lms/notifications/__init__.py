@@ -1,8 +1,8 @@
 import typing
 
 from lms.lmsdb import models
-from lms.lmsnotifications import base
-from lms.lmsnotifications.solution_checked import (
+from lms.notifications import base
+from lms.notifications.solution_checked import (
     SolutionCheckedNotification,
     SolutionWithFlake8Errors,
 )
@@ -16,16 +16,6 @@ _MAPPING = {
     notification_formatter.notification_type(): notification_formatter
     for notification_formatter in _ALL
 }
-
-
-def get_message_from_notification(notification: models.Notification) -> str:
-    if notification.notification_type not in _MAPPING:
-        raise NotImplementedError
-
-    instance: base.BaseNotification = _MAPPING[
-        notification.notification_type
-    ](notification)
-    return instance.format_message()
 
 
 def create_notification(
@@ -48,10 +38,12 @@ def get_notifications_for_user(for_user: models.User) -> typing.Sequence[dict]:
                 notification.user.id,
             models.Notification.related_object_id.name:
                 notification.related_object_id,
-            models.Notification.MESSAGE_FIELD_NAME:
-                get_message_from_notification(notification),
             models.Notification.marked_read.name:
                 notification.marked_read,
+            models.Notification.message_parameters.name:
+                notification.message_parameters_dict,
+            models.Notification.notification_type.name:
+                notification.notification_type,
         }
         for notification
         in models.Notification.notifications_for_user(for_user)
@@ -75,7 +67,6 @@ def mark_as_read(
 
 
 __all__ = (
-    get_message_from_notification.__name__,
     get_notifications_for_user.__name__,
     mark_as_read.__name__,
 ) + tuple(_MAPPING.keys())

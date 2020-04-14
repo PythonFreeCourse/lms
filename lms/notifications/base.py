@@ -1,5 +1,4 @@
 import abc
-import json
 
 from lms.lmsdb import models
 
@@ -7,9 +6,6 @@ from lms.lmsdb import models
 class BaseNotification(abc.ABC):
     def __init__(self, notification: models.Notification):
         self.notification = notification
-
-    def notification_parameters(self):
-        return json.loads(self.notification.message_parameters)
 
     @classmethod
     def notification_type(cls) -> str:
@@ -24,15 +20,6 @@ class BaseNotification(abc.ABC):
     @abc.abstractmethod
     def build_related_object_id(**kwargs) -> int:
         pass
-
-    @abc.abstractmethod
-    def get_text_template(self) -> str:
-        pass
-
-    def format_message(self):
-        return self.get_text_template().format(
-            **self.notification_parameters(),
-        )
 
     @classmethod
     def create_notification(cls, for_user: models.User, **kwargs) -> None:

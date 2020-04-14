@@ -3,7 +3,7 @@ import typing
 
 from celery.result import allow_join_result
 
-from lms import lmsnotifications
+from lms import notifications
 from lms.lmsdb import models
 from lms.lmstests.sandbox import flake8
 
@@ -84,8 +84,8 @@ class PyFlakeChecker:
         if not errors_length:
             return
 
-        lmsnotifications.create_notification(
-            notification_type=(lmsnotifications.SolutionWithFlake8Errors.
+        notifications.create_notification(
+            notification_type=(notifications.SolutionWithFlake8Errors.
                                notification_type()),
             for_user=self.solution.solver,
             solution=self.solution,

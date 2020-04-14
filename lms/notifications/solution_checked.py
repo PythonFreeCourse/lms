@@ -1,5 +1,5 @@
 from lms.lmsdb import models
-from lms.lmsnotifications import base
+from lms.notifications import base
 
 
 class SolutionCheckedNotification(base.BaseNotification):
@@ -13,9 +13,6 @@ class SolutionCheckedNotification(base.BaseNotification):
     def build_related_object_id(solution: models.Solution, **kwargs):
         return solution.id
 
-    def get_text_template(self) -> str:
-        return 'תרגיל {exercise_name} נבדק. צפה בתוצאות!'
-
 
 class SolutionWithFlake8Errors(base.BaseNotification):
     @staticmethod
@@ -28,6 +25,3 @@ class SolutionWithFlake8Errors(base.BaseNotification):
     @staticmethod
     def build_related_object_id(solution: models.Solution, **kwargs):
         return solution.id
-
-    def get_text_template(self) -> str:
-        return 'נמצאו {errors} תקלות בבדיקה האוטומטית עבור התרגיל {exercise_name}'  # NOQA: E501

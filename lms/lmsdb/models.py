@@ -124,9 +124,8 @@ def on_save_handler(model_class, instance, created):
 
 
 class Notification(BaseModel):
-    MESSAGE_FIELD_NAME = 'message'
     ID_FIELD_NAME = 'id'
-    NOTIFICATIONS_LIMIT_PER_USER = 50
+    MAX_PER_USER = 10
 
     user = ForeignKeyField(User)
     created = DateTimeField(default=datetime.now)
@@ -134,6 +133,10 @@ class Notification(BaseModel):
     message_parameters = CharField()
     related_object_id = IntegerField()
     marked_read = BooleanField(default=False)
+
+    @property
+    def message_parameters_dict(self) -> dict:
+        return json.loads(self.message_parameters)
 
     def mark_as_read(self):
         self.marked_read = True
@@ -145,7 +148,7 @@ class Notification(BaseModel):
             for_user: User,
     ) -> Iterable['Notification']:
         return cls.select().join(User).filter(
-            cls.user == for_user.id).limit(cls.NOTIFICATIONS_LIMIT_PER_USER)
+            cls.user == for_user.id).limit(cls.MAX_PER_USER)
 
     @classmethod
     def create_notification(
@@ -169,7 +172,7 @@ def no_notification_saved(model_class, instance, created):
         Notification.user == instance.user.id,
     ).order_by(
         Notification.created.desc(),
-    ).offset(Notification.NOTIFICATIONS_LIMIT_PER_USER).execute()
+    ).offset(Notification.MAX_PER_USER).execute()
 
 
 class Exercise(BaseModel):

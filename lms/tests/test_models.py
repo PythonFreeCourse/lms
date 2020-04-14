@@ -65,8 +65,8 @@ class TestSolution:
 class TestNotification:
     def test_notification_auto_deletion(self, student_user: User):
         extra = 3
-        start = Notification.NOTIFICATIONS_LIMIT_PER_USER
-        for _ in range(Notification.NOTIFICATIONS_LIMIT_PER_USER + extra - 1):
+        start = Notification.MAX_PER_USER
+        for _ in range(Notification.MAX_PER_USER + extra - 1):
             Notification.create_notification(
                 user=student_user,
                 notification_type='',
