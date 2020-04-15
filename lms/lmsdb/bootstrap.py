@@ -75,6 +75,13 @@ def _add_order_if_needed():
     )
 
 
+def _add_exercise_due_date_if_needed():
+    return _migrate_column_in_table_if_needed(
+        models.Exercise,
+        models.Exercise.due_date,
+    )
+
+
 def _add_is_auto_if_needed():
     return _migrate_column_in_table_if_needed(
         models.Comment,
@@ -132,6 +139,7 @@ def main():
     _add_notebook_num_if_needed()
     _add_is_auto_if_needed()
     _add_order_if_needed()
+    _add_exercise_due_date_if_needed()
     add_solution_state_if_needed()
     text_fixer.fix_texts()
 
