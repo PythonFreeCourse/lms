@@ -3,7 +3,7 @@ import random
 import secrets
 import string
 from datetime import datetime
-from typing import Any, ClassVar, Dict, Iterable, Optional, Tuple
+from typing import Any, Dict, Iterable, Optional, Tuple, Type
 
 from flask_login import UserMixin  # type: ignore
 from peewee import (  # type: ignore
@@ -128,13 +128,13 @@ class Notification(BaseModel):
 
     user = ForeignKeyField(User)
     created = DateTimeField(default=datetime.now)
-    notification_type = CharField()
+    action_id = IntegerField()
     message_parameters = database_config.JsonField()
-    related_object_id = IntegerField()
-    marked_read = BooleanField(default=False)
+    related_object_id = IntegerField(null=True)
+    read = BooleanField(default=False)
 
     def mark_as_read(self):
-        self.marked_read = True
+        self.read = True
         self.save()
 
     @classmethod
@@ -163,7 +163,7 @@ class Notification(BaseModel):
 
 @post_save(sender=Notification)
 def on_notification_saved(
-        model_class: ClassVar,
+        model_class: Type[Notification],
         instance: Notification,
         created: datetime,
 ):

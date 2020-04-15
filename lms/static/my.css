@@ -457,3 +457,12 @@ code > .grader-add {
   margin-left: 0.5em;
   padding: 0.55rem 1rem;
 }
+
+
+#notification-icon {
+  cursor: pointer;
+}
+
+.notification {
+  flex-direction: column;
+}
