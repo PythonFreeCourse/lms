@@ -429,7 +429,8 @@ class Comment(BaseModel):
     @classmethod
     def by_solution(cls, solution_id: int):
         fields = [
-            cls.line_number, cls.is_auto, cls.id, CommentText.text,
+            cls.id, cls.line_number, cls.is_auto,
+            CommentText.id.alias('comment_id'), CommentText.text,
             User.fullname.alias('author_name'),
         ]
         return (
