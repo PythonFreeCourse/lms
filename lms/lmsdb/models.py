@@ -429,10 +429,18 @@ class Comment(BaseModel):
     @classmethod
     def by_solution(cls, solution_id: int):
         fields = [
-            Comment, CommentText.text, CommentText.flake8_key, CommentText.id,
+            cls.id, cls.line_number, cls.is_auto,
+            CommentText.id.alias('comment_id'), CommentText.text,
+            User.fullname.alias('author_name'),
         ]
-        the_solution = Comment.solution == solution_id
-        return Comment.select(*fields).join(CommentText).where(the_solution)
+        return (
+            cls
+            .select(*fields)
+            .join(CommentText)
+            .switch()
+            .join(User)
+            .where(cls.solution == solution_id)
+        )
 
     @classmethod
     def get_solutions(cls, solution_id: int) -> Tuple[Dict[Any, Any], ...]:

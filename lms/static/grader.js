@@ -95,13 +95,13 @@ function deleteComment(solutionId, commentId) {
   xhr.send('');
 }
 
-function sendNewComment(solutionId, line, commentText) {
-  return sendComment('text', solutionId, line, commentText);
+function sendNewComment(...commentData) {
+  return sendComment('text', ...commentData);
 }
 
 
-function sendExistsComment(solutionId, line, commentId) {
-  return sendComment('id', solutionId, line, commentId);
+function sendExistsComment(...commentData) {
+  return sendComment('id', ...commentData);
 }
 
 
@@ -163,13 +163,11 @@ function trackTextArea(lineNumber) {
   const target = `textarea[data-line='${lineNumber}']`;
   const popoverElement = `.grader-add[data-line='${lineNumber}']`;
   $(target).keydown((ev) => {
-    console.log(ev.which);
     if ((ev.which == 10 || ev.which == 13) && ev.ctrlKey) {  // CTRL + ENTER
       sendNewComment(window.solutionId, lineNumber, ev.target.value);
       $(popoverElement).popover('hide');
-    } else if (ev.key == 'Escape') {  // Escape
+    } else if (ev.key == 'Escape') {
       ev.preventDefault();
-      console.log('nobody knows it');
       $(popoverElement).popover('hide');
     }
   });

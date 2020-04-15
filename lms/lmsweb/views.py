@@ -199,7 +199,9 @@ def _create_comment(
     )
 
     return jsonify({
-        'success': 'true', 'id': comment_.id, 'text': comment_.comment.text,
+        'success': 'true', 'text': comment_.comment.text,
+        'author_name': user.fullname, 'is_auto': False, 'id': comment_.id,
+        'line_number': line_number,
     })
 
 

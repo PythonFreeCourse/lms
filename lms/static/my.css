@@ -262,11 +262,11 @@ i.fa {
   width: 100%;
 }
 
-#unchecked-msg > strong {
+.unchecked-msg > strong {
   color: #ff1654;
 }
 
-#checked-msg > strong {
+.checked-msg > strong {
   color: #247ba0;
 }
 
@@ -350,6 +350,10 @@ ol.comments > li {
 
 ol.comments > li:active {
   cursor: grabbing;
+}
+
+.comment-author {
+  color: #50514f;
 }
 
 span.line {
