@@ -190,7 +190,7 @@ class Exercise(BaseModel):
     def open_for_new_solutions(self) -> bool:
         if self.due_date is None:
             return not self.is_archived
-        return datetime.now() < self.due_date
+        return datetime.now() < self.due_date and not self.is_archived
 
     @classmethod
     def get_objects(cls, fetch_archived: bool = False):
