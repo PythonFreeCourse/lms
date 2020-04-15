@@ -19,7 +19,7 @@ function isUserGrader() {
 
 function formatCommentData(commentData) {
   let changedCommentText = commentData.text;
-  changedCommentText = `<span class="comment-author">${commentData.authorName}:</span> ${commentData.text}`
+  changedCommentText = `<span class="comment-author">${commentData.author_name}:</span> ${commentData.text}`
   if (isUserGrader()) {
     const deleteButton = `<i class="fa fa-trash grader-delete" aria-hidden="true" data-commentid="${commentData.id}" onclick="deleteComment(${window.solutionId}, ${commentData.id});"></i>`;
     changedCommentText = `${deleteButton} ${changedCommentText}`;
@@ -42,7 +42,7 @@ function addCommentToLine(line, commentData) {
       content: commentText,
       sanitize: false,
       boundary: 'viewport',
-      placement: 'auto', // Actually right :P
+      placement: 'auto',
     });
     $(commentElement).popover();
     markLine(commentElement[0], true);
