@@ -317,7 +317,7 @@ def upload():
         if exercise is None:
             misses.add(exercise_id)
             continue
-        if exercise.is_archived:
+        if not exercise.open_for_new_solutions():
             misses.add(exercise_id)
             continue
 

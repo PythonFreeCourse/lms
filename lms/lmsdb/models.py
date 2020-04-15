@@ -183,8 +183,14 @@ class Exercise(BaseModel):
     date = DateTimeField()
     users = ManyToManyField(User, backref='exercises')
     is_archived = BooleanField()
+    due_date = DateTimeField(null=True)
     notebook_num = IntegerField(default=0)
     order = IntegerField(default=0)
+
+    def open_for_new_solutions(self) -> bool:
+        if self.due_date is None:
+            return not self.is_archived
+        return datetime.now() < self.due_date and not self.is_archived
 
     @classmethod
     def get_objects(cls, fetch_archived: bool = False):
@@ -199,6 +205,7 @@ class Exercise(BaseModel):
             'exercise_name': self.subject,
             'is_archived': self.is_archived,
             'notebook': self.notebook_num,
+            'due_date': self.due_date,
         }
 
     @staticmethod
