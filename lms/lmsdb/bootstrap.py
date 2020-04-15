@@ -78,7 +78,7 @@ def _add_order_if_needed():
 def _add_exercise_due_date_if_needed():
     return _migrate_column_in_table_if_needed(
         models.Exercise,
-        models.Exercise.duo_date,
+        models.Exercise.due_date,
     )
 
 
