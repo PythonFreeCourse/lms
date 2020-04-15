@@ -17,11 +17,12 @@ function isUserGrader() {
   return ['staff', 'administrator'].includes(sessionStorage.getItem('role'));
 }
 
-function addSpecialCommentButtons(commentData) {
+function formatCommentData(commentData) {
   let changedCommentText = commentData.text;
+  changedCommentText = `<span class="comment-author">${commentData.authorName}:</span> ${commentData.text}`
   if (isUserGrader()) {
     const deleteButton = `<i class="fa fa-trash grader-delete" aria-hidden="true" data-commentid="${commentData.id}" onclick="deleteComment(${window.solutionId}, ${commentData.id});"></i>`;
-    changedCommentText = `${deleteButton} ${commentData.text}`;
+    changedCommentText = `${deleteButton} ${changedCommentText}`;
   }
   return changedCommentText;
 }
@@ -29,8 +30,8 @@ function addSpecialCommentButtons(commentData) {
 function addCommentToLine(line, commentData) {
   const commentElement = $(`.line[data-line="${line}"]`);
   const existingPopover = $(commentElement).data('bs.popover');
-  const buttonizedComment = addSpecialCommentButtons(commentData);
-  const commentText = `<span class="comment" data-line="${line}" data-commentid="${commentData.id}">${buttonizedComment}</span>`;
+  const formattedComment = formatCommentData(commentData);
+  const commentText = `<span class="comment" data-line="${line}" data-commentid="${commentData.id}">${formattedComment}</span>`;
   if (existingPopover !== undefined) {
     const existingContent = `${existingPopover.config.content} <hr>`;
     existingPopover.config.content = existingContent + commentText;
@@ -40,7 +41,8 @@ function addCommentToLine(line, commentData) {
       title: `שורה ${line}`,
       content: commentText,
       sanitize: false,
-      placement: 'left', // Actually right :P
+      boundary: 'viewport',
+      placement: 'auto', // Actually right :P
     });
     $(commentElement).popover();
     markLine(commentElement[0], true);

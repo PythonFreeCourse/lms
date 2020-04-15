@@ -6,13 +6,13 @@
     <h1>תצוגת תרגיל {{ solution['exercise']['id'] }}: {{ solution['exercise']['subject'] }}</h1>
     {% if not is_manager %}
       {% if solution['state'] == 'DONE' %}
-          <p id="checked-msg"><strong>התרגיל שלך נבדק!</strong> לחצו על השורות האדומות כדי לראות את הערות הבודקים.</p>
+        <p class="checked-msg"><strong>התרגיל שלך נבדק!</strong> לחצו על השורות האדומות כדי לראות את הערות הבודקים.</p>
       {% elif solution['state'] == 'IN_CHECKING' %}
-        <p id="unchecked-msg"><strong>התרגיל שלך נבדק ברגעים אלו!</strong></p>
+        <p class="unchecked-msg"><strong>התרגיל שלך נבדק ברגעים אלו!</strong></p>
       {% elif solution['state'] == 'OLD_SOLUTION' %}
-        <p id="unchecked-msg"><strong>פתרון זה אינו פתרון עדכני!</strong></p>
+        <p class="unchecked-msg"><strong>פתרון זה אינו פתרון עדכני!</strong></p>
       {% else %}
-      <p id="unchecked-msg"><strong>התרגיל שלך מחכה לבדיקה.</strong> חשוב לנו שכל תרגיל יעבור בדיקה של עין אנושית.</p>
+        <p class="unchecked-msg"><strong>התרגיל שלך מחכה לבדיקה.</strong> חשוב לנו שכל תרגיל יעבור בדיקה של עין אנושית.</p>
       {% endif %}
     {% else %}
     <p id="solver"><strong>מגיש:</strong> {{ solution['solver']['fullname'] }}</p>
@@ -53,7 +53,7 @@
       </div>
       <div id="all-comments">
         <h2>הערות בודק</h2>
-        <ol id="all-comments-list" class="comments all-comments">
+        <ol id="my-comments-list" class="comments my-comments">
           {%- for comment in user_comments %}
           <li class="known-comment" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text }}</li>
           {% endfor -%}
