@@ -194,7 +194,7 @@ class Exercise(BaseModel):
 
     @classmethod
     def get_objects(cls, fetch_archived: bool = False):
-        exercises = cls.select().order_by(Exercise.id)
+        exercises = cls.select().order_by(Exercise.order)
         if not fetch_archived:
             exercises = exercises.where(cls.is_archived == False)  # NOQA: E712
         return exercises
