@@ -25,7 +25,7 @@ from lms import notifications
 from lms.lmstests.public.flake8 import tasks as flake8_tasks
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
-from lms.lmsweb import webapp
+from lms.lmsweb import config, webapp
 from lms.lmsweb.tools.notebook_extractor import extract_exercises
 
 login_manager = LoginManager()
@@ -333,8 +333,10 @@ def upload():
             json_data_str=code,
         )
         flake8_tasks.run_flake8_on_solution.apply_async(args=(solution.id,))
-        identical_tests_tasks.solve_solution_with_identical_code.apply_async(
-            args=(solution.id,))
+        if config.FEATURE_FLAG_CHECK_IDENTICAL_CODE_ON:
+            (identical_tests_tasks.
+             solve_solution_with_identical_code.
+             apply_async(args=(solution.id,)))
         matches.add(exercise_id)
     return jsonify({
         'exercise_matches': list(matches),
@@ -388,8 +390,9 @@ def done_checking(exercise_id, solution_id):
             for_user=checked_solution.solver,
             solution=checked_solution,
         )
-    identical_tests_tasks.check_if_other_solutions_can_be_solved.apply_async(
-        args=(solution_id,))
+    if config.FEATURE_FLAG_CHECK_IDENTICAL_CODE_ON:
+        (identical_tests_tasks.check_if_other_solutions_can_be_solved.
+         apply_async(args=(solution_id,)))
     next_exercise = None
     solution = Solution.next_unchecked_of(exercise_id)
     if solution and solution.start_checking():

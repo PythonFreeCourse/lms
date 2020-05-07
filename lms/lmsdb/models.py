@@ -386,6 +386,44 @@ class Solution(BaseModel):
         )
 
 
+class ExerciseTest(BaseModel):
+    exercise = ForeignKeyField(model=Exercise, unique=True)
+    code = TextField()
+
+    @classmethod
+    def create_exercise_test(cls, exercise: Exercise, code: str):
+        return cls.create(**{
+            cls.exercise.name: exercise,
+            cls.code.name: code,
+        })
+
+    @classmethod
+    def get_by_exercise(cls, exercise: Exercise):
+        return cls.get_or_none(cls.exercise == exercise)
+
+
+class SolutionExerciseTestExecution(BaseModel):
+    solution = ForeignKeyField(model=Solution)
+    test_name = TextField()
+    user_message = TextField()
+    staff_message = TextField()
+
+    @classmethod
+    def create_execution_result(
+            cls,
+            solution: Solution,
+            test_name: str,
+            user_message: str,
+            staff_message: str,
+    ):
+        cls.create(**{
+            cls.solution.name: solution,
+            cls.test_name.name: test_name,
+            cls.user_message.name: user_message,
+            cls.staff_message.name: staff_message,
+        })
+
+
 class CommentText(BaseModel):
     text = TextField(unique=True)
     flake8_key = TextField(null=True)
