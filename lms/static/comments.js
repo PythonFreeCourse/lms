@@ -1,15 +1,23 @@
-const COMMENTED_LINE_COLOR = '#fac4c3';
+const DEFAULT_COMMENTED_LINE_COLOR = '#fab3b0';
+const FLAKE_COMMENTED_LINE_COLOR = '#fac4c3';
+const HOVER_LINE_STYLE = '1px solid #0d0d0f';
+
 
 function markLine(target, color) {
   if (target.dataset && target.dataset.marked === 'true') { return; }
   if (target.dataset && target.dataset.vimbackground === 'true') { return; }
-  let parsedColor = color;
-  if (color === true) {
-    parsedColor = COMMENTED_LINE_COLOR;
-  } else if (color === false) {
+  target.style.background = color;
+}
+
+function hoverLine(target, hover) {
+  if (target.dataset && target.dataset.vimbackground === 'true') { return; }
+  let parsedColor = hover;
+  if (hover === true) {
+    parsedColor = HOVER_LINE_STYLE;
+  } else if (hover === false) {
     parsedColor = 'none';
   }
-  target.style.background = parsedColor;
+  target.style.border = parsedColor;
 }
 
 function isUserGrader() {
@@ -45,7 +53,11 @@ function addCommentToLine(line, commentData) {
       placement: 'auto',
     });
     $(commentElement).popover();
-    markLine(commentElement[0], true);
+  }
+  if (commentData.is_auto) {
+      markLine(commentElement[0], FLAKE_COMMENTED_LINE_COLOR);
+  } else {
+    markLine(commentElement[0], DEFAULT_COMMENTED_LINE_COLOR);
     commentElement[0].dataset.marked = true;
   }
 }
@@ -87,6 +99,7 @@ function addLineSpansToPre(items) {
 
 
 window.markLink = markLine;
+window.hoverLine = hoverLine;
 window.addCommentToLine = addCommentToLine;
 window.isUserGrader = isUserGrader;
 window.addEventListener('load', () => {
