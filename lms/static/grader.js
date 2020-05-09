@@ -67,7 +67,7 @@ function visuallyRemoveComment(commentId) {
   const hr = commentElement.nextElementSibling || commentElement.previousElementSibling;
   if (hr === null) {
     lineElement.dataset.marked = false;
-    window.markLine(lineElement, false);
+    window.markLine(lineElement, "none");
     $(lineElement).popover('dispose');
   } else {
     hr.parentNode.removeChild(hr);
@@ -115,29 +115,29 @@ function trackDragAreas(items) {
   Array.from(items).forEach((item) => {
     item.addEventListener('dragover', (e) => {
       e.preventDefault();
-      window.markLine(findElementToMark(e), true);
+      window.hoverLine(findElementToMark(e), true);
     }, false);
     item.addEventListener('dragleave', (e) => {
       e.preventDefault();
-      window.markLine(findElementToMark(e), false);
+      window.hoverLine(findElementToMark(e), false);
     }, false);
     item.addEventListener('dragenter', (e) => {
       e.preventDefault();
     }, false);
     item.addEventListener('mouseenter', (e) => {
       e.preventDefault();
-      window.markLine(findElementToMark(e), true);
+      window.hoverLine(findElementToMark(e), true);
     }, false);
     item.addEventListener('mouseleave', (e) => {
       e.preventDefault();
-      window.markLine(findElementToMark(e), false);
+      window.hoverLine(findElementToMark(e), false);
     }, false);
     item.addEventListener('drop', (e) => {
       e.preventDefault();
       const target = findElementToMark(e);
       const { line } = target.dataset;
       const commentId = e.dataTransfer.getData('text/plain');
-      window.markLine(target, false);
+      window.hoverLine(target, false);
       sendExistsComment(window.solutionId, line, commentId);
     }, false);
   });
