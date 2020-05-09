@@ -1,6 +1,6 @@
 const DEFAULT_COMMENTED_LINE_COLOR = '#fab3b0';
 const FLAKE_COMMENTED_LINE_COLOR = '#fac4c3';
-const HOVER_LINE_STYLE = '1px solid #0D0D0F';
+const HOVER_LINE_STYLE = '1px solid #0d0d0f';
 
 
 function markLine(target, color) {
