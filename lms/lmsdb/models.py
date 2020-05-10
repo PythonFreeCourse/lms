@@ -473,7 +473,9 @@ class SolutionExerciseTestExecution(BaseModel):
 
     @classmethod
     def by_solution(cls, solution: Solution) -> Iterable[dict]:
-        return cls.filter(cls.solution == solution).join(ExerciseTestName).select(
+        return cls.filter(
+            cls.solution == solution,
+        ).join(ExerciseTestName).select(
             ExerciseTestName.pretty_test_name,
             cls.user_message,
             cls.staff_message,
