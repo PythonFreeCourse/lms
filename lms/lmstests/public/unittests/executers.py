@@ -37,7 +37,7 @@ class BaseExecutor:
 class DockerExecutor(BaseExecutor):
     memory_limit = '20m'
     cpu_limit = '1'
-    timeout_seconds = 60
+    timeout_seconds = 20
     base_image = 'lms:latest'
     container_temp_dir = '/tmp'  # NOQA: S108
 
