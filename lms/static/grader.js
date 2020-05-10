@@ -209,7 +209,7 @@ window.addEventListener('lines-numbered', () => {
   trackDragAreas(document.getElementsByClassName('line'));
   trackDraggables(document.getElementsByClassName('known-comment'));
   trackFinished(exerciseId, window.solutionId, document.getElementById('save-check'));
-  addNewCommentButtons(document.getElementsByClassName('line'));
+  addNewCommentButtons(document.getElementById('code-view').getElementsByClassName('line'));
   if (!window.isUserGrader()) {
     sessionStorage.setItem('role', 'grader');
   }

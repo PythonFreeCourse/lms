@@ -74,9 +74,10 @@ class UnitTestChecker:
                 )
                 continue
             # invalid case
+            message = '\n'.join([elem[1] for elem in result._elem.items()])
             models.SolutionExerciseTestExecution.create_execution_result(
                 solution=self._solution,
                 test_name=case.name,
-                user_message=result.message,
-                staff_message=result.tostring().decode(),
+                user_message=message,
+                staff_message=result._elem.text,
             )
