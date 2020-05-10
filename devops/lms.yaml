@@ -46,12 +46,24 @@ services:
     depends_on:
       - rabbitmq
 
+  checks-docker-engine:
+    image: docker:dind
+    privileged: True
+    environment:
+      - DOCKER_TLS_CERTDIR=/certs
+    volumes:
+      - docker-engine-volume:/var/run/
+      - docker-engine-volume2:/var/lib/docker
+      - docker-engine-volume3:/certs
+
   checks-public:
     image: lms:latest
     command: celery -A lms.lmstests.public worker
     volumes:
       - ../lms:/app_dir/lms/
-      - /var/run/docker.sock:/var/run/docker.sock  # to be enabled to run nested containers
+      - docker-engine-volume:/var/run/
+      - docker-engine-volume2:/var/lib/docker
+      - docker-engine-volume3:/certs
     environment:
       - DB_NAME=${DB_NAME:-db}
       - DB_USER=${DB_USERNAME:-postgres}
@@ -99,5 +111,8 @@ services:
       - rabbitmq
 
 volumes:
+  docker-engine-volume:
+  docker-engine-volume2:
+  docker-engine-volume3:
   db-data-volume:
   rabbit-data-volume:
