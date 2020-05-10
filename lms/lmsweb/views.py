@@ -24,6 +24,7 @@ from lms.lmsdb.models import (
 from lms import notifications
 from lms.lmstests.public.flake8 import tasks as flake8_tasks
 from lms.lmstests.public.general import tasks as general_tasks
+from lms.lmstests.public.unittests import tasks as unittests_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmsweb import config, webapp
 from lms.lmsweb.tools.notebook_extractor import extract_exercises
@@ -333,6 +334,7 @@ def upload():
             json_data_str=code,
         )
         flake8_tasks.run_flake8_on_solution.apply_async(args=(solution.id,))
+        unittests_tasks.run_tests_for_solution.apply_async(args=(solution.id,))
         if config.FEATURE_FLAG_CHECK_IDENTICAL_CODE_ON:
             (identical_tests_tasks.
              solve_solution_with_identical_code.

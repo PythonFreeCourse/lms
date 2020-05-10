@@ -35,6 +35,8 @@ class BaseExecutor:
 
 
 class DockerExecutor(BaseExecutor):
+    memory_limit = '20m'
+    cpu_limit = '1'
     timeout_seconds = 60
     base_image = 'lms:latest'
     container_temp_dir = '/tmp'  # NOQA: S108
@@ -44,7 +46,8 @@ class DockerExecutor(BaseExecutor):
 
     def __enter__(self):
         args = (
-            'docker', 'run', '-d',
+            'docker', 'run', '-d', '--memory', self.memory_limit,
+            '--cpus', self.cpu_limit, '--network', 'none',
             '--rm', '--name', self._container_name, self.base_image,
             'sleep', str(self.timeout_seconds),
         )

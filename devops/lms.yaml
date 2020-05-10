@@ -51,6 +51,7 @@ services:
     command: celery -A lms.lmstests.public worker
     volumes:
       - ../lms:/app_dir/lms/
+      - /var/run/docker.sock:/var/run/docker.sock  # to be enabled to run nested containers
     environment:
       - DB_NAME=${DB_NAME:-db}
       - DB_USER=${DB_USERNAME:-postgres}

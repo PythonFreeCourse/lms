@@ -1,25 +1,19 @@
+import os
+
 import pytest
 
 from lms.lmsdb import models
+from lms.lmstests.public.unittests import import_tests
 from lms.lmstests.public.unittests import executers
 from lms.lmstests.public.unittests import tasks
+from lms.tests import conftest
 
 STUDENT_CODE = '''
 def foo(bar=None):
     return 'bar' if bar == 'bar' else 'foo'
 '''
 
-STUDENT_CODE_TESTS = '''
-class TestStudent:
-    def test_check_foo_foo(self):
-        assert foo() == 'foo'
-
-    def test_check_bar_bar(self):
-        assert foo('bar') == 'barbaron', 'איזה ברברון'
-
-    def test_check_foo_bar_foo(self):
-        assert foo() == 'foofoon'
-'''
+EXERCISE_TESTS = os.path.join(conftest.SAMPLES_DIR, 'student_test_code.py')
 
 
 class TestUTForExercise:
@@ -45,7 +39,8 @@ class TestUTForExercise:
         auto_comments = tuple(models.SolutionExerciseTestExecution.select())
         assert len(auto_comments) == 2
         first = auto_comments[0]
-        assert first.test_name == 'test_check_bar_bar'
+        assert first.exercise_test_name.test_name == 'test_check_bar_bar'
+        assert first.exercise_test_name.pretty_test_name == 'שם כזה מגניב 2'
         assert 'איזה ברברון' in first.user_message
         assert "foo('bar') == 'barbaron'" in first.staff_message
 
@@ -53,10 +48,7 @@ class TestUTForExercise:
     def _initialize_solution(solution: models.Solution):
         solution.json_data_str = STUDENT_CODE
         solution.save()
-        models.ExerciseTest.create_exercise_test(
-            exercise=solution.exercise,
-            code=STUDENT_CODE_TESTS,
-        )
+        import_tests.load_test_from_module(EXERCISE_TESTS)
 
     @staticmethod
     def _run_unit_tests(solution_id, executor_name=None):

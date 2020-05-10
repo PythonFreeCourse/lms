@@ -1,4 +1,5 @@
 import datetime
+import os
 
 from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText,
@@ -116,3 +117,6 @@ def comment(staff_user, solution):
         line_number=1,
         is_auto=False,
     )[0]
+
+
+SAMPLES_DIR = os.path.join(os.path.dirname(__file__), 'samples')

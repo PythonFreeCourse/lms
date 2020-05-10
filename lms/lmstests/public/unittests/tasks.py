@@ -2,7 +2,7 @@ import logging
 
 from celery.utils.log import get_task_logger
 
-from lms.lmstests.sandbox.config.celery import app
+from lms.lmstests.public.config.celery import app
 from lms.lmstests.public.unittests import services
 
 
