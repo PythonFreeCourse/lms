@@ -280,6 +280,9 @@ class Solution(BaseModel):
             Solution.solver == self.solver,
         ).order_by(Solution.submission_timestamp.asc())
 
+    def test_results(self) -> Iterable[dict]:
+        return SolutionExerciseTestExecution.by_solution(self)
+
     @classmethod
     def of_user(
             cls, user_id: int, with_archived: bool = False,
@@ -467,6 +470,14 @@ class SolutionExerciseTestExecution(BaseModel):
             cls.user_message.name: user_message,
             cls.staff_message.name: staff_message,
         })
+
+    @classmethod
+    def by_solution(cls, solution: Solution) -> Iterable[dict]:
+        return cls.filter(cls.solution == solution).join(ExerciseTestName).select(
+            ExerciseTestName.pretty_test_name,
+            cls.user_message,
+            cls.staff_message,
+        ).dicts()
 
 
 class CommentText(BaseModel):

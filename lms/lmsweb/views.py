@@ -358,11 +358,13 @@ def view(solution_id):
         return fail(403, 'This user has no permissions to view this page.')
 
     versions = solution.ordered_versions()
+    test_results = solution.test_results()
     view_params = {
         'solution': model_to_dict(solution),
         'is_manager': is_manager,
         'role': current_user.role.name.lower(),
         'versions': versions,
+        'test_results': test_results,
     }
 
     if is_manager:
