@@ -36,14 +36,16 @@ class UnitTestChecker:
         )
 
     def run_check(self) -> None:
-        self._logger.info('Run UT on solution %s', self._solution_id)
+        self._logger.info('start run_check on solution %s', self._solution_id)
         if self._exercise_auto_test is None:
             self._logger.info('No UT for solution %s', self._solution_id)
             return
         junit_results = self._run_tests_on_solution()
         self._populate_junit_results(junit_results)
+        self._logger.info('end run_check solution %s', self._solution_id)
 
     def _run_tests_on_solution(self):
+        self._logger.info('start UT on solution %s', self._solution_id)
         python_code = self._generate_python_code()
         python_file = 'test_checks.py'
         test_output_path = 'output.xml'
@@ -56,6 +58,7 @@ class UnitTestChecker:
                     '--junitxml', executor.get_file_path(test_output_path)),
             )
             junit_results = executor.get_file(file_path=test_output_path)
+        self._logger.info('end UT on solution %s', self._solution_id)
         return junit_results
 
     def _generate_python_code(self) -> str:
@@ -75,6 +78,8 @@ class UnitTestChecker:
                 continue
             # invalid case
             message = '\n'.join([elem[1] for elem in result._elem.items()])
+            self._logger.info('crate comment on test %s solution %s',
+                              case.name, self._solution_id)
             models.SolutionExerciseTestExecution.create_execution_result(
                 solution=self._solution,
                 test_name=case.name,
