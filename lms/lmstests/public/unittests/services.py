@@ -7,14 +7,6 @@ from lms.lmsdb import models
 from lms.lmstests.public.unittests import executers
 
 
-class PyFlakeResponse(typing.NamedTuple):
-    error_code: str
-    line_number: int
-    column: int
-    text: str
-    physical_line: str
-
-
 class UnitTestChecker:
     def __init__(
             self,
@@ -22,7 +14,6 @@ class UnitTestChecker:
             solution_id: str,
             executor_name: str,
     ):
-        self._app = None
         self._logger = logger
         self._solution_id = solution_id
         self._executor_name = executor_name

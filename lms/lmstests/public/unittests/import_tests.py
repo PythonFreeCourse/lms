@@ -21,9 +21,12 @@ def register_test_class(file_path: str, test_class: typing.ClassVar):
         _logger.info('Failed to find exercise subject %s', subject)
         raise SystemError
 
+    with open(file_path, 'r') as file_reader:
+        code = file_reader.read()
+
     exercise_test = models.ExerciseTest.get_or_create_exercise_test(
         exercise=exercise,
-        code=open(file_path, 'r').read(),
+        code=code,
     )
 
     for test_func_name in inspect.getmembers(test_class):
