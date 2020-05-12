@@ -306,10 +306,43 @@ i.fa {
 }
 */
 
-#code-view {
+.code-view-container {
   direction: ltr;
   text-align: left;
   width: 80%;
+}
+
+.test-results {
+  direction: rtl;
+  text-align: right;
+}
+
+.test-result-title {
+  text-align: center;
+  text-decoration: underline;
+  margin-top: 20px;
+}
+
+.test-results-list {
+  padding: 0;
+}
+
+.test-result {
+  padding: 10px;
+  margin: 5px 0;
+  display: flex;
+  flex-direction: column;
+
+  border: 1px solid #c2bdbd;
+}
+
+.test-result .title {
+  font-weight: bold;
+}
+
+.stack-trace {
+  direction: ltr;
+  text-align: left;
 }
 
 code {

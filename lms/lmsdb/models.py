@@ -280,6 +280,9 @@ class Solution(BaseModel):
             Solution.solver == self.solver,
         ).order_by(Solution.submission_timestamp.asc())
 
+    def test_results(self) -> Iterable[dict]:
+        return SolutionExerciseTestExecution.by_solution(self)
+
     @classmethod
     def of_user(
             cls, user_id: int, with_archived: bool = False,
@@ -384,6 +387,99 @@ class Solution(BaseModel):
             .group_by(Exercise.subject, Exercise.id)
             .order_by(Exercise.id)
         )
+
+
+class ExerciseTest(BaseModel):
+    exercise = ForeignKeyField(model=Exercise, unique=True)
+    code = TextField()
+
+    @classmethod
+    def get_or_create_exercise_test(cls, exercise: Exercise, code: str):
+        instance, created = cls.get_or_create(**{
+            cls.exercise.name: exercise,
+        }, defaults={
+            cls.code.name: code,
+        })
+        if not created:
+            instance.code = code
+            instance.save()
+        return instance
+
+    @classmethod
+    def get_by_exercise(cls, exercise: Exercise):
+        return cls.get_or_none(cls.exercise == exercise)
+
+
+class ExerciseTestName(BaseModel):
+    exercise_test = ForeignKeyField(model=ExerciseTest)
+    test_name = TextField()
+    pretty_test_name = TextField()
+
+    indexes = (
+        (('exercise_test', 'test_name'), True),
+    )
+
+    @classmethod
+    def create_exercise_test_name(
+            cls,
+            exercise_test: ExerciseTest,
+            test_name: str,
+            pretty_test_name: str,
+    ):
+        instance, created = cls.get_or_create(**{
+            cls.exercise_test.name: exercise_test,
+            cls.test_name.name: test_name,
+        }, defaults={
+            cls.pretty_test_name.name: pretty_test_name,
+        })
+        if not created:
+            instance.pretty_test_name = pretty_test_name
+            instance.save()
+
+    @classmethod
+    def get_exercise_test(cls, exercise: Exercise, test_name: str):
+        return cls.select().join(
+            ExerciseTest,
+        ).filter(
+            ExerciseTest.exercise == exercise,
+            ExerciseTestName.test_name == test_name,
+        ).get()
+
+
+class SolutionExerciseTestExecution(BaseModel):
+    solution = ForeignKeyField(model=Solution)
+    exercise_test_name = ForeignKeyField(model=ExerciseTestName)
+    user_message = TextField()
+    staff_message = TextField()
+
+    @classmethod
+    def create_execution_result(
+            cls,
+            solution: Solution,
+            test_name: str,
+            user_message: str,
+            staff_message: str,
+    ):
+        exercise_test_name = ExerciseTestName.get_exercise_test(
+            exercise=solution.exercise,
+            test_name=test_name,
+        )
+        cls.create(**{
+            cls.solution.name: solution,
+            cls.exercise_test_name.name: exercise_test_name,
+            cls.user_message.name: user_message,
+            cls.staff_message.name: staff_message,
+        })
+
+    @classmethod
+    def by_solution(cls, solution: Solution) -> Iterable[dict]:
+        return cls.filter(
+            cls.solution == solution,
+        ).join(ExerciseTestName).select(
+            ExerciseTestName.pretty_test_name,
+            cls.user_message,
+            cls.staff_message,
+        ).dicts()
 
 
 class CommentText(BaseModel):
