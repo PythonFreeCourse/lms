@@ -74,7 +74,7 @@ class UnitTestChecker:
             models.SolutionExerciseTestExecution.create_execution_result(
                 solution=self._solution,
                 test_name=models.ExerciseTestName.FATAL_TEST_NAME,
-                user_message='אנא פנה לסגל.',
+                user_message='אנא פנו לסגל',
                 staff_message='אחי, בדקת את הקוד שלך?',
             )
             return

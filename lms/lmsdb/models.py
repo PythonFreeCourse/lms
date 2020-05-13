@@ -412,7 +412,7 @@ class ExerciseTest(BaseModel):
 
 class ExerciseTestName(BaseModel):
     FATAL_TEST_NAME = 'fatal_test_failure'
-    FATAL_TEST_PRETTY_TEST_NAME = 'כישלון פטאלי'
+    FATAL_TEST_PRETTY_TEST_NAME = 'כישלון חמור'
 
     exercise_test = ForeignKeyField(model=ExerciseTest)
     test_name = TextField()
