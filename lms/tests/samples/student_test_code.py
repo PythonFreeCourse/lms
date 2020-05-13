@@ -1,5 +1,6 @@
 # flake8: noqa
 
+
 class TestStudent:
     """python"""
     def test_check_foo_foo(self):
