@@ -411,6 +411,9 @@ class ExerciseTest(BaseModel):
 
 
 class ExerciseTestName(BaseModel):
+    FATAL_TEST_NAME = 'fatal_test_failure'
+    FATAL_TEST_PRETTY_TEST_NAME = 'כישלון חמור'
+
     exercise_test = ForeignKeyField(model=ExerciseTest)
     test_name = TextField()
     pretty_test_name = TextField()
@@ -438,6 +441,14 @@ class ExerciseTestName(BaseModel):
 
     @classmethod
     def get_exercise_test(cls, exercise: Exercise, test_name: str):
+        if test_name == cls.FATAL_TEST_NAME:
+            instance, _ = cls.get_or_create(**{
+                cls.exercise_test.name: exercise,
+                cls.test_name.name: test_name,
+                cls.pretty_test_name.name: cls.FATAL_TEST_PRETTY_TEST_NAME,
+            })
+            return instance
+
         return cls.select().join(
             ExerciseTest,
         ).filter(

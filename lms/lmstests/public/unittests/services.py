@@ -41,14 +41,21 @@ class UnitTestChecker:
         python_file = 'test_checks.py'
         test_output_path = 'output.xml'
 
-        with executers.get_executor(self._executor_name) as executor:
-            executor.write_file(python_file, python_code)
-            executor.run_on_executor(
-                args=(
-                    'pytest', executor.get_file_path(python_file),
-                    '--junitxml', executor.get_file_path(test_output_path)),
-            )
-            junit_results = executor.get_file(file_path=test_output_path)
+        junit_results = None
+        try:
+            with executers.get_executor(self._executor_name) as executor:
+                executor.write_file(python_file, python_code)
+                executor.run_on_executor(
+                    args=(
+                        'pytest',
+                        executor.get_file_path(python_file),
+                        '--junitxml',
+                        executor.get_file_path(test_output_path)),
+                )
+                junit_results = executor.get_file(file_path=test_output_path)
+        except Exception:
+            self._logger.exception('Failed to run tests on solution %s',
+                                   self._solution_id)
         self._logger.info('end UT on solution %s', self._solution_id)
         return junit_results
 
@@ -58,7 +65,20 @@ class UnitTestChecker:
         return f'{user_code}\n\n{test_code}'
 
     def _populate_junit_results(self, junit_results: str):
-        results = junitparser.TestSuite.fromstring(junit_results)
+        results = None
+        if junit_results:
+            results = junitparser.TestSuite.fromstring(junit_results)
+        if not results:
+            self._logger.info('junit invalid results (%s) on solution %s',
+                              junit_results, self._solution_id)
+            models.SolutionExerciseTestExecution.create_execution_result(
+                solution=self._solution,
+                test_name=models.ExerciseTestName.FATAL_TEST_NAME,
+                user_message='אנא פנו לסגל',
+                staff_message='אחי, בדקת את הקוד שלך?',
+            )
+            return
+
         for case in results:
             result = case.result
             if result is None:
