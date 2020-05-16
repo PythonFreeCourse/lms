@@ -6,6 +6,7 @@ from playhouse.migrate import migrate  # type: ignore
 from lms.lmsdb import database_config as db_config
 from lms.lmsdb import models
 from lms.lmstests.public.flake8 import text_fixer
+from lms.lmstests.public.unittests import import_tests
 
 
 def _migrate_column_in_table_if_needed(
@@ -142,6 +143,7 @@ def main():
     _add_exercise_due_date_if_needed()
     add_solution_state_if_needed()
     text_fixer.fix_texts()
+    import_tests.load_tests_from_path('/app_dir/notebooks-tests')
 
 
 if __name__ == '__main__':
