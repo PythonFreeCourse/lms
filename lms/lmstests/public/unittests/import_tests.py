@@ -42,7 +42,7 @@ def register_test_class(file_path: str, test_class: typing.ClassVar):
 
 def load_tests_from_path(file_path: str):
     if os.path.isdir(file_path):
-        for root, dirs, files in os.walk(file_path):
+        for root, _, files in os.walk(file_path):
             for file in files:
                 if file.startswith('test_') and file.endswith('.py'):
                     load_test_from_module(os.path.join(root, file))
