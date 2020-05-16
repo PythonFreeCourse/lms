@@ -16,7 +16,6 @@ mv lms/lmsweb/config.py.example lms/lmsweb/config.py
 echo "SECRET_KEY = \"$(python -c 'import os;print(os.urandom(32).hex())')\"" >> lms/lmsweb/config.py
 
 # For debug only
-export PYTHONPATH=`pwd`
 export FLASK_DEBUG=1
 export LOCAL_SETUP=true
 
