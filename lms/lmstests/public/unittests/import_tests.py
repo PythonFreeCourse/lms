@@ -40,6 +40,16 @@ def register_test_class(file_path: str, test_class: typing.ClassVar):
             )
 
 
+def load_tests_from_path(file_path: str):
+    if os.path.isdir(file_path):
+        for root, _, files in os.walk(file_path):
+            for file in files:
+                if file.startswith('test_') and file.endswith('.py'):
+                    load_test_from_module(os.path.join(root, file))
+    elif os.path.isfile(file_path):
+        load_test_from_module(file_path)
+
+
 def load_test_from_module(file_path: str):
     relative_path = os.path.relpath(file_path, BASE_DIR)
     response = importlib.import_module(
@@ -54,4 +64,4 @@ def load_test_from_module(file_path: str):
 if __name__ == '__main__':
     if len(sys.argv) != 2:
         print('python load_tests.py test-module-path')  # noqa: T001
-    load_test_from_module(file_path=sys.argv[1])
+    load_tests_from_path(file_path=sys.argv[1])
