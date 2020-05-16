@@ -17,6 +17,8 @@ services:
       interval: 30s
       timeout: 30s
       retries: 3
+    networks:
+      - lms
 
   rabbitmq:
     image: rabbitmq:3.7-management-alpine
@@ -28,6 +30,8 @@ services:
       - RABBITMQ_DEFAULT_VHOST=/
     volumes:
       - rabbit-data-volume:/var/lib/rabbitmq
+    networks:
+      - lms
 
   checks-sandbox:
     image: lms:latest
@@ -45,6 +49,8 @@ services:
       - rabbitmq
     depends_on:
       - rabbitmq
+    networks:
+      - lms
 
   checks-docker-engine:
     image: docker:dind
@@ -55,6 +61,8 @@ services:
       - docker-engine-volume-run:/var/run/
       - docker-engine-certs:/certs
       - docker-engine-lib:/var/lib/docker
+    networks:
+      - lms
 
   checks-public:
     image: lms:latest
@@ -83,6 +91,8 @@ services:
     depends_on:
       - db
       - rabbitmq
+    networks:
+      - lms
 
   http:
     image: lms:latest
@@ -110,6 +120,8 @@ services:
     depends_on:
       - db
       - rabbitmq
+    networks:
+      - lms
 
 volumes:
   docker-engine-volume-run:
@@ -117,3 +129,9 @@ volumes:
   docker-engine-lib:
   db-data-volume:
   rabbit-data-volume:
+
+
+networks:
+  lms:
+    external:
+      name: lms

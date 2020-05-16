@@ -11,5 +11,6 @@ fi
 SCRIPT_FILE_PATH=$(readlink -f "${0}")
 SCRIPT_FOLDER=$(dirname "${SCRIPT_FILE_PATH}")
 
+docker network create lms
 docker-compose -p lms -f "${SCRIPT_FOLDER}/lms.yaml" down
 docker-compose -p lms -f "${SCRIPT_FOLDER}/lms.yaml" up -d

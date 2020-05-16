@@ -336,6 +336,12 @@ i.fa {
   border: 1px solid #c2bdbd;
 }
 
+.test-result .test-name {
+  border-bottom: 1px solid #c2bdbd;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+}
+
 .test-result .title {
   font-weight: bold;
 }

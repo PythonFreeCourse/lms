@@ -40,10 +40,9 @@
                   <ol class="test-results-list">
                       {%- for test_result in test_results %}
                           <li class="test-result" draggable="true">
-                              <span>
-                                  <span class="title">שם הבדיקה:</span>
-                                  <span>{{ test_result.pretty_test_name }}</span>
-                              </span>
+                              <h5 class="test-name">
+                                  {{ test_result.pretty_test_name }}
+                              </h5>
                               <span class="title">שגיאה:</span>
                               <span>
                                   <pre><code class="language-python highlight">{{ test_result.user_message }}</code></pre>
