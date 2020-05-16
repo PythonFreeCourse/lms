@@ -1,6 +1,6 @@
 function upgrade {
   sudo chown -R $USER:$USER /opt/lms /opt/notebooks-tests
-  cd /opt/lms/notebooks-tests
+  cd /opt/notebooks-tests
   git reset --hard
   git pull origin
   git checkout master
