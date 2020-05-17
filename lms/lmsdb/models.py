@@ -448,13 +448,13 @@ class ExerciseTestName(BaseModel):
                 cls.pretty_test_name.name: cls.FATAL_TEST_PRETTY_TEST_NAME,
             })
             return instance
-
-        return cls.select().join(
-            ExerciseTest,
-        ).filter(
-            ExerciseTest.exercise == exercise,
-            ExerciseTestName.test_name == test_name,
-        ).get()
+        instance, _ = cls.get_or_create(**{
+            cls.exercise_test.name: ExerciseTest.get_by_exercise(exercise),
+            cls.test_name.name: test_name,
+        }, defaults={
+            cls.pretty_test_name.name: test_name,
+        })
+        return instance
 
 
 class SolutionExerciseTestExecution(BaseModel):
