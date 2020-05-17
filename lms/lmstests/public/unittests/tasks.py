@@ -22,4 +22,4 @@ def run_tests_for_solution(solution_id: str, executor_name=None):
         checker.initialize()
         checker.run_check()
     except Exception:
-        _logger.info('Failed run_tests_for_solution %s', solution_id)
+        _logger.exception('Failed run_tests_for_solution %s', solution_id)
