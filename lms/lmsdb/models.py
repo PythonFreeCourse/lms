@@ -348,6 +348,8 @@ class Solution(BaseModel):
     def next_unchecked(cls) -> Optional['Solution']:
         unchecked_exercises = cls.select().where(
             cls.state == Solution.STATES.CREATED.name,
+        ).order_by(
+            cls.submission_timestamp.asc(),
         )
         try:
             return unchecked_exercises.get()
@@ -360,6 +362,8 @@ class Solution(BaseModel):
             return cls.select().where(
                 cls.state == cls.STATES.CREATED.name,
                 cls.exercise == exercise_id,
+            ).order_by(
+                cls.submission_timestamp.asc(),
             ).get()
         except cls.DoesNotExist:
             return None
