@@ -60,7 +60,7 @@ function listenToKeys() {
       return;
     }
     const key = event.key.toLowerCase();
-    const linesSelected = `#code-view .line[data-line="${lineNumber}"]`
+    const linesSelected = `#code-view .line[data-line="${lineNumber}"]`;
     if (key == "q") {
       event.preventDefault();
       if (lineMode === true) {
