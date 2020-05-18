@@ -346,11 +346,13 @@ class Solution(BaseModel):
 
     @classmethod
     def _base_next_unchecked(cls):
+        comments_count = fn.Count(Comment.id).alias('comments_count')
+        fails = fn.Count(SolutionExerciseTestExecution.id).alias('failures')
         return cls.select(
             cls.id,
             cls.state,
-            fn.Count(Comment.id).alias('comments_count'),
-            fn.Count(SolutionExerciseTestExecution.id).alias('failures_count'),
+            comments_count,
+            fails,
         ).join(
             Comment,
             join_type=JOIN.LEFT_OUTER,
@@ -364,8 +366,8 @@ class Solution(BaseModel):
         ).group_by(
             cls.id,
         ).order_by(
-            fn.Count(Comment.id).alias('comments_count'),
-            fn.Count(SolutionExerciseTestExecution.id).alias('failures_count'),
+            comments_count,
+            fails,
             cls.submission_timestamp.asc(),
         )
 
