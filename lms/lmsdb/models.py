@@ -8,7 +8,7 @@ from typing import Any, ClassVar, Dict, Iterable, Optional, Tuple
 from flask_login import UserMixin  # type: ignore
 from peewee import (  # type: ignore
     BooleanField, Case, CharField, Check, DateTimeField, ForeignKeyField,
-    IntegerField, ManyToManyField, TextField, fn,
+    IntegerField, JOIN, ManyToManyField, TextField, fn,
 )
 from playhouse.signals import Model, post_save, pre_save  # type: ignore
 from werkzeug.security import (
@@ -345,25 +345,44 @@ class Solution(BaseModel):
         return instance
 
     @classmethod
-    def next_unchecked(cls) -> Optional['Solution']:
-        unchecked_exercises = cls.select().where(
+    def _base_next_unchecked(cls):
+        comments_count = fn.Count(Comment.id).alias('comments_count')
+        fails = fn.Count(SolutionExerciseTestExecution.id).alias('failures')
+        return cls.select(
+            cls.id,
+            cls.state,
+            comments_count,
+            fails,
+        ).join(
+            Comment,
+            join_type=JOIN.LEFT_OUTER,
+            on=(Comment.solution == cls.id),
+        ).join(
+            SolutionExerciseTestExecution,
+            join_type=JOIN.LEFT_OUTER,
+            on=(SolutionExerciseTestExecution.solution == cls.id),
+        ).filter(
             cls.state == Solution.STATES.CREATED.name,
+        ).group_by(
+            cls.id,
         ).order_by(
+            comments_count,
+            fails,
             cls.submission_timestamp.asc(),
         )
+
+    @classmethod
+    def next_unchecked(cls) -> Optional['Solution']:
         try:
-            return unchecked_exercises.get()
+            return cls._base_next_unchecked().get()
         except cls.DoesNotExist:
             return None
 
     @classmethod
     def next_unchecked_of(cls, exercise_id) -> Optional['Solution']:
         try:
-            return cls.select().where(
-                cls.state == cls.STATES.CREATED.name,
+            return cls._base_next_unchecked().where(
                 cls.exercise == exercise_id,
-            ).order_by(
-                cls.submission_timestamp.asc(),
             ).get()
         except cls.DoesNotExist:
             return None

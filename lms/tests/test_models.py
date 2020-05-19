@@ -1,6 +1,7 @@
 import datetime
 
-from lms.lmsdb.models import Exercise, Notification, Solution, User
+from lms.tests import conftest
+from lms.lmsdb.models import Comment, Exercise, Notification, Solution, User
 from lms.lmstests.public.general import tasks as general_tasks
 
 
@@ -62,6 +63,44 @@ class TestSolution:
             second_solution.id)
         assert Solution.next_unchecked().id == second_solution.id
         assert Solution.next_unchecked_of(exercise.id).id == second_solution.id
+
+    def test_next_exercise_with_cleanest_code(
+            self,
+            comment: Comment,
+            staff_user: User,
+    ):
+        student_user: User = conftest.create_student_user(index=1)
+        first_solution = comment.solution
+        comment_text = comment.comment
+        second_solution = Solution.create_solution(
+            comment.solution.exercise, student_user)
+
+        # comment exists on first solution - second one should be the first
+        assert Solution.next_unchecked().id == second_solution.id
+
+        # delete the comment should give us back the first solution
+        Comment.delete_by_id(comment.id)
+        assert Solution.next_unchecked().id == first_solution.id
+
+        # if second_solution has comments we should get first solution
+        Comment.create_comment(
+            commenter=staff_user,
+            line_number=1,
+            comment_text=comment_text,
+            solution=second_solution,
+            is_auto=False,
+        )
+        assert Solution.next_unchecked().id == first_solution.id
+
+        # both have comments - the first one should be the first solution
+        Comment.create_comment(
+            commenter=staff_user,
+            line_number=1,
+            comment_text=comment_text,
+            solution=first_solution,
+            is_auto=False,
+        )
+        assert Solution.next_unchecked().id == first_solution.id
 
 
 class TestNotification:
