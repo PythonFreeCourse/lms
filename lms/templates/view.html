@@ -28,6 +28,13 @@
       {% endfor -%}
       </ul>
     </nav>
+    {% if is_manager %}
+        <div class="progress manager-progress-bar">
+            <div class="progress-bar" style="width: {{ left }}%;" role="progressbar" aria-valuenow="{{ left }}" aria-valuemax="100">
+                {{ left }}% לסיום בדיקה
+            </div>
+        </div>
+    {% endif %}
   </div>
   <div id="view-body">
       <div class="code-view-container">
