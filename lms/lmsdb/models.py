@@ -415,9 +415,10 @@ class Solution(BaseModel):
     def left_in_exercise(cls, exercise: Exercise) -> int:
         one_if_is_checked = Case(
             Solution.state, ((Solution.STATES.DONE.name, 1),), 0)
+        active_solutions = cls.state.in_(Solution.STATES.active_solutions())
         response = cls.filter(
             cls.exercise == exercise,
-            ~cls.state == cls.STATES.OLD_SOLUTION.name,
+            active_solutions,
         ).select(
             fn.Count(cls.id).alias('submitted'),
             fn.Sum(one_if_is_checked).alias('checked'),
