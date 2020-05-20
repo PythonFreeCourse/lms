@@ -243,6 +243,11 @@ i.fa {
   width: 98vw;
 }
 
+.manager-progress-bar {
+  width: 100%;
+  direction: ltr;
+}
+
 #view-head {
   align-items: center;
   direction: rtl;
