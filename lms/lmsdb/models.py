@@ -411,6 +411,19 @@ class Solution(BaseModel):
             .order_by(Exercise.id)
         )
 
+    @classmethod
+    def left_in_exercise(cls, exercise: Exercise) -> int:
+        one_if_is_checked = Case(
+            Solution.state, ((Solution.STATES.DONE.name, 1),), 0)
+        response = cls.filter(
+            cls.exercise == exercise,
+            ~cls.state == cls.STATES.OLD_SOLUTION.name,
+        ).select(
+            fn.Count(cls.id).alias('submitted'),
+            fn.Sum(one_if_is_checked).alias('checked'),
+        ).dicts().get()
+        return int(response['checked'] * 100 / response['submitted'])
+
 
 class ExerciseTest(BaseModel):
     exercise = ForeignKeyField(model=Exercise, unique=True)

@@ -368,6 +368,7 @@ def view(solution_id):
     }
 
     if is_manager:
+        left = Solution.left_in_exercise(solution.exercise)
         view_params = {
             **view_params,
             'exercise_common_comments':
@@ -376,6 +377,7 @@ def view(solution_id):
                 _common_comments(),
             'user_comments':
                 _common_comments(user_id=current_user.id),
+            'left': left,
         }
 
     return render_template('view.html', **view_params)
