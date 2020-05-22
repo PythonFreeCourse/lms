@@ -62,7 +62,7 @@ class UnitTestChecker:
     def _generate_python_code(self) -> str:
         user_code = self._solution.code
         test_code = self._exercise_auto_test.code
-        return f'{user_code}\n\n{test_code}'
+        return f'{test_code}\n\n{user_code}'
 
     def _populate_junit_results(self, junit_results: str):
         results = None
