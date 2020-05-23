@@ -104,7 +104,7 @@ FLAKE_ERRORS_MAPPING = {
     'S607': 'ובכן, אני לא בטוח מה ניסית לעשות פה ולמה ניסית להפעיל תהליך במערכת־ההפעלה, אבל זה כנראה לא הפתרון שהתכוונו אליו.',
     'S610': 'עלול להיות פגיע למתקפות SQL Injection',
     'W191': 'ההזחה פה כוללת טאבים במקום 4 רווחים. אם אתם משתמשים בעורך שאינו jupyter, הקפידו להגדיר אותו כך שימיר לחיצה על טאב לארבעה רווחים.',
-    'W503': 'עדיף לשים את האופרטור הלוגי אחרי שבירת השורה.',
+    'W504': 'עדיף לשים את האופרטור הלוגי אחרי שבירת השורה.',
     'W604': 'עדיף לא להשתמש ב<code>`</code> בקוד פייתון. אם באמת צריך, אפשר להשתמש בפונקציה <code>repr</code> במקום.',
 }
 
@@ -138,6 +138,6 @@ FLAKE_SKIP_ERRORS = (
     'W292',  # no new line in the end of the code
     'W293',  # whitespaces @ blank line
     'W391',  # blank lines at the end of file
-    'W504',  # line break after operator
+    'W503',  # line break after operator
     'W605',  # invalid escape sequence
 )
