@@ -118,7 +118,7 @@ FLAKE_SKIP_ERRORS = (
     'E124',  # closing brackets indentation
     'E127',  # continuation line over-indented for visual indent
     'E128',  # continuation line under-indented for visual indent
-    'E129',  #  visually indented line with same indent as next logical line
+    'E129',  # visually indented line with same indent as next logical line
     'E501',  # > 79
     'E800',  # commented-out code
     'E800:',  # For some reason flake8 sends this key with ':', that's a bug, but not ours
