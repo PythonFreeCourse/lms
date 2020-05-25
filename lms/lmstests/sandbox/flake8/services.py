@@ -24,7 +24,7 @@ class PyFlakeFileScanner:
 
     def initialize(self):
         self._app = application.Application()
-        self._app.initialize(argv=[])
+        self._app.initialize(argv=['--import-order-style', 'google'])
 
     @property
     def app(self) -> application.Application:
