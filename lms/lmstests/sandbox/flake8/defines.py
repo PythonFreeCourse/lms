@@ -33,7 +33,6 @@ FLAKE_ERRORS_MAPPING = {
     'E123': 'סגירת הסוגריים צריכה להיות באותה רמת הזחה כמו תחילת השורה שבה הן נפתחו.',
     'E125': 'ההזחה פה אינה מנומסת – עדיף לא לשבור שורה לאותה רמת הזחה כמו השורה הבאה.',
     'E126': 'השורה הזו תלויה באוויר! זה יותר מדי הזחה.',
-    'E129': 'בפייתון, זה נחשב לא מנומס להכניס כמה הוראות באותה שורה ולהפריד ביניהן בנקודה־פסיק.',
     'E131': 'ההזחה אינה מיושרת היטב.',
     'E201': 'כדי לשמור על הקוד מסודר ויפה, מומלץ שלא לשים רווחים אחרי תו של סגירת סוגריים.',
     'E202': 'כדי לשמור על הקוד מסודר ויפה, מומלץ שלא לשים רווחים לפני תו של סגירת סוגריים.',
@@ -119,6 +118,7 @@ FLAKE_SKIP_ERRORS = (
     'E124',  # closing brackets indentation
     'E127',  # continuation line over-indented for visual indent
     'E128',  # continuation line under-indented for visual indent
+    'E129',  # visually indented line with same indent as next logical line
     'E501',  # > 79
     'E800',  # commented-out code
     'E800:',  # For some reason flake8 sends this key with ':', that's a bug, but not ours
