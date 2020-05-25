@@ -8,3 +8,12 @@ SECRET_KEY = ''
 MAILGUN_API_KEY = os.getenv('MAILGUN_API_KEY')
 MAILGUN_DOMAIN = os.getenv('MAILGUN_DOMAIN', 'mail.pythonic.guru')
 SERVER_ADDRESS = os.getenv('SERVER_ADDRESS', '127.0.0.1:5000')
+
+FEATURE_FLAG_CHECK_IDENTICAL_CODE_ON = os.getenv(
+    'FEATURE_FLAG_CHECK_IDENTICAL_CODE_ON', False,
+)
+
+
+MAIL_WELCOME_MESSAGE = 'welcome-email'
+USERS_CSV = 'users.csv'
+ERRORS_CSV = 'errors.csv'

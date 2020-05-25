@@ -77,7 +77,7 @@ class IdenticalSolutionSolver:
             models.Comment.create_comment(
                 commenter=models.User.get_system_user(),
                 line_number=comment.line_number,
-                comment_text=comment.comment,
+                comment_text=comment.comment.comment_id,
                 solution=to_solution,
                 is_auto=True,
             )

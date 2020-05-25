@@ -6,13 +6,13 @@
     <h1>תצוגת תרגיל {{ solution['exercise']['id'] }}: {{ solution['exercise']['subject'] }}</h1>
     {% if not is_manager %}
       {% if solution['state'] == 'DONE' %}
-          <p id="checked-msg"><strong>התרגיל שלך נבדק!</strong> לחצו על השורות האדומות כדי לראות את הערות הבודקים.</p>
+        <p class="checked-msg"><strong>התרגיל שלך נבדק!</strong> לחצו על השורות האדומות כדי לראות את הערות הבודקים.</p>
       {% elif solution['state'] == 'IN_CHECKING' %}
-        <p id="unchecked-msg"><strong>התרגיל שלך נבדק ברגעים אלו!</strong></p>
+        <p class="unchecked-msg"><strong>התרגיל שלך נבדק ברגעים אלו!</strong></p>
       {% elif solution['state'] == 'OLD_SOLUTION' %}
-        <p id="unchecked-msg"><strong>פתרון זה אינו פתרון עדכני!</strong></p>
+        <p class="unchecked-msg"><strong>פתרון זה אינו פתרון עדכני!</strong></p>
       {% else %}
-      <p id="unchecked-msg"><strong>התרגיל שלך מחכה לבדיקה.</strong> חשוב לנו שכל תרגיל יעבור בדיקה של עין אנושית.</p>
+        <p class="unchecked-msg"><strong>התרגיל שלך מחכה לבדיקה.</strong> חשוב לנו שכל תרגיל יעבור בדיקה של עין אנושית.</p>
       {% endif %}
     {% else %}
     <p id="solver"><strong>מגיש:</strong> {{ solution['solver']['fullname'] }}</p>
@@ -28,11 +28,44 @@
       {% endfor -%}
       </ul>
     </nav>
+    {% if is_manager %}
+        <div class="progress manager-progress-bar">
+            <div class="progress-bar" style="width: {{ left }}%;" role="progressbar" aria-valuenow="{{ left }}" aria-valuemax="100">
+                {{ left }}% לסיום בדיקה
+            </div>
+        </div>
+    {% endif %}
   </div>
   <div id="view-body">
+      <div class="code-view-container">
           <div id="code-view" data-id="{{ solution['id'] }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}">
-      <pre><code class="language-python line-numbers highlight">{{- solution['json_data_str'] | trim(' ') -}}</code></pre>
-    </div>
+              <pre><code class="language-python line-numbers highlight">{{- solution['json_data_str'] | trim(' ') -}}</code></pre>
+          </div>
+          {% if test_results %}
+              <div class="test-results">
+                  <h3 class="test-result-title">בדיקות אוטומטיות</h3>
+                  <ol class="test-results-list">
+                      {%- for test_result in test_results %}
+                          <li class="test-result" draggable="true">
+                              <h5 class="test-name">
+                                  {{ test_result.pretty_test_name }}
+                              </h5>
+                              <span class="title">שגיאה:</span>
+                              <span>
+                                  <pre><code class="language-python highlight">{{ test_result.user_message }}</code></pre>
+                              </span>
+                              {% if is_manager %}
+                                  <span class="title">שגיאת סגל:</span>
+                                  <span class="stack-trace">
+                                      <pre><code class="language-python highlight">{{ test_result.staff_message }}</code></pre>
+                                  </span>
+                              {% endif %}
+                          </li>
+                      {% endfor -%}
+                  </ol>
+              </div>
+          {% endif %}
+      </div>
     {% if is_manager %}
     <div id="popular-comments">
       <div id="exercise-comments">
@@ -53,11 +86,13 @@
       </div>
       <div id="all-comments">
         <h2>הערות בודק</h2>
-        <ol id="all-comments-list" class="comments all-comments">
-          {%- for comment in user_comments %}
-          <li class="known-comment" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text }}</li>
-          {% endfor -%}
-        </ol>
+        {% if user_comments %}
+            <ol id="my-comments-list" class="comments my-comments">
+              {%- for comment in user_comments %}
+              <li class="known-comment" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text }}</li>
+              {% endfor -%}
+            </ol>
+        {% endif -%}
       </div>
       <div id="grader-buttons">
         <button id="save-check" class="btn btn-success">סיימתי לבדוק!</button>

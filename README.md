@@ -10,17 +10,16 @@
 ## Project minimized setup (sqlite & FE only)
 ```bash
 git clone https://github.com/PythonFreeCourse/lms
-cd lms/lms
-pip install --user -r requirements.txt
-mv lmsweb/config.py.example lmsweb/config.py
+cd lms
+pip install --user -r lms/requirements.txt
+mv lms/lmsweb/config.py.example lms/lmsweb/config.py
 echo "SECRET_KEY = \"$(python -c 'import os;print(os.urandom(32).hex())')\"" >> lms/lmsweb/config.py
 
 # For debug only
 export FLASK_DEBUG=1
 export LOCAL_SETUP=true
-# For production, edit the rest of config.py manually
 
-flask run
+gunicorn --bind 0.0.0.0:5000 --workers 5 lms.lmsweb
 ```
 
 Enter http://127.0.0.1:5000, and the initial credentials should appear in your terminal. :)
@@ -39,6 +38,7 @@ echo "SECRET_KEY = \"$(python -c 'import os;print(os.urandom(32).hex())')\"" >> 
 
 ./devops/build.sh
 ./devops/start.sh
+./devops/bootstrap.sh
 ```
 ```
 In case you want to add the stub data to postgres db, run:

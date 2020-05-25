@@ -24,8 +24,9 @@ from lms.lmsdb.models import (
 from lms import notifications
 from lms.lmstests.public.flake8 import tasks as flake8_tasks
 from lms.lmstests.public.general import tasks as general_tasks
+from lms.lmstests.public.unittests import tasks as unittests_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
-from lms.lmsweb import webapp
+from lms.lmsweb import config, webapp
 from lms.lmsweb.tools.notebook_extractor import extract_exercises
 
 login_manager = LoginManager()
@@ -199,7 +200,9 @@ def _create_comment(
     )
 
     return jsonify({
-        'success': 'true', 'id': comment_.id, 'text': comment_.comment.text,
+        'success': 'true', 'text': comment_.comment.text,
+        'author_name': user.fullname, 'is_auto': False, 'id': comment_.id,
+        'line_number': line_number,
     })
 
 
@@ -315,7 +318,7 @@ def upload():
         if exercise is None:
             misses.add(exercise_id)
             continue
-        if exercise.is_archived:
+        if not exercise.open_for_new_solutions():
             misses.add(exercise_id)
             continue
 
@@ -331,8 +334,11 @@ def upload():
             json_data_str=code,
         )
         flake8_tasks.run_flake8_on_solution.apply_async(args=(solution.id,))
-        identical_tests_tasks.solve_solution_with_identical_code.apply_async(
-            args=(solution.id,))
+        unittests_tasks.run_tests_for_solution.apply_async(args=(solution.id,))
+        if config.FEATURE_FLAG_CHECK_IDENTICAL_CODE_ON:
+            (identical_tests_tasks.
+             solve_solution_with_identical_code.
+             apply_async(args=(solution.id,)))
         matches.add(exercise_id)
     return jsonify({
         'exercise_matches': list(matches),
@@ -352,11 +358,13 @@ def view(solution_id):
         return fail(403, 'This user has no permissions to view this page.')
 
     versions = solution.ordered_versions()
+    test_results = solution.test_results()
     view_params = {
         'solution': model_to_dict(solution),
         'is_manager': is_manager,
         'role': current_user.role.name.lower(),
         'versions': versions,
+        'test_results': test_results,
     }
 
     if is_manager:
@@ -368,6 +376,7 @@ def view(solution_id):
                 _common_comments(),
             'user_comments':
                 _common_comments(user_id=current_user.id),
+            'left': Solution.left_in_exercise(solution.exercise),
         }
 
     return render_template('view.html', **view_params)
@@ -386,8 +395,9 @@ def done_checking(exercise_id, solution_id):
             for_user=checked_solution.solver,
             solution=checked_solution,
         )
-    identical_tests_tasks.check_if_other_solutions_can_be_solved.apply_async(
-        args=(solution_id,))
+    if config.FEATURE_FLAG_CHECK_IDENTICAL_CODE_ON:
+        (identical_tests_tasks.check_if_other_solutions_can_be_solved.
+         apply_async(args=(solution_id,)))
     next_exercise = None
     solution = Solution.next_unchecked_of(exercise_id)
     if solution and solution.start_checking():

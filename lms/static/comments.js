@@ -1,15 +1,23 @@
-const COMMENTED_LINE_COLOR = '#fac4c3';
+const DEFAULT_COMMENTED_LINE_COLOR = '#fab3b0';
+const FLAKE_COMMENTED_LINE_COLOR = '#fac4c3';
+const HOVER_LINE_STYLE = '1px solid #0d0d0f';
+
 
 function markLine(target, color) {
   if (target.dataset && target.dataset.marked === 'true') { return; }
   if (target.dataset && target.dataset.vimbackground === 'true') { return; }
-  let parsedColor = color;
-  if (color === true) {
-    parsedColor = COMMENTED_LINE_COLOR;
-  } else if (color === false) {
+  target.style.background = color;
+}
+
+function hoverLine(target, hover) {
+  if (target.dataset && target.dataset.vimbackground === 'true') { return; }
+  let parsedColor = hover;
+  if (hover === true) {
+    parsedColor = HOVER_LINE_STYLE;
+  } else if (hover === false) {
     parsedColor = 'none';
   }
-  target.style.background = parsedColor;
+  target.style.border = parsedColor;
 }
 
 function isUserGrader() {
@@ -17,11 +25,12 @@ function isUserGrader() {
   return ['staff', 'administrator'].includes(sessionStorage.getItem('role'));
 }
 
-function addSpecialCommentButtons(commentData) {
+function formatCommentData(commentData) {
   let changedCommentText = commentData.text;
+  changedCommentText = `<span class="comment-author">${commentData.author_name}:</span> ${commentData.text}`
   if (isUserGrader()) {
     const deleteButton = `<i class="fa fa-trash grader-delete" aria-hidden="true" data-commentid="${commentData.id}" onclick="deleteComment(${window.solutionId}, ${commentData.id});"></i>`;
-    changedCommentText = `${deleteButton} ${commentData.text}`;
+    changedCommentText = `${deleteButton} ${changedCommentText}`;
   }
   return changedCommentText;
 }
@@ -29,8 +38,8 @@ function addSpecialCommentButtons(commentData) {
 function addCommentToLine(line, commentData) {
   const commentElement = $(`.line[data-line="${line}"]`);
   const existingPopover = $(commentElement).data('bs.popover');
-  const buttonizedComment = addSpecialCommentButtons(commentData);
-  const commentText = `<span class="comment" data-line="${line}" data-commentid="${commentData.id}">${buttonizedComment}</span>`;
+  const formattedComment = formatCommentData(commentData);
+  const commentText = `<span class="comment" data-line="${line}" data-commentid="${commentData.id}">${formattedComment}</span>`;
   if (existingPopover !== undefined) {
     const existingContent = `${existingPopover.config.content} <hr>`;
     existingPopover.config.content = existingContent + commentText;
@@ -40,10 +49,15 @@ function addCommentToLine(line, commentData) {
       title: `שורה ${line}`,
       content: commentText,
       sanitize: false,
-      placement: 'left', // Actually right :P
+      boundary: 'viewport',
+      placement: 'auto',
     });
     $(commentElement).popover();
-    markLine(commentElement[0], true);
+  }
+  if (commentData.is_auto) {
+      markLine(commentElement[0], FLAKE_COMMENTED_LINE_COLOR);
+  } else {
+    markLine(commentElement[0], DEFAULT_COMMENTED_LINE_COLOR);
     commentElement[0].dataset.marked = true;
   }
 }
@@ -85,6 +99,7 @@ function addLineSpansToPre(items) {
 
 
 window.markLink = markLine;
+window.hoverLine = hoverLine;
 window.addCommentToLine = addCommentToLine;
 window.isUserGrader = isUserGrader;
 window.addEventListener('load', () => {

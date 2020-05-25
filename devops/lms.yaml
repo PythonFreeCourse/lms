@@ -17,6 +17,8 @@ services:
       interval: 30s
       timeout: 30s
       retries: 3
+    networks:
+      - lms
 
   rabbitmq:
     image: rabbitmq:3.7-management-alpine
@@ -28,6 +30,8 @@ services:
       - RABBITMQ_DEFAULT_VHOST=/
     volumes:
       - rabbit-data-volume:/var/lib/rabbitmq
+    networks:
+      - lms
 
   checks-sandbox:
     image: lms:latest
@@ -45,12 +49,29 @@ services:
       - rabbitmq
     depends_on:
       - rabbitmq
+    networks:
+      - lms
+
+  checks-docker-engine:
+    image: docker:dind
+    privileged: True
+    environment:
+      - DOCKER_TLS_CERTDIR=/certs
+    volumes:
+      - docker-engine-volume-run:/var/run/
+      - docker-engine-certs:/certs
+      - docker-engine-lib:/var/lib/docker
+    networks:
+      - lms
 
   checks-public:
     image: lms:latest
     command: celery -A lms.lmstests.public worker
     volumes:
       - ../lms:/app_dir/lms/
+      - docker-engine-volume-run:/var/run/
+      - docker-engine-certs:/certs
+      - docker-engine-lib:/var/lib/docker
     environment:
       - DB_NAME=${DB_NAME:-db}
       - DB_USER=${DB_USERNAME:-postgres}
@@ -70,12 +91,15 @@ services:
     depends_on:
       - db
       - rabbitmq
+    networks:
+      - lms
 
   http:
     image: lms:latest
     command: gunicorn --bind 0.0.0.0:8080 --workers 5 lms.lmsweb
     volumes:
       - ../lms:/app_dir/lms
+      - ../../notebooks-tests:/app_dir/notebooks-tests
     environment:
       - DB_NAME=${DB_NAME:-db}
       - DB_USER=${DB_USERNAME:-postgres}
@@ -96,7 +120,18 @@ services:
     depends_on:
       - db
       - rabbitmq
+    networks:
+      - lms
 
 volumes:
+  docker-engine-volume-run:
+  docker-engine-certs:
+  docker-engine-lib:
   db-data-volume:
   rabbit-data-volume:
+
+
+networks:
+  lms:
+    external:
+      name: lms

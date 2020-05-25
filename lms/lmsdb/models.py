@@ -8,7 +8,7 @@ from typing import Any, Dict, Iterable, Optional, Tuple, Type
 from flask_login import UserMixin  # type: ignore
 from peewee import (  # type: ignore
     BooleanField, Case, CharField, Check, DateTimeField, ForeignKeyField,
-    IntegerField, ManyToManyField, TextField, fn,
+    IntegerField, JOIN, ManyToManyField, TextField, fn,
 )
 from playhouse.signals import Model, post_save, pre_save  # type: ignore
 from werkzeug.security import (
@@ -183,12 +183,18 @@ class Exercise(BaseModel):
     date = DateTimeField()
     users = ManyToManyField(User, backref='exercises')
     is_archived = BooleanField()
+    due_date = DateTimeField(null=True)
     notebook_num = IntegerField(default=0)
     order = IntegerField(default=0)
 
+    def open_for_new_solutions(self) -> bool:
+        if self.due_date is None:
+            return not self.is_archived
+        return datetime.now() < self.due_date and not self.is_archived
+
     @classmethod
     def get_objects(cls, fetch_archived: bool = False):
-        exercises = cls.select().order_by(Exercise.id)
+        exercises = cls.select().order_by(Exercise.order)
         if not fetch_archived:
             exercises = exercises.where(cls.is_archived == False)  # NOQA: E712
         return exercises
@@ -199,6 +205,7 @@ class Exercise(BaseModel):
             'exercise_name': self.subject,
             'is_archived': self.is_archived,
             'notebook': self.notebook_num,
+            'due_date': self.due_date,
         }
 
     @staticmethod
@@ -273,6 +280,9 @@ class Solution(BaseModel):
             Solution.solver == self.solver,
         ).order_by(Solution.submission_timestamp.asc())
 
+    def test_results(self) -> Iterable[dict]:
+        return SolutionExerciseTestExecution.by_solution(self)
+
     @classmethod
     def of_user(
             cls, user_id: int, with_archived: bool = False,
@@ -335,20 +345,43 @@ class Solution(BaseModel):
         return instance
 
     @classmethod
-    def next_unchecked(cls) -> Optional['Solution']:
-        unchecked_exercises = cls.select().where(
+    def _base_next_unchecked(cls):
+        comments_count = fn.Count(Comment.id).alias('comments_count')
+        fails = fn.Count(SolutionExerciseTestExecution.id).alias('failures')
+        return cls.select(
+            cls.id,
+            cls.state,
+            comments_count,
+            fails,
+        ).join(
+            Comment,
+            join_type=JOIN.LEFT_OUTER,
+            on=(Comment.solution == cls.id),
+        ).join(
+            SolutionExerciseTestExecution,
+            join_type=JOIN.LEFT_OUTER,
+            on=(SolutionExerciseTestExecution.solution == cls.id),
+        ).filter(
             cls.state == Solution.STATES.CREATED.name,
+        ).group_by(
+            cls.id,
+        ).order_by(
+            comments_count,
+            fails,
+            cls.submission_timestamp.asc(),
         )
+
+    @classmethod
+    def next_unchecked(cls) -> Optional['Solution']:
         try:
-            return unchecked_exercises.get()
+            return cls._base_next_unchecked().get()
         except cls.DoesNotExist:
             return None
 
     @classmethod
     def next_unchecked_of(cls, exercise_id) -> Optional['Solution']:
         try:
-            return cls.select().where(
-                cls.state == cls.STATES.CREATED.name,
+            return cls._base_next_unchecked().where(
                 cls.exercise == exercise_id,
             ).get()
         except cls.DoesNotExist:
@@ -377,6 +410,124 @@ class Solution(BaseModel):
             .group_by(Exercise.subject, Exercise.id)
             .order_by(Exercise.id)
         )
+
+    @classmethod
+    def left_in_exercise(cls, exercise: Exercise) -> int:
+        one_if_is_checked = Case(
+            Solution.state, ((Solution.STATES.DONE.name, 1),), 0)
+        active_solutions = cls.state.in_(Solution.STATES.active_solutions())
+        response = cls.filter(
+            cls.exercise == exercise,
+            active_solutions,
+        ).select(
+            fn.Count(cls.id).alias('submitted'),
+            fn.Sum(one_if_is_checked).alias('checked'),
+        ).dicts().get()
+        return int(response['checked'] * 100 / response['submitted'])
+
+
+class ExerciseTest(BaseModel):
+    exercise = ForeignKeyField(model=Exercise, unique=True)
+    code = TextField()
+
+    @classmethod
+    def get_or_create_exercise_test(cls, exercise: Exercise, code: str):
+        instance, created = cls.get_or_create(**{
+            cls.exercise.name: exercise,
+        }, defaults={
+            cls.code.name: code,
+        })
+        if not created:
+            instance.code = code
+            instance.save()
+        return instance
+
+    @classmethod
+    def get_by_exercise(cls, exercise: Exercise):
+        return cls.get_or_none(cls.exercise == exercise)
+
+
+class ExerciseTestName(BaseModel):
+    FATAL_TEST_NAME = 'fatal_test_failure'
+    FATAL_TEST_PRETTY_TEST_NAME = 'כישלון חמור'
+
+    exercise_test = ForeignKeyField(model=ExerciseTest)
+    test_name = TextField()
+    pretty_test_name = TextField()
+
+    indexes = (
+        (('exercise_test', 'test_name'), True),
+    )
+
+    @classmethod
+    def create_exercise_test_name(
+            cls,
+            exercise_test: ExerciseTest,
+            test_name: str,
+            pretty_test_name: str,
+    ):
+        instance, created = cls.get_or_create(**{
+            cls.exercise_test.name: exercise_test,
+            cls.test_name.name: test_name,
+        }, defaults={
+            cls.pretty_test_name.name: pretty_test_name,
+        })
+        if not created:
+            instance.pretty_test_name = pretty_test_name
+            instance.save()
+
+    @classmethod
+    def get_exercise_test(cls, exercise: Exercise, test_name: str):
+        if test_name == cls.FATAL_TEST_NAME:
+            instance, _ = cls.get_or_create(**{
+                cls.exercise_test.name: exercise,
+                cls.test_name.name: test_name,
+                cls.pretty_test_name.name: cls.FATAL_TEST_PRETTY_TEST_NAME,
+            })
+            return instance
+        instance, _ = cls.get_or_create(**{
+            cls.exercise_test.name: ExerciseTest.get_by_exercise(exercise),
+            cls.test_name.name: test_name,
+        }, defaults={
+            cls.pretty_test_name.name: test_name,
+        })
+        return instance
+
+
+class SolutionExerciseTestExecution(BaseModel):
+    solution = ForeignKeyField(model=Solution)
+    exercise_test_name = ForeignKeyField(model=ExerciseTestName)
+    user_message = TextField()
+    staff_message = TextField()
+
+    @classmethod
+    def create_execution_result(
+            cls,
+            solution: Solution,
+            test_name: str,
+            user_message: str,
+            staff_message: str,
+    ):
+        exercise_test_name = ExerciseTestName.get_exercise_test(
+            exercise=solution.exercise,
+            test_name=test_name,
+        )
+        cls.create(**{
+            cls.solution.name: solution,
+            cls.exercise_test_name.name: exercise_test_name,
+            cls.user_message.name: user_message,
+            cls.staff_message.name: staff_message,
+        })
+
+    @classmethod
+    def by_solution(cls, solution: Solution) -> Iterable[dict]:
+        return cls.filter(
+            cls.solution == solution,
+        ).join(ExerciseTestName).select(
+            ExerciseTestName.pretty_test_name,
+            cls.user_message,
+            cls.staff_message,
+        ).dicts()
 
 
 class CommentText(BaseModel):
@@ -422,10 +573,18 @@ class Comment(BaseModel):
     @classmethod
     def by_solution(cls, solution_id: int):
         fields = [
-            Comment, CommentText.text, CommentText.flake8_key, CommentText.id,
+            cls.id, cls.line_number, cls.is_auto,
+            CommentText.id.alias('comment_id'), CommentText.text,
+            User.fullname.alias('author_name'),
         ]
-        the_solution = Comment.solution == solution_id
-        return Comment.select(*fields).join(CommentText).where(the_solution)
+        return (
+            cls
+            .select(*fields)
+            .join(CommentText)
+            .switch()
+            .join(User)
+            .where(cls.solution == solution_id)
+        )
 
     @classmethod
     def get_solutions(cls, solution_id: int) -> Tuple[Dict[Any, Any], ...]:

@@ -56,7 +56,7 @@ function visuallyRemoveComment(commentId) {
   const hr = commentElement.nextElementSibling || commentElement.previousElementSibling;
   if (hr === null) {
     lineElement.dataset.marked = false;
-    window.markLine(lineElement, false);
+    window.markLine(lineElement, "none");
     $(lineElement).popover('dispose');
   } else {
     hr.parentNode.removeChild(hr);
@@ -84,13 +84,13 @@ function deleteComment(solutionId, commentId) {
   xhr.send('');
 }
 
-function sendNewComment(solutionId, line, commentText) {
-  return sendComment('text', solutionId, line, commentText);
+function sendNewComment(...commentData) {
+  return sendComment('text', ...commentData);
 }
 
 
-function sendExistsComment(solutionId, line, commentId) {
-  return sendComment('id', solutionId, line, commentId);
+function sendExistsComment(...commentData) {
+  return sendComment('id', ...commentData);
 }
 
 
@@ -104,29 +104,29 @@ function trackDragAreas(items) {
   Array.from(items).forEach((item) => {
     item.addEventListener('dragover', (e) => {
       e.preventDefault();
-      window.markLine(findElementToMark(e), true);
+      window.hoverLine(findElementToMark(e), true);
     }, false);
     item.addEventListener('dragleave', (e) => {
       e.preventDefault();
-      window.markLine(findElementToMark(e), false);
+      window.hoverLine(findElementToMark(e), false);
     }, false);
     item.addEventListener('dragenter', (e) => {
       e.preventDefault();
     }, false);
     item.addEventListener('mouseenter', (e) => {
       e.preventDefault();
-      window.markLine(findElementToMark(e), true);
+      window.hoverLine(findElementToMark(e), true);
     }, false);
     item.addEventListener('mouseleave', (e) => {
       e.preventDefault();
-      window.markLine(findElementToMark(e), false);
+      window.hoverLine(findElementToMark(e), false);
     }, false);
     item.addEventListener('drop', (e) => {
       e.preventDefault();
       const target = findElementToMark(e);
       const { line } = target.dataset;
       const commentId = e.dataTransfer.getData('text/plain');
-      window.markLine(target, false);
+      window.hoverLine(target, false);
       sendExistsComment(window.solutionId, line, commentId);
     }, false);
   });
@@ -152,13 +152,11 @@ function trackTextArea(lineNumber) {
   const target = `textarea[data-line='${lineNumber}']`;
   const popoverElement = `.grader-add[data-line='${lineNumber}']`;
   $(target).keydown((ev) => {
-    console.log(ev.which);
     if ((ev.which == 10 || ev.which == 13) && ev.ctrlKey) {  // CTRL + ENTER
       sendNewComment(window.solutionId, lineNumber, ev.target.value);
       $(popoverElement).popover('hide');
-    } else if (ev.key == 'Escape') {  // Escape
+    } else if (ev.key == 'Escape') {
       ev.preventDefault();
-      console.log('nobody knows it');
       $(popoverElement).popover('hide');
     }
   });
@@ -200,7 +198,7 @@ window.addEventListener('lines-numbered', () => {
   trackDragAreas(document.getElementsByClassName('line'));
   trackDraggables(document.getElementsByClassName('known-comment'));
   trackFinished(exerciseId, window.solutionId, document.getElementById('save-check'));
-  addNewCommentButtons(document.getElementsByClassName('line'));
+  addNewCommentButtons(document.getElementById('code-view').getElementsByClassName('line'));
   if (!window.isUserGrader()) {
     sessionStorage.setItem('role', 'grader');
   }

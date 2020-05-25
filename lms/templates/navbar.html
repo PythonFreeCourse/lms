@@ -1,6 +1,6 @@
 {% if request.path != '/login' %}
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="#">
+  <a class="navbar-brand" href="{{ config.HOME_URL or "#" }}">
     <img src="{{ url_for('static', filename='avatar.jpg') }}" width="30" height="30" class="d-inline-block align-top" alt="הלוגו של פרויקט לומדים פייתון: נחש צהוב על רקע עיגול בצבע תכלת, ומתחתיו כתוב 'לומדים פייתון'.">
   </a>
   <div class="collapse navbar-collapse" id="navbarNavDropdown">
