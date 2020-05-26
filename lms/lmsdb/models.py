@@ -480,8 +480,9 @@ class ExerciseTestName(BaseModel):
     def get_exercise_test(cls, exercise: Exercise, test_name: str):
         if test_name == cls.FATAL_TEST_NAME:
             instance, _ = cls.get_or_create(**{
-                cls.exercise_test.name: exercise,
+                cls.exercise_test.name: ExerciseTest.get_by_exercise(exercise),
                 cls.test_name.name: test_name,
+            }, defaults={
                 cls.pretty_test_name.name: cls.FATAL_TEST_PRETTY_TEST_NAME,
             })
             return instance
