@@ -5,6 +5,7 @@ from lms.lmstests.public.identical_tests import tasks
 from lms.models import notifications
 from lms.tests import conftest
 
+
 SOME_CODE = "print('Hello Word')"
 
 
@@ -21,8 +22,8 @@ class TestAutoSolutionSolver:
 
         user_notifications = notifications.get(user=s_solution.solver)
         assert len(user_notifications) == 1
-        subject = user_notifications[0]['message_parameters']['exercise_name']
-        assert s_solution.exercise.subject == subject
+        solution_id = user_notifications[0].related_id
+        assert s_solution.id == solution_id
 
         user_notifications = notifications.get(user=f_solution.solver)
         assert len(user_notifications) == 0
@@ -60,8 +61,8 @@ class TestAutoSolutionSolver:
         user_notifications = notifications.get(user=another_solution.solver)
         assert len(user_notifications) == 1
 
-        subject = user_notifications[0]['text']
-        assert subject in another_solution.exercise.subject
+        subject = user_notifications[0].message
+        assert another_solution.exercise.subject in subject
 
     def test_check_if_other_solutions_can_be_solved_not_identical_code(
             self,

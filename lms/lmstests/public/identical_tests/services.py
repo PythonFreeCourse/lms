@@ -3,6 +3,7 @@ import logging
 
 from lms.lmsdb import models
 from lms.models import notifications
+from lms.lmsweb import routes
 
 
 class IdenticalSolutionSolver:
@@ -90,6 +91,7 @@ class IdenticalSolutionSolver:
             user=to_solution.solver,
             related_id=to_solution,
             message=f'הפתרון שלך לתרגיל {to_solution.exercise.subject} נבדק.',
+            action_url=f'{routes.SOLUTIONS}/{to_solution.id}',
         )
 
     @staticmethod

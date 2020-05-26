@@ -231,7 +231,7 @@ class SolutionState(enum.Enum):
         )
 
     @classmethod
-    def to_choices(cls) -> Tuple[Tuple[str, str]]:
+    def to_choices(cls) -> Tuple[Tuple[str, str], ...]:
         return tuple((choice.name, choice.value) for choice in tuple(cls))
 
 
@@ -390,7 +390,8 @@ class Solution(BaseModel):
     @classmethod
     def status(cls):
         one_if_is_checked = Case(
-            Solution.state, ((Solution.STATES.DONE.name, 1),), 0)
+            Solution.state, ((Solution.STATES.DONE.name, 1),), 0,
+        )
         fields = [
             Exercise.id,
             Exercise.subject.alias('name'),
@@ -398,14 +399,14 @@ class Solution(BaseModel):
             fn.Count(Solution.id).alias('submitted'),
             fn.Sum(one_if_is_checked).alias('checked'),
         ]
-
         join_by_exercise = (Solution.exercise == Exercise.id)
         active_solutions = Solution.state.in_(
-            Solution.STATES.active_solutions())
+            Solution.STATES.active_solutions(),
+        )
         return (
             Exercise
             .select(*fields)
-            .join(Solution, 'LEFT OUTER', on=join_by_exercise)
+            .join(Solution, JOIN.LEFT_OUTER, on=join_by_exercise)
             .where(active_solutions)
             .group_by(Exercise.subject, Exercise.id)
             .order_by(Exercise.id)

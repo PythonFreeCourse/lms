@@ -25,7 +25,7 @@ from lms.lmstests.public.flake8 import tasks as flake8_tasks
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.unittests import tasks as unittests_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
-from lms.lmsweb import config, webapp
+from lms.lmsweb import config, routes, webapp
 from lms.lmsweb.tools.notebook_extractor import extract_exercises
 from lms.models import notifications
 
@@ -345,7 +345,7 @@ def upload():
     })
 
 
-@webapp.route('/view/<int:solution_id>')
+@webapp.route(f'{routes.SOLUTIONS}/<int:solution_id>')
 @login_required
 def view(solution_id):
     solution = Solution.get_or_none(Solution.id == solution_id)
@@ -392,8 +392,9 @@ def done_checking(exercise_id, solution_id):
         notifications.send(
             kind=notifications.NotificationKind.CHECKED,
             user=checked_solution.solver,
-            related_id=checked_solution,
+            related_id=solution_id,
             message=msg,
+            action_url=f'{routes.SOLUTIONS}/{solution_id}',
         )
     if config.FEATURE_FLAG_CHECK_IDENTICAL_CODE_ON:
         (identical_tests_tasks.check_if_other_solutions_can_be_solved.
@@ -422,7 +423,7 @@ def start_checking(exercise_id):
             args=(next_exercise.id,),
             countdown=Solution.MAX_CHECK_TIME_SECONDS,
         )
-        return redirect(f'/view/{next_exercise.id}')
+        return redirect(f'{routes.SOLUTIONS}/{next_exercise.id}')
     return redirect('/exercises')
 
 

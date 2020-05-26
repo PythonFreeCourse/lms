@@ -5,6 +5,7 @@ from celery.result import allow_join_result
 
 from lms.lmsdb import models
 from lms.lmstests.sandbox import flake8
+from lms.lmsweb import routes
 from lms.models import notifications
 
 
@@ -91,4 +92,5 @@ class PyFlakeChecker:
             user=self.solution.solver,
             related_id=self.solution,
             message=msg,
+            action_url=f'{routes.SOLUTIONS}/{self.solution.id}',
         )

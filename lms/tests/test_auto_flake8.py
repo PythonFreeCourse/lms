@@ -55,11 +55,9 @@ class TestAutoFlake8:
         user_notifications = notifications.get(user=solution.solver)
         assert len(user_notifications) == 1
         assert user_notifications
-        parameters = user_notifications[0]['message_parameters']
-        subject = parameters['exercise_name']
-        errors = parameters['errors']
-        assert solution.exercise.subject == subject
-        assert 1 == errors
+        subject = user_notifications[0].message
+        assert solution.exercise.subject in subject
+        assert '1' in subject
 
     def test_valid_solution(self, solution: models.Solution):
         solution.json_data_str = VALID_CODE
