@@ -33,6 +33,53 @@ def _migrate_column_in_table_if_needed(
     return True
 
 
+def _rename_column_in_table_if_needed(
+    table: Type[Model],
+    field_instance: Field,
+    new_column_name: str,
+) -> bool:
+    column_name = field_instance.__name__.lower()
+    table_name = table.__name__.lower()
+    cols = {col.name for col in db_config.database.get_columns(table_name)}
+
+    if new_column_name in cols:
+        print(f'Column {new_column_name} already exists in {table}')  # noqa: T001, E501
+        return False
+
+    print(f'Changing {column_name} -> {new_column_name} in {table}')  # noqa: T001, E501
+    migrator = db_config.get_migrator_instance()
+    with db_config.database.transaction():
+        migrate(
+            migrator.rename_column(table_name, column_name, new_column_name),
+        )
+        db_config.database.commit()
+    return True
+
+
+def _alter_column_type_if_needed(
+    table: Type[Model],
+    field_instance: Field,
+    new_type: str,
+) -> bool:
+    column_name = field_instance.__name__.lower()
+    table_name = table.__name__.lower()
+    cols = {col.name for col in db_config.database.get_columns(table_name)}
+
+    if new_column_name in cols:
+        print(f'Column {new_column_name} already exists in {table}')  # noqa: T001, E501
+        return False
+
+    print(f'Changing {column_name} -> {new_column_name} in {table}')  # noqa: T001, E501
+    migrator = db_config.get_migrator_instance()
+    with db_config.database.transaction():
+        migrate(
+            migrator.rename_column(table_name, column_name, new_column_name),
+        )
+        db_config.database.commit()
+    return True
+
+
+
 def _drop_column_from_module_if_needed(
     table: Type[Model],
     column_name: str,
@@ -87,6 +134,15 @@ def _add_is_auto_if_needed():
     return _migrate_column_in_table_if_needed(
         models.Comment,
         models.Comment.is_auto,
+    )
+
+
+def _reshape_notifications_if_needed():
+    _migrate_column_in_table_if_needed(
+        models.Notification,
+        models.Notification.action_url,
+    )
+    _rename_column_in_table_if_needed(
     )
 
 

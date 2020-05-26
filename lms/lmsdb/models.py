@@ -128,36 +128,36 @@ class Notification(BaseModel):
 
     user = ForeignKeyField(User)
     created = DateTimeField(default=datetime.now)
-    action_id = IntegerField()
-    message_parameters = database_config.JsonField()
-    related_object_id = IntegerField(null=True)
-    read = BooleanField(default=False)
+    kind = IntegerField()
+    message = TextField()
+    related_id = IntegerField(null=True)
+    action_url = CharField(null=True)
+    viewed = BooleanField(default=False)
 
-    def mark_as_read(self):
-        self.read = True
-        self.save()
-
-    @classmethod
-    def notifications_for_user(
-            cls,
-            for_user: User,
-    ) -> Iterable['Notification']:
-        return cls.select().join(User).filter(
-            cls.user == for_user.id).limit(cls.MAX_PER_USER)
+    def read(self) -> bool:
+        self.viewed = True
+        return bool(self.save())
 
     @classmethod
-    def create_notification(
+    def fetch(cls, user: User) -> Iterable['Notification']:
+        user_id = cls.user == user.id
+        return cls.select().join(User).where(user_id).limit(cls.MAX_PER_USER)
+
+    @classmethod
+    def send(
             cls,
             user: User,
-            notification_type: str,
-            message_parameters: dict,
-            related_object_id: int,
+            kind: int,
+            message: str,
+            related_id: Optional[int] = None,
+            action_url: Optional[str] = None,
     ) -> 'Notification':
         return cls.create(**{
             cls.user.name: user,
-            cls.notification_type.name: notification_type,
-            cls.message_parameters.name: message_parameters,
-            cls.related_object_id.name: related_object_id,
+            cls.kind.name: kind,
+            cls.message.name: message,
+            cls.related_id.name: related_id,
+            cls.action_url.name: action_url,
         })
 
 
@@ -275,7 +275,7 @@ class Solution(BaseModel):
         return self.json_data_str
 
     def ordered_versions(self) -> Iterable['Solution']:
-        return Solution.select().filter(
+        return Solution.select().where(
             Solution.exercise == self.exercise,
             Solution.solver == self.solver,
         ).order_by(Solution.submission_timestamp.asc())
@@ -305,7 +305,7 @@ class Solution(BaseModel):
 
     @property
     def comments(self):
-        return Comment.select().join(Solution).filter(Comment.solution == self)
+        return Comment.select().join(Solution).where(Comment.solution == self)
 
     @classmethod
     def solution_exists(
@@ -314,7 +314,7 @@ class Solution(BaseModel):
             solver: User,
             json_data_str: str,
     ):
-        return cls.select().filter(
+        return cls.select().where(
             cls.exercise == exercise,
             cls.solver == solver,
             cls.json_data_str == json_data_str,
@@ -335,7 +335,7 @@ class Solution(BaseModel):
         })
 
         # update old solutions for this exercise
-        other_solutions: Iterable[Solution] = cls.select().filter(
+        other_solutions: Iterable[Solution] = cls.select().where(
             cls.exercise == exercise,
             cls.solver == solver,
             cls.id != instance.id,
@@ -361,7 +361,7 @@ class Solution(BaseModel):
             SolutionExerciseTestExecution,
             join_type=JOIN.LEFT_OUTER,
             on=(SolutionExerciseTestExecution.solution == cls.id),
-        ).filter(
+        ).where(
             cls.state == Solution.STATES.CREATED.name,
         ).group_by(
             cls.id,

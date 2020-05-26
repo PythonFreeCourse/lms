@@ -21,13 +21,13 @@ from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Exercise, RoleOptions, Solution, User,
     database,
 )
-from lms import notifications
 from lms.lmstests.public.flake8 import tasks as flake8_tasks
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.unittests import tasks as unittests_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmsweb import config, webapp
 from lms.lmsweb.tools.notebook_extractor import extract_exercises
+from lms.models import notifications
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
@@ -214,14 +214,13 @@ def get_notifications():
             explicit_id = int(request.json.get('notificationId', 0))
         else:
             explicit_id = 0
-        changed = notifications.mark_as_read(
-            from_user=current_user, notification_id=explicit_id)
+        changed = notifications.read(user=current_user, id_=explicit_id)
         if not changed:
             return fail(401, 'Invalid notification')
         return jsonify({'success': True})
 
     # it's a GET
-    response = notifications.get_notifications_for_user(current_user)
+    response = notifications.get(user=current_user)
     return jsonify(response)
 
 
@@ -388,12 +387,13 @@ def view(solution_id):
 def done_checking(exercise_id, solution_id):
     checked_solution: Solution = Solution.get_by_id(solution_id)
     is_updated = checked_solution.set_state(new_state=Solution.STATES.DONE)
+    msg = f'הפתרון שלך לתרגיל {checked_solution.exercise.subject} נבדק.'
     if is_updated:
-        notifications.create_notification(
-            notification_type=(notifications.SolutionCheckedNotification
-                               .notification_type()),
-            for_user=checked_solution.solver,
-            solution=checked_solution,
+        notifications.send(
+            kind=notifications.NotificationKind.CHECKED,
+            user=checked_solution.solver,
+            related_id=checked_solution,
+            message=msg,
         )
     if config.FEATURE_FLAG_CHECK_IDENTICAL_CODE_ON:
         (identical_tests_tasks.check_if_other_solutions_can_be_solved.
