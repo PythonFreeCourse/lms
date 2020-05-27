@@ -111,6 +111,9 @@ class UnitTestChecker:
                 staff_message=result._elem.text,
             )
 
+        if not number_of_failures:
+            return
+
         fail_message = (
             f'הבודק האוטומטי נכשל ב־{number_of_failures} '
             f'דוגמאות בתרגיל "{self._solution.exercise.subject}".'
