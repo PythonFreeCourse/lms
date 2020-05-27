@@ -1,10 +1,12 @@
 import logging
-import typing
+from typing import List, Optional
 
 import junitparser
 
 from lms.lmsdb import models
 from lms.lmstests.public.unittests import executers
+from lms.lmsweb import routes
+from lms.models import notifications
 
 
 class UnitTestChecker:
@@ -17,8 +19,8 @@ class UnitTestChecker:
         self._logger = logger
         self._solution_id = solution_id
         self._executor_name = executor_name
-        self._solution: typing.Optional[models.Solution] = None
-        self._exercise_auto_test: typing.Optional[models.ExerciseTest] = None
+        self._solution: Optional[models.Solution] = None
+        self._exercise_auto_test: Optional[models.ExerciseTest] = None
 
     def initialize(self):
         self._solution = models.Solution.get_by_id(self._solution_id)
@@ -65,17 +67,26 @@ class UnitTestChecker:
         return f'{test_code}\n\n{user_code}'
 
     def _populate_junit_results(self, junit_results: str):
+        assert self._solution is not None  # noqa: S101
         results = None
         if junit_results:
             results = junitparser.TestSuite.fromstring(junit_results)
         if not results:
             self._logger.info('junit invalid results (%s) on solution %s',
                               junit_results, self._solution_id)
+            fail_user_message = 'הבודק האוטומטי לא הצליח להריץ את הקוד שלך.'
             models.SolutionExerciseTestExecution.create_execution_result(
                 solution=self._solution,
                 test_name=models.ExerciseTestName.FATAL_TEST_NAME,
-                user_message='אנא פנו לסגל',
+                user_message=fail_user_message,
                 staff_message='אחי, בדקת את הקוד שלך?',
+            )
+            notifications.send(
+                kind=notifications.NotificationKind.UNITTEST_ERROR,
+                user=self._solution.solver,
+                related_id=self._solution.id,
+                message=fail_user_message,
+                action_url=f'{routes.SOLUTIONS}/{self._solution_id}',
             )
             return
 
@@ -97,3 +108,15 @@ class UnitTestChecker:
                 user_message=message,
                 staff_message=result._elem.text,
             )
+        fails: List[str] = list(filter(None, results))
+        fail_message = (
+            f'הבודק האוטומטי נכשל ב־{len(fails)} '
+            f'דוגמאות בתרגיל "{self._solution.exercise.subject}".'
+        )
+        notifications.send(
+            kind=notifications.NotificationKind.UNITTEST_ERROR,
+            user=self._solution.solver,
+            related_id=self._solution.id,
+            message=fail_message,
+            action_url=f'{routes.SOLUTIONS}/{self._solution_id}',
+        )

@@ -6,7 +6,9 @@ from lms.lmsdb import models
 from lms.lmstests.public.unittests import import_tests
 from lms.lmstests.public.unittests import executers
 from lms.lmstests.public.unittests import tasks
+from lms.models import notifications
 from lms.tests import conftest
+
 
 STUDENT_CODE = '''
 def foo(bar=None):
@@ -16,6 +18,7 @@ def foo(bar=None):
 EXERCISE_TESTS = os.path.join(conftest.SAMPLES_DIR, 'student_test_code.py')
 INVALID_EXERCISE_TESTS = os.path.join(
     conftest.SAMPLES_DIR, 'not_working_test_code.py')
+UNITTEST_NOTIFICATION = notifications.NotificationKind.UNITTEST_ERROR.value
 
 
 class TestUTForExercise:
@@ -25,6 +28,7 @@ class TestUTForExercise:
         self._initialize_solution(solution, EXERCISE_TESTS)
         self._run_unit_tests(solution.id)
         self._verify_comments()
+        self._verify_notifications()
 
     def test_check_solution_with_invalid_exercise(
             self, solution: models.Solution,
@@ -39,6 +43,11 @@ class TestUTForExercise:
         assert first.exercise_test_name.test_name == expected_name
         expected_name = models.ExerciseTestName.FATAL_TEST_PRETTY_TEST_NAME
         assert first.exercise_test_name.pretty_test_name == expected_name
+        assert first.exercise_test_name.pretty_test_name == expected_name
+
+        all_notifications = notifications.get(user=models.User.get(id=1))
+        assert len(all_notifications) == 1
+        assert all_notifications[0].kind == UNITTEST_NOTIFICATION
 
     @pytest.mark.skip('Should run with docker system access')
     def test_check_solution_with_exercise_ut_full_docker(
@@ -61,6 +70,12 @@ class TestUTForExercise:
                     "assert 'bar' == 'barbaron'   - bar   + barbaron")
         assert expected == first.user_message
         assert "foo('bar') == 'barbaron'" in first.staff_message
+
+    @staticmethod
+    def _verify_notifications():
+        all_notifications = notifications.get(user=models.User.get(id=1))
+        assert len(all_notifications) == 1
+        assert all_notifications[0].kind == UNITTEST_NOTIFICATION
 
     @staticmethod
     def _initialize_solution(solution: models.Solution, module_name: str):

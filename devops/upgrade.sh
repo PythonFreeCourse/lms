@@ -19,10 +19,3 @@ upgrade () {
   sudo systemctl start nginx
   source ./bootstrap.sh
 }
-
-restart () {
-  source ./build.sh
-  sudo systemctl restart lms
-  sudo systemctl start nginx
-  source ./bootstrap.sh
-}

@@ -7,6 +7,7 @@ from lms.lmsdb.models import Notification, User
 class NotificationKind(enum.Enum):
     CHECKED = 1
     FLAKE8_ERROR = 2
+    UNITTEST_ERROR = 2
 
 
 def get(user):
