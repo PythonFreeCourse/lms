@@ -14,9 +14,13 @@
           {%- for notification in current_user.get_notifications() %}
           <div class="notification dropdown-item">
             <i class="fa fa-{{ icon }}" aria-hidden="true"></i>
+            {% if notification.action_url %}
             <a href="{{ notification.action_url }}" class="notification-text">
               {{ notification.message }}
             </a>
+            {% else %}
+            <span class"notification-text">{{ notification.message }}</span>
+            {% endif %}
             <span class="notification-date" title="{{ notification.created }}">{{ notification.created | date_humanize }}</span>
           </div>
           {% endfor -%}
