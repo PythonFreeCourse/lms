@@ -43,7 +43,6 @@ class TestUTForExercise:
         assert first.exercise_test_name.test_name == expected_name
         expected_name = models.ExerciseTestName.FATAL_TEST_PRETTY_TEST_NAME
         assert first.exercise_test_name.pretty_test_name == expected_name
-        assert first.exercise_test_name.pretty_test_name == expected_name
 
         all_notifications = notifications.get(user=models.User.get(id=1))
         assert len(all_notifications) == 1
