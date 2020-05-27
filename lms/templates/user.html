@@ -31,7 +31,7 @@
               <td>{{ solution.exercise_name }}</td>
               <td>{{ 'נבדק' if solution.is_checked else 'הוגש' if solution.solution_id else 'לא הוגש' }}</td>
               <td><a href="/view/{{ solution.solution_id }}">{{ solution.solution_id }}</a></td>
-              <td>משה</a></td>
+              <td>{{ solution.get('checker', '') }}</a></td>
             </tr>
             {% endfor -%}
           </tbody>
