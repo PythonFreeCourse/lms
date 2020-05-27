@@ -90,6 +90,7 @@ class UnitTestChecker:
             )
             return
 
+        number_of_failures = 0
         for case in results:
             result = case.result
             if result is None:
@@ -102,15 +103,16 @@ class UnitTestChecker:
             message = '\n'.join([elem[1] for elem in result._elem.items()])
             self._logger.info('Create comment on test %s solution %s.',
                               case.name, self._solution_id)
+            number_of_failures += 1
             models.SolutionExerciseTestExecution.create_execution_result(
                 solution=self._solution,
                 test_name=case.name,
                 user_message=message,
                 staff_message=result._elem.text,
             )
-        fails: List[str] = [r.result for r in results if r.result is not None]
+
         fail_message = (
-            f'הבודק האוטומטי נכשל ב־{len(fails)} '
+            f'הבודק האוטומטי נכשל ב־{number_of_failures} '
             f'דוגמאות בתרגיל "{self._solution.exercise.subject}".'
         )
         notifications.send(
