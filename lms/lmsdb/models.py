@@ -144,7 +144,14 @@ class Notification(BaseModel):
     @classmethod
     def fetch(cls, user: User) -> Iterable['Notification']:
         user_id = cls.user == user.id
-        return cls.select().join(User).where(user_id).limit(cls.MAX_PER_USER)
+        return (
+            cls
+            .select()
+            .join(User)
+            .where(user_id)
+            .order_by(Notification.created.desc())
+            .limit(cls.MAX_PER_USER)
+        )
 
     @classmethod
     def send(
