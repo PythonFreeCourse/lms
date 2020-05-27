@@ -287,11 +287,14 @@ def send(_exercise_id):
 def user(user_id):
     if user_id != current_user.id and not current_user.role.is_manager:
         return fail(403, "You aren't allowed to watch this page.")
+    target_user = User.get_by_id(user_id)
+    if target_user is None:
+        return fail(404, 'There is no such user.')
 
     return render_template(
         'user.html',
-        solutions=Solution.of_user(current_user.id, with_archived=True),
-        user=current_user,
+        solutions=Solution.of_user(target_user.id, with_archived=True),
+        user=target_user,
     )
 
 
