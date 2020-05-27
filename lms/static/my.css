@@ -513,6 +513,7 @@ code > .grader-add {
 
 .notification {
   flex-direction: column;
+  text-align: right;
 }
 
 
