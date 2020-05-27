@@ -108,6 +108,9 @@ class User(UserMixin, BaseModel):
     def random_password(cls) -> str:
         return ''.join(random.choices(string.printable.strip()[:65], k=12))
 
+    def get_notifications(self) -> Iterable['Notification']:
+        return Notification.fetch(self)
+
     def __str__(self):
         return f'{self.username} - {self.fullname}'
 

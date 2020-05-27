@@ -10,8 +10,16 @@
           <i class="fa fa-bell" aria-hidden="true"></i>
           הודעות
         </a>
-        <div id="notifications-list" class="dropdown-menu" aria-labelledby="navbarDropdown">
-          {% include 'notifications.html' %}
+        <div id="notifications-list" class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+          {%- for notification in current_user.get_notifications() %}
+          <div class="notification dropdown-item">
+            <i class="fa fa-{{ icon }}" aria-hidden="true"></i>
+            <a href="{{ notification.action_url }}" class="notification-text">
+              {{ notification.message }}
+            </a>
+            <span class="notification-date" title="{{ notification.created }}">{{ notification.created | date_humanize }}</span>
+          </div>
+          {% endfor -%}
         </div>
       </li>
       <li class="nav-item">
@@ -40,7 +48,7 @@
     <ul class="navbar-nav mr-auto">
       {%- if current_user.role.is_manager %}
       <li class="nav-item">
-        <a href="/send" class="nav-link">
+        <a href="/status" class="nav-link">
           <i class="fa fa-check-square-o" aria-hidden="true"></i>
           בדוק תרגילים
         </a>

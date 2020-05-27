@@ -4,6 +4,7 @@ from functools import wraps
 from typing import Optional
 from urllib.parse import urljoin, urlparse
 
+import arrow
 from flask import (
     abort, jsonify, render_template, request, send_from_directory, url_for,
 )
@@ -387,7 +388,7 @@ def view(solution_id):
 def done_checking(exercise_id, solution_id):
     checked_solution: Solution = Solution.get_by_id(solution_id)
     is_updated = checked_solution.set_state(new_state=Solution.STATES.DONE)
-    msg = f'הפתרון שלך לתרגיל {checked_solution.exercise.subject} נבדק.'
+    msg = f'הפתרון שלך לתרגיל "{checked_solution.exercise.subject}" נבדק.'
     if is_updated:
         notifications.send(
             kind=notifications.NotificationKind.CHECKED,
@@ -461,6 +462,11 @@ def _common_comments(exercise_id=None, user_id=None):
 @managers_only
 def common_comments(exercise_id=None):
     return jsonify(_common_comments(exercise_id=exercise_id))
+
+
+@webapp.template_filter('date_humanize')
+def _jinja2_filter_datetime(date):
+    return arrow.get(date).humanize(locale='he_IL')
 
 
 class AccessibleByAdminMixin:

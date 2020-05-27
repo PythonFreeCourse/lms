@@ -514,3 +514,12 @@ code > .grader-add {
 .notification {
   flex-direction: column;
 }
+
+
+.notification-ok {
+  margin-right: 1em;
+}
+
+.notification-date {
+  font-size: 0.8em;
+}
