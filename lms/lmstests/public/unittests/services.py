@@ -94,13 +94,13 @@ class UnitTestChecker:
             result = case.result
             if result is None:
                 self._logger.info(
-                    'case %s passed for solution %s',
+                    'Case %s passed for solution %s.',
                     case.name, self._solution,
                 )
                 continue
             # invalid case
             message = '\n'.join([elem[1] for elem in result._elem.items()])
-            self._logger.info('crate comment on test %s solution %s',
+            self._logger.info('Create comment on test %s solution %s.',
                               case.name, self._solution_id)
             models.SolutionExerciseTestExecution.create_execution_result(
                 solution=self._solution,
@@ -108,7 +108,7 @@ class UnitTestChecker:
                 user_message=message,
                 staff_message=result._elem.text,
             )
-        fails: List[str] = list(filter(None, results))
+        fails: List[str] = [r.result for r in results if r.result is not None]
         fail_message = (
             f'הבודק האוטומטי נכשל ב־{len(fails)} '
             f'דוגמאות בתרגיל "{self._solution.exercise.subject}".'
