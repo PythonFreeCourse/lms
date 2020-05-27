@@ -466,7 +466,10 @@ def common_comments(exercise_id=None):
 
 @webapp.template_filter('date_humanize')
 def _jinja2_filter_datetime(date):
-    return arrow.get(date).humanize(locale='he_IL')
+    try:
+        return arrow.get(date).humanize(locale='he_IL')
+    except ValueError:
+        return str(arrow.get(date).date())
 
 
 class AccessibleByAdminMixin:
