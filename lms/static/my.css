@@ -524,3 +524,28 @@ code > .grader-add {
 .notification-date {
   font-size: 0.8em;
 }
+
+
+/* User's page */
+#user {
+  direction: rtl;
+  text-align: right;
+}
+
+#user h1 {
+  margin: 5vh 0;
+  text-align: center;
+}
+
+#user .body {
+  width: 80vw;
+  margin: auto;
+}
+
+#user table {
+  width: 80vw;
+}
+
+#user .user-details {
+  margin-bottom: 5em;
+}

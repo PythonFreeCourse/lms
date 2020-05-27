@@ -217,7 +217,7 @@ def get_notifications():
             explicit_id = 0
         changed = notifications.read(user=current_user, id_=explicit_id)
         if not changed:
-            return fail(401, 'Invalid notification')
+            return fail(403, 'Invalid notification')
         return jsonify({'success': True})
 
     # it's a GET
@@ -241,7 +241,7 @@ def comment():
 
     solver_id = solution.solver.id
     if solver_id != current_user.id and not current_user.role.is_manager:
-        return fail(401, "You aren't allowed to watch this page.")
+        return fail(403, "You aren't allowed to watch this page.")
 
     if act == 'fetch':
         return jsonify(Comment.get_solutions(solution_id))
@@ -280,6 +280,19 @@ def comment():
 @login_required
 def send(_exercise_id):
     return render_template('upload.html')
+
+
+@webapp.route('/user/<int:user_id>')
+@login_required
+def user(user_id):
+    if user_id != current_user.id and not current_user.role.is_manager:
+        return fail(403, "You aren't allowed to watch this page.")
+
+    return render_template(
+        'user.html',
+        solutions=Solution.of_user(current_user.id, with_archived=True),
+        user=current_user,
+    )
 
 
 @webapp.route('/send', methods=['GET'])

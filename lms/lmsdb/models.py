@@ -302,15 +302,16 @@ class Solution(BaseModel):
 
         solutions = (
             cls
-            .select(cls.exercise, cls.id, cls.state)
+            .select(cls.exercise, cls.id, cls.state, cls.checker)
             .where(cls.exercise.in_(db_exercises), cls.solver == user_id)
-            .order_by(cls.submission_timestamp.desc())
         )
         for solution in solutions:
             exercise = exercises[solution.exercise_id]
             if exercise.get('solution_id') is None:
                 exercise['solution_id'] = solution.id
                 exercise['is_checked'] = solution.is_checked
+                if solution.is_checked and solution.checker:
+                    exercise['checker'] = solution.checker.fullname
         return tuple(exercises.values())
 
     @property
