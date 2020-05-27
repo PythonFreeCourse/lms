@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import Optional
 
 import junitparser
 
@@ -90,27 +90,29 @@ class UnitTestChecker:
             )
             return
 
+        number_of_failures = 0
         for case in results:
             result = case.result
             if result is None:
                 self._logger.info(
-                    'case %s passed for solution %s',
+                    'Case %s passed for solution %s.',
                     case.name, self._solution,
                 )
                 continue
             # invalid case
             message = '\n'.join([elem[1] for elem in result._elem.items()])
-            self._logger.info('crate comment on test %s solution %s',
+            self._logger.info('Create comment on test %s solution %s.',
                               case.name, self._solution_id)
+            number_of_failures += 1
             models.SolutionExerciseTestExecution.create_execution_result(
                 solution=self._solution,
                 test_name=case.name,
                 user_message=message,
                 staff_message=result._elem.text,
             )
-        fails: List[str] = list(filter(None, results))
+
         fail_message = (
-            f'הבודק האוטומטי נכשל ב־{len(fails)} '
+            f'הבודק האוטומטי נכשל ב־{number_of_failures} '
             f'דוגמאות בתרגיל "{self._solution.exercise.subject}".'
         )
         notifications.send(
