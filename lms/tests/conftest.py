@@ -82,7 +82,7 @@ def create_student_user(index=0):
 @pytest.fixture()
 def admin_user():
     admin_role = Role.get(Role.name == RoleOptions.ADMINISTRATOR.value)
-    return User.create(  # NOQA: S106
+    return User.create(  # NOQA: B106, S106
         username='Yam',
         fullname='Elk',
         mail_address='mymail@mail.com',

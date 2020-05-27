@@ -1,19 +1,26 @@
 import pathlib
+import shutil
 
 from flask import Flask
 from flask_wtf.csrf import CSRFProtect  # type: ignore
 
 project_dir = pathlib.Path(__file__).resolve().parent.parent
-template_dir = str(project_dir / 'templates')
-static_dir = str(project_dir / 'static')
+web_dir = project_dir / 'lmsweb'
+template_dir = project_dir / 'templates'
+static_dir = project_dir / 'static'
+config_file = web_dir / 'config.py'
+
 
 webapp = Flask(
     __name__,
-    template_folder=template_dir,
-    static_folder=static_dir,
+    template_folder=str(template_dir),
+    static_folder=str(static_dir),
 )
 
-webapp.config.from_pyfile('config.py')
+
+if not config_file.exists():
+    shutil.copy(str(web_dir / 'config.py.example'), str(config_file))
+webapp.config.from_pyfile(str(config_file))
 
 csrf = CSRFProtect(webapp)
 

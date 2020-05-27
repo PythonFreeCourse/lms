@@ -3,7 +3,7 @@ import random
 import secrets
 import string
 from datetime import datetime
-from typing import Any, ClassVar, Dict, Iterable, Optional, Tuple
+from typing import Any, Dict, Iterable, Optional, Tuple, Type
 
 from flask_login import UserMixin  # type: ignore
 from peewee import (  # type: ignore
@@ -108,6 +108,9 @@ class User(UserMixin, BaseModel):
     def random_password(cls) -> str:
         return ''.join(random.choices(string.printable.strip()[:65], k=12))
 
+    def get_notifications(self) -> Iterable['Notification']:
+        return Notification.fetch(self)
+
     def __str__(self):
         return f'{self.username} - {self.fullname}'
 
@@ -128,42 +131,42 @@ class Notification(BaseModel):
 
     user = ForeignKeyField(User)
     created = DateTimeField(default=datetime.now)
-    notification_type = CharField()
-    message_parameters = database_config.JsonField()
-    related_object_id = IntegerField()
-    marked_read = BooleanField(default=False)
+    kind = IntegerField()
+    message = TextField()
+    related_id = IntegerField(null=True)
+    action_url = CharField(null=True)
+    viewed = BooleanField(default=False)
 
-    def mark_as_read(self):
-        self.marked_read = True
-        self.save()
-
-    @classmethod
-    def notifications_for_user(
-            cls,
-            for_user: User,
-    ) -> Iterable['Notification']:
-        return cls.select().join(User).filter(
-            cls.user == for_user.id).limit(cls.MAX_PER_USER)
+    def read(self) -> bool:
+        self.viewed = True
+        return bool(self.save())
 
     @classmethod
-    def create_notification(
+    def fetch(cls, user: User) -> Iterable['Notification']:
+        user_id = cls.user == user.id
+        return cls.select().join(User).where(user_id).limit(cls.MAX_PER_USER)
+
+    @classmethod
+    def send(
             cls,
             user: User,
-            notification_type: str,
-            message_parameters: dict,
-            related_object_id: int,
+            kind: int,
+            message: str,
+            related_id: Optional[int] = None,
+            action_url: Optional[str] = None,
     ) -> 'Notification':
         return cls.create(**{
             cls.user.name: user,
-            cls.notification_type.name: notification_type,
-            cls.message_parameters.name: message_parameters,
-            cls.related_object_id.name: related_object_id,
+            cls.kind.name: kind,
+            cls.message.name: message,
+            cls.related_id.name: related_id,
+            cls.action_url.name: action_url,
         })
 
 
 @post_save(sender=Notification)
 def on_notification_saved(
-        model_class: ClassVar,
+        model_class: Type[Notification],
         instance: Notification,
         created: datetime,
 ):
@@ -231,7 +234,7 @@ class SolutionState(enum.Enum):
         )
 
     @classmethod
-    def to_choices(cls) -> Tuple[Tuple[str, str]]:
+    def to_choices(cls) -> Tuple[Tuple[str, str], ...]:
         return tuple((choice.name, choice.value) for choice in tuple(cls))
 
 
@@ -275,7 +278,7 @@ class Solution(BaseModel):
         return self.json_data_str
 
     def ordered_versions(self) -> Iterable['Solution']:
-        return Solution.select().filter(
+        return Solution.select().where(
             Solution.exercise == self.exercise,
             Solution.solver == self.solver,
         ).order_by(Solution.submission_timestamp.asc())
@@ -305,7 +308,7 @@ class Solution(BaseModel):
 
     @property
     def comments(self):
-        return Comment.select().join(Solution).filter(Comment.solution == self)
+        return Comment.select().join(Solution).where(Comment.solution == self)
 
     @classmethod
     def solution_exists(
@@ -314,7 +317,7 @@ class Solution(BaseModel):
             solver: User,
             json_data_str: str,
     ):
-        return cls.select().filter(
+        return cls.select().where(
             cls.exercise == exercise,
             cls.solver == solver,
             cls.json_data_str == json_data_str,
@@ -335,7 +338,7 @@ class Solution(BaseModel):
         })
 
         # update old solutions for this exercise
-        other_solutions: Iterable[Solution] = cls.select().filter(
+        other_solutions: Iterable[Solution] = cls.select().where(
             cls.exercise == exercise,
             cls.solver == solver,
             cls.id != instance.id,
@@ -361,7 +364,7 @@ class Solution(BaseModel):
             SolutionExerciseTestExecution,
             join_type=JOIN.LEFT_OUTER,
             on=(SolutionExerciseTestExecution.solution == cls.id),
-        ).filter(
+        ).where(
             cls.state == Solution.STATES.CREATED.name,
         ).group_by(
             cls.id,
@@ -390,7 +393,8 @@ class Solution(BaseModel):
     @classmethod
     def status(cls):
         one_if_is_checked = Case(
-            Solution.state, ((Solution.STATES.DONE.name, 1),), 0)
+            Solution.state, ((Solution.STATES.DONE.name, 1),), 0,
+        )
         fields = [
             Exercise.id,
             Exercise.subject.alias('name'),
@@ -398,14 +402,14 @@ class Solution(BaseModel):
             fn.Count(Solution.id).alias('submitted'),
             fn.Sum(one_if_is_checked).alias('checked'),
         ]
-
         join_by_exercise = (Solution.exercise == Exercise.id)
         active_solutions = Solution.state.in_(
-            Solution.STATES.active_solutions())
+            Solution.STATES.active_solutions(),
+        )
         return (
             Exercise
             .select(*fields)
-            .join(Solution, 'LEFT OUTER', on=join_by_exercise)
+            .join(Solution, JOIN.LEFT_OUTER, on=join_by_exercise)
             .where(active_solutions)
             .group_by(Exercise.subject, Exercise.id)
             .order_by(Exercise.id)

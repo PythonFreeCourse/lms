@@ -1,9 +1,10 @@
 import typing
 
-from lms import notifications
 from lms.lmsdb import models
 from lms.lmstests.public.identical_tests import tasks
+from lms.models import notifications
 from lms.tests import conftest
+
 
 SOME_CODE = "print('Hello Word')"
 
@@ -19,14 +20,12 @@ class TestAutoSolutionSolver:
         tasks.solve_solution_with_identical_code(s_solution.id)
         assert len(tuple(s_solution.comments)) == 1
 
-        user_notifications = notifications.get_notifications_for_user(
-            for_user=s_solution.solver)
+        user_notifications = notifications.get(user=s_solution.solver)
         assert len(user_notifications) == 1
-        subject = user_notifications[0]['message_parameters']['exercise_name']
-        assert s_solution.exercise.subject == subject
+        solution_id = user_notifications[0].related_id
+        assert s_solution.id == solution_id
 
-        user_notifications = notifications.get_notifications_for_user(
-            for_user=f_solution.solver)
+        user_notifications = notifications.get(user=f_solution.solver)
         assert len(user_notifications) == 0
 
     def test_solve_solution_with_identical_code_not_identical_code(
@@ -59,12 +58,11 @@ class TestAutoSolutionSolver:
         tasks.check_if_other_solutions_can_be_solved(first_solution.id)
         assert len(tuple(another_solution.comments)) == 1
 
-        user_notifications = notifications.get_notifications_for_user(
-            for_user=another_solution.solver)
+        user_notifications = notifications.get(user=another_solution.solver)
         assert len(user_notifications) == 1
 
-        subject = user_notifications[0]['message_parameters']['exercise_name']
-        assert another_solution.exercise.subject == subject
+        subject = user_notifications[0].message
+        assert another_solution.exercise.subject in subject
 
     def test_check_if_other_solutions_can_be_solved_not_identical_code(
             self,

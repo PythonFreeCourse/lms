@@ -3,9 +3,10 @@ import typing
 
 from celery.result import allow_join_result
 
-from lms import notifications
 from lms.lmsdb import models
 from lms.lmstests.sandbox import flake8
+from lms.lmsweb import routes
+from lms.models import notifications
 
 
 PyFlakeResponse = flake8.services.PyFlakeResponse
@@ -83,11 +84,16 @@ class PyFlakeChecker:
         if not self._errors:
             return
 
-        errors_length = len(self._errors)
-        notifications.create_notification(
-            notification_type=(notifications.SolutionWithFlake8Errors.
-                               notification_type()),
-            for_user=self.solution.solver,
-            solution=self.solution,
-            errors=errors_length,
+        errors_len = len(self._errors)
+        exercise_name = self.solution.exercise.subject
+        msg = (
+            f'הבודק האוטומטי נתן {errors_len}'
+            f'הערות על תרגילך "{exercise_name}".'
+        )
+        return notifications.send(
+            kind=notifications.NotificationKind.FLAKE8_ERROR,
+            user=self.solution.solver,
+            related_id=self.solution,
+            message=msg,
+            action_url=f'{routes.SOLUTIONS}/{self.solution.id}',
         )

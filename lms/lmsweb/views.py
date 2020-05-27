@@ -4,6 +4,7 @@ from functools import wraps
 from typing import Optional
 from urllib.parse import urljoin, urlparse
 
+import arrow
 from flask import (
     abort, jsonify, render_template, request, send_from_directory, url_for,
 )
@@ -21,13 +22,13 @@ from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Exercise, RoleOptions, Solution, User,
     database,
 )
-from lms import notifications
 from lms.lmstests.public.flake8 import tasks as flake8_tasks
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.unittests import tasks as unittests_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
-from lms.lmsweb import config, webapp
+from lms.lmsweb import config, routes, webapp
 from lms.lmsweb.tools.notebook_extractor import extract_exercises
+from lms.models import notifications
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
@@ -214,14 +215,13 @@ def get_notifications():
             explicit_id = int(request.json.get('notificationId', 0))
         else:
             explicit_id = 0
-        changed = notifications.mark_as_read(
-            from_user=current_user, notification_id=explicit_id)
+        changed = notifications.read(user=current_user, id_=explicit_id)
         if not changed:
             return fail(401, 'Invalid notification')
         return jsonify({'success': True})
 
     # it's a GET
-    response = notifications.get_notifications_for_user(current_user)
+    response = notifications.get(user=current_user)
     return jsonify(response)
 
 
@@ -346,7 +346,7 @@ def upload():
     })
 
 
-@webapp.route('/view/<int:solution_id>')
+@webapp.route(f'{routes.SOLUTIONS}/<int:solution_id>')
 @login_required
 def view(solution_id):
     solution = Solution.get_or_none(Solution.id == solution_id)
@@ -388,12 +388,14 @@ def view(solution_id):
 def done_checking(exercise_id, solution_id):
     checked_solution: Solution = Solution.get_by_id(solution_id)
     is_updated = checked_solution.set_state(new_state=Solution.STATES.DONE)
+    msg = f'הפתרון שלך לתרגיל "{checked_solution.exercise.subject}" נבדק.'
     if is_updated:
-        notifications.create_notification(
-            notification_type=(notifications.SolutionCheckedNotification
-                               .notification_type()),
-            for_user=checked_solution.solver,
-            solution=checked_solution,
+        notifications.send(
+            kind=notifications.NotificationKind.CHECKED,
+            user=checked_solution.solver,
+            related_id=solution_id,
+            message=msg,
+            action_url=f'{routes.SOLUTIONS}/{solution_id}',
         )
     if config.FEATURE_FLAG_CHECK_IDENTICAL_CODE_ON:
         (identical_tests_tasks.check_if_other_solutions_can_be_solved.
@@ -422,7 +424,7 @@ def start_checking(exercise_id):
             args=(next_exercise.id,),
             countdown=Solution.MAX_CHECK_TIME_SECONDS,
         )
-        return redirect(f'/view/{next_exercise.id}')
+        return redirect(f'{routes.SOLUTIONS}/{next_exercise.id}')
     return redirect('/exercises')
 
 
@@ -460,6 +462,11 @@ def _common_comments(exercise_id=None, user_id=None):
 @managers_only
 def common_comments(exercise_id=None):
     return jsonify(_common_comments(exercise_id=exercise_id))
+
+
+@webapp.template_filter('date_humanize')
+def _jinja2_filter_datetime(date):
+    return arrow.get(date).humanize(locale='he_IL')
 
 
 class AccessibleByAdminMixin:

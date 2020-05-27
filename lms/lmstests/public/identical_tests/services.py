@@ -1,8 +1,9 @@
 import collections
 import logging
 
-from lms import notifications
 from lms.lmsdb import models
+from lms.models import notifications
+from lms.lmsweb import routes
 
 
 class IdenticalSolutionSolver:
@@ -85,11 +86,12 @@ class IdenticalSolutionSolver:
         to_solution.checker = from_solution.checker
         to_solution.state = from_solution.state
         to_solution.save()
-        notifications.create_notification(
-            notification_type=(notifications.SolutionCheckedNotification
-                               .notification_type()),
-            for_user=to_solution.solver,
-            solution=to_solution,
+        notifications.send(
+            kind=notifications.NotificationKind.CHECKED,
+            user=to_solution.solver,
+            related_id=to_solution,
+            message=f'הפתרון שלך לתרגיל {to_solution.exercise.subject} נבדק.',
+            action_url=f'{routes.SOLUTIONS}/{to_solution.id}',
         )
 
     @staticmethod

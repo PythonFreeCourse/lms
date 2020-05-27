@@ -1,8 +1,9 @@
 import datetime
 
-from lms.tests import conftest
 from lms.lmsdb.models import Comment, Exercise, Notification, Solution, User
+from lms.models import notifications
 from lms.lmstests.public.general import tasks as general_tasks
+from lms.tests import conftest
 
 
 class TestUser:
@@ -108,11 +109,12 @@ class TestNotification:
         extra = 3
         start = Notification.MAX_PER_USER
         for _ in range(Notification.MAX_PER_USER + extra - 1):
-            Notification.create_notification(
+            notifications.send(
                 user=student_user,
-                notification_type='',
-                message_parameters={},
-                related_object_id=1,
+                kind=notifications.NotificationKind.CHECKED,
+                message='',
+                related_id=1,
+                action_url=1,
             )
 
         assert Notification.select().count() == start
