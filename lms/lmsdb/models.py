@@ -303,8 +303,12 @@ class Solution(BaseModel):
         solutions = (
             cls
             .select(cls.exercise, cls.id, cls.state)
+            .join(Exercise)
             .where(cls.exercise.in_(db_exercises), cls.solver == user_id)
-            .order_by(cls.submission_timestamp.desc())
+            .order_by(
+                Solution.exercise.order.asc(),
+                cls.submission_timestamp.desc(),
+            )
         )
         for solution in solutions:
             exercise = exercises[solution.exercise_id]
