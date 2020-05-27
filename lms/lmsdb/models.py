@@ -303,7 +303,6 @@ class Solution(BaseModel):
         solutions = (
             cls
             .select(cls.exercise, cls.id, cls.state, cls.checker)
-            .join(Exercise)
             .where(cls.exercise.in_(db_exercises), cls.solver == user_id)
         )
         for solution in solutions:
