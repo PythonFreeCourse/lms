@@ -87,7 +87,7 @@ class PyFlakeChecker:
         errors_len = len(self._errors)
         exercise_name = self.solution.exercise.subject
         msg = (
-            f'הבודק האוטומטי נתן {errors_len}'
+            f'הבודק האוטומטי נתן {errors_len} '
             f'הערות על תרגילך "{exercise_name}".'
         )
         return notifications.send(
