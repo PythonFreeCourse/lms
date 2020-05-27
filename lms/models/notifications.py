@@ -1,5 +1,5 @@
 import enum
-from typing import Optional
+from typing import Iterable, Optional
 
 from lms.lmsdb.models import Notification, User
 
@@ -10,7 +10,7 @@ class NotificationKind(enum.Enum):
     UNITTEST_ERROR = 2
 
 
-def get(user):
+def get(user: User) -> Iterable[Notification]:
     return Notification.fetch(user)
 
 
