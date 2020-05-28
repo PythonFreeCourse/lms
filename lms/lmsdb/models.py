@@ -304,6 +304,7 @@ class Solution(BaseModel):
             cls
             .select(cls.exercise, cls.id, cls.state, cls.checker)
             .where(cls.exercise.in_(db_exercises), cls.solver == user_id)
+            .order_by(cls.submission_timestamp.desc())
         )
         for solution in solutions:
             exercise = exercises[solution.exercise_id]
