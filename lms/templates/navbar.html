@@ -12,21 +12,22 @@
         <a id="notifications-icon" href="#" class="nav-link" aria-expanded="false" aria-haspopup="true" aria-label="Notifications" role="button" data-toggle="dropdown">
           <i class="fa fa-bell" aria-hidden="true"></i>
           הודעות
+          <span id="notification-count" class="badge badge-secondary">0</span>
         </a>
         <div id="notifications-list" class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
           {%- for notification in current_user.get_notifications() %}
-          <div class="notification dropdown-item">
-            <i class="fa fa-{{ icon }}" aria-hidden="true"></i>
-            {% if notification.action_url %}
-            <a href="{{ notification.action_url }}" class="notification-text">
+          <div class="notification dropdown-item" data-read="{{ notification.viewed | lower }}">
+            <i class="fa fa-envelope{{ '-open' if notification.viewed else '' }}" aria-hidden="true"></i>
+            <a href="/read/{{ notification.id }}/{{ notification.related_id }}" class="notification-text">
               {{ notification.message }}
             </a>
-            {% else %}
-            <span class"notification-text">{{ notification.message }}</span>
-            {% endif %}
             <span class="notification-date" title="{{ notification.created }}">{{ notification.created | date_humanize }}</span>
           </div>
           {% endfor -%}
+          <!--a href="#" id="read-all-notifications" class="notification dropdown-item">
+            <i class="fa fa-check" aria-hidden="true"></i>
+            קראתי הכל
+          </a-->
         </div>
       </li>
       <li class="nav-item">

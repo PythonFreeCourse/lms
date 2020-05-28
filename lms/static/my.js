@@ -12,6 +12,18 @@ function escapeUnicode(str) {
 }
 
 
+function updateNotificationsCount() {
+  const dropdown = document.getElementById('navbarNavDropdown');
+  const container = document.getElementById('notifications-list');
+  const unread = container.querySelectorAll('.dropdown-item[data-read="false"]');
+  const counter = dropdown.querySelector('#notification-count');
+  counter.textContent = unread.length;
+  if (unread.length > 0) {
+    counter.style['background-color'] = '#dc3545';
+  }
+}
+
+
 String.prototype.format = function(kwargs) {
   return text.replace(templatedWords, function(wholeMatch, identifier) {
     const isReplacementExists = Object.keys(kwargs).includes(identifier);
@@ -21,3 +33,7 @@ String.prototype.format = function(kwargs) {
 
 
 window.escapeUnicode = escapeUnicode;
+
+window.addEventListener('load', () => {
+  updateNotificationsCount();
+});

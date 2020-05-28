@@ -207,22 +207,42 @@ def _create_comment(
     })
 
 
-@webapp.route('/notifications', methods=['GET', 'POST'])
+@webapp.route('/notifications')
 @login_required
 def get_notifications():
-    if request.method == 'POST':
-        if request.json:
-            explicit_id = int(request.json.get('notificationId', 0))
-        else:
-            explicit_id = 0
-        changed = notifications.read(user=current_user, id_=explicit_id)
-        if not changed:
-            return fail(403, 'Invalid notification')
-        return jsonify({'success': True})
-
-    # it's a GET
     response = notifications.get(user=current_user)
     return jsonify(response)
+
+
+@webapp.route('/read')
+@webapp.route('/read/<int:notification_id>')
+@webapp.route('/read/<int:notification_id>/<int:related_id>')
+@login_required
+def read_notification(notification_id=None, related_id=None):
+    if notification_id is None:
+        return notifications.read(user=current_user)
+
+    fetched_notifications = notifications.get(current_user)
+    same_related_id = []
+    notification = None
+    for n in fetched_notifications:
+        if n.id == notification_id:
+            notification = n
+        if related_id is not None and n.related_id == related_id:
+            same_related_id.append(n)
+    if related_id is None:
+        same_related_id = [notification]
+
+    if notification is None:
+        return fail(404, 'Invalid notification ID.')
+    if notification.user.id != current_user.id:
+        return fail(403, "You aren't allowed to access this page.")
+
+    for n in same_related_id:
+        n.read()
+
+    # In the future, take get parameter to returnt the user to the same page`
+    return redirect(notification.action_url or '/exercises')
 
 
 @webapp.route('/comments', methods=['GET', 'POST'])
@@ -241,7 +261,7 @@ def comment():
 
     solver_id = solution.solver.id
     if solver_id != current_user.id and not current_user.role.is_manager:
-        return fail(403, "You aren't allowed to watch this page.")
+        return fail(403, "You aren't allowed to access this page.")
 
     if act == 'fetch':
         return jsonify(Comment.get_solutions(solution_id))
@@ -287,7 +307,7 @@ def send(_exercise_id):
 def user(user_id):
     if user_id != current_user.id and not current_user.role.is_manager:
         return fail(403, "You aren't allowed to watch this page.")
-    target_user = User.get_by_id(user_id)
+    target_user = User.get_or_none(User.id == user_id)
     if target_user is None:
         return fail(404, 'There is no such user.')
 
