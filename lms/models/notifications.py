@@ -32,6 +32,11 @@ def read(user: Optional[User] = None, id_: Optional[int] = None) -> bool:
     return all(is_success)  # Not gen to prevent lazy evaluation
 
 
+def read_related(related_id: int, user: int):
+    for n in Notification.of(related_id, user):
+        n.read()
+
+
 def send(
         user: User,
         kind: NotificationKind,

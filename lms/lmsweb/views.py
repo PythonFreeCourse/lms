@@ -214,35 +214,10 @@ def get_notifications():
     return jsonify(response)
 
 
-@webapp.route('/read')
-@webapp.route('/read/<int:notification_id>')
-@webapp.route('/read/<int:notification_id>/<int:related_id>')
-@login_required
-def read_notification(notification_id=None, related_id=None):
-    if notification_id is None:
-        return notifications.read(user=current_user)
-
-    fetched_notifications = notifications.get(current_user)
-    same_related_id = []
-    notification = None
-    for n in fetched_notifications:
-        if n.id == notification_id:
-            notification = n
-        if related_id is not None and n.related_id == related_id:
-            same_related_id.append(n)
-    if related_id is None:
-        same_related_id = [notification]
-
-    if notification is None:
-        return fail(404, 'Invalid notification ID.')
-    if notification.user.id != current_user.id:
-        return fail(403, "You aren't allowed to access this page.")
-
-    for n in same_related_id:
-        n.read()
-
-    # In the future, take get parameter to returnt the user to the same page`
-    return redirect(notification.action_url or '/exercises')
+@webapp.route('/read', methods=['PATCH'])
+def read_all_notification():
+    success_state = notifications.read(user=current_user)
+    return jsonify({'success': success_state})
 
 
 @webapp.route('/comments', methods=['GET', 'POST'])
@@ -415,6 +390,7 @@ def view(solution_id):
             'left': Solution.left_in_exercise(solution.exercise),
         }
 
+    notifications.read_related(solution_id, current_user.id)
     return render_template('view.html', **view_params)
 
 

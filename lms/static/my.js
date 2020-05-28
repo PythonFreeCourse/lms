@@ -1,4 +1,8 @@
 const templatedWords = /\$\{(\w+?)\}/g;
+const style = getComputedStyle(document.documentElement);
+const badColor = style.getPropertyValue('--danger');
+const naturalColor = style.getPropertyValue('--secondary');
+
 
 
 function escapeUnicode(str) {
@@ -12,15 +16,33 @@ function escapeUnicode(str) {
 }
 
 
-function updateNotificationsCount() {
+function updateNotificationsBadge() {
   const dropdown = document.getElementById('navbarNavDropdown');
   const container = document.getElementById('notifications-list');
   const unread = container.querySelectorAll('.dropdown-item[data-read="false"]');
   const counter = dropdown.querySelector('#notification-count');
+  const bgColor = (unread.length > 0) ? badColor : naturalColor;
   counter.textContent = unread.length;
-  if (unread.length > 0) {
-    counter.style['background-color'] = '#dc3545';
-  }
+  counter.style['background-color'] = bgColor;
+}
+
+
+function sendReadAllNotificationsRequest() {
+  const request = new XMLHttpRequest();
+  request.open('PATCH', '/read');
+  return request.send();
+}
+
+
+function trackReadAllNotificationsButton(button) {
+  button.addEventListener('click', () => {
+    sendReadAllNotificationsRequest();
+    const notifications = document.querySelectorAll('.dropdown-item[data-read="false"]');
+    Array.from(notifications).forEach((notification) => {
+      notification.dataset.read = 'true';
+    });
+    updateNotificationsBadge();
+  });
 }
 
 
@@ -35,5 +57,6 @@ String.prototype.format = function(kwargs) {
 window.escapeUnicode = escapeUnicode;
 
 window.addEventListener('load', () => {
-  updateNotificationsCount();
+  updateNotificationsBadge();
+  trackReadAllNotificationsButton(document.getElementById('read-notifications'));
 });
