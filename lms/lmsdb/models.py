@@ -25,6 +25,7 @@ ExercisesDictById = Dict[int, Dict[str, Any]]
 class RoleOptions(enum.Enum):
     STUDENT = 'Student'
     STAFF = 'Staff'
+    VIEWER = 'Viewer'
     ADMINISTRATOR = 'Administrator'
 
     def __str__(self):
@@ -41,9 +42,9 @@ class BaseModel(Model):
 
 class Role(BaseModel):
     name = CharField(unique=True, choices=(
-        (RoleOptions.ADMINISTRATOR.value,
-         RoleOptions.ADMINISTRATOR.value),
+        (RoleOptions.ADMINISTRATOR.value, RoleOptions.ADMINISTRATOR.value),
         (RoleOptions.STAFF.value, RoleOptions.STAFF.value),
+        (RoleOptions.VIEWER.value, RoleOptions.VIEWER.value),
         (RoleOptions.STUDENT.value, RoleOptions.STUDENT.value),
     ))
 
@@ -80,6 +81,10 @@ class Role(BaseModel):
     @property
     def is_manager(self):
         return self.is_staff or self.is_administrator
+
+    @property
+    def is_viewer(self):
+        return self.name == RoleOptions.VIEWER.value or self.is_manager
 
 
 class User(UserMixin, BaseModel):

@@ -364,12 +364,14 @@ def view(solution_id):
     if solution is None:
         return fail(404, 'Solution does not exist.')
 
-    is_manager = current_user.role.is_manager
-    if solution.solver.id != current_user.id and not is_manager:
+    viewer_is_solver = solution.solver.id == current_user.id
+    has_viewer_access = current_user.role.is_viewer
+    if not viewer_is_solver and not has_viewer_access:
         return fail(403, 'This user has no permissions to view this page.')
 
     versions = solution.ordered_versions()
     test_results = solution.test_results()
+    is_manager = current_user.role.is_manager
     view_params = {
         'solution': model_to_dict(solution),
         'is_manager': is_manager,
@@ -390,7 +392,9 @@ def view(solution_id):
             'left': Solution.left_in_exercise(solution.exercise),
         }
 
-    notifications.read_related(solution_id, current_user.id)
+    if viewer_is_solver:
+        notifications.read_related(solution_id, current_user.id)
+
     return render_template('view.html', **view_params)
 
 
