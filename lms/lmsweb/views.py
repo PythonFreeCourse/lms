@@ -207,22 +207,17 @@ def _create_comment(
     })
 
 
-@webapp.route('/notifications', methods=['GET', 'POST'])
+@webapp.route('/notifications')
 @login_required
 def get_notifications():
-    if request.method == 'POST':
-        if request.json:
-            explicit_id = int(request.json.get('notificationId', 0))
-        else:
-            explicit_id = 0
-        changed = notifications.read(user=current_user, id_=explicit_id)
-        if not changed:
-            return fail(403, 'Invalid notification')
-        return jsonify({'success': True})
-
-    # it's a GET
     response = notifications.get(user=current_user)
     return jsonify(response)
+
+
+@webapp.route('/read', methods=['PATCH'])
+def read_all_notification():
+    success_state = notifications.read(user=current_user)
+    return jsonify({'success': success_state})
 
 
 @webapp.route('/comments', methods=['GET', 'POST'])
@@ -241,7 +236,7 @@ def comment():
 
     solver_id = solution.solver.id
     if solver_id != current_user.id and not current_user.role.is_manager:
-        return fail(403, "You aren't allowed to watch this page.")
+        return fail(403, "You aren't allowed to access this page.")
 
     if act == 'fetch':
         return jsonify(Comment.get_solutions(solution_id))
@@ -287,7 +282,7 @@ def send(_exercise_id):
 def user(user_id):
     if user_id != current_user.id and not current_user.role.is_manager:
         return fail(403, "You aren't allowed to watch this page.")
-    target_user = User.get_by_id(user_id)
+    target_user = User.get_or_none(User.id == user_id)
     if target_user is None:
         return fail(404, 'There is no such user.')
 
@@ -395,6 +390,7 @@ def view(solution_id):
             'left': Solution.left_in_exercise(solution.exercise),
         }
 
+    notifications.read_related(solution_id, current_user.id)
     return render_template('view.html', **view_params)
 
 

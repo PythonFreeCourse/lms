@@ -516,6 +516,15 @@ code > .grader-add {
   text-align: right;
 }
 
+.notification[data-read="true"] .icon::before {
+  font: normal normal normal 14px/1 FontAwesome;
+  content: "\f2b6";  /* envelope-open */
+}
+
+.notification[data-read="false"] .icon::before {
+  font: normal normal normal 14px/1 FontAwesome;
+  content: "\f0e0";  /* envelope (closed) */
+}
 
 .notification-ok {
   margin-right: 1em;

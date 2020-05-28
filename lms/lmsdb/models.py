@@ -154,6 +154,24 @@ class Notification(BaseModel):
         )
 
     @classmethod
+    def of(
+            cls,
+            related_id: int,
+            user: Optional[int] = None,
+    ) -> Iterable['Notification']:
+        where_clause = [Notification.related_id == related_id]
+        if user is not None:
+            where_clause.append(Notification.user == user)
+
+        return (
+            cls
+            .select()
+            .join(User)
+            .where(*where_clause)
+            .limit(cls.MAX_PER_USER)
+        )
+
+    @classmethod
     def send(
             cls,
             user: User,

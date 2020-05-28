@@ -1,4 +1,8 @@
 const templatedWords = /\$\{(\w+?)\}/g;
+const style = getComputedStyle(document.documentElement);
+const badColor = style.getPropertyValue('--danger');
+const naturalColor = style.getPropertyValue('--secondary');
+
 
 
 function escapeUnicode(str) {
@@ -12,6 +16,36 @@ function escapeUnicode(str) {
 }
 
 
+function updateNotificationsBadge() {
+  const dropdown = document.getElementById('navbarNavDropdown');
+  const container = document.getElementById('notifications-list');
+  const unread = container.querySelectorAll('.dropdown-item[data-read="false"]');
+  const counter = dropdown.querySelector('#notification-count');
+  const bgColor = (unread.length > 0) ? badColor : naturalColor;
+  counter.textContent = unread.length;
+  counter.style['background-color'] = bgColor;
+}
+
+
+function sendReadAllNotificationsRequest() {
+  const request = new XMLHttpRequest();
+  request.open('PATCH', '/read');
+  return request.send();
+}
+
+
+function trackReadAllNotificationsButton(button) {
+  button.addEventListener('click', () => {
+    sendReadAllNotificationsRequest();
+    const notifications = document.querySelectorAll('.dropdown-item[data-read="false"]');
+    Array.from(notifications).forEach((notification) => {
+      notification.dataset.read = 'true';
+    });
+    updateNotificationsBadge();
+  });
+}
+
+
 String.prototype.format = function(kwargs) {
   return text.replace(templatedWords, function(wholeMatch, identifier) {
     const isReplacementExists = Object.keys(kwargs).includes(identifier);
@@ -21,3 +55,8 @@ String.prototype.format = function(kwargs) {
 
 
 window.escapeUnicode = escapeUnicode;
+
+window.addEventListener('load', () => {
+  updateNotificationsBadge();
+  trackReadAllNotificationsButton(document.getElementById('read-notifications'));
+});
