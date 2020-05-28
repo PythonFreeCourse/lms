@@ -3,7 +3,7 @@
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
-  <a class="navbar-brand" href="{{ config.HOME_URL or "#" }}">
+  <a class="navbar-brand" href="{{ config.HOME_URL or "/" }}">
     <img src="{{ url_for('static', filename='avatar.jpg') }}" width="30" height="30" class="d-inline-block align-top" alt="הלוגו של פרויקט לומדים פייתון: נחש צהוב על רקע עיגול בצבע תכלת, ומתחתיו כתוב 'לומדים פייתון'.">
   </a>
   <div class="collapse navbar-collapse" id="navbarNavDropdown">
@@ -12,21 +12,22 @@
         <a id="notifications-icon" href="#" class="nav-link" aria-expanded="false" aria-haspopup="true" aria-label="Notifications" role="button" data-toggle="dropdown">
           <i class="fa fa-bell" aria-hidden="true"></i>
           הודעות
+          <span id="notification-count" class="badge badge-secondary">0</span>
         </a>
         <div id="notifications-list" class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
           {%- for notification in current_user.get_notifications() %}
-          <div class="notification dropdown-item">
-            <i class="fa fa-{{ icon }}" aria-hidden="true"></i>
-            {% if notification.action_url %}
+          <div class="notification dropdown-item" data-read="{{ notification.viewed | lower }}">
+            <i class="fa icon" aria-hidden="true"></i>
             <a href="{{ notification.action_url }}" class="notification-text">
               {{ notification.message }}
             </a>
-            {% else %}
-            <span class"notification-text">{{ notification.message }}</span>
-            {% endif %}
             <span class="notification-date" title="{{ notification.created }}">{{ notification.created | date_humanize }}</span>
           </div>
           {% endfor -%}
+          <div id="read-notifications" class="notification dropdown-item">
+            <i class="fa fa-check" aria-hidden="true"></i>
+            <a href="#">סמן הכל כנקרא.</a>
+          </a>
         </div>
       </li>
       <li class="nav-item">
