@@ -61,6 +61,7 @@ function listenToKeys() {
     }
     const key = event.key.toLowerCase();
     const linesSelected = `#code-view .line[data-line="${lineNumber}"]`;
+    const graderAddButton = `.grader-add[data-line="${lineNumber}"]`;
     if (key == "q") {
       event.preventDefault();
       if (lineMode === true) {
@@ -100,7 +101,7 @@ function listenToKeys() {
       }
     } else if (letterMode && (key == "`" || key == ";")) {
       event.preventDefault();
-      document.querySelector(linesSelected).click();
+      document.querySelector(graderAddButton).click();
     } else if (key == "escape") {
       event.preventDefault();
       if (lineMode === true || letterMode === true) {
