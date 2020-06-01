@@ -3,7 +3,6 @@ import string
 from unittest import mock
 
 import pytest
-from peewee import SqliteDatabase
 
 from lms.lmsdb.models import Exercise, Notification, Solution, User
 from lms.models import notifications, solutions
