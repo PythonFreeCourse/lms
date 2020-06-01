@@ -1,6 +1,6 @@
 from typing import Type
 
-from peewee import Field, Model, TextField  # type: ignore
+from peewee import Field, Model, OperationalError, TextField  # type: ignore
 from playhouse.migrate import migrate  # type: ignore
 
 from lms.lmsdb import database_config as db_config
@@ -156,7 +156,45 @@ def _upgrade_notifications_if_needed():
     _alter_column_type_if_needed(t, t.message, TextField())
 
 
-def add_solution_state_if_needed():
+def _add_index_if_needed(
+    table: Type[Model],
+    field_instance: Field,
+    is_unique_constraint: bool = False,
+) -> None:
+    column_name = field_instance.name
+    table_name = table.__name__.lower()
+    migrator = db_config.get_migrator_instance()
+    print(f"Add index to '{column_name}' field in '{table_name}'")  # noqa: T001 E501
+    with db_config.database.transaction():
+        try:
+            migrate(
+                migrator.add_index(
+                    table_name, (column_name,), is_unique_constraint,
+                ),
+            )
+        except OperationalError as e:
+            if 'already exists' in e.args[0]:
+                pass
+            else:
+                raise
+        db_config.database.commit()
+
+
+def _add_indices_if_needed():
+    table_field_pairs = (
+        (models.Notification, models.Notification.created),
+        (models.Notification, models.Notification.related_id),
+        (models.Exercise, models.Exercise.is_archived),
+        (models.Exercise, models.Exercise.order),
+        (models.Solution, models.Solution.state),
+        (models.Solution, models.Solution.submission_timestamp),
+        (models.Solution, models.Solution.json_data_str),
+    )
+    for table, field_instance in table_field_pairs:
+        _add_index_if_needed(table, field_instance)
+
+
+def _add_solution_state_if_needed():
     _migrate_column_in_table_if_needed(models.Solution, models.Solution.state)
     table_name = models.Solution.__name__.lower()
     cols = {col.name for col in db_config.database.get_columns(table_name)}
@@ -208,7 +246,8 @@ def main():
     _add_order_if_needed()
     _add_exercise_due_date_if_needed()
     _upgrade_notifications_if_needed()
-    add_solution_state_if_needed()
+    _add_solution_state_if_needed()
+    _add_indices_if_needed()
     text_fixer.fix_texts()
     import_tests.load_tests_from_path('/app_dir/notebooks-tests')
 
