@@ -23,12 +23,11 @@ from lms.lmsdb.models import (
     database,
 )
 from lms.lmstests.public.flake8 import tasks as flake8_tasks
-from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.unittests import tasks as unittests_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmsweb import config, routes, webapp
 from lms.lmsweb.tools.notebook_extractor import extract_exercises
-from lms.models import notifications
+from lms.models import notifications, solutions
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
@@ -140,7 +139,7 @@ def main():
     return redirect(url_for('exercises_page'))
 
 
-@webapp.route('/status')
+@webapp.route(routes.STATUS)
 @managers_only
 @login_required
 def status():
@@ -402,46 +401,19 @@ def view(solution_id):
 @login_required
 @managers_only
 def done_checking(exercise_id, solution_id):
-    checked_solution: Solution = Solution.get_by_id(solution_id)
-    is_updated = checked_solution.set_state(new_state=Solution.STATES.DONE)
-    msg = f'הפתרון שלך לתרגיל "{checked_solution.exercise.subject}" נבדק.'
-    if is_updated:
-        notifications.send(
-            kind=notifications.NotificationKind.CHECKED,
-            user=checked_solution.solver,
-            related_id=solution_id,
-            message=msg,
-            action_url=f'{routes.SOLUTIONS}/{solution_id}',
-        )
-    if config.FEATURE_FLAG_CHECK_IDENTICAL_CODE_ON:
-        (identical_tests_tasks.check_if_other_solutions_can_be_solved.
-         apply_async(args=(solution_id,)))
-    next_exercise = None
-    solution = Solution.next_unchecked_of(exercise_id)
-    if solution and solution.start_checking():
-        general_tasks.reset_solution_state_if_needed.apply_async(
-            args=(solution.id,),
-            countdown=Solution.MAX_CHECK_TIME_SECONDS,
-        )
-        next_exercise = solution.id
-    return jsonify({'success': is_updated, 'next': next_exercise})
+    is_updated = solutions.mark_as_checked(solution_id, current_user.id)
+    next_solution = solutions.get_next_unchecked(exercise_id)
+    return jsonify({'success': is_updated, 'next': next_solution.id})
 
 
 @webapp.route('/check/<int:exercise_id>')
 @login_required
 @managers_only
 def start_checking(exercise_id):
-    if exercise_id != 0:
-        next_exercise = Solution.next_unchecked_of(exercise_id)
-    else:
-        next_exercise = Solution.next_unchecked()
-    if next_exercise and next_exercise.start_checking():
-        general_tasks.reset_solution_state_if_needed.apply_async(
-            args=(next_exercise.id,),
-            countdown=Solution.MAX_CHECK_TIME_SECONDS,
-        )
-        return redirect(f'{routes.SOLUTIONS}/{next_exercise.id}')
-    return redirect('/exercises')
+    next_solution = solutions.get_next_unchecked(exercise_id)
+    if solutions.start_checking(next_solution):
+        return redirect(f'{routes.SOLUTIONS}/{next_solution.id}')
+    return redirect(routes.STATUS)
 
 
 def _common_comments(exercise_id=None, user_id=None):

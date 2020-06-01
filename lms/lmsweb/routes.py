@@ -1,1 +1,2 @@
 SOLUTIONS = '/view'
+STATUS = '/status'

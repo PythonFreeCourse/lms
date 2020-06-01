@@ -2,7 +2,7 @@
 
 
 class TestStudent:
-    """python"""
+    """python 0"""
     def test_check_foo_foo(self):
         """שם כזה מגניב"""
         assert foo() == 'foo'

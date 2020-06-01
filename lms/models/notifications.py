@@ -7,7 +7,7 @@ from lms.lmsdb.models import Notification, User
 class NotificationKind(enum.Enum):
     CHECKED = 1
     FLAKE8_ERROR = 2
-    UNITTEST_ERROR = 2
+    UNITTEST_ERROR = 3
 
 
 def get(user: User) -> Iterable[Notification]:
@@ -28,7 +28,7 @@ def read(user: Optional[User] = None, id_: Optional[int] = None) -> bool:
         return True
 
     assert user, 'Must provide user or id_'  # noqa: B101, S101
-    is_success = [msg.read() for msg in Notification.fetch(user)]
+    is_success = [msg.read() for msg in get(user)]
     return all(is_success)  # Not gen to prevent lazy evaluation
 
 
@@ -43,7 +43,7 @@ def send(
         message: str,
         related_id: Optional[int] = None,
         action_url: Optional[str] = None,
-) -> bool:
+) -> Notification:
     return Notification.send(
         user, kind.value, message, related_id, action_url,
     )

@@ -44,7 +44,7 @@ class TestUTForExercise:
         expected_name = models.ExerciseTestName.FATAL_TEST_PRETTY_TEST_NAME
         assert comment.exercise_test_name.pretty_test_name == expected_name
 
-        all_notifications = notifications.get(user=solution.solver)
+        all_notifications = list(notifications.get(user=solution.solver))
         assert len(all_notifications) == 1
         assert all_notifications[0].kind == UNITTEST_NOTIFICATION
 
