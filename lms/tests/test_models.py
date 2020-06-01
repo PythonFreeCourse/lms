@@ -87,7 +87,6 @@ class TestSolution2:
 
     @staticmethod
     def test_start_checking(
-            db_in_memory: SqliteDatabase,
             exercise: Exercise,
             student_user: User,
             staff_user: User,
@@ -179,7 +178,6 @@ class TestNotification:
 
     def test_read(
             self,
-            db_in_memory: SqliteDatabase,
             student_user: User,
             solution: Solution,
     ):
