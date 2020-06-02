@@ -13,7 +13,7 @@ from lms.lmstests.public.unittests import import_tests
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
-_logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 def _migrate_column_in_table_if_needed(
@@ -25,10 +25,10 @@ def _migrate_column_in_table_if_needed(
     cols = {col.name for col in db_config.database.get_columns(table_name)}
 
     if column_name in cols:
-        _logger.info(f'Column {column_name} already exists in {table}')
+        log.info(f'Column {column_name} already exists in {table}')
         return False
 
-    _logger.info(f'Create {column_name} field in {table}')
+    log.info(f'Create {column_name} field in {table}')
     migrator = db_config.get_migrator_instance()
     with db_config.database.transaction():
         migrate(migrator.add_column(
@@ -50,13 +50,13 @@ def _rename_column_in_table_if_needed(
     cols = {col.name for col in db_config.database.get_columns(table_name)}
 
     if new_column_name in cols:
-        _logger.info(f'Column {new_column_name} already exists in {table}')
+        log.info(f'Column {new_column_name} already exists in {table}')
         return False
     if old_column_name not in cols:
-        _logger.info(f'Column {old_column_name} not exists in {table}')
+        log.info(f'Column {old_column_name} not exists in {table}')
         return False
 
-    _logger.info(f'Changing {column_name} -> {new_column_name} in {table}')
+    log.info(f'Changing {column_name} -> {new_column_name} in {table}')
     migrator = db_config.get_migrator_instance()
     with db_config.database.transaction():
         migrate(
@@ -79,10 +79,10 @@ def _alter_column_type_if_needed(
     table_name = table.__name__.lower()
 
     if field_type_name.lower() == current_type.lower():
-        _logger.info(f'Column {column_name} is already {field_type_name}')
+        log.info(f'Column {column_name} is already {field_type_name}')
         return False
 
-    _logger.info(
+    log.info(
         f'Changing {column_name} from {current_type} '
         f'to {field_type_name} in {table}',
     )
@@ -103,10 +103,10 @@ def _drop_column_from_module_if_needed(
     cols = {col.name for col in db_config.database.get_columns(table_name)}
 
     if column_name not in cols:
-        _logger.info(f'Column {column_name} not exists in {table}')
+        log.info(f'Column {column_name} not exists in {table}')
         return False
 
-    _logger.info(f'Drop {column_name} field in {table}')
+    log.info(f'Drop {column_name} field in {table}')
     migrator = db_config.get_migrator_instance()
     with db_config.database.transaction():
         migrate(migrator.drop_column(
@@ -171,7 +171,7 @@ def _add_index_if_needed(
     column_name = field_instance.name
     table_name = table.__name__.lower()
     migrator = db_config.get_migrator_instance()
-    _logger.info(f"Add index to '{column_name}' field in '{table_name}'")
+    log.info(f"Add index to '{column_name}' field in '{table_name}'")
     with db_config.database.transaction():
         try:
             migrate(
@@ -181,7 +181,7 @@ def _add_index_if_needed(
             )
         except OperationalError as e:
             if 'already exists' in e.args[0]:
-                _logger.info('Index already exists.')
+                log.info('Index already exists.')
             else:
                 raise
         db_config.database.commit()
