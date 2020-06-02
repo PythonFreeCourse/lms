@@ -2,7 +2,9 @@ import sys
 import logging
 from typing import Type
 
-from peewee import Field, Model, OperationalError, TextField  # type: ignore
+from peewee import (  # type: ignore
+    Field, Model, OperationalError, ProgrammingError, TextField,
+)
 from playhouse.migrate import migrate  # type: ignore
 
 from lms.lmsdb import database_config as db_config
@@ -179,8 +181,8 @@ def _add_index_if_needed(
                     table_name, (column_name,), is_unique_constraint,
                 ),
             )
-        except OperationalError as e:
-            if 'already exists' in e.args[0]:
+        except (OperationalError, ProgrammingError) as e:
+            if 'already exists' in str(e):
                 log.info('Index already exists.')
             else:
                 raise
