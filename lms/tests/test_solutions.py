@@ -94,7 +94,6 @@ class TestSolutionDb:
         assert next_unchecked.id == first_solution.id
 
 
-
 class TestSolutionBridge:
     @staticmethod
     def test_mark_as_checked(

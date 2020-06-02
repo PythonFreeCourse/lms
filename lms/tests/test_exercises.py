@@ -1,8 +1,6 @@
 import datetime
 
-from lms.lmsdb.models import Comment, Exercise, Notification, Solution, User
-from lms.models import notifications
-from lms.tests import conftest
+from lms.lmsdb.models import Exercise
 
 
 class TestExercise:

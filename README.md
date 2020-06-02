@@ -11,7 +11,7 @@
 ```bash
 git clone https://github.com/PythonFreeCourse/lms
 cd lms
-pip install --user -r lms/requirements.txt
+pip install --user -r requirements.txt
 mv lms/lmsweb/config.py.example lms/lmsweb/config.py
 echo "SECRET_KEY = \"$(python -c 'import os;print(os.urandom(32).hex())')\"" >> lms/lmsweb/config.py
 
@@ -60,7 +60,7 @@ flake8 lms
 * run tests
 ```
 export PYTHONPATH=`pwd`
-pip install -r lms/requirements.txt
+pip install -r requirements.txt
 pip install -r dev_requirements.txt
 py.test -vvv
 ```
