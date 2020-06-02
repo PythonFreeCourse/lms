@@ -1,12 +1,19 @@
+import sys
+import logging
 from typing import Type
 
-from peewee import Field, Model, TextField  # type: ignore
+from peewee import Field, Model, OperationalError, TextField  # type: ignore
 from playhouse.migrate import migrate  # type: ignore
 
 from lms.lmsdb import database_config as db_config
 from lms.lmsdb import models
 from lms.lmstests.public.flake8 import text_fixer
 from lms.lmstests.public.unittests import import_tests
+
+
+logging.basicConfig(stream=sys.stdout, level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+log = logging.getLogger(__name__)
 
 
 def _migrate_column_in_table_if_needed(
@@ -18,10 +25,10 @@ def _migrate_column_in_table_if_needed(
     cols = {col.name for col in db_config.database.get_columns(table_name)}
 
     if column_name in cols:
-        print(f'Column {column_name} already exists in {table}')  # noqa: T001
+        log.info(f'Column {column_name} already exists in {table}')
         return False
 
-    print(f'Create {column_name} field in {table}')  # noqa: T001
+    log.info(f'Create {column_name} field in {table}')
     migrator = db_config.get_migrator_instance()
     with db_config.database.transaction():
         migrate(migrator.add_column(
@@ -43,13 +50,13 @@ def _rename_column_in_table_if_needed(
     cols = {col.name for col in db_config.database.get_columns(table_name)}
 
     if new_column_name in cols:
-        print(f'Column {new_column_name} already exists in {table}')  # noqa: T001, E501
+        log.info(f'Column {new_column_name} already exists in {table}')
         return False
     if old_column_name not in cols:
-        print(f'Column {old_column_name} not exists in {table}')  # noqa: T001, E501
+        log.info(f'Column {old_column_name} not exists in {table}')
         return False
 
-    print(f'Changing {column_name} -> {new_column_name} in {table}')  # noqa: T001, E501
+    log.info(f'Changing {column_name} -> {new_column_name} in {table}')
     migrator = db_config.get_migrator_instance()
     with db_config.database.transaction():
         migrate(
@@ -72,10 +79,10 @@ def _alter_column_type_if_needed(
     table_name = table.__name__.lower()
 
     if field_type_name.lower() == current_type.lower():
-        print(f'Column {column_name} is already {field_type_name}')  # noqa: T001, E501
+        log.info(f'Column {column_name} is already {field_type_name}')
         return False
 
-    print(  # noqa: T001
+    log.info(
         f'Changing {column_name} from {current_type} '
         f'to {field_type_name} in {table}',
     )
@@ -96,10 +103,10 @@ def _drop_column_from_module_if_needed(
     cols = {col.name for col in db_config.database.get_columns(table_name)}
 
     if column_name not in cols:
-        print(f'Column {column_name} not exists in {table}')  # noqa: T001
+        log.info(f'Column {column_name} not exists in {table}')
         return False
 
-    print(f'Drop {column_name} field in {table}')  # noqa: T001
+    log.info(f'Drop {column_name} field in {table}')
     migrator = db_config.get_migrator_instance()
     with db_config.database.transaction():
         migrate(migrator.drop_column(
@@ -156,7 +163,45 @@ def _upgrade_notifications_if_needed():
     _alter_column_type_if_needed(t, t.message, TextField())
 
 
-def add_solution_state_if_needed():
+def _add_index_if_needed(
+    table: Type[Model],
+    field_instance: Field,
+    is_unique_constraint: bool = False,
+) -> None:
+    column_name = field_instance.name
+    table_name = table.__name__.lower()
+    migrator = db_config.get_migrator_instance()
+    log.info(f"Add index to '{column_name}' field in '{table_name}'")
+    with db_config.database.transaction():
+        try:
+            migrate(
+                migrator.add_index(
+                    table_name, (column_name,), is_unique_constraint,
+                ),
+            )
+        except OperationalError as e:
+            if 'already exists' in e.args[0]:
+                log.info('Index already exists.')
+            else:
+                raise
+        db_config.database.commit()
+
+
+def _add_indices_if_needed():
+    table_field_pairs = (
+        (models.Notification, models.Notification.created),
+        (models.Notification, models.Notification.related_id),
+        (models.Exercise, models.Exercise.is_archived),
+        (models.Exercise, models.Exercise.order),
+        (models.Solution, models.Solution.state),
+        (models.Solution, models.Solution.submission_timestamp),
+        (models.Solution, models.Solution.json_data_str),
+    )
+    for table, field_instance in table_field_pairs:
+        _add_index_if_needed(table, field_instance)
+
+
+def _add_solution_state_if_needed():
     _migrate_column_in_table_if_needed(models.Solution, models.Solution.state)
     table_name = models.Solution.__name__.lower()
     cols = {col.name for col in db_config.database.get_columns(table_name)}
@@ -208,7 +253,8 @@ def main():
     _add_order_if_needed()
     _add_exercise_due_date_if_needed()
     _upgrade_notifications_if_needed()
-    add_solution_state_if_needed()
+    _add_solution_state_if_needed()
+    _add_indices_if_needed()
     text_fixer.fix_texts()
     import_tests.load_tests_from_path('/app_dir/notebooks-tests')
 

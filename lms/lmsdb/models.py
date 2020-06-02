@@ -135,10 +135,10 @@ class Notification(BaseModel):
     MAX_PER_USER = 10
 
     user = ForeignKeyField(User)
-    created = DateTimeField(default=datetime.now)
+    created = DateTimeField(default=datetime.now, index=True)
     kind = IntegerField()
     message = TextField()
-    related_id = IntegerField(null=True)
+    related_id = IntegerField(null=True, index=True)
     action_url = CharField(null=True)
     viewed = BooleanField(default=False)
 
@@ -215,10 +215,10 @@ class Exercise(BaseModel):
     subject = CharField()
     date = DateTimeField()
     users = ManyToManyField(User, backref='exercises')
-    is_archived = BooleanField()
+    is_archived = BooleanField(index=True)
     due_date = DateTimeField(null=True)
     notebook_num = IntegerField(default=0)
-    order = IntegerField(default=0)
+    order = IntegerField(default=0, index=True)
 
     def open_for_new_solutions(self) -> bool:
         if self.due_date is None:
@@ -278,12 +278,13 @@ class Solution(BaseModel):
     state = CharField(
         choices=STATES.to_choices(),
         default=STATES.CREATED.name,
+        index=True,
     )
     grade = IntegerField(
         default=0, constraints=[Check('grade <= 100'), Check('grade >= 0')],
     )
-    submission_timestamp = DateTimeField()
-    json_data_str = TextField()
+    submission_timestamp = DateTimeField(index=True)
+    json_data_str = TextField(index=True)
 
     @property
     def is_checked(self):
