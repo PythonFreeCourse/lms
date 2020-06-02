@@ -4,7 +4,7 @@ from typing import Type
 
 from peewee import (  # type: ignore
     Field, Model, OperationalError, ProgrammingError, TextField,
-
+)
 from playhouse.migrate import migrate  # type: ignore
 
 from lms.lmsdb import database_config as db_config
