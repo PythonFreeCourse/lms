@@ -180,7 +180,7 @@ def _add_index_if_needed(
                 ),
             )
         except OperationalError as e:
-            if 'already exists' in e.args[0]:
+            if 'already exists' in str(e):
                 log.info('Index already exists.')
             else:
                 raise
