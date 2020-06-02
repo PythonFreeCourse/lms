@@ -195,7 +195,6 @@ def _add_indices_if_needed():
         (models.Exercise, models.Exercise.order),
         (models.Solution, models.Solution.state),
         (models.Solution, models.Solution.submission_timestamp),
-        (models.Solution, models.Solution.json_data_str),
     )
     for table, field_instance in table_field_pairs:
         _add_index_if_needed(table, field_instance)
