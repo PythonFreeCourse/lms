@@ -1,16 +1,20 @@
 import datetime
+import random
+import string
 import os
+from typing import Optional
+
+import pytest
+from peewee import SqliteDatabase
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, CommentText,
-    Exercise, Role, RoleOptions, Solution, User,
+    ALL_MODELS, Comment, CommentText, Exercise, Notification, Role,
+    RoleOptions, Solution, User,
 )
 from lms.lmstests.public import celery_app as public_app
 from lms.lmstests.sandbox import celery_app as sandbox_app
-
-from peewee import SqliteDatabase
-
-import pytest
+from lms.lmsweb import routes
+from lms.models import notifications
 
 
 @pytest.fixture(autouse=True, scope='session')
@@ -47,6 +51,27 @@ def celery_eager():
     sandbox_app.conf.update(task_always_eager=True)
 
 
+def create_user(
+        role_name: str = RoleOptions.STUDENT.value,
+        index: int = 1,
+) -> User:
+    return User.create(  # NOQA: S106
+        username=f'{role_name}-{index}',
+        fullname=f'A{role_name}',
+        mail_address=f'so-{role_name}-{index}@mail.com',
+        password='fake pass',
+        role=Role.by_name(role_name),
+    )
+
+
+def create_student_user(index: int = 0) -> User:
+    return create_user(RoleOptions.STUDENT.value, index)
+
+
+def create_staff_user(index: int = 0) -> User:
+    return create_user(RoleOptions.STAFF.value, index)
+
+
 @pytest.fixture()
 def staff_password():
     return 'fake pass'
@@ -54,14 +79,7 @@ def staff_password():
 
 @pytest.fixture()
 def staff_user(staff_password):
-    staff_role = Role.get(Role.name == RoleOptions.STAFF.value)
-    return User.create(  # NOQA: S106
-        username='Ido',
-        fullname='Elk',
-        mail_address='mymail@mail.com',
-        password=staff_password,
-        role=staff_role,
-    )
+    return create_staff_user()
 
 
 @pytest.fixture()
@@ -69,43 +87,63 @@ def student_user():
     return create_student_user()
 
 
-def create_student_user(index=0):
-    return User.create(  # NOQA: S106
-        username=f'student-{index}',
-        fullname='Astudent',
-        mail_address=f'so-student-{index}@mail.com',
-        password='fake pass',
-        role=Role.get_student_role(),
-    )
-
-
 @pytest.fixture()
 def admin_user():
     admin_role = Role.get(Role.name == RoleOptions.ADMINISTRATOR.value)
     return User.create(  # NOQA: B106, S106
         username='Yam',
-        fullname='Elk',
+        fullname='Buya',
         mail_address='mymail@mail.com',
         password='fake pass',
         role=admin_role,
     )
 
 
-@pytest.fixture()
-def exercise():
+def create_notification(
+        student_user: User,
+        solution: Solution,
+        index: int = 0,
+) -> Notification:
+    return Notification.create(
+        user=student_user,
+        kind=notifications.NotificationKind.CHECKED.value,
+        message=f'Test message {index}',
+        related_id=solution.id,
+        action_url=f'{routes.SOLUTIONS}/{solution.id}',
+    )
+
+
+def create_exercise(index: int = 0) -> Exercise:
     return Exercise.create(
-        subject='python',
+        subject=f'python {index}',
         date=datetime.datetime.now(),
         is_archived=False,
     )
 
 
 @pytest.fixture()
-def solution(exercise, student_user):
+def exercise() -> Exercise:
+    return create_exercise()
+
+
+def create_solution(
+        exercise: Exercise,
+        student_user: User,
+        code: Optional[str] = None,
+) -> Solution:
+    if code is None:
+        code = ''.join(random.choices(string.printable, k=100))
+
     return Solution.create_solution(
         exercise=exercise,
         solver=student_user,
+        json_data_str=code,
     )
+
+
+@pytest.fixture()
+def solution(exercise: Exercise, student_user: User) -> Solution:
+    return create_solution(exercise, student_user)
 
 
 @pytest.fixture()
@@ -117,6 +155,11 @@ def comment(staff_user, solution):
         line_number=1,
         is_auto=False,
     )[0]
+
+
+@pytest.fixture()
+def notification(student_user: User, solution: Solution) -> Notification:
+    return create_notification(student_user, solution)
 
 
 SAMPLES_DIR = os.path.join(os.path.dirname(__file__), 'samples')

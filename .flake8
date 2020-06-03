@@ -1,3 +1,6 @@
 [flake8]
-per-file-ignores=lms/tests/*.py:S101,lms/lmstests/sandbox/flake8/defines.py:E501, lms/tests/test_exercise_unit_tests.py:Q001,S101
+per-file-ignores =
+  lms/tests/*.py:S101
+  lms/lmstests/sandbox/flake8/defines.py:E501
+  lms/tests/test_exercise_unit_tests.py:Q001,S101
 ignore=I100,I201,W503

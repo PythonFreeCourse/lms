@@ -2,7 +2,7 @@
 
 
 class TestStudent:
-    """python"""
+    """python 0"""
     def __init__(self):
         raise NotImplementedError
 

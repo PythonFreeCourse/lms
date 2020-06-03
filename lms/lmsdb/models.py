@@ -3,7 +3,7 @@ import random
 import secrets
 import string
 from datetime import datetime
-from typing import Any, Dict, Iterable, Optional, Tuple, Type
+from typing import Any, Dict, Iterable, Optional, Tuple, Type, Union
 
 from flask_login import UserMixin  # type: ignore
 from peewee import (  # type: ignore
@@ -52,38 +52,38 @@ class Role(BaseModel):
         return self.name
 
     @classmethod
-    def get_student_role(cls):
+    def get_student_role(cls) -> 'Role':
         return cls.get(Role.name == RoleOptions.STUDENT.value)
 
     @classmethod
-    def get_staff_role(cls):
+    def get_staff_role(cls) -> 'Role':
         return cls.get(Role.name == RoleOptions.STAFF.value)
 
     @classmethod
-    def by_name(cls, name):
+    def by_name(cls, name) -> 'Role':
         if name.startswith('_'):
             raise ValueError('That could lead to a security issue.')
         role_name = getattr(RoleOptions, name.upper()).value
         return cls.get(name=role_name)
 
     @property
-    def is_student(self):
+    def is_student(self) -> bool:
         return self.name == RoleOptions.STUDENT.value
 
     @property
-    def is_staff(self):
+    def is_staff(self) -> bool:
         return self.name == RoleOptions.STAFF.value
 
     @property
-    def is_administrator(self):
+    def is_administrator(self) -> bool:
         return self.name == RoleOptions.ADMINISTRATOR.value
 
     @property
-    def is_manager(self):
+    def is_manager(self) -> bool:
         return self.is_staff or self.is_administrator
 
     @property
-    def is_viewer(self):
+    def is_viewer(self) -> bool:
         return self.name == RoleOptions.VIEWER.value or self.is_manager
 
 
@@ -362,7 +362,7 @@ class Solution(BaseModel):
         exercise: Exercise,
         solver: User,
         json_data_str='',
-    ):
+    ) -> 'Solution':
         instance = cls.create(**{
             cls.exercise.name: exercise,
             cls.solver.name: solver,
@@ -387,6 +387,7 @@ class Solution(BaseModel):
         return cls.select(
             cls.id,
             cls.state,
+            cls.exercise,
             comments_count,
             fails,
         ).join(
@@ -405,6 +406,15 @@ class Solution(BaseModel):
             comments_count,
             fails,
             cls.submission_timestamp.asc(),
+        )
+
+    def mark_as_checked(
+            self,
+            by: Optional[Union[User, int]] = None,
+    ) -> bool:
+        return self.set_state(
+            Solution.STATES.DONE,
+            checker=by,
         )
 
     @classmethod
