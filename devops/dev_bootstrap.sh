@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -eux
 
 SCRIPT_FILE_PATH=$(readlink -f "${0}")
 SCRIPT_FOLDER=$(dirname "${SCRIPT_FILE_PATH}")
@@ -30,4 +30,4 @@ python3 "${DB_BOOTSTRAP_FILE_PATH}"
 echo "Moving DB to main directory"
 mv "./db.sqlite" "${MAIN_FOLDER}/db.sqlite"
 
-set +e
+set +eux
