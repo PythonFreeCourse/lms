@@ -11,23 +11,34 @@ CONFIG_FILE_PATH="${LMSWEB_FOLDER}/config.py"
 CONFIG_EXAMPLE_FILE_PATH="${LMSWEB_FOLDER}/config.py.example"
 DB_BOOTSTRAP_FILE_PATH="${LMSAPP_FOLDER}/lmsdb/bootstrap.py"
 
+if (command -v pip); then
+  pip_exec=pip
+else
+  pip_exec=pip3
+fi
+
+if (command -v python); then
+  python_exec=python
+else
+  python_exec=python3
+fi
+
 if ! (test -f "${CONFIG_FILE_PATH}"); then
   echo "Creating config from template"
   cp "${CONFIG_EXAMPLE_FILE_PATH}" "${CONFIG_FILE_PATH}"
   echo "Writing secret key to config"
-  echo "SECRET_KEY = \"$(python -c 'import os;print(os.urandom(32).hex())')\"" >>"${CONFIG_FILE_PATH}"
+  secret_key=$($python_exec -c "import os;print(os.urandom(32).hex())")
+  echo "SECRET_KEY = \"${secret_key}\"" >>"${CONFIG_FILE_PATH}"
 else
   echo "Config already exists"
 fi
 
 echo "Installing prod requirements"
-pip3 install --user -r "${MAIN_FOLDER}/requirements.txt"
+$pip_exec install --user -r "${MAIN_FOLDER}/requirements.txt"
 echo "Installing dev requirements"
-pip3 install --user -r "${MAIN_FOLDER}/dev_requirements.txt"
+$pip_exec install --user -r "${MAIN_FOLDER}/dev_requirements.txt"
 
 echo "Creating local SQLite DB"
-python3 "${DB_BOOTSTRAP_FILE_PATH}"
-echo "Moving DB to main directory"
-mv "./db.sqlite" "${MAIN_FOLDER}/db.sqlite"
+$python_exec "${DB_BOOTSTRAP_FILE_PATH}"
 
 set +eux

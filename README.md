@@ -21,8 +21,8 @@ cd devops
 source dev_bootstrap.sh
 # The initial credentials should appear in your terminal. :)
 
-cd ..  # Back to main directory
-flask run
+cd ..
+flask run  # Run in root directory
 ```
 
 After logging in, use https://127.0.0.1:5000/admin to modify entries in the database.

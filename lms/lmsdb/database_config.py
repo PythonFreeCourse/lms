@@ -15,12 +15,14 @@ DB_PORT = int(os.getenv('DB_PORT', 5432))
 DB_HOST = os.getenv('DB_HOST', '127.0.0.1')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_AUTOROLLBACK = os.getenv('DB_AUTOROLLBACK')
-
+# SQLite resides in main directory
+SQLITE_PATH = os.path.join(os.path.dirname(__file__), '..', '..', 'db.sqlite')
 
 if os.getenv('LOCAL_SETUP'):
-    database = SqliteDatabase('db.sqlite')
+    database = SqliteDatabase(SQLITE_PATH)
     migrator = SqliteMigrator(database)
     JsonField = SqliteJsonField
+
 else:
     db_config = {
         'database': DB_NAME,
