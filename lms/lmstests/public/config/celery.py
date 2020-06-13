@@ -1,6 +1,9 @@
 import os
 
 from celery import Celery
+import sentry_sdk
+from sentry_sdk.integrations import celery, logging
+
 
 CELERY_RABBITMQ_ERLANG_COOKIE = os.getenv('CELERY_RABBITMQ_ERLANG_COOKIE')
 CELERY_RABBITMQ_DEFAULT_USER = os.getenv('CELERY_RABBITMQ_DEFAULT_USER')
@@ -20,4 +23,10 @@ app.conf.update(
     accept_content=['json'],  # Ignore other content
     result_serializer='json',
     enable_utc=True,
+)
+
+
+sentry_sdk.init(
+    dsn=os.getenv('SENTRY_SDK_DSN', 'https://stub@stub/1'),
+    integrations=[celery.CeleryIntegration(), logging.LoggingIntegration()],
 )
