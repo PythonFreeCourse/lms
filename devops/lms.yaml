@@ -85,6 +85,7 @@ services:
       - CELERY_CHECKS_SANDBOX_VHOST=lmstests-sandbox
       - CELERY_RABBITMQ_HOST=rabbitmq
       - CELERY_RABBITMQ_PORT=5672
+      - SENTRY_SDK_DSN=${SENTRY_SDK_DSN:-https://stub@stub/1}
     links:
       - db
       - rabbitmq
@@ -112,6 +113,7 @@ services:
       - CELERY_CHECKS_PUBLIC_VHOST=lmstests-public
       - CELERY_RABBITMQ_HOST=rabbitmq
       - CELERY_RABBITMQ_PORT=5672
+      - SENTRY_SDK_DSN=${SENTRY_SDK_DSN:-https://stub@stub/1}
     links:
       - db
       - rabbitmq

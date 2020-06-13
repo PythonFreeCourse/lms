@@ -5,6 +5,7 @@ attrs==19.3.0
 backcall==0.1.0
 bandit==1.6.2
 billiard==3.6.3.0
+blinker==1.4
 celery==4.4.2
 certifi==2019.11.28
 chardet==3.0.4
@@ -67,9 +68,11 @@ pyflakes==2.1.1
 Pygments==2.6.1
 pyparsing==2.4.6
 pytest==5.0.1
+python-dateutil==2.8.1
 pytz==2019.3
 PyYAML==5.3.1
 requests==2.23.0
+sentry-sdk==0.14.4
 six==1.14.0
 smmap==3.0.1
 stevedore==1.32.0

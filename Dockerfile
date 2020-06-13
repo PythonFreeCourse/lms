@@ -1,11 +1,11 @@
 FROM python:3.8.0-buster
 
-COPY requirements.txt /tmp/requirements.txt
-RUN pip3 install -r /tmp/requirements.txt
-
 RUN apt-get update
 RUN apt-get install -y docker.io
 RUN adduser --disabled-password --gecos '' app-user
+
+COPY requirements.txt /tmp/requirements.txt
+RUN pip3 install -r /tmp/requirements.txt
 
 RUN mkdir -p /app_dir/lms
 RUN chown -R app-user:app-user /app_dir

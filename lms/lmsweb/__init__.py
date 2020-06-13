@@ -1,8 +1,11 @@
+import os
 import pathlib
 import shutil
 
 from flask import Flask
 from flask_wtf.csrf import CSRFProtect  # type: ignore
+import sentry_sdk
+from sentry_sdk.integrations import flask
 
 project_dir = pathlib.Path(__file__).resolve().parent.parent
 web_dir = project_dir / 'lmsweb'
@@ -17,6 +20,10 @@ webapp = Flask(
     static_folder=str(static_dir),
 )
 
+sentry_sdk.init(
+    dsn=os.getenv('SENTRY_SDK_DSN', 'https://stub@stub/1'),
+    integrations=[flask.FlaskIntegration()],
+)
 
 if not config_file.exists():
     shutil.copy(str(web_dir / 'config.py.example'), str(config_file))
