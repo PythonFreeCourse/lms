@@ -5,6 +5,7 @@ set -eux
 SCRIPT_FILE_PATH=$(readlink -f "${0}")
 SCRIPT_FOLDER=$(dirname "${SCRIPT_FILE_PATH}")
 MAIN_FOLDER="${SCRIPT_FOLDER}/.."
+VENV_DIR="${MAIN_FOLDER}/venv"
 LMSAPP_FOLDER="${MAIN_FOLDER}/lms"
 LMSWEB_FOLDER="${LMSAPP_FOLDER}/lmsweb"
 CONFIG_FILE_PATH="${LMSWEB_FOLDER}/config.py"
@@ -32,6 +33,11 @@ if ! (test -f "${CONFIG_FILE_PATH}"); then
 else
   echo "Config already exists"
 fi
+
+echo "Creating venv"
+$python_exec -m venv "${VENV_DIR}"
+echo "Activating venv"
+source "${VENV_DIR}/bin/activate"
 
 echo "Installing prod requirements"
 $pip_exec install --user -r "${MAIN_FOLDER}/requirements.txt"
