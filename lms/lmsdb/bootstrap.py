@@ -154,6 +154,13 @@ def _add_is_auto_if_needed():
     )
 
 
+def _add_user_note():
+    return _migrate_column_in_table_if_needed(
+        models.User,
+        models.User.note,
+    )
+
+
 def _upgrade_notifications_if_needed():
     t = models.Notification
     _migrate_column_in_table_if_needed(t, t.action_url)
@@ -256,6 +263,7 @@ def main():
     _upgrade_notifications_if_needed()
     _add_solution_state_if_needed()
     _add_indices_if_needed()
+    _add_user_note()
     text_fixer.fix_texts()
     import_tests.load_tests_from_path('/app_dir/notebooks-tests')
 
