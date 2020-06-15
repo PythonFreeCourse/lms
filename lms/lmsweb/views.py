@@ -452,6 +452,27 @@ def common_comments(exercise_id=None):
     return jsonify(_common_comments(exercise_id=exercise_id))
 
 
+@webapp.route('/user_note', methods=['POST'])
+@login_required
+@managers_only
+def user_note():
+    act = request.json.get('act')
+    note = request.json.get('note')
+    user = User.get_or_none(request.json.get('user_id', 0))
+
+    if not act or not user or note is None:
+        return fail(400, 'Invalid user_id or note')
+
+    if act == 'fetch':
+        return jsonify({user.note})
+    elif act == 'update':
+        user.note = note
+        user.save()
+        return jsonify({'success': 'true'})
+    else:
+        return fail(400, f'Invalid act "{act}"')
+
+
 @webapp.template_filter('date_humanize')
 def _jinja2_filter_datetime(date):
     try:

@@ -93,7 +93,7 @@ class User(UserMixin, BaseModel):
     mail_address = CharField(unique=True)
     password = CharField()
     role = ForeignKeyField(Role, backref='users')
-    note = CharField(max_length=4096, null=True)
+    note = CharField(max_length=4096, default='')
 
     def is_password_valid(self, password):
         return check_password_hash(self.password, password)
