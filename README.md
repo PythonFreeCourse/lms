@@ -7,22 +7,23 @@
   <img title="LGTM JavaScript Grade" src="https://img.shields.io/lgtm/grade/javascript/github/PythonFreeCourse/LMS.svg">
 </p>
 
-## Project minimized setup (sqlite & FE only)
+## Minimized setup for debug (sqlite & FE only)
 ```bash
 git clone https://github.com/PythonFreeCourse/lms
 cd lms
-pip install --user -r requirements.txt
-mv lms/lmsweb/config.py.example lms/lmsweb/config.py
-echo "SECRET_KEY = \"$(python -c 'import os;print(os.urandom(32).hex())')\"" >> lms/lmsweb/config.py
 
-# For debug only
 export FLASK_DEBUG=1
 export LOCAL_SETUP=true
+export FLASK_APP=lms.lmsweb
+export PYTHONPATH=`pwd`:$PYTHONPATH
 
-gunicorn --bind 0.0.0.0:5000 --workers 5 lms.lmsweb
+cd devops
+source dev_bootstrap.sh
+# The initial credentials should appear in your terminal. :)
+
+cd ..
+flask run  # Run in root directory
 ```
-
-Enter http://127.0.0.1:5000, and the initial credentials should appear in your terminal. :)
 
 After logging in, use https://127.0.0.1:5000/admin to modify entries in the database.
 
