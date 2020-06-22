@@ -35,7 +35,7 @@ class BaseExecutor:
 
 
 class DockerExecutor(BaseExecutor):
-    memory_limit = '20m'
+    memory_limit = '100m'
     cpu_limit = '1'
     timeout_seconds = 20
     base_image = 'lms:latest'
