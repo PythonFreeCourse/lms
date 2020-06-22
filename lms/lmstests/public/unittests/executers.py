@@ -78,9 +78,15 @@ class DockerExecutor(BaseExecutor):
             subprocess.check_output(args)  # NOQA: S603
 
     def get_file(self, file_path: str):
-        full_path = os.path.join(self.container_temp_dir, file_path)
-        args = ('docker', 'exec', self._container_name, 'cat', full_path)
-        return subprocess.check_output(args)  # NOQA: S603
+        with tempfile.NamedTemporaryFile('w') as temp_file:
+            temp_file.flush()
+            container_path = os.path.join(self.container_temp_dir, file_path)
+            docker_path = f'{self._container_name}:{container_path}'
+            args = ('docker', 'cp', docker_path, temp_file.name)
+            subprocess.check_output(args)  # NOQA: S603
+            with open(temp_file.name, 'r') as file_reader:
+                content = file_reader.read()
+        return content
 
 
 class SameProcessExecutor(BaseExecutor):
