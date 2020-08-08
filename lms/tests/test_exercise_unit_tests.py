@@ -61,7 +61,6 @@ class TestUTForExercise:
     @staticmethod
     def _verify_comments():
         auto_comments = tuple(models.SolutionExerciseTestExecution.select())
-        print(auto_comments)
         assert len(auto_comments) == 2
         first = auto_comments[0]
         assert first.exercise_test_name.test_name == 'test_check_bar_bar'
