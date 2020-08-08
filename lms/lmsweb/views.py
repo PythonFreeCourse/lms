@@ -1,10 +1,9 @@
-import json
 import os
 from functools import wraps
 from typing import Optional
 from urllib.parse import urljoin, urlparse
 
-import arrow
+import arrow  # type: ignore
 from flask import (
     abort, jsonify, render_template, request, send_from_directory, url_for,
 )
@@ -22,11 +21,11 @@ from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Exercise, RoleOptions, Solution, User,
     database,
 )
+import lms.extractors.base as extractor
 from lms.lmstests.public.flake8 import tasks as flake8_tasks
 from lms.lmstests.public.unittests import tasks as unittests_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmsweb import config, routes, webapp
-from lms.lmsweb.tools.notebook_extractor import extract_exercises
 from lms.models import notifications, solutions
 
 login_manager = LoginManager()
@@ -312,12 +311,7 @@ def upload():
     if not file:
         return fail(422, 'No file was given')
 
-    json_file_data = file.read()
-    try:
-        file_content = json.loads(json_file_data)
-        exercises = list(extract_exercises(file_content))
-    except (ValueError, json.JSONDecodeError):
-        return fail(422, 'Invalid file format - must be ipynb')
+    exercises = list(extractor.Extractor(file.read()))
     if not exercises:
         msg = 'No exercises were found in the notebook'
         desc = 'did you use Upload <number of exercise> ? (example: Upload 1)'

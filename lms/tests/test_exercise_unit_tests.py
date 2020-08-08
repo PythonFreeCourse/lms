@@ -1,6 +1,6 @@
 import os
 
-import pytest
+import pytest  # type: ignore
 
 from lms.lmsdb import models
 from lms.lmstests.public.unittests import import_tests
@@ -10,10 +10,10 @@ from lms.models import notifications
 from lms.tests import conftest
 
 
-STUDENT_CODE = '''
+STUDENT_CODE = """
 def foo(bar=None):
     return 'bar' if bar == 'bar' else 'foo'
-'''
+"""
 
 EXERCISE_TESTS = os.path.join(conftest.SAMPLES_DIR, 'student_test_code.py')
 INVALID_EXERCISE_TESTS = os.path.join(
