@@ -1,4 +1,3 @@
-from operator import itemgetter
 from typing import Iterator, Tuple
 
 from lms.extractors.base import Extractor
