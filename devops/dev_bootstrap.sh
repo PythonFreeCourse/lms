@@ -40,9 +40,9 @@ echo "Activating venv"
 source "${VENV_DIR}/bin/activate"
 
 echo "Installing prod requirements"
-$pip_exec install --user -r "${MAIN_FOLDER}/requirements.txt"
+$pip_exec install -r "${MAIN_FOLDER}/requirements.txt"
 echo "Installing dev requirements"
-$pip_exec install --user -r "${MAIN_FOLDER}/dev_requirements.txt"
+$pip_exec install -r "${MAIN_FOLDER}/dev_requirements.txt"
 
 echo "Creating local SQLite DB"
 $python_exec "${DB_BOOTSTRAP_FILE_PATH}"
