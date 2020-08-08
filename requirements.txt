@@ -45,7 +45,7 @@ itsdangerous==1.1.0
 jedi==0.17.2
 Jinja2==2.11.2
 junitparser==1.4.1
-kombu=4.6.11
+kombu==4.6.11
 loguru==0.5.1
 MarkupSafe==1.1.1
 mccabe==0.6.1
