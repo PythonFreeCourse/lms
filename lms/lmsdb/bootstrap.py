@@ -65,6 +65,24 @@ def _migrate_copy_column(table: Type[Model], source: str, dest: str) -> bool:
     return True
 
 
+def _drop_not_null(table: Type[Model], column_name: str) -> bool:
+    table_name = table.__name__.lower()
+    migrator = db_config.get_migrator_instance()
+    with db_config.database.transaction():
+        migrate(migrator.drop_not_null(table_name, column_name))
+        db_config.database.commit()
+    return True
+
+
+def _add_not_null(table: Type[Model], column_name: str) -> bool:
+    table_name = table.__name__.lower()
+    migrator = db_config.get_migrator_instance()
+    with db_config.database.transaction():
+        migrate(migrator.add_not_null(table_name, column_name))
+        db_config.database.commit()
+    return True
+
+
 def _rename_column_in_table_if_needed(
     table: Type[Model],
     old_column_name: str,
@@ -279,7 +297,11 @@ def _multiple_files_migration() -> bool:
     db = db_config.database
     c = models.Comment
     f = models.SolutionFile
-    s = models.Solution
+
+    class Solution(models.Solution):
+        json_data_str = TextField(column_name='json_data_str')
+    s = Solution
+
     solution_cols = {col.name for col in db.get_columns(s.__name__.lower())}
     if 'json_data_str' not in solution_cols:
         log.info('Skipping multiple files migration.')
@@ -293,6 +315,7 @@ def _multiple_files_migration() -> bool:
     solutions = c.select(s.id, s.id, '/main.py', s.json_data_str)
     f.insert_from(solutions, [f.id, f.solution, f.path, f.code])
     _migrate_copy_column(c, dest='file', source='solution_id')
+    _add_not_null(c, 'file')
     _drop_column_from_module_if_needed(c, 'solution_id')
     _drop_column_from_module_if_needed(s, 'json_data_str')
     log.info('Successfully migrated multiple files.')

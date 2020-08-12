@@ -284,7 +284,6 @@ class Solution(BaseModel):
         default=0, constraints=[Check('grade <= 100'), Check('grade >= 0')],
     )
     submission_timestamp = DateTimeField(index=True)
-    json_data_str = TextField()
 
     @property
     def is_checked(self):
