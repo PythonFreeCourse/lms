@@ -1,9 +1,10 @@
 import sys
 import logging
-from typing import Type
+from typing import Any, Optional, Type
 
 from peewee import (  # type: ignore
-    Field, Model, OperationalError, ProgrammingError, TextField,
+    Entity, Expression, Field, ForeignKeyField, Model, OP,
+    OperationalError, ProgrammingError, SQL, TextField,
 )
 from playhouse.migrate import migrate  # type: ignore
 
@@ -21,8 +22,11 @@ log = logging.getLogger(__name__)
 def _migrate_column_in_table_if_needed(
     table: Type[Model],
     field_instance: Field,
+    *,
+    field_name: Optional[str] = None,
+    **kwargs: Any,
 ) -> bool:
-    column_name = field_instance.name
+    column_name = field_name or field_instance.name
     table_name = table.__name__.lower()
     cols = {col.name for col in db_config.database.get_columns(table_name)}
 
@@ -34,11 +38,30 @@ def _migrate_column_in_table_if_needed(
     migrator = db_config.get_migrator_instance()
     with db_config.database.transaction():
         migrate(migrator.add_column(
-            table_name,
-            field_instance.name,
-            field_instance,
+            table=table_name,
+            column_name=column_name,
+            field=field_instance,
+            **kwargs,
         ))
         db_config.database.commit()
+    return True
+
+
+def _migrate_copy_column(table: Type[Model], source: str, dest: str) -> bool:
+    table_name = table.__name__.lower()
+    migrator = db_config.get_migrator_instance()
+    with db_config.database.transaction():
+        (
+            db_config.database.execute_sql(
+                migrator.make_context()
+                .literal('UPDATE ').sql(Entity(table_name))
+                .literal(' SET ').sql(
+                    Expression(
+                        Entity(dest), OP.EQ, SQL(' solution_id'), flat=True,
+                    ),
+                ).query()[0]
+            )
+        )
     return True
 
 
@@ -111,10 +134,23 @@ def _drop_column_from_module_if_needed(
     log.info(f'Drop {column_name} field in {table}')
     migrator = db_config.get_migrator_instance()
     with db_config.database.transaction():
-        migrate(migrator.drop_column(
-            table_name,
-            column_name,
-        ))
+        migrate(migrator.drop_column(table_name, column_name))
+        db_config.database.commit()
+    return True
+
+
+def _drop_constraint_if_needed(table: Type[Model], column_name: str) -> bool:
+    table_name = table.__name__.lower()
+    cols = {col.name for col in db_config.database.get_columns(table_name)}
+
+    if column_name not in cols:
+        log.info(f'Column {column_name} not exists in {table}')
+        return False
+
+    log.info(f'Drop foreign key on {table}.{column_name}')
+    migrator = db_config.get_migrator_instance()
+    with db_config.database.transaction():
+        migrate(migrator.drop_constraint(table_name, column_name))
         db_config.database.commit()
     return True
 
@@ -239,6 +275,32 @@ def _add_solution_state_if_needed():
         )
 
 
+def _multiple_files_migration() -> bool:
+    db = db_config.database
+    c = models.Comment
+    f = models.SolutionFile
+    s = models.Solution
+    solution_cols = {col.name for col in db.get_columns(s.__name__.lower())}
+    if 'json_data_str' not in solution_cols:
+        log.info('Skipping multiple files migration.')
+        return False
+
+    with models.database.connection_context():
+        solutions = s.select(s.id, s.id, '/main.py', s.json_data_str)
+        f.insert_from(solutions, [f.id, f.solution, f.path, f.code]).execute()
+    # _rename_column_in_table_if_needed(c, 'solution', 'file')
+    # _drop_constraint_if_needed(c, 'file')
+    file = ForeignKeyField(f, field=f.id, backref='comments', null=True)
+    _migrate_column_in_table_if_needed(c, file, field_name='file')
+    solutions = c.select(s.id, s.id, '/main.py', s.json_data_str)
+    f.insert_from(solutions, [f.id, f.solution, f.path, f.code])
+    _migrate_copy_column(c, dest='file', source='solution_id')
+    _drop_column_from_module_if_needed(c, 'solution_id')
+    _drop_column_from_module_if_needed(s, 'json_data_str')
+    log.info('Successfully migrated multiple files.')
+    return True
+
+
 def main():
     with models.database.connection_context():
         models.database.create_tables(models.ALL_MODELS, safe=True)
@@ -256,6 +318,7 @@ def main():
     _upgrade_notifications_if_needed()
     _add_solution_state_if_needed()
     _add_indices_if_needed()
+    _multiple_files_migration()
     text_fixer.fix_texts()
     import_tests.load_tests_from_path('/app_dir/notebooks-tests')
 

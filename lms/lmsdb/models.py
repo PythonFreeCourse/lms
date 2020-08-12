@@ -122,7 +122,7 @@ class User(UserMixin, BaseModel):
 
 @pre_save(sender=User)
 def on_save_handler(model_class, instance, created):
-    """Hashes password on creation/save"""
+    """Hash password on creation/save."""
 
     # If password changed then it won't start with hash's method prefix
     is_password_changed = not instance.password.startswith('pbkdf2:sha256')
@@ -215,7 +215,7 @@ class Exercise(BaseModel):
     subject = CharField()
     date = DateTimeField()
     users = ManyToManyField(User, backref='exercises')
-    is_archived = BooleanField(index=True)
+    is_archived = BooleanField(default=False, index=True)
     due_date = DateTimeField(null=True)
     notebook_num = IntegerField(default=0)
     order = IntegerField(default=0, index=True)
@@ -473,6 +473,12 @@ class Solution(BaseModel):
         return int(response['checked'] * 100 / response['submitted'])
 
 
+class SolutionFile(BaseModel):
+    path = TextField()
+    solution = ForeignKeyField(Solution, backref='files')
+    code = TextField()
+
+
 class ExerciseTest(BaseModel):
     exercise = ForeignKeyField(model=Exercise, unique=True)
     code = TextField()
@@ -598,7 +604,7 @@ class Comment(BaseModel):
     timestamp = DateTimeField(default=datetime.now)
     line_number = IntegerField(constraints=[Check('line_number >= 1')])
     comment = ForeignKeyField(CommentText)
-    solution = ForeignKeyField(Solution)
+    file = ForeignKeyField(Solution, backref='comments')
     is_auto = BooleanField(default=False)
 
     @classmethod
