@@ -59,7 +59,7 @@ def _migrate_copy_column(table: Type[Model], source: str, dest: str) -> bool:
                     Expression(
                         Entity(dest), OP.EQ, SQL(' solution_id'), flat=True,
                     ),
-                ).query()[0]
+                ).query()[0],
             )
         )
     return True
@@ -288,8 +288,6 @@ def _multiple_files_migration() -> bool:
     with models.database.connection_context():
         solutions = s.select(s.id, s.id, '/main.py', s.json_data_str)
         f.insert_from(solutions, [f.id, f.solution, f.path, f.code]).execute()
-    # _rename_column_in_table_if_needed(c, 'solution', 'file')
-    # _drop_constraint_if_needed(c, 'file')
     file = ForeignKeyField(f, field=f.id, backref='comments', null=True)
     _migrate_column_in_table_if_needed(c, file, field_name='file')
     solutions = c.select(s.id, s.id, '/main.py', s.json_data_str)
