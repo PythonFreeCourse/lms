@@ -37,35 +37,37 @@
     {% endif %}
   </div>
   <div id="view-body">
-      <div class="code-view-container">
-          <div id="code-view" data-id="{{ solution['id'] }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}">
-              <pre><code class="language-python line-numbers highlight">{{- solution['json_data_str'] | trim(' ') -}}</code></pre>
-          </div>
-          {% if test_results %}
-              <div class="test-results">
-                  <h3 class="test-result-title">בדיקות אוטומטיות</h3>
-                  <ol class="test-results-list">
-                      {%- for test_result in test_results %}
-                          <li class="test-result">
-                              <h5 class="test-name">
-                                  {{ test_result.pretty_test_name }}
-                              </h5>
-                              <span class="title">שגיאה:</span>
-                              <span>
-                                  <pre><code class="language-python highlight">{{ test_result.user_message }}</code></pre>
-                              </span>
-                              {% if is_manager %}
-                                  <span class="title">שגיאת סגל:</span>
-                                  <span class="stack-trace">
-                                      <pre><code class="language-python highlight">{{ test_result.staff_message }}</code></pre>
-                                  </span>
-                              {% endif %}
-                          </li>
-                      {% endfor -%}
-                  </ol>
-              </div>
-          {% endif %}
+    {%- for file in files %}
+    <div class="code-view-container">
+      <div id="code-view" data-id="{{ solution['id'] }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}">
+        <pre><code class="language-python line-numbers highlight">{{- file.code | trim(' ') -}}</code></pre>
       </div>
+      {% if test_results %}
+      <div class="test-results">
+          <h3 class="test-result-title">בדיקות אוטומטיות</h3>
+          <ol class="test-results-list">
+              {%- for test_result in test_results %}
+              <li class="test-result">
+                  <h5 class="test-name">
+                      {{ test_result.pretty_test_name }}
+                  </h5>
+                  <span class="title">שגיאה:</span>
+                  <span>
+                      <pre><code class="language-python highlight">{{ test_result.user_message }}</code></pre>
+                  </span>
+                  {% if is_manager %}
+                  <span class="title">שגיאת סגל:</span>
+                  <span class="stack-trace">
+                      <pre><code class="language-python highlight">{{ test_result.staff_message }}</code></pre>
+                  </span>
+                  {% endif %}
+              </li>
+              {% endfor -%}
+          </ol>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor -%}
     {% if is_manager %}
     <div id="popular-comments">
       <div id="exercise-comments">

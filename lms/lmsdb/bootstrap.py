@@ -12,6 +12,7 @@ from lms.lmsdb import database_config as db_config
 from lms.lmsdb import models
 from lms.lmstests.public.flake8 import text_fixer
 from lms.lmstests.public.unittests import import_tests
+from lms.models import upload
 
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
@@ -243,6 +244,27 @@ def _add_index_if_needed(
         db_config.database.commit()
 
 
+def _drop_index_if_needed(
+    table: Type[Model],
+    field_instance: Field,
+    foreign_key: bool = False,
+) -> None:
+    table_name = table.__name__.lower()
+    suffix = "_id" if foreign_key else ""
+    column_name = f'{table_name}_{field_instance.name}{suffix}'
+    migrator = db_config.get_migrator_instance()
+    log.info(f"Drop index from '{column_name}' field in '{table_name}'")
+    with db_config.database.transaction():
+        try:
+            migrate(migrator.drop_index(table_name, column_name))
+        except (OperationalError, ProgrammingError) as e:
+            if 'already exists' in str(e):
+                log.info('Index already exists.')
+            else:
+                raise
+        db_config.database.commit()
+
+
 def _add_indices_if_needed():
     table_field_pairs = (
         (models.Notification, models.Notification.created),
@@ -293,14 +315,25 @@ def _add_solution_state_if_needed():
         )
 
 
+def _update_solution_hashes(s):
+    log.info('Updating solution hashes. Might take a while.')
+    for solution in s:
+        solution.upload_hash = upload.create_hash(solution.json_data_str)
+        solution.save()
+
+
 def _multiple_files_migration() -> bool:
     db = db_config.database
-    c = models.Comment
     f = models.SolutionFile
 
     class Solution(models.Solution):
         json_data_str = TextField(column_name='json_data_str')
+        upload_hash = TextField(null=True)
     s = Solution
+
+    class Comment(models.Comment):
+        file = ForeignKeyField(f, backref='comments', null=True)
+    c = Comment
 
     solution_cols = {col.name for col in db.get_columns(s.__name__.lower())}
     if 'json_data_str' not in solution_cols:
@@ -310,12 +343,16 @@ def _multiple_files_migration() -> bool:
     with models.database.connection_context():
         solutions = s.select(s.id, s.id, '/main.py', s.json_data_str)
         f.insert_from(solutions, [f.id, f.solution, f.path, f.code]).execute()
-    file = ForeignKeyField(f, field=f.id, backref='comments', null=True)
-    _migrate_column_in_table_if_needed(c, file, field_name='file')
+
+    _drop_index_if_needed(c, c.file, foreign_key=True)
+    _migrate_column_in_table_if_needed(c, c.file, field_name='file_id')
+    _migrate_column_in_table_if_needed(s, s.upload_hash)
     solutions = c.select(s.id, s.id, '/main.py', s.json_data_str)
     f.insert_from(solutions, [f.id, f.solution, f.path, f.code])
-    _migrate_copy_column(c, dest='file', source='solution_id')
-    _add_not_null(c, 'file')
+    _update_solution_hashes(s)
+    _migrate_copy_column(c, dest='file_id', source='solution_id')
+    _add_not_null(c, 'file_id')
+    _add_not_null(s, 'upload_hash')
     _drop_column_from_module_if_needed(c, 'solution_id')
     _drop_column_from_module_if_needed(s, 'json_data_str')
     log.info('Successfully migrated multiple files.')

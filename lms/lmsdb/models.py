@@ -1,9 +1,10 @@
 import enum
+import hashlib
 import random
 import secrets
 import string
 from datetime import datetime
-from typing import Any, Dict, Iterable, Optional, Tuple, Type, Union
+from typing import Any, Dict, Iterable, Optional, Tuple, Type, Union, cast
 
 from flask_login import UserMixin  # type: ignore
 from peewee import (  # type: ignore
@@ -178,12 +179,12 @@ class Notification(BaseModel):
 
     @classmethod
     def send(
-            cls,
-            user: User,
-            kind: int,
-            message: str,
-            related_id: Optional[int] = None,
-            action_url: Optional[str] = None,
+        cls,
+        user: User,
+        kind: int,
+        message: str,
+        related_id: Optional[int] = None,
+        action_url: Optional[str] = None,
     ) -> 'Notification':
         return cls.create(**{
             cls.user.name: user,
@@ -196,9 +197,9 @@ class Notification(BaseModel):
 
 @post_save(sender=Notification)
 def on_notification_saved(
-        model_class: Type[Notification],
-        instance: Notification,
-        created: datetime,
+    model_class: Type[Notification],
+    instance: Notification,
+    created: datetime,
 ):
     # sqlite supports delete query with order
     # but when we use postgres, peewee is stupid
@@ -264,8 +265,9 @@ class SolutionState(enum.Enum):
         )
 
     @classmethod
-    def to_choices(cls) -> Tuple[Tuple[str, str], ...]:
-        return tuple((choice.name, choice.value) for choice in tuple(cls))
+    def to_choices(cls: enum.EnumMeta) -> Tuple[Tuple[str, str], ...]:
+        choices = cast(Iterable[enum.Enum], tuple(cls))
+        return tuple((choice.name, choice.value) for choice in choices)
 
 
 class Solution(BaseModel):
@@ -284,6 +286,7 @@ class Solution(BaseModel):
         default=0, constraints=[Check('grade <= 100'), Check('grade >= 0')],
     )
     submission_timestamp = DateTimeField(index=True)
+    upload_hash = TextField()
 
     @property
     def is_checked(self):
@@ -303,10 +306,6 @@ class Solution(BaseModel):
         updated = changes.execute() == 1
         return updated
 
-    @property
-    def code(self):
-        return self.json_data_str
-
     def ordered_versions(self) -> Iterable['Solution']:
         return Solution.select().where(
             Solution.exercise == self.exercise,
@@ -318,7 +317,7 @@ class Solution(BaseModel):
 
     @classmethod
     def of_user(
-            cls, user_id: int, with_archived: bool = False,
+        cls, user_id: int, with_archived: bool = False,
     ) -> Iterable[Dict[str, Any]]:
         db_exercises = Exercise.get_objects(fetch_archived=with_archived)
         exercises = Exercise.as_dicts(db_exercises)
@@ -344,15 +343,15 @@ class Solution(BaseModel):
 
     @classmethod
     def solution_exists(
-            cls,
-            exercise: Exercise,
-            solver: User,
-            json_data_str: str,
+        cls,
+        exercise: Exercise,
+        solver: User,
+        upload_hash: str,
     ):
         return cls.select().where(
             cls.exercise == exercise,
             cls.solver == solver,
-            cls.json_data_str == json_data_str,
+            cls.upload_hash == upload_hash,
         ).exists()
 
     @classmethod
@@ -360,14 +359,21 @@ class Solution(BaseModel):
         cls,
         exercise: Exercise,
         solver: User,
-        json_data_str='',
+        upload_hash: str,
+        files: Dict[str, str],
     ) -> 'Solution':
         instance = cls.create(**{
             cls.exercise.name: exercise,
             cls.solver.name: solver,
             cls.submission_timestamp.name: datetime.now(),
-            cls.json_data_str.name: json_data_str,
+            cls.upload_hash.name: upload_hash,
         })
+
+        files_details = [
+            SolutionFile(path, content)
+            for path, content in files.items()
+        ]
+        SolutionFile.bulk_create(files_details)
 
         # update old solutions for this exercise
         other_solutions: Iterable[Solution] = cls.select().where(
@@ -408,8 +414,8 @@ class Solution(BaseModel):
         )
 
     def mark_as_checked(
-            self,
-            by: Optional[Union[User, int]] = None,
+        self,
+        by: Optional[Union[User, int]] = None,
     ) -> bool:
         return self.set_state(
             Solution.STATES.DONE,
@@ -513,10 +519,10 @@ class ExerciseTestName(BaseModel):
 
     @classmethod
     def create_exercise_test_name(
-            cls,
-            exercise_test: ExerciseTest,
-            test_name: str,
-            pretty_test_name: str,
+        cls,
+        exercise_test: ExerciseTest,
+        test_name: str,
+        pretty_test_name: str,
     ):
         instance, created = cls.get_or_create(**{
             cls.exercise_test.name: exercise_test,
@@ -555,11 +561,11 @@ class SolutionExerciseTestExecution(BaseModel):
 
     @classmethod
     def create_execution_result(
-            cls,
-            solution: Solution,
-            test_name: str,
-            user_message: str,
-            staff_message: str,
+        cls,
+        solution: Solution,
+        test_name: str,
+        user_message: str,
+        staff_message: str,
     ):
         exercise_test_name = ExerciseTestName.get_exercise_test(
             exercise=solution.exercise,
@@ -589,7 +595,7 @@ class CommentText(BaseModel):
 
     @classmethod
     def create_comment(
-            cls, text: str, flake_key: Optional[str] = None,
+        cls, text: str, flake_key: Optional[str] = None,
     ) -> 'CommentText':
         instance, _ = CommentText.get_or_create(
             **{CommentText.text.name: text},
@@ -603,23 +609,23 @@ class Comment(BaseModel):
     timestamp = DateTimeField(default=datetime.now)
     line_number = IntegerField(constraints=[Check('line_number >= 1')])
     comment = ForeignKeyField(CommentText)
-    file = ForeignKeyField(Solution, backref='comments')
+    file = ForeignKeyField(SolutionFile, backref='comments')
     is_auto = BooleanField(default=False)
 
     @classmethod
     def create_comment(
-            cls,
-            commenter: User,
-            line_number: int,
-            comment_text: CommentText,
-            solution: Solution,
-            is_auto: bool,
+        cls,
+        commenter: User,
+        line_number: int,
+        comment_text: CommentText,
+        file: SolutionFile,
+        is_auto: bool,
     ) -> 'Comment':
         return cls.get_or_create(
             commenter=commenter,
             line_number=line_number,
             comment=comment_text,
-            solution=solution,
+            file=file,
             is_auto=is_auto,
         )
 
@@ -628,15 +634,19 @@ class Comment(BaseModel):
         fields = [
             cls.id, cls.line_number, cls.is_auto,
             CommentText.id.alias('comment_id'), CommentText.text,
+            SolutionFile.id.alias('file_id'),
             User.fullname.alias('author_name'),
         ]
         return (
             cls
             .select(*fields)
+            .join(SolutionFile)
+            .join(Solution)
+            .switch()
             .join(CommentText)
             .switch()
             .join(User)
-            .where(cls.solution == solution_id)
+            .where(cls.file.solution == solution_id)
         )
 
     @classmethod

@@ -29,7 +29,7 @@ class Extractor:
         if code and isinstance(code, bytes):
             return code.decode(errors='replace')
 
-        assert isinstance(code, str)  # noqa: S101
+        assert isinstance(code, str)
         return code
 
     @classmethod

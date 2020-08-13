@@ -18,15 +18,15 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, CommentText, Exercise, RoleOptions, Solution, User,
-    database,
+    ALL_MODELS, Comment, CommentText, Exercise, RoleOptions,
+    Solution, SolutionFile, User, database,
 )
 import lms.extractors.base as extractor
 from lms.lmstests.public.flake8 import tasks as flake8_tasks
 from lms.lmstests.public.unittests import tasks as unittests_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmsweb import config, routes, webapp
-from lms.models import notifications, solutions
+from lms.models import notifications, solutions, upload
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
@@ -299,7 +299,7 @@ def send_():
 
 @webapp.route('/upload', methods=['POST'])
 @login_required
-def upload():
+def upload_page():
     user_id = current_user.id
     user = User.get_or_none(User.id == user_id)  # should never happen
     if user is None:
@@ -311,7 +311,9 @@ def upload():
     if not file:
         return fail(422, 'No file was given')
 
-    exercises = list(extractor.Extractor(file.read()))
+    file_content = file.read()
+    file_hash = upload.create_hash(file_content)
+    exercises = list(extractor.Extractor(file_content))
     if not exercises:
         msg = 'No exercises were found in the notebook'
         desc = 'did you use Upload <number of exercise> ? (example: Upload 1)'
@@ -327,14 +329,15 @@ def upload():
             continue
 
         if Solution.solution_exists(
-                exercise=exercise,
-                solver=user,
-                json_data_str=code,
+            exercise=exercise,
+            solver=user,
+            upload_hash=file_hash,
         ):
             continue
         solution = Solution.create_solution(
             exercise=exercise,
             solver=user,
+            upload_hash=file_hash,
             json_data_str=code,
         )
         flake8_tasks.run_flake8_on_solution.apply_async(args=(solution.id,))
@@ -351,8 +354,9 @@ def upload():
 
 
 @webapp.route(f'{routes.SOLUTIONS}/<int:solution_id>')
+@webapp.route(f'{routes.SOLUTIONS}/<int:solution_id>/<int:file_id>')
 @login_required
-def view(solution_id):
+def view(solution_id: int, file_id: Optional[int]):
     solution = Solution.get_or_none(Solution.id == solution_id)
     if solution is None:
         return fail(404, 'Solution does not exist.')
@@ -365,8 +369,10 @@ def view(solution_id):
     versions = solution.ordered_versions()
     test_results = solution.test_results()
     is_manager = current_user.role.is_manager
+
     view_params = {
         'solution': model_to_dict(solution),
+        'files': solution.files,
         'is_manager': is_manager,
         'role': current_user.role.name.lower(),
         'versions': versions,
@@ -418,22 +424,28 @@ def _common_comments(exercise_id=None, user_id=None):
     query = CommentText.filter(**{
         CommentText.flake8_key.name: None,
     }).select(CommentText.id, CommentText.text).join(Comment)
-    if exercise_id is not None:
-        query = (query
-                 .join(Solution)
-                 .join(Exercise)
-                 .where(Exercise.id == exercise_id)
-                 )
-    if user_id is not None:
-        query = (query
-                 .filter(Comment.commenter == user_id)
-                 )
 
-    query = (query
-             .group_by(CommentText.id)
-             .order_by(fn.Count(CommentText.id).desc())
-             .limit(5)
-             )
+    if exercise_id is not None:
+        query = (
+            query
+            .join(SolutionFile)
+            .join(Solution)
+            .join(Exercise)
+            .where(Exercise.id == exercise_id)
+        )
+
+    if user_id is not None:
+        query = (
+            query
+            .filter(Comment.commenter == user_id)
+        )
+
+    query = (
+        query
+        .group_by(CommentText.id)
+        .order_by(fn.Count(CommentText.id).desc())
+        .limit(5)
+    )
 
     return tuple(query.dicts())
 
