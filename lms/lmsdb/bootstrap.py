@@ -250,7 +250,7 @@ def _drop_index_if_needed(
     foreign_key: bool = False,
 ) -> None:
     table_name = table.__name__.lower()
-    suffix = "_id" if foreign_key else ""
+    suffix = '_id' if foreign_key else ''
     column_name = f'{table_name}_{field_instance.name}{suffix}'
     migrator = db_config.get_migrator_instance()
     log.info(f"Drop index from '{column_name}' field in '{table_name}'")
@@ -317,8 +317,9 @@ def _add_solution_state_if_needed():
 
 def _update_solution_hashes(s):
     log.info('Updating solution hashes. Might take a while.')
+    create_hash = models.Solution.create_hash
     for solution in s:
-        solution.upload_hash = upload.create_hash(solution.json_data_str)
+        solution.hashed = create_hash(solution.json_data_str)
         solution.save()
 
 
@@ -326,35 +327,55 @@ def _multiple_files_migration() -> bool:
     db = db_config.database
     f = models.SolutionFile
 
+    # Mock old solution. The null is needed for peewee's ALTER.
     class Solution(models.Solution):
         json_data_str = TextField(column_name='json_data_str')
-        upload_hash = TextField(null=True)
+        hashed = TextField(null=True)
     s = Solution
 
+    # Mock old comment. The null is needed for peewee's ALTER.
     class Comment(models.Comment):
         file = ForeignKeyField(f, backref='comments', null=True)
     c = Comment
 
-    solution_cols = {col.name for col in db.get_columns(s.__name__.lower())}
+    # Check if the migration is needed.
+    solution_cols = {
+        col.name for col in db.get_columns(models.Solution.__name__.lower())
+    }
     if 'json_data_str' not in solution_cols:
         log.info('Skipping multiple files migration.')
         return False
 
-    with models.database.connection_context():
-        solutions = s.select(s.id, s.id, '/main.py', s.json_data_str)
-        f.insert_from(solutions, [f.id, f.solution, f.path, f.code]).execute()
-
+    # Trick peewee to think there is a file column with no index,
+    # # than create it in the real Comments table
     _drop_index_if_needed(c, c.file, foreign_key=True)
+
+    # Create Comments.file_id
     _migrate_column_in_table_if_needed(c, c.file, field_name='file_id')
-    _migrate_column_in_table_if_needed(s, s.upload_hash)
-    solutions = c.select(s.id, s.id, '/main.py', s.json_data_str)
-    f.insert_from(solutions, [f.id, f.solution, f.path, f.code])
+
+    # Create Solution.hashed and populate it using json_data_str
+    _migrate_column_in_table_if_needed(s, s.hashed)
     _update_solution_hashes(s)
+
+    # Copy the data from Solution to SolutionFile with the same id.
+    # This will allow us to redirect Comment.solution_id from pointing to
+    # Solution to pointing to SolutionFile, keeping old comments.
+    solutions = s.select(
+        s.id, s.id, '/main.py', s.json_data_str, s.hashed,
+    )
+    fields = [f.id, f.solution, f.path, f.code, f.file_hash]
+    f.insert_from(solutions, fields).execute()
     _migrate_copy_column(c, dest='file_id', source='solution_id')
-    _add_not_null(c, 'file_id')
-    _add_not_null(s, 'upload_hash')
     _drop_column_from_module_if_needed(c, 'solution_id')
+
+    # Add NOT NULL (can't use NOT NULL when ALTERing new columns)
+    _add_not_null(c, 'file_id')
+    _add_not_null(s, 'hashed')
+
+    # Drop the unneeded content code of solutions
     _drop_column_from_module_if_needed(s, 'json_data_str')
+
+    # Done
     log.info('Successfully migrated multiple files.')
     return True
 

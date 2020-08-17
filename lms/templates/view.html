@@ -37,10 +37,12 @@
     {% endif %}
   </div>
   <div id="view-body">
-    {%- for file in files %}
+    {%- if files | length == 1 %}
+      {% include 'filetree.html' %}
+    {% endif -%}
     <div class="code-view-container">
       <div id="code-view" data-id="{{ solution['id'] }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}">
-        <pre><code class="language-python line-numbers highlight">{{- file.code | trim(' ') -}}</code></pre>
+        <pre><code class="language-python line-numbers highlight">{{- current_file.code | trim(' ') -}}</code></pre>
       </div>
       {% if test_results %}
       <div class="test-results">
@@ -67,7 +69,6 @@
       </div>
       {% endif %}
     </div>
-    {% endfor -%}
     {% if is_manager %}
     <div id="popular-comments">
       <div id="exercise-comments">

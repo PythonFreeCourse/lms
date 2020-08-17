@@ -1,6 +1,7 @@
-from typing import Optional
+from operator import itemgetter
+from typing import Any, Dict, Iterable, List, Optional
 
-from lms.lmsdb.models import Solution
+from lms.lmsdb.models import Solution, SolutionFile
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmsweb import config, routes
@@ -39,3 +40,17 @@ def start_checking(solution: Optional[Solution]) -> bool:
         )
         return True
     return False
+
+
+def get_files_tree(files: Iterable[SolutionFile]) -> List[Dict[str, Any]]:
+    file_details = [
+        {
+            'id': file.id,
+            'path': file.path.rpartition('/')[2],
+            'indent': file.path.count('/') - 1,
+            'code': file.code,
+        }
+        for file in files
+    ]
+    file_details.sort(key=itemgetter('path'))
+    return file_details

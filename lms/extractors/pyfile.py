@@ -1,6 +1,6 @@
-from typing import Iterator, Tuple
+from typing import Iterator, List, Tuple
 
-from lms.extractors.base import Extractor
+from lms.extractors.base import Extractor, File
 
 
 class Pyfile(Extractor):
@@ -11,10 +11,11 @@ class Pyfile(Extractor):
         return True
 
     @classmethod
-    def get_exercise(cls, to_extract: str) -> Tuple[str, str]:
-        return cls._clean(to_extract)
+    def get_exercise(cls, to_extract: str) -> Tuple[int, List[File]]:
+        exercise_id, content = cls._clean(to_extract)
+        return (exercise_id, [File('/main.py', content)])
 
-    def get_exercises(self) -> Iterator[Tuple[str, str]]:
-        extractor = self.get_exercise(self.to_extract)
-        if extractor and extractor[0]:
-            yield extractor
+    def get_exercises(self) -> Iterator[Tuple[int, List[File]]]:
+        exercise_id, files = self.get_exercise(self.to_extract)
+        if files and files[0].code:
+            yield (exercise_id, files)

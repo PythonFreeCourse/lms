@@ -4,7 +4,10 @@ import random
 import secrets
 import string
 from datetime import datetime
-from typing import Any, Dict, Iterable, Optional, Tuple, Type, Union, cast
+from typing import (
+    Any, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple,
+    Type, Union, cast,
+)
 
 from flask_login import UserMixin  # type: ignore
 from peewee import (  # type: ignore
@@ -21,6 +24,8 @@ from lms.lmsdb import database_config
 
 database = database_config.get_db_instance()
 ExercisesDictById = Dict[int, Dict[str, Any]]
+if TYPE_CHECKING:
+    from lms.extractors.base import File
 
 
 class RoleOptions(enum.Enum):
@@ -286,11 +291,24 @@ class Solution(BaseModel):
         default=0, constraints=[Check('grade <= 100'), Check('grade >= 0')],
     )
     submission_timestamp = DateTimeField(index=True)
-    upload_hash = TextField()
+    hashed = TextField()
 
     @property
     def is_checked(self):
         return self.state == self.STATES.DONE.name
+
+    @staticmethod
+    def create_hash(content: Union[str, bytes], *args, **kwargs) -> str:
+        return create_hash_by_content(content, *args, **kwargs)
+
+    @classmethod
+    def is_duplicate(
+            cls, content: Union[str, bytes], user: User,
+    ) -> bool:
+        return cls.select().where(
+            cls.hashed == cls.create_hash(content),
+            cls.solver == user,
+        ).exists()
 
     def start_checking(self) -> bool:
         return self.set_state(Solution.STATES.IN_CHECKING)
@@ -342,36 +360,26 @@ class Solution(BaseModel):
         return Comment.select().join(Solution).where(Comment.solution == self)
 
     @classmethod
-    def solution_exists(
-        cls,
-        exercise: Exercise,
-        solver: User,
-        upload_hash: str,
-    ):
-        return cls.select().where(
-            cls.exercise == exercise,
-            cls.solver == solver,
-            cls.upload_hash == upload_hash,
-        ).exists()
-
-    @classmethod
     def create_solution(
         cls,
         exercise: Exercise,
         solver: User,
-        upload_hash: str,
-        files: Dict[str, str],
+        files: List['File'],
+        hashed: Optional[str] = None,
     ) -> 'Solution':
+        if len(files) == 1:
+            hashed = cls.create_hash(files[0].code)
+
         instance = cls.create(**{
             cls.exercise.name: exercise,
             cls.solver.name: solver,
             cls.submission_timestamp.name: datetime.now(),
-            cls.upload_hash.name: upload_hash,
+            cls.hashed.name: hashed,
         })
 
         files_details = [
-            SolutionFile(path, content)
-            for path, content in files.items()
+            SolutionFile(f.path, instance, f.code, cls.create_hash(f.code))
+            for f in files
         ]
         SolutionFile.bulk_create(files_details)
 
@@ -479,9 +487,24 @@ class Solution(BaseModel):
 
 
 class SolutionFile(BaseModel):
-    path = TextField()
+    path = TextField(default='/main.py')
     solution = ForeignKeyField(Solution, backref='files')
     code = TextField()
+    file_hash = TextField()
+
+    @classmethod
+    def is_duplicate(
+            cls, exercise: Exercise, solver: User, code: str,
+    ) -> bool:
+        return cls.select().where(
+            cls.solution.exercise == Exercise,
+            cls.solver == solver,
+            cls.hashed == cls.create_hash(code),
+        ).exists()
+
+    @staticmethod
+    def create_hash(content: Union[str, bytes], *args, **kwargs) -> str:
+        return create_hash_by_content(content, *args, **kwargs)
 
 
 class ExerciseTest(BaseModel):
@@ -659,6 +682,17 @@ def generate_password():
     length = randomizer.randrange(9, 16)
     password = randomizer.choices(string.printable[:66], k=length)
     return ''.join(password)
+
+
+def create_hash_by_content(
+    file_content: Union[bytes, str], *args, **kwargs,
+) -> str:
+    if not isinstance(file_content, bytes):
+        file_content = file_content.encode('utf-8')
+
+    hashed_code = hashlib.blake2b(digest_size=20)
+    hashed_code.update(file_content)
+    return hashed_code.hexdigest()
 
 
 def create_demo_users():

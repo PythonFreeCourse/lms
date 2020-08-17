@@ -305,15 +305,13 @@ def upload_page():
     if user is None:
         return fail(404, 'user not found')
     if request.content_length > MAX_REQUEST_SIZE:
-        return fail(413, 'File is too heavy. 500KB allowed')
+        return fail(413, f'File is too heavy. {MAX_REQUEST_SIZE}KB allowed')
 
-    file: FileStorage = request.files.get('file')
-    if not file:
+    file: Optional[FileStorage] = request.files.get('file')
+    if file is None:
         return fail(422, 'No file was given')
 
-    file_content = file.read()
-    file_hash = upload.create_hash(file_content)
-    exercises = list(extractor.Extractor(file_content))
+    upload.new(file)
     if not exercises:
         msg = 'No exercises were found in the notebook'
         desc = 'did you use Upload <number of exercise> ? (example: Upload 1)'
@@ -331,13 +329,13 @@ def upload_page():
         if Solution.solution_exists(
             exercise=exercise,
             solver=user,
-            upload_hash=file_hash,
+            hashed=file_hash,
         ):
             continue
         solution = Solution.create_solution(
             exercise=exercise,
             solver=user,
-            upload_hash=file_hash,
+            hashed=file_hash,
             json_data_str=code,
         )
         flake8_tasks.run_flake8_on_solution.apply_async(args=(solution.id,))
@@ -356,7 +354,7 @@ def upload_page():
 @webapp.route(f'{routes.SOLUTIONS}/<int:solution_id>')
 @webapp.route(f'{routes.SOLUTIONS}/<int:solution_id>/<int:file_id>')
 @login_required
-def view(solution_id: int, file_id: Optional[int]):
+def view(solution_id: int, file_id: Optional[int] = None):
     solution = Solution.get_or_none(Solution.id == solution_id)
     if solution is None:
         return fail(404, 'Solution does not exist.')
@@ -370,9 +368,20 @@ def view(solution_id: int, file_id: Optional[int]):
     test_results = solution.test_results()
     is_manager = current_user.role.is_manager
 
+    solution_files = tuple(solution.files)
+    if not solution_files:
+        return fail(404, 'There are no files in this solution.')
+
+    files = solutions.get_files_tree(solution.files)
+    file_id = file_id or files[0]['id']
+    file_to_show = next((f for f in solution_files if f.id == file_id), None)
+    if file_to_show is None:
+        return fail(404, 'File does not exist.')
+
     view_params = {
         'solution': model_to_dict(solution),
-        'files': solution.files,
+        'files': files,
+        'current_file': file_to_show,
         'is_manager': is_manager,
         'role': current_user.role.name.lower(),
         'versions': versions,
