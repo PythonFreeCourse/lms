@@ -4,3 +4,7 @@ class LmsError(Exception):
 
 class UploadError(LmsError):
     pass
+
+
+class AlreadyExists(LmsError):
+    pass

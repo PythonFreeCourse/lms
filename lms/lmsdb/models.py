@@ -20,6 +20,7 @@ from werkzeug.security import (
 )
 
 from lms.lmsdb import database_config
+from lms.models import errors
 
 
 database = database_config.get_db_instance()
@@ -303,10 +304,12 @@ class Solution(BaseModel):
 
     @classmethod
     def is_duplicate(
-            cls, content: Union[str, bytes], user: User,
+            cls, content: Union[str, bytes], user: User, *,
+            already_hashed: bool = False,
     ) -> bool:
+        hash_ = cls.create_hash(content) if not already_hashed else content
         return cls.select().where(
-            cls.hashed == cls.create_hash(content),
+            cls.hashed == hash_,
             cls.solver == user,
         ).exists()
 
@@ -365,23 +368,31 @@ class Solution(BaseModel):
         exercise: Exercise,
         solver: User,
         files: List['File'],
-        hashed: Optional[str] = None,
+        hash_: Optional[str] = None,
     ) -> 'Solution':
         if len(files) == 1:
-            hashed = cls.create_hash(files[0].code)
+            hash_ = cls.create_hash(files[0].code)
+
+        if hash_ and cls.is_duplicate(hash_, solver, already_hashed=True):
+            raise errors.AlreadyExists('This solution already exists.')
 
         instance = cls.create(**{
             cls.exercise.name: exercise,
             cls.solver.name: solver,
             cls.submission_timestamp.name: datetime.now(),
-            cls.hashed.name: hashed,
+            cls.hashed.name: hash_,
         })
 
         files_details = [
-            SolutionFile(f.path, instance, f.code, cls.create_hash(f.code))
+            {
+                SolutionFile.path.name: f.path,
+                SolutionFile.solution_id.name: instance.id,
+                SolutionFile.code.name: f.code,
+                SolutionFile.file_hash.name: cls.create_hash(f.code),
+            }
             for f in files
         ]
-        SolutionFile.bulk_create(files_details)
+        SolutionFile.insert_many(files_details).execute()
 
         # update old solutions for this exercise
         other_solutions: Iterable[Solution] = cls.select().where(

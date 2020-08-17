@@ -21,11 +21,7 @@ from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Exercise, RoleOptions,
     Solution, SolutionFile, User, database,
 )
-import lms.extractors.base as extractor
-from lms.lmstests.public.flake8 import tasks as flake8_tasks
-from lms.lmstests.public.unittests import tasks as unittests_tasks
-from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
-from lms.lmsweb import config, routes, webapp
+from lms.lmsweb import routes, webapp
 from lms.models import notifications, solutions, upload
 
 login_manager = LoginManager()
@@ -311,40 +307,7 @@ def upload_page():
     if file is None:
         return fail(422, 'No file was given')
 
-    upload.new(file)
-    if not exercises:
-        msg = 'No exercises were found in the notebook'
-        desc = 'did you use Upload <number of exercise> ? (example: Upload 1)'
-        return fail(422, f'{msg}, {desc}')
-    matches, misses = set(), set()
-    for exercise_id, code in exercises:
-        exercise = Exercise.get_or_none(Exercise.id == exercise_id)
-        if exercise is None:
-            misses.add(exercise_id)
-            continue
-        if not exercise.open_for_new_solutions():
-            misses.add(exercise_id)
-            continue
-
-        if Solution.solution_exists(
-            exercise=exercise,
-            solver=user,
-            hashed=file_hash,
-        ):
-            continue
-        solution = Solution.create_solution(
-            exercise=exercise,
-            solver=user,
-            hashed=file_hash,
-            json_data_str=code,
-        )
-        flake8_tasks.run_flake8_on_solution.apply_async(args=(solution.id,))
-        unittests_tasks.run_tests_for_solution.apply_async(args=(solution.id,))
-        if config.FEATURE_FLAG_CHECK_IDENTICAL_CODE_ON:
-            (identical_tests_tasks.
-             solve_solution_with_identical_code.
-             apply_async(args=(solution.id,)))
-        matches.add(exercise_id)
+    matches, misses = upload.new(user, file)
     return jsonify({
         'exercise_matches': list(matches),
         'exercise_misses': list(misses),

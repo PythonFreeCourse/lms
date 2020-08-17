@@ -8,6 +8,7 @@ from typing import (
 )
 
 from loguru import logger
+from werkzeug.datastructures import FileStorage
 
 Text = Union[str, bytes]
 CodeFile = Union[Sequence[Text], str, bytes]
@@ -22,8 +23,11 @@ class File:
 class Extractor:
     UPLOAD_TITLE: ClassVar[Pattern] = re.compile(r'Upload\s+(\d+)', IGNORECASE)
 
-    def __init__(self, to_extract: Any):
+    def __init__(self, to_extract: FileStorage):
         self.to_extract = to_extract
+        cursor_position = to_extract.tell()
+        self.file_content = to_extract.read()
+        to_extract.seek(cursor_position)
 
     @staticmethod
     def _convert_to_text(code: CodeFile) -> str:

@@ -25,7 +25,7 @@ class Notebook(Extractor):
         return self.is_json
 
     def _get_code_cells(self) -> Iterator[Cell]:
-        notebook = json.loads(self.to_extract)
+        notebook = json.loads(self.file_content)
         cells = notebook['cells']
         yield from filter(self._is_code_cell, cells)
 
