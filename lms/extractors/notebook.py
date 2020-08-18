@@ -10,24 +10,24 @@ Cell = Dict[str, Any]
 
 
 class Notebook(Extractor):
+    POSSIBLE_JSON_EXCEPTIONS = (
+        json.JSONDecodeError, KeyError, StopIteration, UnicodeDecodeError,
+    )
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         try:
             cells = self._get_code_cells()
-            # Mandatory to run the generator
-            self.cells = itertools.chain([next(cells)], cells)
-        except (json.JSONDecodeError, KeyError):
+            # Triggers StopIteration if `cells` is empty (see example below).
+            first_cell = next(cells)
+            self.cells = itertools.chain([first_cell], cells)
+        except self.POSSIBLE_JSON_EXCEPTIONS:
             self.is_json = False
         else:
             self.is_json = True
 
     def can_extract(self) -> bool:
         return self.is_json
-
-    def _get_code_cells(self) -> Iterator[Cell]:
-        notebook = json.loads(self.file_content)
-        cells = notebook['cells']
-        yield from filter(self._is_code_cell, cells)
 
     @staticmethod
     def _is_code_cell(cell: Cell) -> bool:
@@ -36,10 +36,14 @@ class Notebook(Extractor):
             and bool(cell.get('source'))
         )
 
-    @classmethod
-    def get_exercise(cls, to_extract: Cell) -> Tuple[int, List[File]]:
+    def _get_code_cells(self) -> Iterator[Cell]:
+        notebook = json.loads(self.file_content)
+        cells = notebook['cells']
+        yield from filter(self._is_code_cell, cells)
+
+    def get_exercise(self, to_extract: Cell) -> Tuple[int, List[File]]:
         code: List[str] = to_extract.get('source', [])
-        exercise_id, clean_code = cls._clean(code)
+        exercise_id, clean_code = self._clean(code)
         return (exercise_id, [File('/main.py', clean_code)])
 
     def get_exercises(self) -> Iterator[Tuple[int, List[File]]]:
@@ -48,3 +52,14 @@ class Notebook(Extractor):
             exercise_id, files = self.get_exercise(cell)
             if files and files[0].code:
                 yield (exercise_id, files)
+
+
+if __name__ == '__main__':
+    # An example of how the itertools.chain + next() trick works
+    cells = iter([1, 2, 3])
+    assert list(itertools.chain([next(cells)], cells)) == [1, 2, 3]
+    try:
+        list(itertools.chain([next(cells)], cells))
+        raise AssertionError()
+    except StopIteration:
+        pass

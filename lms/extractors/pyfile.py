@@ -10,9 +10,8 @@ class Pyfile(Extractor):
     def can_extract(self) -> bool:
         return True
 
-    @classmethod
-    def get_exercise(cls, to_extract: str) -> Tuple[int, List[File]]:
-        exercise_id, content = cls._clean(to_extract)
+    def get_exercise(self, to_extract: str) -> Tuple[int, List[File]]:
+        exercise_id, content = self._clean(to_extract)
         return (exercise_id, [File('/main.py', content)])
 
     def get_exercises(self) -> Iterator[Tuple[int, List[File]]]:

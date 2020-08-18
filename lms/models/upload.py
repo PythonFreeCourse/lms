@@ -1,5 +1,6 @@
 from typing import List, Optional, Tuple
 
+from loguru import logger
 from werkzeug.datastructures import FileStorage
 
 from lms.extractors.base import Extractor, File
@@ -7,23 +8,20 @@ from lms.lmsdb.models import Exercise, Solution, User
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmstests.public.flake8 import tasks as flake8_tasks
 from lms.lmstests.public.unittests import tasks as unittests_tasks
-from lms.models.errors import UploadError
+from lms.models.errors import AlreadyExists, UploadError
 from lms.lmsweb import config
+from lms.utils import hashing
 
 
-def _is_uploaded_before(user: User, file: FileStorage) -> bool:
-    saved_location = file.tell()
-    file.seek(0)
-    is_duplicate = Solution.is_duplicate(file.read(), user)
-    file.seek(saved_location)
-    return is_duplicate
+def _is_uploaded_before(user: User, file_hash: str) -> bool:
+    return Solution.is_duplicate(file_hash, user, already_hashed=True)
 
 
 def _upload_to_db(
         exercise_id: int,
         user: User,
         files: List[File],
-        hashed: Optional[str] = None,
+        solution_hash: Optional[str] = None,
 ) -> Solution:
     exercise = Exercise.get_or_none(exercise_id)
     if exercise is None:
@@ -38,7 +36,7 @@ def _upload_to_db(
         exercise=exercise,
         solver=user,
         files=files,
-        hash_=hashed,
+        hash_=solution_hash,
     )
 
 
@@ -50,24 +48,19 @@ def run_auto_checks(solution: Solution) -> None:
         check_ident.apply_async(args=(solution.id,))
 
 
-def _handle_extracted_files(
-        exercise_id: int, user: User, files: List[File],
-) -> Solution:
-    solution = _upload_to_db(exercise_id, user, files)
-    run_auto_checks(solution)
-    return solution
-
-
 def new(user: User, file: FileStorage) -> Tuple[List[int], List[int]]:
-    if _is_uploaded_before(user, file):
-        raise UploadError('You try to reupload an old solution.')
+    solution_hash = hashing.by_file(file)
+    if _is_uploaded_before(user, solution_hash):
+        raise AlreadyExists('You try to reupload an old solution.')
 
     matches: List[int] = []
     misses: List[int] = []
     for exercise_id, files in Extractor(file):
         try:
-            _handle_extracted_files(exercise_id, user, files)
-        except UploadError:
+            _upload_to_db(exercise_id, user, files, solution_hash)
+            # This runs the checks: run_auto_checks(solution)
+        except (UploadError, AlreadyExists) as e:
+            logger.debug(e)
             misses.append(exercise_id)
         else:
             matches.append(exercise_id)

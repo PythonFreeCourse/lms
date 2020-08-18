@@ -12,6 +12,7 @@ from flask_admin.contrib.peewee import ModelView  # type: ignore
 from flask_login import (  # type: ignore
     LoginManager, current_user, login_required, login_user, logout_user,
 )
+from loguru import logger
 from peewee import fn  # type: ignore
 from playhouse.shortcuts import model_to_dict  # type: ignore
 from werkzeug.datastructures import FileStorage
@@ -23,6 +24,7 @@ from lms.lmsdb.models import (
 )
 from lms.lmsweb import routes, webapp
 from lms.models import notifications, solutions, upload
+from lms.models.errors import AlreadyExists, BadUploadFile
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
@@ -36,7 +38,7 @@ PERMISSIVE_CORS = {
 }
 
 HIGH_ROLES = {str(RoleOptions.STAFF), str(RoleOptions.ADMINISTRATOR)}
-MAX_REQUEST_SIZE = 550_000  # 550 KB
+MAX_REQUEST_SIZE = 10 * 1024 * 1024  # 2 MB
 
 
 @webapp.before_request
@@ -299,7 +301,7 @@ def upload_page():
     user_id = current_user.id
     user = User.get_or_none(User.id == user_id)  # should never happen
     if user is None:
-        return fail(404, 'user not found')
+        return fail(404, 'User not found')
     if request.content_length > MAX_REQUEST_SIZE:
         return fail(413, f'File is too heavy. {MAX_REQUEST_SIZE}KB allowed')
 
@@ -307,10 +309,15 @@ def upload_page():
     if file is None:
         return fail(422, 'No file was given')
 
-    matches, misses = upload.new(user, file)
+    try:
+        matches, misses = upload.new(user, file)
+    except (AlreadyExists, BadUploadFile) as e:
+        logger.debug(e)
+        return fail(400, str(e))
+
     return jsonify({
-        'exercise_matches': list(matches),
-        'exercise_misses': list(misses),
+        'exercise_matches': matches,
+        'exercise_misses': misses,
     })
 
 

@@ -8,3 +8,7 @@ class UploadError(LmsError):
 
 class AlreadyExists(LmsError):
     pass
+
+
+class BadUploadFile(LmsError):
+    pass

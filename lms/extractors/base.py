@@ -17,7 +17,7 @@ CodeFile = Union[Sequence[Text], str, bytes]
 @dataclass
 class File:
     path: str
-    code: str
+    code: Text
 
 
 class Extractor:
@@ -28,6 +28,7 @@ class Extractor:
         cursor_position = to_extract.tell()
         self.file_content = to_extract.read()
         to_extract.seek(cursor_position)
+        self.filename = to_extract.filename
 
     @staticmethod
     def _convert_to_text(code: CodeFile) -> str:
@@ -49,7 +50,9 @@ class Extractor:
 
         clean_text = code.strip('#' + string.whitespace)
         first_line_end = clean_text.find('\n')
-        first_line = clean_text[:first_line_end].strip()
+        if first_line_end == -1:
+            first_line_end = len(clean_text)
+        first_line = clean_text[:first_line_end].strip().replace('_', ' ')
         code_lines = clean_text[first_line_end:].strip()
 
         logger.debug(f'Upload title: {first_line}')
@@ -69,8 +72,7 @@ class Extractor:
     def can_extract(self) -> bool:
         raise NotImplementedError()
 
-    @classmethod
-    def get_exercise(cls, to_extract: Any) -> Tuple[int, List[File]]:
+    def get_exercise(self, to_extract: Any) -> Tuple[int, List[File]]:
         raise NotImplementedError()
 
     def get_exercises(self) -> Iterator[Tuple[int, List[File]]]:
@@ -78,6 +80,7 @@ class Extractor:
 
     def __iter__(self) -> Iterator[Tuple[int, List[File]]]:
         for cls in self.__class__.__subclasses__():
+            logger.debug(f'Trying extractor: {cls.__name__}')
             extractor = cls(to_extract=self.to_extract)
             if extractor.can_extract():
                 for solution_id, files in extractor.get_exercises():

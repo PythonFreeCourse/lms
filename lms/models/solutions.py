@@ -46,11 +46,15 @@ def get_files_tree(files: Iterable[SolutionFile]) -> List[Dict[str, Any]]:
     file_details = [
         {
             'id': file.id,
-            'path': file.path.rpartition('/')[2],
-            'indent': file.path.count('/') - 1,
+            'fullpath': file.path,
+            'path': file.path.strip('/').rpartition('/')[2],
+            'indent': file.path.strip('/').count('/'),
+            'is_folder': file.path.endswith('/'),
             'code': file.code,
         }
         for file in files
     ]
-    file_details.sort(key=itemgetter('path'))
+    file_details.sort(key=itemgetter('fullpath'))
+    for file in file_details:
+        file.pop('fullpath')
     return file_details

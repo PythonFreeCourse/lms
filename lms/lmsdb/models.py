@@ -1,5 +1,4 @@
 import enum
-import hashlib
 import random
 import secrets
 import string
@@ -20,7 +19,8 @@ from werkzeug.security import (
 )
 
 from lms.lmsdb import database_config
-from lms.models import errors
+from lms.models.errors import AlreadyExists
+from lms.utils import hashing
 
 
 database = database_config.get_db_instance()
@@ -300,7 +300,7 @@ class Solution(BaseModel):
 
     @staticmethod
     def create_hash(content: Union[str, bytes], *args, **kwargs) -> str:
-        return create_hash_by_content(content, *args, **kwargs)
+        return hashing.by_content(content, *args, **kwargs)
 
     @classmethod
     def is_duplicate(
@@ -374,7 +374,7 @@ class Solution(BaseModel):
             hash_ = cls.create_hash(files[0].code)
 
         if hash_ and cls.is_duplicate(hash_, solver, already_hashed=True):
-            raise errors.AlreadyExists('This solution already exists.')
+            raise AlreadyExists('This solution already exists.')
 
         instance = cls.create(**{
             cls.exercise.name: exercise,
@@ -388,7 +388,7 @@ class Solution(BaseModel):
                 SolutionFile.path.name: f.path,
                 SolutionFile.solution_id.name: instance.id,
                 SolutionFile.code.name: f.code,
-                SolutionFile.file_hash.name: cls.create_hash(f.code),
+                SolutionFile.file_hash.name: SolutionFile.create_hash(f.code),
             }
             for f in files
         ]
@@ -515,7 +515,7 @@ class SolutionFile(BaseModel):
 
     @staticmethod
     def create_hash(content: Union[str, bytes], *args, **kwargs) -> str:
-        return create_hash_by_content(content, *args, **kwargs)
+        return hashing.by_content(content, *args, **kwargs)
 
 
 class ExerciseTest(BaseModel):
@@ -693,17 +693,6 @@ def generate_password():
     length = randomizer.randrange(9, 16)
     password = randomizer.choices(string.printable[:66], k=length)
     return ''.join(password)
-
-
-def create_hash_by_content(
-    file_content: Union[bytes, str], *args, **kwargs,
-) -> str:
-    if not isinstance(file_content, bytes):
-        file_content = file_content.encode('utf-8')
-
-    hashed_code = hashlib.blake2b(digest_size=20)
-    hashed_code.update(file_content)
-    return hashed_code.hexdigest()
 
 
 def create_demo_users():
