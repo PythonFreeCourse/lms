@@ -162,7 +162,7 @@ def exercises_page():
 
 def _create_comment(
     user_id: int,
-    solution: Solution,
+    file: SolutionFile,
     kind: str,
     line_number: int,
     comment_text: Optional[str] = None,  # set when kind == text
@@ -193,7 +193,7 @@ def _create_comment(
         commenter=user,
         line_number=line_number,
         comment=new_comment_id,
-        solution=solution,
+        file=file,
     )
 
     return jsonify({
@@ -222,20 +222,20 @@ def comment():
     act = request.args.get('act') or request.json.get('act')
 
     if request.method == 'POST':
-        solution_id = int(request.json.get('solutionId', 0))
+        file_id = int(request.json.get('fileId', 0))
     else:  # it's a GET
-        solution_id = int(request.args.get('solutionId', 0))
+        file_id = int(request.args.get('fileId', 0))
 
-    solution = Solution.get_or_none(Solution.id == solution_id)
-    if solution is None:
-        return fail(404, f'No such solution {solution_id}')
+    file = SolutionFile.get_or_none(file_id)
+    if file is None:
+        return fail(404, f'No such file {file_id}')
 
-    solver_id = solution.solver.id
+    solver_id = file.solution.solver.id
     if solver_id != current_user.id and not current_user.role.is_manager:
         return fail(403, "You aren't allowed to access this page.")
 
     if act == 'fetch':
-        return jsonify(Comment.get_solutions(solution_id))
+        return jsonify(Comment.by_file(file_id))
 
     if act == 'delete':
         comment_id = int(request.args.get('commentId'))
@@ -257,7 +257,7 @@ def comment():
             comment_text = request.json.get('comment', '')
         return _create_comment(
             current_user.id,
-            solution,
+            file,
             kind,
             line_number,
             comment_text,
@@ -382,7 +382,8 @@ def view(solution_id: int, file_id: Optional[int] = None):
 def done_checking(exercise_id, solution_id):
     is_updated = solutions.mark_as_checked(solution_id, current_user.id)
     next_solution = solutions.get_next_unchecked(exercise_id)
-    return jsonify({'success': is_updated, 'next': next_solution.id})
+    next_solution_id = getattr(next_solution, 'id', None)
+    return jsonify({'success': is_updated, 'next': next_solution_id})
 
 
 @webapp.route('/check/<int:exercise_id>')

@@ -209,7 +209,6 @@ i.fa {
 #filetree {
   display: flex;
   overflow-x: none;
-  flex-grow: 1;
 }
 
 #files {
@@ -333,7 +332,7 @@ i.fa {
   text-align: left;
   height: min-content;
   display: flex;
-  flex-grow: 5;
+  flex-grow: 1;
   flex-basis: min(75vw, -moz-available);
   overflow-x: hidden;
 }

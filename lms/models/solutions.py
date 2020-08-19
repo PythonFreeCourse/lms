@@ -56,5 +56,5 @@ def get_files_tree(files: Iterable[SolutionFile]) -> List[Dict[str, Any]]:
     ]
     file_details.sort(key=itemgetter('fullpath'))
     for file in file_details:
-        file.pop('fullpath')
+        del file['fullpath']
     return file_details

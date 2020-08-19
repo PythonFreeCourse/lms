@@ -29,7 +29,7 @@ function formatCommentData(commentData) {
   let changedCommentText = commentData.text;
   changedCommentText = `<span class="comment-author">${commentData.author_name}:</span> ${commentData.text}`
   if (isUserGrader()) {
-    const deleteButton = `<i class="fa fa-trash grader-delete" aria-hidden="true" data-commentid="${commentData.id}" onclick="deleteComment(${window.solutionId}, ${commentData.id});"></i>`;
+    const deleteButton = `<i class="fa fa-trash grader-delete" aria-hidden="true" data-commentid="${commentData.id}" onclick="deleteComment(${window.fileId}, ${commentData.id});"></i>`;
     changedCommentText = `${deleteButton} ${changedCommentText}`;
   }
   return changedCommentText;
@@ -73,8 +73,8 @@ function treatComments(comments) {
 }
 
 
-function pullComments(solutionId, callback) {
-  const url = `/comments?act=fetch&solutionId=${solutionId}`;
+function pullComments(fileId, callback) {
+  const url = `/comments?act=fetch&fileId=${fileId}`;
   const xhr = new XMLHttpRequest();
 
   xhr.onreadystatechange = () => {
@@ -105,7 +105,8 @@ window.isUserGrader = isUserGrader;
 window.addEventListener('load', () => {
   const codeElement = document.getElementById('code-view').dataset;
   window.solutionId = codeElement.id;
+  window.fileId = codeElement.file;
   sessionStorage.setItem('role', codeElement.role);
   addLineSpansToPre(document.getElementsByTagName('code'));
-  pullComments(window.solutionId, treatComments);
+  pullComments(window.fileId, treatComments);
 });

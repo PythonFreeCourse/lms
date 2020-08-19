@@ -1,7 +1,7 @@
 <div id="filetree">
   <ol id="files">
     {%- for file in files %}
-    <li class="file">
+    <li class="file" data-id="{{ file.id }}">
       <span class="indent" style="padding-left: {{ file.indent }}em"></span>
       <span class="
       {%- if file.is_folder -%}
@@ -10,7 +10,7 @@
         icon hawcons-icon-document-text hawcons-icon-file-{{ file.path.rsplit('.')[-1] }}">
       {%- endif -%}
       </span>
-      <span class="filename" title="{{ file.path }}">{{ file.path | truncate(25, killwords=True) }}</span>
+      <a {% if not file.is_folder %}href="/view/{{ solution.id }}/{{ file.id }}"{% endif %} class="filename link" title="{{ file.path }}">{{ file.path | truncate(25, killwords=True) }}</a>
     </li>
     {% endfor -%}
   </ol>

@@ -415,9 +415,13 @@ class Solution(BaseModel):
             comments_count,
             fails,
         ).join(
+            SolutionFile,
+            join_type=JOIN.LEFT_OUTER,
+            on=(SolutionFile.solution == cls.id),
+        ).join(
             Comment,
             join_type=JOIN.LEFT_OUTER,
-            on=(Comment.solution == cls.id),
+            on=(Comment.file == SolutionFile.id),
         ).join(
             SolutionExerciseTestExecution,
             join_type=JOIN.LEFT_OUTER,
@@ -664,7 +668,7 @@ class Comment(BaseModel):
         )
 
     @classmethod
-    def by_solution(cls, solution_id: int):
+    def _by_file(cls, file_id: int):
         fields = [
             cls.id, cls.line_number, cls.is_auto,
             CommentText.id.alias('comment_id'), CommentText.text,
@@ -675,17 +679,16 @@ class Comment(BaseModel):
             cls
             .select(*fields)
             .join(SolutionFile)
-            .join(Solution)
             .switch()
             .join(CommentText)
             .switch()
             .join(User)
-            .where(cls.file.solution == solution_id)
+            .where(cls.file == file_id)
         )
 
     @classmethod
-    def get_solutions(cls, solution_id: int) -> Tuple[Dict[Any, Any], ...]:
-        return tuple(cls.by_solution(solution_id).dicts())
+    def by_file(cls, file_id: int) -> Tuple[Dict[Any, Any], ...]:
+        return tuple(cls._by_file(file_id).dicts())
 
 
 def generate_password():
