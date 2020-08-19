@@ -78,8 +78,9 @@ class TestUTForExercise:
 
     @staticmethod
     def _initialize_solution(solution: models.Solution, module_name: str):
-        solution.json_data_str = STUDENT_CODE
-        solution.save()
+        solution_file = solution.solution_files.get()
+        solution_file.code = STUDENT_CODE
+        solution_file.save()
         import_tests.load_test_from_module(module_name)
 
     @staticmethod

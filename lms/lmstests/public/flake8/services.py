@@ -52,12 +52,17 @@ class PyFlakeChecker:
             self._errors.append(PyFlakeResponse(*error))
 
     def _run_in_sandbox(self):
-        result = self.sandbox_tasks.run_flake8_on_sandbox_on_code.apply_async(
-            args=(self._solution_id, self.solution.json_data_str),
-        )
+        results = [
+            self.sandbox_tasks.run_flake8_on_sandbox_on_code.apply_async(
+                args=(solution_file.id, solution_file.code),
+            )
+            for solution_file in self.solution.solution_files
+        ]
+        responses = []
         with allow_join_result():
-            response = result.get()
-        return response
+            for result in results:
+                responses.extend(result.get())
+        return responses
 
     def _populate_comments(self):
         self._logger.info(
@@ -76,7 +81,7 @@ class PyFlakeChecker:
                 commenter=models.User.get_system_user(),
                 line_number=error.line_number,
                 comment_text=comment_text,
-                solution=self.solution,
+                file=models.SolutionFile.get_by_id(error.solution_file_id),
                 is_auto=True,
             )
 

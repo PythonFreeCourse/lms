@@ -1,5 +1,6 @@
 import collections
 import logging
+import typing
 
 from lms.lmsdb import models
 from lms.models import notifications
@@ -24,9 +25,16 @@ class IdenticalSolutionSolver:
         return self._solution
 
     def check_identical(self):
-        solution = self._get_first_identical_solution()
-        if solution is None:
+        solution_file = self._get_first_identical_solution_file()
+        if solution_file is None:
             return
+
+        solution = solution_file.solution
+        if solution.solution_files.count() != 1:
+            self._logger.info(
+                'Skip multiple files identical check on solution %s',
+                solution,
+            )
 
         self._logger.info(
             'solution %s matched to an checked solution %s. '
@@ -38,32 +46,33 @@ class IdenticalSolutionSolver:
             to_solution=self.solution,
         )
 
-    def _get_first_identical_solution(self):
-        return models.Solution.select().join(
-            models.Exercise,
-        ).filter(**{
-            models.Solution.exercise.name:
-                self.solution.exercise,
-            models.Solution.state.name:
-                models.Solution.STATES.DONE.name,
-            models.Solution.json_data_str.name:
-                self.solution.json_data_str,
-        }).first()
+    def _get_first_identical_solution_file(
+            self,
+    ) -> typing.Optional[models.SolutionFile]:
+        match_code = self.solution.solution_files.get().code
+        return models.SolutionFile.select().join(
+            models.Solution,
+        ).filter(
+            models.Solution.exercise == self.solution.exercise,
+            models.Solution.state == models.Solution.STATES.DONE.name,
+            models.SolutionFile.code == match_code,
+        ).first()
 
     def check_for_match_solutions_to_solve(self):
-        for solution in models.Solution.select().join(
-                models.Exercise,
-        ).filter(**{
-            models.Solution.exercise.name:
-                self.solution.exercise,
-            models.Solution.state.name:
-                models.Solution.STATES.CREATED.name,
-            models.Solution.json_data_str.name:
-                self.solution.json_data_str,
-        }):
+        if self.solution.solution_files.count() != 1:
+            return
+
+        match_code = self.solution.solution_files.get().code
+        for solution_file in models.SolutionFile.select().join(
+                models.Solution,
+        ).filter(
+            models.Solution.exercise == self.solution.exercise,
+            models.Solution.state == models.Solution.STATES.CREATED.name,
+            models.SolutionFile.code == match_code,
+        ):
             self._clone_solution_comments(
                 from_solution=self.solution,
-                to_solution=solution,
+                to_solution=solution_file.solution,
             )
 
     @staticmethod
@@ -78,8 +87,8 @@ class IdenticalSolutionSolver:
             models.Comment.create_comment(
                 commenter=models.User.get_system_user(),
                 line_number=comment.line_number,
-                comment_text=comment.comment.comment_id,
-                solution=to_solution,
+                comment_text=comment.comment,
+                file=to_solution.solution_files.get(),
                 is_auto=True,
             )
 

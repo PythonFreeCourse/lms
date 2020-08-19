@@ -11,6 +11,7 @@ from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Exercise, Notification, Role,
     RoleOptions, Solution, User,
 )
+from lms.extractors.base import File
 from lms.lmstests.public import celery_app as public_app
 from lms.lmstests.sandbox import celery_app as sandbox_app
 from lms.lmsweb import routes
@@ -137,7 +138,7 @@ def create_solution(
     return Solution.create_solution(
         exercise=exercise,
         solver=student_user,
-        json_data_str=code,
+        files=[File('exercise.py', code)],
     )
 
 
@@ -150,7 +151,7 @@ def solution(exercise: Exercise, student_user: User) -> Solution:
 def comment(staff_user, solution):
     return Comment.create_comment(
         commenter=staff_user,
-        solution=solution,
+        file=solution.solution_files.get(),
         comment_text=CommentText.create_comment(text='very good!'),
         line_number=1,
         is_auto=False,

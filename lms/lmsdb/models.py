@@ -295,6 +295,12 @@ class Solution(BaseModel):
     hashed = TextField()
 
     @property
+    def solution_files(
+            self,
+    ) -> Union[Iterable['SolutionFile'], 'SolutionFile']:
+        return SolutionFile.filter(SolutionFile.solution == self)
+
+    @property
     def is_checked(self):
         return self.state == self.STATES.DONE.name
 
@@ -360,7 +366,9 @@ class Solution(BaseModel):
 
     @property
     def comments(self):
-        return Comment.select().join(Solution).where(Comment.solution == self)
+        return Comment.select().join(
+            SolutionFile,
+        ).where(SolutionFile.solution == self)
 
     @classmethod
     def create_solution(
@@ -649,6 +657,19 @@ class Comment(BaseModel):
     comment = ForeignKeyField(CommentText)
     file = ForeignKeyField(SolutionFile, backref='comments')
     is_auto = BooleanField(default=False)
+
+    @classmethod
+    def by_solution(
+            cls,
+            solution: Solution,
+    ) -> Union[Iterable['Comment'], 'Comment']:
+        return cls.select().join(
+            SolutionFile,
+        ).filter(SolutionFile.solution == solution)
+
+    @property
+    def solution(self) -> Solution:
+        return self.file.solution
 
     @classmethod
     def create_comment(
