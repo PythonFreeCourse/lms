@@ -10,7 +10,7 @@
         icon hawcons-icon-document-text hawcons-icon-file-{{ file.path.rsplit('.')[-1] | e }}">
       {%- endif -%}
       </span>
-      <a {% if not file.is_folder %}href="/view/{{ solution.id }}/{{ file.id }}"{% endif %} class="filename link" title="{{ file.path }} | e">{{ file.path | truncate(25, killwords=True) | e }}</a>
+      <a {% if not file.is_folder %}href="/view/{{ solution.id }}/{{ file.id }}"{% endif %} class="filename link" title="{{ file.path | e }}">{{ file.path | truncate(25, killwords=True) | e }}</a>
     </li>
     {% endfor -%}
   </ol>

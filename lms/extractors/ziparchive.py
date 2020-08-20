@@ -30,7 +30,7 @@ class Ziparchive(Extractor):
         with archive.open(filename) as current_file:
             logger.debug(f'Extracting from archive: {filename}')
             code = current_file.read()
-        decoded = code.decode('utf-8', errors='ignore')
+        decoded = code.decode('utf-8', errors='replace').replace('\x00', '')
         return File(path=f'/{filename}', code=decoded)
 
     def get_exercise(self, file: ZipFile) -> Tuple[int, List[File]]:
