@@ -45,11 +45,18 @@ class PyFlakeFileScanner:
             if error.error_code in defines.FLAKE_SKIP_ERRORS:
                 self._logger.info(
                     'Skipping error %s on line %s to solution file %s',
-                    error.error_code, error.line_number, self._solution_file_id)
+                    error.error_code,
+                    error.line_number,
+                    self._solution_file_id,
+                )
                 continue
 
-            self._logger.info('Adding error %s on line %s to solution file %s',
-                              error.error_code, error.line_number, self._solution_file_id)
+            self._logger.info(
+                'Adding error %s on line %s to solution file %s',
+                error.error_code,
+                error.line_number,
+                self._solution_file_id,
+            )
             custom_text = defines.FLAKE_ERRORS_MAPPING.get(
                 error.error_code, f'{error.error_code}-{error.text}')
             response.append(PyFlakeResponse(
