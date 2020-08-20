@@ -157,6 +157,17 @@ def _drop_column_from_module_if_needed(
     return True
 
 
+def _execute_sql_if_possible(sql: str) -> bool:
+    with db_config.database.transaction():
+        log.info(f'Running {sql}')
+        try:
+            db_config.database.execute_sql(sql)
+            db_config.database.commit()
+        except (OperationalError, ProgrammingError) as e:
+            log.info(f"Can't run SQL '{sql}' because: {e}")
+    return True
+
+
 def _drop_constraint_if_needed(table: Type[Model], column_name: str) -> bool:
     table_name = table.__name__.lower()
     cols = {col.name for col in db_config.database.get_columns(table_name)}
@@ -373,6 +384,16 @@ def _multiple_files_migration() -> bool:
 
     # Drop the unneeded content code of solutions
     _drop_column_from_module_if_needed(s, 'json_data_str')
+
+    # Update serial of SolutionFile to the last one.
+    # This will allow us to add new files without collusions.
+    _execute_sql_if_possible(
+        'SELECT setval('
+        "pg_get_serial_sequence('{table_name}', 'id'), "
+        'coalesce(max(id)+1, 1), '
+        'false'
+        ') FROM {table_name};'.format(table_name='solutionfile'),
+    )
 
     # Done
     log.info('Successfully migrated multiple files.')
