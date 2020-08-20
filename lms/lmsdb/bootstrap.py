@@ -257,7 +257,7 @@ def _drop_index_if_needed(
         try:
             migrate(migrator.drop_index(table_name, column_name))
         except (OperationalError, ProgrammingError) as e:
-            if 'already exists' in str(e):
+            if 'does not exist' in str(e):
                 log.info('Index already exists.')
             else:
                 raise
@@ -322,8 +322,18 @@ def _update_solution_hashes(s):
         solution.save()
 
 
-def _multiple_files_migration() -> bool:
+def check_if_multiple_files_migration_is_needed():
     db = db_config.database
+    solution_cols = {
+        col.name for col in db.get_columns(models.Solution.__name__.lower())
+    }
+    if 'json_data_str' not in solution_cols:
+        log.info('Skipping multiple files migration.')
+        return False
+    return True
+
+
+def _multiple_files_migration() -> bool:
     f = models.SolutionFile
 
     # Mock old solution. The null is needed for peewee's ALTER.
@@ -338,19 +348,8 @@ def _multiple_files_migration() -> bool:
     c = Comment
 
     # Check if the migration is needed.
-    solution_cols = {
-        col.name for col in db.get_columns(models.Solution.__name__.lower())
-    }
-    if 'json_data_str' not in solution_cols:
-        log.info('Skipping multiple files migration.')
+    if not check_if_multiple_files_migration_is_needed():
         return False
-
-    # Trick peewee to think there is a file column with no index,
-    # # than create it in the real Comments table
-    _drop_index_if_needed(c, c.file, foreign_key=True)
-
-    # Create Comments.file_id
-    _migrate_column_in_table_if_needed(c, c.file, field_name='file_id')
 
     # Create Solution.hashed and populate it using json_data_str
     _migrate_column_in_table_if_needed(s, s.hashed)
@@ -379,7 +378,29 @@ def _multiple_files_migration() -> bool:
     return True
 
 
+def prepare_postgres_to_multiple_files_migration() -> bool:
+    # Check if the migration is needed.
+    if not check_if_multiple_files_migration_is_needed():
+        return False
+
+    class Comment(models.Comment):
+        file = ForeignKeyField(
+            models.SolutionFile, backref='comments', null=True,
+        )
+    c = Comment
+
+    # Trick peewee to think there is a file column with no index,
+    # # than create it in the real Comments table
+    _drop_index_if_needed(c, c.file, foreign_key=True)
+
+    # Create Comments.file_id
+    _migrate_column_in_table_if_needed(c, c.file, field_name='file_id')
+    return True
+
+
 def main():
+    prepare_postgres_to_multiple_files_migration()
+
     with models.database.connection_context():
         models.database.create_tables(models.ALL_MODELS, safe=True)
 
