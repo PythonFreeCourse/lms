@@ -344,7 +344,7 @@ def view(solution_id: int, file_id: Optional[int] = None):
     if not solution_files:
         if not is_manager:
             return fail(404, 'There are no files in this solution.')
-        return done_checking(solution.exercise.id, current_user.id)
+        return done_checking(solution.exercise.id, solution.id)
 
     files = solutions.get_files_tree(solution.files)
     file_id = file_id or files[0]['id']
