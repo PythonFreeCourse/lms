@@ -38,7 +38,7 @@ PERMISSIVE_CORS = {
 }
 
 HIGH_ROLES = {str(RoleOptions.STAFF), str(RoleOptions.ADMINISTRATOR)}
-MAX_REQUEST_SIZE = 10 * 1024 * 1024  # 2 MB
+MAX_REQUEST_SIZE = 2_000_000  # 2MB (in bytes)
 
 
 @webapp.before_request
@@ -303,7 +303,9 @@ def upload_page():
     if user is None:
         return fail(404, 'User not found')
     if request.content_length > MAX_REQUEST_SIZE:
-        return fail(413, f'File is too heavy. {MAX_REQUEST_SIZE}KB allowed')
+        return fail(
+            413, f'File is too big. {MAX_REQUEST_SIZE // 1000000}MB allowed',
+        )
 
     file: Optional[FileStorage] = request.files.get('file')
     if file is None:
@@ -340,7 +342,9 @@ def view(solution_id: int, file_id: Optional[int] = None):
 
     solution_files = tuple(solution.files)
     if not solution_files:
-        return fail(404, 'There are no files in this solution.')
+        if not is_manager:
+            return fail(404, 'There are no files in this solution.')
+        return done_checking(solution.exercise.id, current_user.id)
 
     files = solutions.get_files_tree(solution.files)
     file_id = file_id or files[0]['id']
