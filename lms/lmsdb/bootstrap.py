@@ -37,12 +37,18 @@ def _migrate_column_in_table_if_needed(
     log.info(f'Create {column_name} field in {table}')
     migrator = db_config.get_migrator_instance()
     with db_config.database.transaction():
-        migrate(migrator.add_column(
-            table=table_name,
-            column_name=column_name,
-            field=field_instance,
-            **kwargs,
-        ))
+        try:
+            migrate(migrator.add_column(
+                table=table_name,
+                column_name=column_name,
+                field=field_instance,
+                **kwargs,
+            ))
+        except (OperationalError, ProgrammingError) as e:
+            if 'does not exist' in str(e):
+                log.info(f'Column {field_name} already exists: {e}')
+            else:
+                raise
         db_config.database.commit()
     return True
 
@@ -399,7 +405,7 @@ def _multiple_files_migration() -> bool:
     return True
 
 
-def prepare_postgres_to_multiple_files_migration() -> bool:
+def _prepare_postgres_to_multiple_files_migration() -> bool:
     # Check if the migration is needed.
     if not check_if_multiple_files_migration_is_needed():
         return False
@@ -420,7 +426,10 @@ def prepare_postgres_to_multiple_files_migration() -> bool:
 
 
 def main():
-    prepare_postgres_to_multiple_files_migration()
+    with models.database.connection_context():
+        models.database.create_tables([models.SolutionFile], safe=True)
+
+    _prepare_postgres_to_multiple_files_migration()
 
     with models.database.connection_context():
         models.database.create_tables(models.ALL_MODELS, safe=True)
