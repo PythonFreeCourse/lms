@@ -57,6 +57,7 @@ class PyFlakeChecker:
                 args=(solution_file.id, solution_file.code),
             )
             for solution_file in self.solution.solution_files
+            if solution_file.path.endswith('.py')
         ]
         responses = []
         with allow_join_result():
