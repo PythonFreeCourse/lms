@@ -206,6 +206,21 @@ i.fa {
   margin-left: 0;
 }
 
+#filetree {
+  display: flex;
+  overflow-x: none;
+}
+
+#files {
+  list-style-type: none;
+  text-align: left;
+  margin: 0 1rem;
+  direction: ltr;
+  white-space: nowrap;
+  padding: 0.2rem;
+  line-height: 2;
+}
+
 /* Upload */
 #send-page-parent {
   height: 100vh;
@@ -312,9 +327,25 @@ i.fa {
 */
 
 .code-view-container {
+  display: flex;
   direction: ltr;
   text-align: left;
-  width: 80%;
+  height: min-content;
+  display: flex;
+  flex-grow: 1;
+  flex-basis: min(75vw, -moz-available);
+  overflow-x: hidden;
+}
+
+
+#code-view {
+  display: flex;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+pre {
+  width: 100%
 }
 
 .test-results {
@@ -367,7 +398,7 @@ code {
   margin-right: 2rem;
   position: sticky;
   top: 2rem;
-  max-width: 30vw;
+  min-width: 15vw;
 }
 
 #popular-comments h2 {

@@ -15,11 +15,11 @@
           <span id="notification-count" class="badge badge-secondary">0</span>
         </a>
         <div id="notifications-list" class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-          {%- for notification in current_user.get_notifications() %}
+          {% for notification in current_user.get_notifications() %}
           <div class="notification dropdown-item" data-read="{{ notification.viewed | lower }}">
             <i class="fa icon" aria-hidden="true"></i>
             <a href="{{ notification.action_url }}" class="notification-text">
-              {{ notification.message }}
+              {{ notification.message | e }}
             </a>
             <span class="notification-date" title="{{ notification.created }}">{{ notification.created | date_humanize }}</span>
           </div>
@@ -27,7 +27,7 @@
           <div id="read-notifications" class="notification dropdown-item">
             <i class="fa fa-check" aria-hidden="true"></i>
             <a href="#">סמן הכל כנקרא.</a>
-          </a>
+          </div>
         </div>
       </li>
       <li class="nav-item">

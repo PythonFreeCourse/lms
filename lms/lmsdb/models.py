@@ -3,7 +3,10 @@ import random
 import secrets
 import string
 from datetime import datetime
-from typing import Any, Dict, Iterable, Optional, Tuple, Type, Union
+from typing import (
+    Any, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple,
+    Type, Union, cast,
+)
 
 from flask_login import UserMixin  # type: ignore
 from peewee import (  # type: ignore
@@ -16,10 +19,14 @@ from werkzeug.security import (
 )
 
 from lms.lmsdb import database_config
+from lms.models.errors import AlreadyExists
+from lms.utils import hashing
 
 
 database = database_config.get_db_instance()
 ExercisesDictById = Dict[int, Dict[str, Any]]
+if TYPE_CHECKING:
+    from lms.extractors.base import File
 
 
 class RoleOptions(enum.Enum):
@@ -122,7 +129,7 @@ class User(UserMixin, BaseModel):
 
 @pre_save(sender=User)
 def on_save_handler(model_class, instance, created):
-    """Hashes password on creation/save"""
+    """Hash password on creation/save."""
 
     # If password changed then it won't start with hash's method prefix
     is_password_changed = not instance.password.startswith('pbkdf2:sha256')
@@ -178,12 +185,12 @@ class Notification(BaseModel):
 
     @classmethod
     def send(
-            cls,
-            user: User,
-            kind: int,
-            message: str,
-            related_id: Optional[int] = None,
-            action_url: Optional[str] = None,
+        cls,
+        user: User,
+        kind: int,
+        message: str,
+        related_id: Optional[int] = None,
+        action_url: Optional[str] = None,
     ) -> 'Notification':
         return cls.create(**{
             cls.user.name: user,
@@ -196,9 +203,9 @@ class Notification(BaseModel):
 
 @post_save(sender=Notification)
 def on_notification_saved(
-        model_class: Type[Notification],
-        instance: Notification,
-        created: datetime,
+    model_class: Type[Notification],
+    instance: Notification,
+    created: datetime,
 ):
     # sqlite supports delete query with order
     # but when we use postgres, peewee is stupid
@@ -215,7 +222,7 @@ class Exercise(BaseModel):
     subject = CharField()
     date = DateTimeField()
     users = ManyToManyField(User, backref='exercises')
-    is_archived = BooleanField(index=True)
+    is_archived = BooleanField(default=False, index=True)
     due_date = DateTimeField(null=True)
     notebook_num = IntegerField(default=0)
     order = IntegerField(default=0, index=True)
@@ -264,8 +271,9 @@ class SolutionState(enum.Enum):
         )
 
     @classmethod
-    def to_choices(cls) -> Tuple[Tuple[str, str], ...]:
-        return tuple((choice.name, choice.value) for choice in tuple(cls))
+    def to_choices(cls: enum.EnumMeta) -> Tuple[Tuple[str, str], ...]:
+        choices = cast(Iterable[enum.Enum], tuple(cls))
+        return tuple((choice.name, choice.value) for choice in choices)
 
 
 class Solution(BaseModel):
@@ -284,11 +292,32 @@ class Solution(BaseModel):
         default=0, constraints=[Check('grade <= 100'), Check('grade >= 0')],
     )
     submission_timestamp = DateTimeField(index=True)
-    json_data_str = TextField()
+    hashed = TextField()
+
+    @property
+    def solution_files(
+            self,
+    ) -> Union[Iterable['SolutionFile'], 'SolutionFile']:
+        return SolutionFile.filter(SolutionFile.solution == self)
 
     @property
     def is_checked(self):
         return self.state == self.STATES.DONE.name
+
+    @staticmethod
+    def create_hash(content: Union[str, bytes], *args, **kwargs) -> str:
+        return hashing.by_content(content, *args, **kwargs)
+
+    @classmethod
+    def is_duplicate(
+            cls, content: Union[str, bytes], user: User, *,
+            already_hashed: bool = False,
+    ) -> bool:
+        hash_ = cls.create_hash(content) if not already_hashed else content
+        return cls.select().where(
+            cls.hashed == hash_,
+            cls.solver == user,
+        ).exists()
 
     def start_checking(self) -> bool:
         return self.set_state(Solution.STATES.IN_CHECKING)
@@ -304,10 +333,6 @@ class Solution(BaseModel):
         updated = changes.execute() == 1
         return updated
 
-    @property
-    def code(self):
-        return self.json_data_str
-
     def ordered_versions(self) -> Iterable['Solution']:
         return Solution.select().where(
             Solution.exercise == self.exercise,
@@ -319,7 +344,7 @@ class Solution(BaseModel):
 
     @classmethod
     def of_user(
-            cls, user_id: int, with_archived: bool = False,
+        cls, user_id: int, with_archived: bool = False,
     ) -> Iterable[Dict[str, Any]]:
         db_exercises = Exercise.get_objects(fetch_archived=with_archived)
         exercises = Exercise.as_dicts(db_exercises)
@@ -341,34 +366,41 @@ class Solution(BaseModel):
 
     @property
     def comments(self):
-        return Comment.select().join(Solution).where(Comment.solution == self)
-
-    @classmethod
-    def solution_exists(
-            cls,
-            exercise: Exercise,
-            solver: User,
-            json_data_str: str,
-    ):
-        return cls.select().where(
-            cls.exercise == exercise,
-            cls.solver == solver,
-            cls.json_data_str == json_data_str,
-        ).exists()
+        return Comment.select().join(
+            SolutionFile,
+        ).where(SolutionFile.solution == self)
 
     @classmethod
     def create_solution(
         cls,
         exercise: Exercise,
         solver: User,
-        json_data_str='',
+        files: List['File'],
+        hash_: Optional[str] = None,
     ) -> 'Solution':
+        if len(files) == 1:
+            hash_ = cls.create_hash(files[0].code)
+
+        if hash_ and cls.is_duplicate(hash_, solver, already_hashed=True):
+            raise AlreadyExists('This solution already exists.')
+
         instance = cls.create(**{
             cls.exercise.name: exercise,
             cls.solver.name: solver,
             cls.submission_timestamp.name: datetime.now(),
-            cls.json_data_str.name: json_data_str,
+            cls.hashed.name: hash_,
         })
+
+        files_details = [
+            {
+                SolutionFile.path.name: f.path,
+                SolutionFile.solution_id.name: instance.id,
+                SolutionFile.code.name: f.code,
+                SolutionFile.file_hash.name: SolutionFile.create_hash(f.code),
+            }
+            for f in files
+        ]
+        SolutionFile.insert_many(files_details).execute()
 
         # update old solutions for this exercise
         other_solutions: Iterable[Solution] = cls.select().where(
@@ -391,9 +423,13 @@ class Solution(BaseModel):
             comments_count,
             fails,
         ).join(
+            SolutionFile,
+            join_type=JOIN.LEFT_OUTER,
+            on=(SolutionFile.solution == cls.id),
+        ).join(
             Comment,
             join_type=JOIN.LEFT_OUTER,
-            on=(Comment.solution == cls.id),
+            on=(Comment.file == SolutionFile.id),
         ).join(
             SolutionExerciseTestExecution,
             join_type=JOIN.LEFT_OUTER,
@@ -409,8 +445,8 @@ class Solution(BaseModel):
         )
 
     def mark_as_checked(
-            self,
-            by: Optional[Union[User, int]] = None,
+        self,
+        by: Optional[Union[User, int]] = None,
     ) -> bool:
         return self.set_state(
             Solution.STATES.DONE,
@@ -473,6 +509,27 @@ class Solution(BaseModel):
         return int(response['checked'] * 100 / response['submitted'])
 
 
+class SolutionFile(BaseModel):
+    path = TextField(default='/main.py')
+    solution = ForeignKeyField(Solution, backref='files')
+    code = TextField()
+    file_hash = TextField()
+
+    @classmethod
+    def is_duplicate(
+            cls, exercise: Exercise, solver: User, code: str,
+    ) -> bool:
+        return cls.select().where(
+            cls.solution.exercise == Exercise,
+            cls.solver == solver,
+            cls.hashed == cls.create_hash(code),
+        ).exists()
+
+    @staticmethod
+    def create_hash(content: Union[str, bytes], *args, **kwargs) -> str:
+        return hashing.by_content(content, *args, **kwargs)
+
+
 class ExerciseTest(BaseModel):
     exercise = ForeignKeyField(model=Exercise, unique=True)
     code = TextField()
@@ -508,10 +565,10 @@ class ExerciseTestName(BaseModel):
 
     @classmethod
     def create_exercise_test_name(
-            cls,
-            exercise_test: ExerciseTest,
-            test_name: str,
-            pretty_test_name: str,
+        cls,
+        exercise_test: ExerciseTest,
+        test_name: str,
+        pretty_test_name: str,
     ):
         instance, created = cls.get_or_create(**{
             cls.exercise_test.name: exercise_test,
@@ -550,11 +607,11 @@ class SolutionExerciseTestExecution(BaseModel):
 
     @classmethod
     def create_execution_result(
-            cls,
-            solution: Solution,
-            test_name: str,
-            user_message: str,
-            staff_message: str,
+        cls,
+        solution: Solution,
+        test_name: str,
+        user_message: str,
+        staff_message: str,
     ):
         exercise_test_name = ExerciseTestName.get_exercise_test(
             exercise=solution.exercise,
@@ -584,7 +641,7 @@ class CommentText(BaseModel):
 
     @classmethod
     def create_comment(
-            cls, text: str, flake_key: Optional[str] = None,
+        cls, text: str, flake_key: Optional[str] = None,
     ) -> 'CommentText':
         instance, _ = CommentText.get_or_create(
             **{CommentText.text.name: text},
@@ -598,45 +655,61 @@ class Comment(BaseModel):
     timestamp = DateTimeField(default=datetime.now)
     line_number = IntegerField(constraints=[Check('line_number >= 1')])
     comment = ForeignKeyField(CommentText)
-    solution = ForeignKeyField(Solution)
+    file = ForeignKeyField(SolutionFile, backref='comments')
     is_auto = BooleanField(default=False)
 
     @classmethod
-    def create_comment(
+    def by_solution(
             cls,
-            commenter: User,
-            line_number: int,
-            comment_text: CommentText,
             solution: Solution,
-            is_auto: bool,
+    ) -> Union[Iterable['Comment'], 'Comment']:
+        return cls.select().join(
+            SolutionFile,
+        ).filter(SolutionFile.solution == solution)
+
+    @property
+    def solution(self) -> Solution:
+        return self.file.solution
+
+    @classmethod
+    def create_comment(
+        cls,
+        commenter: User,
+        line_number: int,
+        comment_text: CommentText,
+        file: SolutionFile,
+        is_auto: bool,
     ) -> 'Comment':
         return cls.get_or_create(
             commenter=commenter,
             line_number=line_number,
             comment=comment_text,
-            solution=solution,
+            file=file,
             is_auto=is_auto,
         )
 
     @classmethod
-    def by_solution(cls, solution_id: int):
+    def _by_file(cls, file_id: int):
         fields = [
             cls.id, cls.line_number, cls.is_auto,
             CommentText.id.alias('comment_id'), CommentText.text,
+            SolutionFile.id.alias('file_id'),
             User.fullname.alias('author_name'),
         ]
         return (
             cls
             .select(*fields)
+            .join(SolutionFile)
+            .switch()
             .join(CommentText)
             .switch()
             .join(User)
-            .where(cls.solution == solution_id)
+            .where(cls.file == file_id)
         )
 
     @classmethod
-    def get_solutions(cls, solution_id: int) -> Tuple[Dict[Any, Any], ...]:
-        return tuple(cls.by_solution(solution_id).dicts())
+    def by_file(cls, file_id: int) -> Tuple[Dict[Any, Any], ...]:
+        return tuple(cls._by_file(file_id).dicts())
 
 
 def generate_password():

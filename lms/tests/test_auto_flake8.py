@@ -31,22 +31,22 @@ class TestAutoFlake8:
             shutil.rmtree(cls.test_directory)
 
     def test_pyflake_wont_execute_code(self, solution: models.Solution):
-        solution.json_data_str = self.execute_script
-        solution.save()
+        solution_file = solution.solution_files.get()
+        solution_file.code = self.execute_script
+        solution_file.save()
         tasks.run_flake8_on_solution(solution.id)
-        comments = tuple(
-            models.Comment.filter(models.Comment.solution == solution))
+        comments = tuple(models.Comment.by_solution(solution))
         assert not os.listdir(self.test_directory)
         assert len(comments) == 2
         exec(compile(self.execute_script, '', 'exec'))  # noqa S102
         assert os.listdir(self.test_directory) == ['some-file']
 
     def test_invalid_solution(self, solution: models.Solution):
-        solution.json_data_str = INVALID_CODE
-        solution.save()
+        solution_file = solution.solution_files.get()
+        solution_file.code = INVALID_CODE
+        solution_file.save()
         tasks.run_flake8_on_solution(solution.id)
-        comments = tuple(
-            models.Comment.filter(models.Comment.solution == solution))
+        comments = tuple(models.Comment.by_solution(solution))
         assert comments
         assert len(comments) == 1
         comment = comments[0].comment
@@ -60,9 +60,9 @@ class TestAutoFlake8:
         assert '1' in subject
 
     def test_valid_solution(self, solution: models.Solution):
-        solution.json_data_str = VALID_CODE
-        solution.save()
+        solution_file = solution.solution_files.get()
+        solution_file.code = VALID_CODE
+        solution_file.save()
         tasks.run_flake8_on_solution(solution.id)
-        comments = tuple(
-            models.Comment.filter(models.Comment.solution == solution))
+        comments = tuple(models.Comment.by_solution(solution))
         assert not comments

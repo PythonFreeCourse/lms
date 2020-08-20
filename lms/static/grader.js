@@ -8,7 +8,7 @@ function trackFinished(exerciseId, solutionId, element) {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
           if (xhr.response.next !== null) {
-            window.location.href = xhr.response.next;
+            window.location.href = `/view/${xhr.response.next}`;
           } else {
             alert("Yay! That's it!");
           }
@@ -23,7 +23,7 @@ function trackFinished(exerciseId, solutionId, element) {
 }
 
 
-function sendComment(kind, solutionId, line, commentData) {
+function sendComment(kind, fileId, line, commentData) {
   const xhr = new XMLHttpRequest();
   xhr.open('POST', '/comments');
   xhr.setRequestHeader('Content-Type', 'application/json');
@@ -45,7 +45,7 @@ function sendComment(kind, solutionId, line, commentData) {
       comment: commentData,
       kind, // Should be 'text' or 'id'
       line,
-      solutionId,
+      fileId,
     }),
   );
 }
@@ -65,9 +65,9 @@ function visuallyRemoveComment(commentId) {
 }
 
 
-function deleteComment(solutionId, commentId) {
+function deleteComment(fileId, commentId) {
   const xhr = new XMLHttpRequest();
-  const url = `/comments?act=delete&solutionId=${solutionId}&commentId=${commentId}`;
+  const url = `/comments?act=delete&fileId=${fileId}&commentId=${commentId}`;
   xhr.open('GET', url, true);
   xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.responseType = 'json';
@@ -127,7 +127,7 @@ function trackDragAreas(items) {
       const { line } = target.dataset;
       const commentId = e.dataTransfer.getData('text/plain');
       window.hoverLine(target, false);
-      sendExistsComment(window.solutionId, line, commentId);
+      sendExistsComment(window.fileId, line, commentId);
     }, false);
   });
 }
@@ -153,7 +153,7 @@ function trackTextArea(lineNumber) {
   const popoverElement = `.grader-add[data-line='${lineNumber}']`;
   $(target).keydown((ev) => {
     if ((ev.which == 10 || ev.which == 13) && ev.ctrlKey) {  // CTRL + ENTER
-      sendNewComment(window.solutionId, lineNumber, ev.target.value);
+      sendNewComment(window.fileId, lineNumber, ev.target.value);
       $(popoverElement).popover('hide');
     } else if (ev.key == 'Escape') {
       ev.preventDefault();

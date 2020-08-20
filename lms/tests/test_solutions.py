@@ -23,8 +23,8 @@ class TestSolutionDb:
             exercise: Exercise,
             student_user: User,
     ):
-        first_solution = Solution.create_solution(exercise, student_user)
-        second_solution = Solution.create_solution(exercise, student_user)
+        first_solution = conftest.create_solution(exercise, student_user)
+        second_solution = conftest.create_solution(exercise, student_user)
         assert second_solution.state == self.created_state
         assert first_solution.refresh().state == self.old_solution_state
 
@@ -55,7 +55,7 @@ class TestSolutionDb:
         student_user: User = conftest.create_student_user(index=1)
         first_solution = comment.solution
         comment_text = comment.comment
-        second_solution = Solution.create_solution(
+        second_solution = conftest.create_solution(
             comment.solution.exercise, student_user)
 
         # comment exists on first solution - second one should be the first
@@ -74,7 +74,7 @@ class TestSolutionDb:
             commenter=staff_user,
             line_number=1,
             comment_text=comment_text,
-            solution=second_solution,
+            file=second_solution.solution_files.get(),
             is_auto=False,
         )
         next_unchecked = Solution.next_unchecked()
@@ -86,7 +86,7 @@ class TestSolutionDb:
             commenter=staff_user,
             line_number=1,
             comment_text=comment_text,
-            solution=first_solution,
+            file=first_solution.solution_files.get(),
             is_auto=False,
         )
         next_unchecked = Solution.next_unchecked()
@@ -113,7 +113,7 @@ class TestSolutionBridge:
 
         # Not duplicating things
         staff_user2 = conftest.create_staff_user(index=1)
-        solution2 = Solution.create_solution(exercise, student_user)
+        solution2 = conftest.create_solution(exercise, student_user)
         marked = solutions.mark_as_checked(solution2.id, staff_user2.id)
         solution2 = Solution.get_by_id(solution2.id)
         assert solution2.state == Solution.STATES.DONE.name
@@ -170,9 +170,9 @@ class TestSolutionBridge:
     ):
         student_user2 = conftest.create_student_user(index=1)
         exercise2 = conftest.create_exercise(1)
-        solution1 = Solution.create_solution(exercise, student_user)
-        solution2 = Solution.create_solution(exercise2, student_user)
-        solution3 = Solution.create_solution(exercise, student_user2)
+        solution1 = conftest.create_solution(exercise, student_user)
+        solution2 = conftest.create_solution(exercise2, student_user)
+        solution3 = conftest.create_solution(exercise, student_user2)
 
         is_checking = solutions.start_checking(solution=None)
         assert not is_checking

@@ -15,7 +15,7 @@
         <p class="unchecked-msg"><strong>התרגיל שלך מחכה לבדיקה.</strong> חשוב לנו שכל תרגיל יעבור בדיקה של עין אנושית.</p>
       {% endif %}
     {% else %}
-    <p id="solver"><strong>מגיש:</strong> <a href="/user/{{ solution['solver']['id'] }}">{{ solution['solver']['fullname'] }}</a></p>
+    <p id="solver"><strong>מגיש:</strong> <a href="/user/{{ solution['solver']['id'] }}">{{ solution['solver']['fullname'] | e }}</a></p>
     {% endif %}
     <nav id="versions" aria-lael="ניווט בגרסאות ההגשה">
       <ul class="pagination">
@@ -37,42 +37,42 @@
     {% endif %}
   </div>
   <div id="view-body">
-      <div class="code-view-container">
-          <div id="code-view" data-id="{{ solution['id'] }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}">
-              <pre><code class="language-python line-numbers highlight">{{- solution['json_data_str'] | trim(' ') -}}</code></pre>
-          </div>
-          {% if test_results %}
-              <div class="test-results">
-                  <h3 class="test-result-title">בדיקות אוטומטיות</h3>
-                  <ol class="test-results-list">
-                      {%- for test_result in test_results %}
-                          <li class="test-result">
-                              <h5 class="test-name">
-                                  {{ test_result.pretty_test_name }}
-                              </h5>
-                              <span class="title">שגיאה:</span>
-                              <span>
-                                  <pre><code class="language-python highlight">{{ test_result.user_message }}</code></pre>
-                              </span>
-                              {% if is_manager %}
-                                  <span class="title">שגיאת סגל:</span>
-                                  <span class="stack-trace">
-                                      <pre><code class="language-python highlight">{{ test_result.staff_message }}</code></pre>
-                                  </span>
-                              {% endif %}
-                          </li>
-                      {% endfor -%}
-                  </ol>
-              </div>
-          {% endif %}
+    <div class="code-view-container">
+      <div id="code-view" data-id="{{ solution['id'] }}" data-file="{{ current_file.id }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}">
+        <pre><code class="language-python line-numbers highlight">{{- current_file.code | trim(' ') | e -}}</code></pre>
       </div>
+      {% if test_results %}
+      <div class="test-results">
+          <h3 class="test-result-title">בדיקות אוטומטיות</h3>
+          <ol class="test-results-list">
+              {%- for test_result in test_results %}
+              <li class="test-result">
+                  <h5 class="test-name">
+                      {{ test_result.pretty_test_name | e }}
+                  </h5>
+                  <span class="title">שגיאה:</span>
+                  <span>
+                      <pre><code class="language-python highlight">{{ test_result.user_message | e }}</code></pre>
+                  </span>
+                  {% if is_manager %}
+                  <span class="title">שגיאת סגל:</span>
+                  <span class="stack-trace">
+                      <pre><code class="language-python highlight">{{ test_result.staff_message | e }}</code></pre>
+                  </span>
+                  {% endif %}
+              </li>
+              {% endfor -%}
+          </ol>
+      </div>
+      {% endif %}
+    </div>
     {% if is_manager %}
     <div id="popular-comments">
       <div id="exercise-comments">
         <h2>הערות על התרגיל</h2>
         <ol id="exercise-comments-list" class="comments exercise-comments">
           {%- for comment in exercise_common_comments %}
-          <li class="known-comment" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text }}</li>
+          <li class="known-comment" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text | e }}</li>
           {% endfor -%}
         </ol>
       </div>
@@ -80,7 +80,7 @@
         <h2>הערות כלליות</h2>
         <ol id="all-comments-list" class="comments all-comments">
           {%- for comment in all_common_comments %}
-          <li class="known-comment" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text }}</li>
+          <li class="known-comment" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text | e }}</li>
           {% endfor -%}
         </ol>
       </div>
@@ -89,7 +89,7 @@
         {% if user_comments %}
             <ol id="my-comments-list" class="comments my-comments">
               {%- for comment in user_comments %}
-              <li class="known-comment" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text }}</li>
+              <li class="known-comment" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text | e }}</li>
               {% endfor -%}
             </ol>
         {% endif -%}
@@ -100,6 +100,9 @@
       </div>
     </div>
     {% endif %}
+    {%- if files | length > 1 %}
+      {% include 'filetree.html' %}
+    {% endif -%}
   </div>
 </div>
 <script src="{{ url_for('static', filename='prism.js') }}"></script>

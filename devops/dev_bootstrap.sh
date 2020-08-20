@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eux
+set -x
 
 SCRIPT_FILE_PATH=$(readlink -f "${0}")
 SCRIPT_FOLDER=$(dirname "${SCRIPT_FILE_PATH}")
@@ -47,4 +47,4 @@ $pip_exec install -r "${MAIN_FOLDER}/dev_requirements.txt"
 echo "Creating local SQLite DB"
 $python_exec "${DB_BOOTSTRAP_FILE_PATH}"
 
-set +eux
+set +x

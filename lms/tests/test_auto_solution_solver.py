@@ -85,15 +85,16 @@ class TestAutoSolutionSolver:
             first_solution_code: str,
             second_solution_code: str,
     ) -> typing.Tuple[models.Solution, models.Solution]:
-        first_solution: models.Solution = comment.solution
+        first_solution: models.Solution = comment.file.solution
         first_solution.set_state(models.Solution.STATES.DONE)
         first_solution = first_solution.refresh()
-        first_solution.json_data_str = first_solution_code
-        first_solution.save()
+        solution_file = first_solution.solution_files.get()
+        solution_file.code = first_solution_code
+        solution_file.save()
         student_user: models.User = conftest.create_student_user(index=1)
-        second_solution = models.Solution.create_solution(
+        second_solution = conftest.create_solution(
             exercise=first_solution.exercise,
-            solver=student_user,
-            json_data_str=second_solution_code,
+            student_user=student_user,
+            code=second_solution_code,
         )
         return first_solution, second_solution

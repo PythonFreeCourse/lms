@@ -62,7 +62,12 @@ class UnitTestChecker:
         return junit_results
 
     def _generate_python_code(self) -> str:
-        user_code = self._solution.code
+        # FIX: Multiple files
+        assert self._solution is not None
+        user_code = '\n'.join(
+            file.code for file in self._solution.solution_files
+        )
+        assert self._exercise_auto_test is not None
         test_code = self._exercise_auto_test.code
         return f'{test_code}\n\n{user_code}'
 

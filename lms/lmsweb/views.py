@@ -12,21 +12,19 @@ from flask_admin.contrib.peewee import ModelView  # type: ignore
 from flask_login import (  # type: ignore
     LoginManager, current_user, login_required, login_user, logout_user,
 )
+from loguru import logger
 from peewee import fn  # type: ignore
 from playhouse.shortcuts import model_to_dict  # type: ignore
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, CommentText, Exercise, RoleOptions, Solution, User,
-    database,
+    ALL_MODELS, Comment, CommentText, Exercise, RoleOptions,
+    Solution, SolutionFile, User, database,
 )
-import lms.extractors.base as extractor
-from lms.lmstests.public.flake8 import tasks as flake8_tasks
-from lms.lmstests.public.unittests import tasks as unittests_tasks
-from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
-from lms.lmsweb import config, routes, webapp
-from lms.models import notifications, solutions
+from lms.lmsweb import routes, webapp
+from lms.models import notifications, solutions, upload
+from lms.models.errors import AlreadyExists, BadUploadFile
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
@@ -40,7 +38,7 @@ PERMISSIVE_CORS = {
 }
 
 HIGH_ROLES = {str(RoleOptions.STAFF), str(RoleOptions.ADMINISTRATOR)}
-MAX_REQUEST_SIZE = 550_000  # 550 KB
+MAX_REQUEST_SIZE = 10 * 1024 * 1024  # 2 MB
 
 
 @webapp.before_request
@@ -164,7 +162,7 @@ def exercises_page():
 
 def _create_comment(
     user_id: int,
-    solution: Solution,
+    file: SolutionFile,
     kind: str,
     line_number: int,
     comment_text: Optional[str] = None,  # set when kind == text
@@ -195,7 +193,7 @@ def _create_comment(
         commenter=user,
         line_number=line_number,
         comment=new_comment_id,
-        solution=solution,
+        file=file,
     )
 
     return jsonify({
@@ -224,20 +222,20 @@ def comment():
     act = request.args.get('act') or request.json.get('act')
 
     if request.method == 'POST':
-        solution_id = int(request.json.get('solutionId', 0))
+        file_id = int(request.json.get('fileId', 0))
     else:  # it's a GET
-        solution_id = int(request.args.get('solutionId', 0))
+        file_id = int(request.args.get('fileId', 0))
 
-    solution = Solution.get_or_none(Solution.id == solution_id)
-    if solution is None:
-        return fail(404, f'No such solution {solution_id}')
+    file = SolutionFile.get_or_none(file_id)
+    if file is None:
+        return fail(404, f'No such file {file_id}')
 
-    solver_id = solution.solver.id
+    solver_id = file.solution.solver.id
     if solver_id != current_user.id and not current_user.role.is_manager:
         return fail(403, "You aren't allowed to access this page.")
 
     if act == 'fetch':
-        return jsonify(Comment.get_solutions(solution_id))
+        return jsonify(Comment.by_file(file_id))
 
     if act == 'delete':
         comment_id = int(request.args.get('commentId'))
@@ -259,7 +257,7 @@ def comment():
             comment_text = request.json.get('comment', '')
         return _create_comment(
             current_user.id,
-            solution,
+            file,
             kind,
             line_number,
             comment_text,
@@ -299,60 +297,34 @@ def send_():
 
 @webapp.route('/upload', methods=['POST'])
 @login_required
-def upload():
+def upload_page():
     user_id = current_user.id
     user = User.get_or_none(User.id == user_id)  # should never happen
     if user is None:
-        return fail(404, 'user not found')
+        return fail(404, 'User not found')
     if request.content_length > MAX_REQUEST_SIZE:
-        return fail(413, 'File is too heavy. 500KB allowed')
+        return fail(413, f'File is too heavy. {MAX_REQUEST_SIZE}KB allowed')
 
-    file: FileStorage = request.files.get('file')
-    if not file:
+    file: Optional[FileStorage] = request.files.get('file')
+    if file is None:
         return fail(422, 'No file was given')
 
-    exercises = list(extractor.Extractor(file.read()))
-    if not exercises:
-        msg = 'No exercises were found in the notebook'
-        desc = 'did you use Upload <number of exercise> ? (example: Upload 1)'
-        return fail(422, f'{msg}, {desc}')
-    matches, misses = set(), set()
-    for exercise_id, code in exercises:
-        exercise = Exercise.get_or_none(Exercise.id == exercise_id)
-        if exercise is None:
-            misses.add(exercise_id)
-            continue
-        if not exercise.open_for_new_solutions():
-            misses.add(exercise_id)
-            continue
+    try:
+        matches, misses = upload.new(user, file)
+    except (AlreadyExists, BadUploadFile) as e:
+        logger.debug(e)
+        return fail(400, str(e))
 
-        if Solution.solution_exists(
-                exercise=exercise,
-                solver=user,
-                json_data_str=code,
-        ):
-            continue
-        solution = Solution.create_solution(
-            exercise=exercise,
-            solver=user,
-            json_data_str=code,
-        )
-        flake8_tasks.run_flake8_on_solution.apply_async(args=(solution.id,))
-        unittests_tasks.run_tests_for_solution.apply_async(args=(solution.id,))
-        if config.FEATURE_FLAG_CHECK_IDENTICAL_CODE_ON:
-            (identical_tests_tasks.
-             solve_solution_with_identical_code.
-             apply_async(args=(solution.id,)))
-        matches.add(exercise_id)
     return jsonify({
-        'exercise_matches': list(matches),
-        'exercise_misses': list(misses),
+        'exercise_matches': matches,
+        'exercise_misses': misses,
     })
 
 
 @webapp.route(f'{routes.SOLUTIONS}/<int:solution_id>')
+@webapp.route(f'{routes.SOLUTIONS}/<int:solution_id>/<int:file_id>')
 @login_required
-def view(solution_id):
+def view(solution_id: int, file_id: Optional[int] = None):
     solution = Solution.get_or_none(Solution.id == solution_id)
     if solution is None:
         return fail(404, 'Solution does not exist.')
@@ -365,8 +337,21 @@ def view(solution_id):
     versions = solution.ordered_versions()
     test_results = solution.test_results()
     is_manager = current_user.role.is_manager
+
+    solution_files = tuple(solution.files)
+    if not solution_files:
+        return fail(404, 'There are no files in this solution.')
+
+    files = solutions.get_files_tree(solution.files)
+    file_id = file_id or files[0]['id']
+    file_to_show = next((f for f in solution_files if f.id == file_id), None)
+    if file_to_show is None:
+        return fail(404, 'File does not exist.')
+
     view_params = {
         'solution': model_to_dict(solution),
+        'files': files,
+        'current_file': file_to_show,
         'is_manager': is_manager,
         'role': current_user.role.name.lower(),
         'versions': versions,
@@ -397,7 +382,8 @@ def view(solution_id):
 def done_checking(exercise_id, solution_id):
     is_updated = solutions.mark_as_checked(solution_id, current_user.id)
     next_solution = solutions.get_next_unchecked(exercise_id)
-    return jsonify({'success': is_updated, 'next': next_solution.id})
+    next_solution_id = getattr(next_solution, 'id', None)
+    return jsonify({'success': is_updated, 'next': next_solution_id})
 
 
 @webapp.route('/check/<int:exercise_id>')
@@ -418,22 +404,28 @@ def _common_comments(exercise_id=None, user_id=None):
     query = CommentText.filter(**{
         CommentText.flake8_key.name: None,
     }).select(CommentText.id, CommentText.text).join(Comment)
-    if exercise_id is not None:
-        query = (query
-                 .join(Solution)
-                 .join(Exercise)
-                 .where(Exercise.id == exercise_id)
-                 )
-    if user_id is not None:
-        query = (query
-                 .filter(Comment.commenter == user_id)
-                 )
 
-    query = (query
-             .group_by(CommentText.id)
-             .order_by(fn.Count(CommentText.id).desc())
-             .limit(5)
-             )
+    if exercise_id is not None:
+        query = (
+            query
+            .join(SolutionFile)
+            .join(Solution)
+            .join(Exercise)
+            .where(Exercise.id == exercise_id)
+        )
+
+    if user_id is not None:
+        query = (
+            query
+            .filter(Comment.commenter == user_id)
+        )
+
+    query = (
+        query
+        .group_by(CommentText.id)
+        .order_by(fn.Count(CommentText.id).desc())
+        .limit(5)
+    )
 
     return tuple(query.dicts())
 
