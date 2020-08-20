@@ -20,7 +20,7 @@
     {%- for exercise in exercises|rejectattr("is_archived") %}
         <tr>
           <th scope="row">{{ exercise['id'] }}</th>
-          <td><a href="/check/{{ exercise['id'] }}">{{ exercise['name'] }}</a></td>
+          <td><a href="/check/{{ exercise['id'] }}">{{ exercise['name'] | e }}</a></td>
           <td>{{ exercise['checked'] }}</td>
           <td>{{ exercise['submitted'] }}</td>
           <td>{{ (exercise['checked'] * 100 / exercise['submitted']) | round(2, 'floor') }}%</td>
@@ -33,7 +33,7 @@
     {%- for exercise in exercises|selectattr("is_archived") %}
         <tr>
     	  <th scope="row">{{ exercise['id'] }}</th>
-          <td><a href="/check/{{ exercise['id'] }}">{{ exercise['name'] }}</a></td>
+          <td><a href="/check/{{ exercise['id'] }}">{{ exercise['name'] | e }}</a></td>
           <td>{{ exercise['checked'] }}</td>
           <td>{{ exercise['submitted'] }}</td>
           <td>{{ (exercise['checked'] * 100 / exercise['submitted']) | round(2, 'floor') }}%</td>

@@ -19,7 +19,7 @@
           <div class="notification dropdown-item" data-read="{{ notification.viewed | lower }}">
             <i class="fa icon" aria-hidden="true"></i>
             <a href="{{ notification.action_url }}" class="notification-text">
-              {{ notification.message }}
+              {{ notification.message | e }}
             </a>
             <span class="notification-date" title="{{ notification.created }}">{{ notification.created | date_humanize }}</span>
           </div>

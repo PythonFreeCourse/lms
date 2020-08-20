@@ -13,7 +13,7 @@
       <div class="exercise">
         <div class="right-side">
           <div class="exercise-id">{{ exercise['exercise_id'] }}</div>
-          <div class="exercise-name"><div class="ex-title">{{ exercise['exercise_name'] }}</div></div>
+          <div class="exercise-name"><div class="ex-title">{{ exercise['exercise_name'] | e }}</div></div>
         </div>
         <div class="left-side">
           {%- if exercise['notebook'] %}
@@ -33,7 +33,7 @@
             {%- if not exercise.get('is_archived') or exercise.get('is_checked') is not none %}
             <a class="our-button go-{{ details['css'] }}" href="{{ details['page'] }}/{{ details['page_id'] }}">
               <i class="fa fa-{{ details['icon'] }}" aria-hidden="true"></i>
-              {{ details['text'] }}
+              {{ details['text'] | e }}
             </a>
             {% endif -%}
             {% if is_manager %}

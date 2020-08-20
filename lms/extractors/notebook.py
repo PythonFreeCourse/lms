@@ -50,7 +50,7 @@ class Notebook(Extractor):
         """Yield exercise ID and code from notebook."""
         for cell in self.cells:
             exercise_id, files = self.get_exercise(cell)
-            if files and files[0].code:
+            if exercise_id and files and files[0].code:
                 yield (exercise_id, files)
 
 

@@ -16,5 +16,5 @@ class Pyfile(Extractor):
 
     def get_exercises(self) -> Iterator[Tuple[int, List[File]]]:
         exercise_id, files = self.get_exercise(self.file_content)
-        if files and files[0].code:
+        if exercise_id and files and files[0].code:
             yield (exercise_id, files)
