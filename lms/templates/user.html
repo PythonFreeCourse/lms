@@ -3,13 +3,13 @@
 {% block page_content %}
 <div id="page-user">
   <div id="user">
-    <h1>{{ user.fullname }}</h1>
+    <h1>{{ user.fullname | e }}</h1>
     <div class="body">
       <div class="user-details">
         <h2>פרטי משתמש:</h2>
         <ul>
-          <li>שם משתמש: {{ user.username }}</li>
-          <li>דואר אלקטרוני: {{ user.mail_address }}</li>
+          <li>שם משתמש: {{ user.username | e }}</li>
+          <li>דואר אלקטרוני: {{ user.mail_address | e }}</li>
         </ul>
       </div>
       <div class="user-exercises">
@@ -27,11 +27,11 @@
           <tbody>
             {%- for solution in solutions %}
             <tr>
-              <th scope="row">{{ solution.exercise_id }}</th>
-              <td>{{ solution.exercise_name }}</td>
+              <th scope="row">{{ solution.exercise_id | e }}</th>
+              <td>{{ solution.exercise_name | e }}</td>
               <td>{{ 'נבדק' if solution.is_checked else 'הוגש' if solution.solution_id else 'לא הוגש' }}</td>
               <td><a href="/view/{{ solution.solution_id }}">{{ solution.solution_id }}</a></td>
-              <td>{{ solution.get('checker', '') }}</a></td>
+              <td>{{ solution.get('checker', '') | e }}</a></td>
             </tr>
             {% endfor -%}
           </tbody>

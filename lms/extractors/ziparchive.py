@@ -25,23 +25,26 @@ class Ziparchive(Extractor):
     def can_extract(self) -> bool:
         return self.is_zipfile
 
+    @staticmethod
+    def _extract(archive: ZipFile, filename: str) -> File:
+        with archive.open(filename) as current_file:
+            logger.debug(f'Extracting from archive: {filename}')
+            code = current_file.read()
+        decoded = code.decode('utf-8', errors='ignore')
+        return File(path=f'/{filename}', code=decoded)
+
     def get_exercise(self, file: ZipFile) -> Tuple[int, List[File]]:
         assert self.filename is not None
         exercise_id, _ = self._clean(self.filename.rpartition('.')[0])
         if not exercise_id:
             raise BadUploadFile('Invalid zip name', self.filename)
 
-        files = []
         with file as archive:
-            for filename in archive.namelist():
-                with archive.open(filename) as current_file:
-                    logger.debug(f'Extracting from archive: {filename}')
-                    code = current_file.read()
-                    decoded = code.decode('utf-8', errors='ignore')
-                    files.append(File(path=f'/{filename}', code=decoded))
+            namelist = archive.namelist()
+            files = [self._extract(archive, filename) for filename in namelist]
         return exercise_id, files
 
     def get_exercises(self) -> Iterator[Tuple[int, List[File]]]:
         exercise_id, files = self.get_exercise(self.archive)
-        if files and any(file.code for file in files):
+        if exercise_id and files and any(file.code for file in files):
             yield (exercise_id, files)

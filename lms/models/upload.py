@@ -40,7 +40,7 @@ def _upload_to_db(
     )
 
 
-def run_auto_checks(solution: Solution) -> None:
+def _run_auto_checks(solution: Solution) -> None:
     flake8_tasks.run_flake8_on_solution.apply_async(args=(solution.id,))
     unittests_tasks.run_tests_for_solution.apply_async(args=(solution.id,))
     if config.FEATURE_FLAG_CHECK_IDENTICAL_CODE_ON:
@@ -57,8 +57,8 @@ def new(user: User, file: FileStorage) -> Tuple[List[int], List[int]]:
     misses: List[int] = []
     for exercise_id, files in Extractor(file):
         try:
-            _upload_to_db(exercise_id, user, files, solution_hash)
-            # This runs the checks: run_auto_checks(solution)
+            solution = _upload_to_db(exercise_id, user, files, solution_hash)
+            _run_auto_checks(solution)
         except (UploadError, AlreadyExists) as e:
             logger.debug(e)
             misses.append(exercise_id)
