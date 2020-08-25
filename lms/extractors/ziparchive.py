@@ -1,14 +1,14 @@
 import fnmatch
-from typing import Iterator, List, Tuple
+from typing import Iterator, List, Set, Tuple
 from zipfile import BadZipFile, ZipFile
 
 from loguru import logger
 
-from lms.extractors.base import Extractor, File
+from lms.extractors.base import Extractor, File, Text
 from lms.models.errors import BadUploadFile
 
 
-UNWANTED_FILE_TYPES: List[str] = Extractor.get_unwanted_files_types()
+UNWANTED_FILE_TYPES: Iterator[str] = Extractor.get_unwanted_files_types()
 
 
 class Ziparchive(Extractor):
@@ -45,10 +45,7 @@ class Ziparchive(Extractor):
 
         with file as archive:
             namelist = archive.namelist()
-
-            unwanted_files = set()
-            for pattern in UNWANTED_FILE_TYPES:
-                unwanted_files.update(fnmatch.filter(namelist, pattern))
+            unwanted_files = self.get_unwanted_files(namelist)
 
             files = [
                 self._extract(archive, filename)
@@ -62,3 +59,9 @@ class Ziparchive(Extractor):
         exercise_id, files = self.get_exercise(self.archive)
         if exercise_id and files and any(file.code for file in files):
             yield (exercise_id, files)
+
+    def get_unwanted_files(self, namelist: List[Text]) -> Set:
+        unwanted_files = set()
+        for pattern in UNWANTED_FILE_TYPES:
+            unwanted_files.update(fnmatch.filter(namelist, pattern))
+        return unwanted_files

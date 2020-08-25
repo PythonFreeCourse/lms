@@ -22,5 +22,3 @@ app.conf.update(
     enable_utc=True,
     task_always_eager=bool(os.getenv('FLASK_DEBUG')),
 )
-
-
