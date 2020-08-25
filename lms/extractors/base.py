@@ -85,3 +85,14 @@ class Extractor:
             if extractor.can_extract():
                 for solution_id, files in extractor.get_exercises():
                     yield (solution_id, files)
+
+    @classmethod
+    def get_unwanted_files_types(cls) -> List[str]:
+        with open('ignorefiles.txt', 'r') as file:
+            lines = file.read().splitlines()
+
+        return [
+            line.strip()
+            for line in lines
+            if line and not line.strip().startswith('#')
+        ]
