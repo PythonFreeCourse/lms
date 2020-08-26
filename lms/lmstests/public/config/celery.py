@@ -20,4 +20,5 @@ app.conf.update(
     accept_content=['json'],  # Ignore other content
     result_serializer='json',
     enable_utc=True,
+    task_always_eager=bool(os.getenv('FLASK_DEBUG')),
 )
