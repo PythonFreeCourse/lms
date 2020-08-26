@@ -8,9 +8,6 @@ from lms.extractors.base import Extractor, File, Text
 from lms.models.errors import BadUploadFile
 
 
-UNWANTED_FILE_TYPES: Iterator[str] = Extractor.get_unwanted_files_types()
-
-
 class Ziparchive(Extractor):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -60,8 +57,19 @@ class Ziparchive(Extractor):
         if exercise_id and files and any(file.code for file in files):
             yield (exercise_id, files)
 
+    @staticmethod
+    def get_unwanted_files_types() -> Iterator[str]:
+        with open('ignorefiles.txt', 'r') as file:
+            lines = file.read().splitlines()
+
+        yield from (
+            line.strip()
+            for line in lines
+            if line and not line.strip().startswith('#')
+        )
+
     def get_unwanted_files(self, namelist: List[Text]) -> Set:
         unwanted_files = set()
-        for pattern in UNWANTED_FILE_TYPES:
+        for pattern in self.get_unwanted_files_types():
             unwanted_files.update(fnmatch.filter(namelist, pattern))
         return unwanted_files

@@ -1,5 +1,6 @@
 from lms.tests.conftest import SAMPLES_DIR
 from tempfile import SpooledTemporaryFile
+from zipfile import ZipFile
 
 from werkzeug.datastructures import FileStorage
 
@@ -10,11 +11,11 @@ import lms.extractors.ziparchive as zipfilearchive
 class TestExtractor:
     IPYNB_NAME = 'upload-1-2.ipynb'
     ZIP_NAME = 'Upload_123.zip'
-    PY_NAMES = ('code1.py', 'code2.py', 'code2.py')
+    PY_NAMES = ('code1.py', 'code2.py')
 
     def setup(self):
         self.ipynb_file = self.ipynb_file()
-        self.pyfiles_files = self.py_files()
+        self.pyfiles_files = list(self.py_files())
         self.zipfile_file = self.zip_file()
         self.ipynb_storage = FileStorage(self.ipynb_file)
         self.pyfiles_storage = [
@@ -33,11 +34,8 @@ class TestExtractor:
         return open(f'{SAMPLES_DIR}/{self.IPYNB_NAME}', encoding='utf-8')
 
     def py_files(self):
-        for index, file_name in enumerate(self.PY_NAMES):
-            if index == 2:
-                yield open(f'{SAMPLES_DIR}/{file_name}', encoding='utf-8')
-            else:
-                yield open(f'{SAMPLES_DIR}/{file_name}')
+        for file_name in self.PY_NAMES:
+            yield open(f'{SAMPLES_DIR}/{file_name}')
 
     def zip_file(self):
         return open(f'{SAMPLES_DIR}/{self.ZIP_NAME}', 'br')
@@ -48,6 +46,10 @@ class TestExtractor:
         zip_file_storage = FileStorage(spooled)
         zip_file_storage.filename = self.ZIP_NAME
         return zip_file_storage
+
+    def get_zip_filenames(self):
+        the_zip = ZipFile(f'{SAMPLES_DIR}/{self.ZIP_NAME}')
+        return the_zip.namelist()
 
     def test_notebook(self):
         results = list(extractor.Extractor(self.ipynb_storage))
@@ -67,4 +69,16 @@ class TestExtractor:
     def test_zip(self):
         result = zipfilearchive.Ziparchive(to_extract=self.zipfile_storage)
         exercises = list(result.get_exercises())[0][1]
+        exercises_paths = [exercise.path for exercise in exercises]
         assert len(exercises) == 8
+        original_zip_filenames = self.get_zip_filenames()
+
+        assert all(
+            '__pycache__/foo.py' not in exercise_path
+            for exercise_path in exercises_paths
+        )
+
+        assert any(
+            '__pycache__/foo.py' in filename
+            for filename in original_zip_filenames
+        )
