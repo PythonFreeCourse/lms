@@ -5,6 +5,7 @@ logger.add(
     'logs.log',
     format='{time:YYYY-MM-DD at HH:mm:ss} | {name} | {message}',
     level='DEBUG',
+    rotation='monthly',
 )
 
 
