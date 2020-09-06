@@ -2,10 +2,12 @@ import fnmatch
 from typing import Iterator, List, Set, Tuple
 from zipfile import BadZipFile, ZipFile
 
-from loguru import logger
-
 from lms.extractors.base import Extractor, File, Text
 from lms.models.errors import BadUploadFile
+from lms.utils.loggermanager import get_logger
+
+
+_logger = get_logger()
 
 
 class Ziparchive(Extractor):
@@ -29,7 +31,7 @@ class Ziparchive(Extractor):
     @staticmethod
     def _extract(archive: ZipFile, filename: str) -> File:
         with archive.open(filename) as current_file:
-            logger.debug(f'Extracting from archive: {filename}')
+            _logger.debug(f'Extracting from archive: {filename}')
             code = current_file.read()
         decoded = code.decode('utf-8', errors='replace').replace('\x00', '')
         return File(path=f'/{filename}', code=decoded)

@@ -3,13 +3,11 @@ import os
 import typing
 import sys
 import importlib
-import logging
 
 from lms.lmsdb import models
+from lms.utils.loggermanager import get_logger
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
-_logger = logging.getLogger(__name__)
+_logger = get_logger()
 
 BASE_DIR = os.path.abspath(os.path.join(__file__, '../../../../../'))
 

@@ -1,15 +1,15 @@
 import csv
-import logging
 import os
 import typing
 
 from lms.lmsdb import models
 from lms.lmsweb import config
+from lms.utils.loggermanager import get_logger
 
 import requests
 
 
-_logger = logging.getLogger(__name__)
+_logger = get_logger()
 
 
 class UserToCreate(typing.NamedTuple):
