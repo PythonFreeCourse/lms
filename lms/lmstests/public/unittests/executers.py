@@ -3,10 +3,11 @@ import os
 import shutil
 import tempfile
 import uuid
-import logging
 import subprocess  # NOQA: S404
 
-_logger = logging.getLogger(__name__)
+from lms.utils.loggermanager import get_logger
+
+_logger = get_logger()
 
 
 class BaseExecutor:
