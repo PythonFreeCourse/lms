@@ -5,9 +5,7 @@ import tempfile
 import uuid
 import subprocess  # NOQA: S404
 
-from lms.utils.loggermanager import get_logger
-
-_logger = get_logger()
+from lms.utils.log import log
 
 
 class BaseExecutor:
@@ -52,7 +50,7 @@ class DockerExecutor(BaseExecutor):
             '--rm', '--name', self._container_name, self.base_image,
             'sleep', str(self.timeout_seconds),
         )
-        _logger.info('Start executing safe container context with %s', args)
+        log.info('Start executing safe container context with %s', args)
         subprocess.check_call(args)  # NOQA: S603
         return self
 

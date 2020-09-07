@@ -24,7 +24,7 @@ from lms.lmsdb.models import (
 from lms.lmsweb import routes, webapp
 from lms.models import notifications, solutions, upload
 from lms.models.errors import AlreadyExists, BadUploadFile
-from lms.utils.loggermanager import get_logger
+from lms.utils.log import log
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
@@ -39,8 +39,6 @@ PERMISSIVE_CORS = {
 
 HIGH_ROLES = {str(RoleOptions.STAFF), str(RoleOptions.ADMINISTRATOR)}
 MAX_REQUEST_SIZE = 2_000_000  # 2MB (in bytes)
-
-_logger = get_logger()
 
 
 @webapp.before_request
@@ -316,7 +314,7 @@ def upload_page():
     try:
         matches, misses = upload.new(user, file)
     except (AlreadyExists, BadUploadFile) as e:
-        _logger.debug(e)
+        log.debug(e)
         return fail(400, str(e))
 
     return jsonify({

@@ -4,10 +4,7 @@ from zipfile import BadZipFile, ZipFile
 
 from lms.extractors.base import Extractor, File, Text
 from lms.models.errors import BadUploadFile
-from lms.utils.loggermanager import get_logger
-
-
-_logger = get_logger()
+from lms.utils.log import log
 
 
 class Ziparchive(Extractor):
@@ -31,7 +28,7 @@ class Ziparchive(Extractor):
     @staticmethod
     def _extract(archive: ZipFile, filename: str) -> File:
         with archive.open(filename) as current_file:
-            _logger.debug(f'Extracting from archive: {filename}')
+            log.debug(f'Extracting from archive: {filename}')
             code = current_file.read()
         decoded = code.decode('utf-8', errors='replace').replace('\x00', '')
         return File(path=f'/{filename}', code=decoded)

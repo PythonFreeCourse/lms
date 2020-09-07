@@ -10,10 +10,7 @@ from lms.lmstests.public.unittests import tasks as unittests_tasks
 from lms.models.errors import AlreadyExists, UploadError
 from lms.lmsweb import config
 from lms.utils import hashing
-from lms.utils.loggermanager import get_logger
-
-
-_logger = get_logger()
+from lms.utils.log import log
 
 
 def _is_uploaded_before(user: User, file_hash: str) -> bool:
@@ -63,7 +60,7 @@ def new(user: User, file: FileStorage) -> Tuple[List[int], List[int]]:
             solution = _upload_to_db(exercise_id, user, files, solution_hash)
             _run_auto_checks(solution)
         except (UploadError, AlreadyExists) as e:
-            _logger.debug(e)
+            log.debug(e)
             misses.append(exercise_id)
         else:
             matches.append(exercise_id)

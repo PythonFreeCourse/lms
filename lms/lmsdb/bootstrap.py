@@ -10,10 +10,7 @@ from lms.lmsdb import database_config as db_config
 from lms.lmsdb import models
 from lms.lmstests.public.flake8 import text_fixer
 from lms.lmstests.public.unittests import import_tests
-from lms.utils.loggermanager import get_logger
-
-
-log = get_logger()
+from lms.utils.log import log
 
 
 def _migrate_column_in_table_if_needed(
