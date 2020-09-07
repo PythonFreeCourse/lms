@@ -297,6 +297,16 @@ def send_():
     return render_template('upload.html')
 
 
+@webapp.route('/banned')
+@login_required
+def banned_page():
+    user_id = current_user.id
+    user = User.get_or_none(User.id == user_id)  # should never happen
+    if user is None:
+        return fail(404, 'User not found')
+    return render_template('banned.html')
+
+
 @webapp.route('/upload', methods=['POST'])
 @login_required
 def upload_page():

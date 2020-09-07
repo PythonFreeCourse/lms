@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block page_content %}
+{% if not current_user.role.is_banned %}
+<script type="text/javascript">
+    window.location.href = "/exercises"
+</script>
+{% else %}
+<div class="banned-user-message">
+    <p style="font-size:30px">Your user is banned due to unproperate usage</p>
+    <p style="font-size:25px">Please contact <a href="mailto:bugs@mesicka.com">Yam Mesicka</a> for more information</p>
+</div>
+{% endif %}
+{% endblock %}
