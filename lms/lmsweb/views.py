@@ -40,8 +40,6 @@ PERMISSIVE_CORS = {
 HIGH_ROLES = {str(RoleOptions.STAFF), str(RoleOptions.ADMINISTRATOR)}
 MAX_REQUEST_SIZE = 2_000_000  # 2MB (in bytes)
 
-_logger = get_logger()
-
 
 @webapp.before_request
 def _db_connect():
