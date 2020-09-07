@@ -3,13 +3,10 @@ import os
 import typing
 import sys
 import importlib
-import logging
 
 from lms.lmsdb import models
+from lms.utils.log import log
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
-_logger = logging.getLogger(__name__)
 
 BASE_DIR = os.path.abspath(os.path.join(__file__, '../../../../../'))
 
@@ -18,7 +15,7 @@ def register_test_class(file_path: str, test_class: typing.ClassVar):
     subject = test_class.__doc__
     exercise = models.Exercise.get_or_none(models.Exercise.subject == subject)
     if not exercise:
-        _logger.info('Failed to find exercise subject %s', subject)
+        log.info('Failed to find exercise subject %s', subject)
         raise SystemError
 
     with open(file_path, 'r') as file_reader:

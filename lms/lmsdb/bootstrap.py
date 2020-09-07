@@ -1,5 +1,3 @@
-import sys
-import logging
 from typing import Any, Optional, Type
 
 from peewee import (  # type: ignore
@@ -12,11 +10,7 @@ from lms.lmsdb import database_config as db_config
 from lms.lmsdb import models
 from lms.lmstests.public.flake8 import text_fixer
 from lms.lmstests.public.unittests import import_tests
-
-
-logging.basicConfig(stream=sys.stdout, level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
-log = logging.getLogger(__name__)
+from lms.utils.log import log
 
 
 def _migrate_column_in_table_if_needed(

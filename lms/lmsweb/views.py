@@ -12,7 +12,6 @@ from flask_admin.contrib.peewee import ModelView  # type: ignore
 from flask_login import (  # type: ignore
     LoginManager, current_user, login_required, login_user, logout_user,
 )
-from loguru import logger
 from peewee import fn  # type: ignore
 from playhouse.shortcuts import model_to_dict  # type: ignore
 from werkzeug.datastructures import FileStorage
@@ -25,6 +24,7 @@ from lms.lmsdb.models import (
 from lms.lmsweb import routes, webapp
 from lms.models import notifications, solutions, upload
 from lms.models.errors import AlreadyExists, BadUploadFile
+from lms.utils.log import log
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
@@ -314,7 +314,7 @@ def upload_page():
     try:
         matches, misses = upload.new(user, file)
     except (AlreadyExists, BadUploadFile) as e:
-        logger.debug(e)
+        log.debug(e)
         return fail(400, str(e))
 
     return jsonify({

@@ -7,8 +7,10 @@ from typing import (
     Pattern, Sequence, Tuple, Union, cast,
 )
 
-from loguru import logger
 from werkzeug.datastructures import FileStorage
+
+from lms.utils.log import log
+
 
 Text = Union[str, bytes]
 CodeFile = Union[Sequence[Text], str, bytes]
@@ -55,7 +57,7 @@ class Extractor:
         first_line = clean_text[:first_line_end].strip().replace('_', ' ')
         code_lines = clean_text[first_line_end:].strip()
 
-        logger.debug(f'Upload title: {first_line}')
+        log.debug(f'Upload title: {first_line}')
         return first_line, code_lines
 
     @classmethod
@@ -66,11 +68,7 @@ class Extractor:
             exercise_id = int(upload_title.group(1))
             return exercise_id, code_text
 
-        logger.debug(f'Unmatched title: {first_line}')
         return 0, ''
-
-    def can_extract(self) -> bool:
-        raise NotImplementedError()
 
     def get_exercise(self, to_extract: Any) -> Tuple[int, List[File]]:
         raise NotImplementedError()
@@ -80,7 +78,7 @@ class Extractor:
 
     def __iter__(self) -> Iterator[Tuple[int, List[File]]]:
         for cls in self.__class__.__subclasses__():
-            logger.debug(f'Trying extractor: {cls.__name__}')
+            log.debug(f'Trying extractor: {cls.__name__}')
             extractor = cls(to_extract=self.to_extract)
             if extractor.can_extract():
                 for solution_id, files in extractor.get_exercises():

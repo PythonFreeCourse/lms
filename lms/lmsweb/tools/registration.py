@@ -1,15 +1,12 @@
 import csv
-import logging
 import os
 import typing
 
 from lms.lmsdb import models
 from lms.lmsweb import config
+from lms.utils.log import log
 
 import requests
-
-
-_logger = logging.getLogger(__name__)
 
 
 class UserToCreate(typing.NamedTuple):
@@ -73,14 +70,14 @@ class UserRegistrationCreator:
                 self._get_or_create_user_in_model(user)
                 self._send_user_email_registration(user)
             except Exception:
-                _logger.exception(
+                log.exception(
                     'Failed to create user %s, continue to next user',
                     user.email)
                 self._failed_users.append(user)
 
     @staticmethod
     def _get_or_create_user_in_model(user: UserToCreate) -> None:
-        _logger.info('Create user with email: %s', user.email)
+        log.info('Create user with email: %s', user.email)
         models.User.get_or_create(**{
             models.User.mail_address.name: user.email,
             models.User.username.name: user.email,
@@ -106,7 +103,7 @@ class UserRegistrationCreator:
                 auth=('api', config.MAILGUN_API_KEY))
             response.raise_for_status()
         except Exception:
-            _logger.exception(
+            log.exception(
                 'Failed to create user %s. response: %s',
                 user.email,
                 response.content)
