@@ -45,6 +45,22 @@
     <div class="code-view-container">
       <div id="code-view" data-id="{{ solution['id'] }}" data-file="{{ current_file.id }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}">
         <pre><code class="language-python line-numbers highlight">{{- current_file.code | trim(chars=' ') | e -}}</code></pre>
+        <span id="python-code-copy" style="display:none;">{{- current_file.code}}</span>
+        <div id="copy-code">
+          <button class="fa fa-copy" id="copy-button" title="Copy code" style="background-color:white;font-size:20px;"></button>
+          <script>
+            document.getElementById("copy-button").addEventListener("click", copy_code);
+            function copy_code() {
+              var copyText = document.getElementById("python-code-copy");
+              var textArea = document.createElement("textarea");
+              textArea.value = copyText.textContent;
+              document.body.appendChild(textArea);
+              textArea.select();
+              document.execCommand("Copy");
+              textArea.remove();
+          }
+          </script>
+        </div>
       </div>
       {% if test_results %}
       <div class="test-results">
