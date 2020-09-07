@@ -68,11 +68,7 @@ class Extractor:
             exercise_id = int(upload_title.group(1))
             return exercise_id, code_text
 
-        log.debug(f'Unmatched title: {first_line}')
         return 0, ''
-
-    def can_extract(self) -> bool:
-        raise NotImplementedError()
 
     def get_exercise(self, to_extract: Any) -> Tuple[int, List[File]]:
         raise NotImplementedError()
