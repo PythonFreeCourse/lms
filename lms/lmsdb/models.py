@@ -30,6 +30,7 @@ if TYPE_CHECKING:
 
 
 class RoleOptions(enum.Enum):
+    BANNED = 'Banned'
     STUDENT = 'Student'
     STAFF = 'Staff'
     VIEWER = 'Viewer'
@@ -53,10 +54,15 @@ class Role(BaseModel):
         (RoleOptions.STAFF.value, RoleOptions.STAFF.value),
         (RoleOptions.VIEWER.value, RoleOptions.VIEWER.value),
         (RoleOptions.STUDENT.value, RoleOptions.STUDENT.value),
+        (RoleOptions.BANNED.value, RoleOptions.BANNED.value),
     ))
 
     def __str__(self):
         return self.name
+
+    @classmethod
+    def get_banned_role(cls) -> 'Role':
+        return cls.get(Role.name == RoleOptions.BANNED.value)
 
     @classmethod
     def get_student_role(cls) -> 'Role':
@@ -72,6 +78,10 @@ class Role(BaseModel):
             raise ValueError('That could lead to a security issue.')
         role_name = getattr(RoleOptions, name.upper()).value
         return cls.get(name=role_name)
+
+    @property
+    def is_banned(self) -> bool:
+        return self.name == RoleOptions.BANNED.value
 
     @property
     def is_student(self) -> bool:

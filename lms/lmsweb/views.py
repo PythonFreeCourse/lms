@@ -152,10 +152,12 @@ def exercises_page():
     fetch_archived = bool(request.args.get('archived'))
     exercises = Solution.of_user(current_user.id, fetch_archived)
     is_manager = current_user.role.is_manager
+    is_banned = current_user.role.is_banned
     return render_template(
         'exercises.html',
         exercises=exercises,
         is_manager=is_manager,
+        is_banned=is_banned,
         fetch_archived=fetch_archived,
     )
 
@@ -339,6 +341,7 @@ def view(solution_id: int, file_id: Optional[int] = None):
     versions = solution.ordered_versions()
     test_results = solution.test_results()
     is_manager = current_user.role.is_manager
+    is_banned = current_user.role.is_banned
 
     solution_files = tuple(solution.files)
     if not solution_files:
@@ -357,6 +360,7 @@ def view(solution_id: int, file_id: Optional[int] = None):
         'files': files,
         'current_file': file_to_show,
         'is_manager': is_manager,
+        'is_banned': is_banned,
         'role': current_user.role.name.lower(),
         'versions': versions,
         'test_results': test_results,
