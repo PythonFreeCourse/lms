@@ -39,7 +39,10 @@
   <div id="view-body">
     <div class="code-view-container">
       <div id="code-view" data-id="{{ solution['id'] }}" data-file="{{ current_file.id }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}">
-        <pre><code class="language-python line-numbers highlight">{{- current_file.code | trim(chars=' ') | e -}}</code></pre>
+        <pre><code id="python-user-code" class="language-python line-numbers highlight">{{- current_file.code | trim(chars=' ') | e -}}</code></pre>
+      </div>
+      <div id="copy-code">
+        <button class="fa fa-copy" id="copy-button" title="Copy code" onclick="copy_code()" style="background-color:white;font-size:20px;"></button>
       </div>
       {% if test_results %}
       <div class="test-results">
@@ -105,6 +108,7 @@
     {% endif -%}
   </div>
 </div>
+<script src="{{ url_for('static', filename='copy.js') }}"></script>
 <script src="{{ url_for('static', filename='prism.js') }}"></script>
 <script src="{{ url_for('static', filename='comments.js') }}"></script>
 {%- if is_manager %}
