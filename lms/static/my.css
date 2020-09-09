@@ -327,6 +327,7 @@ i.fa {
 */
 
 .code-view-container {
+  position: relative;
   display: flex;
   direction: ltr;
   text-align: left;

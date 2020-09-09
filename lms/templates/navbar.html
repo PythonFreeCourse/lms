@@ -8,7 +8,6 @@
   </a>
   <div class="collapse navbar-collapse" id="navbarNavDropdown">
     <ul class="navbar-nav">
-      {%- if not current_user.role.is_banned %}
       <li class="nav-item dropdown">
         <a id="notifications-icon" href="#" class="nav-link" aria-expanded="false" aria-haspopup="true" aria-label="Notifications" role="button" data-toggle="dropdown">
           <i class="fa fa-bell" aria-hidden="true"></i>
@@ -31,16 +30,13 @@
           </div>
         </div>
       </li>
-      {% endif -%}
-      {%- if not current_user.role.is_banned %}
       <li class="nav-item">
         <a href="/send" class="nav-link">
           <i class="fa fa-upload" aria-hidden="true"></i>
           העלאת תרגילים
         </a>
       </li>
-      {% endif -%}
-      {%- if (not exercises or fetch_archived) and not current_user.role.is_banned %}
+      {%- if not exercises or fetch_archived %}
       <li class="nav-item">
         <a href="/exercises" class="nav-link">
           <i class="fa fa-book" aria-hidden="true"></i>
@@ -48,7 +44,7 @@
         </a>
       </li>
       {% endif -%}
-      {%- if (exercises and not fetch_archived) and not current_user.role.is_banned %}
+      {%- if exercises and not fetch_archived %}
       <li class="nav-item">
         <a href="/exercises?archived=1" class="nav-link">
           <i class="fa fa-archive" aria-hidden="true"></i>

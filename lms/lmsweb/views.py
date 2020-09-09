@@ -130,15 +130,6 @@ def favicon():
     )
 
 
-@webapp.before_request
-def banned_page():
-    if (
-        request.endpoint not in ('login', 'logout')
-        and current_user.role.is_banned
-    ):
-        return render_template('banned.html')
-
-
 @webapp.route('/')
 @login_required
 def main():
