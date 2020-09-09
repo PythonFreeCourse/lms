@@ -349,15 +349,15 @@ i.fa {
   position: absolute;
   right: 45px;
   top: 8px;
-	background-color:gray;
-	border-radius:14px;
-	border:1px solid #ffffff;
-	display:inline-block;
-	cursor:pointer;
-	color:#ffffff;
-	font-size:14px;
-	padding:6px 12px;
-	text-decoration:none;
+  background-color:gray;
+  border-radius:14px;
+  border:1px solid #ffffff;
+  display:inline-block;
+  cursor:pointer;
+  color:#ffffff;
+  font-size:14px;
+  padding:6px 12px;
+  text-decoration:none;
 }
 
 .button-copy:hover {

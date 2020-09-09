@@ -18,9 +18,9 @@ function escapeUnicode(str) {
 
 function copyCode(button) {
   button.addEventListener('click', () => {
-    var copyText = document.getElementById('python-user-code');
+    const copyText = document.getElementById('python-user-code');
+    const last = button.innerHTML;
     navigator.clipboard.writeText(copyText.textContent);
-    var last = button.innerHTML;
     button.innerHTML = 'Copied!';
     setTimeout(function() {
         button.innerHTML = last;
