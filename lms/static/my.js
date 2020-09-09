@@ -16,7 +16,7 @@ function escapeUnicode(str) {
 }
 
 
-function copyCode(button) {
+function trackCopyCodeButton(button) {
   button.addEventListener('click', () => {
     const copyText = document.getElementById('python-user-code');
     const last = button.innerHTML;
@@ -72,5 +72,5 @@ window.escapeUnicode = escapeUnicode;
 window.addEventListener('load', () => {
   updateNotificationsBadge();
   trackReadAllNotificationsButton(document.getElementById('read-notifications'));
-  copyCode(document.getElementById('copy-button'));
+  trackCopyCodeButton(document.getElementById('copy-button'));
 });
