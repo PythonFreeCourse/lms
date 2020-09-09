@@ -327,6 +327,7 @@ i.fa {
 */
 
 .code-view-container {
+  position: relative;
   display: flex;
   direction: ltr;
   text-align: left;
@@ -342,6 +343,29 @@ i.fa {
   display: flex;
   width: 100%;
   overflow-x: hidden;
+}
+
+.button-copy {
+  position: absolute;
+  right: 45px;
+  top: 8px;
+  background-color:gray;
+  border-radius:14px;
+  border:1px solid #ffffff;
+  display:inline-block;
+  cursor:pointer;
+  color:#ffffff;
+  font-size:14px;
+  padding:6px 12px;
+  text-decoration:none;
+}
+
+.button-copy:hover {
+	background-color:white;
+}
+
+.button-copy:active {
+	top:1px;
 }
 
 pre {
@@ -536,6 +560,12 @@ code > .grader-add {
   align-self: center;
   margin-left: 0.5em;
   padding: 0.55rem 1rem;
+}
+
+
+.comments-count {
+  align-self: center;
+  font-size: 18px;
 }
 
 
