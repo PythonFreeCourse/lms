@@ -1,10 +1,10 @@
-from typing import Any, Optional, Type
+from typing import Any, Callable, Optional, Tuple, Type
 
-from peewee import (  # type: ignore
-    Entity, Expression, Field, ForeignKeyField, Model, OP,
-    OperationalError, ProgrammingError, SQL, TextField,
+from peewee import (
+    Entity, Expression, Field, Model, OP, OperationalError, ProgrammingError,
+    SQL,
 )
-from playhouse.migrate import migrate  # type: ignore
+from playhouse.migrate import migrate
 
 from lms.lmsdb import database_config as db_config
 from lms.lmsdb import models
@@ -79,6 +79,37 @@ def _add_not_null(table: Type[Model], column_name: str) -> bool:
     migrator = db_config.get_migrator_instance()
     with db_config.database.transaction():
         migrate(migrator.add_not_null(table_name, column_name))
+        db_config.database.commit()
+    return True
+
+
+def get_details(table: Model, column: Field) -> Tuple[bool, str, str]:
+    table_name = table.__name__.lower()
+    column_name = column.column_name
+
+    cols = {col.name for col in db_config.database.get_columns(table_name)}
+    if column_name in cols:
+        return True, table_name, column_name
+    return False, table_name, column_name
+
+
+def _add_not_null_column(
+    table: Model, column: Field,
+    run_before_adding_not_null: Callable[[Model, Field], None] = None,
+) -> bool:
+    table_name, column_name, already_exists = get_details(table, column)
+    log.info(f'Adding {table_name}.{column_name}, if needed.')
+    if already_exists:
+        log.info(f'Column {column.name} already exists in {table}')
+        return False
+
+    migrator = db_config.get_migrator_instance()
+    with db_config.database.transaction():
+        column.null = True
+        migrate(migrator.add_column(table_name, column_name, field=column))
+        if callable(run_before_adding_not_null):
+            run_before_adding_not_null(table, column)
+        migrate(migrator.drop_not_null(table_name, column_name))
         db_config.database.commit()
     return True
 
@@ -184,247 +215,29 @@ def _drop_constraint_if_needed(table: Type[Model], column_name: str) -> bool:
     return True
 
 
-def _add_flake8_key_if_needed():
-    return _migrate_column_in_table_if_needed(
-        models.CommentText,
-        models.CommentText.flake8_key,
-    )
-
-
-def _add_notebook_num_if_needed():
-    return _migrate_column_in_table_if_needed(
-        models.Exercise,
-        models.Exercise.notebook_num,
-    )
-
-
-def _add_order_if_needed():
-    return _migrate_column_in_table_if_needed(
-        models.Exercise,
-        models.Exercise.order,
-    )
-
-
-def _add_exercise_due_date_if_needed():
-    return _migrate_column_in_table_if_needed(
-        models.Exercise,
-        models.Exercise.due_date,
-    )
-
-
-def _add_is_auto_if_needed():
-    return _migrate_column_in_table_if_needed(
-        models.Comment,
-        models.Comment.is_auto,
-    )
-
-
-def _upgrade_notifications_if_needed():
-    t = models.Notification
-    _migrate_column_in_table_if_needed(t, t.action_url)
-    _rename_column_in_table_if_needed(t, 'message_parameters', 'message')
-    _rename_column_in_table_if_needed(t, 'related_object_id', 'related_id')
-    _rename_column_in_table_if_needed(t, 'marked_read', 'viewed')
-    _rename_column_in_table_if_needed(t, 'read', 'viewed')
-    _rename_column_in_table_if_needed(t, 'notification_type', 'kind')
-    _alter_column_type_if_needed(t, t.message, TextField())
-
-
-def _add_index_if_needed(
-    table: Type[Model],
-    field_instance: Field,
-    is_unique_constraint: bool = False,
-) -> None:
-    column_name = field_instance.name
-    table_name = table.__name__.lower()
-    migrator = db_config.get_migrator_instance()
-    log.info(f"Add index to '{column_name}' field in '{table_name}'")
-    with db_config.database.transaction():
-        try:
-            migrate(
-                migrator.add_index(
-                    table_name, (column_name,), is_unique_constraint,
-                ),
-            )
-        except (OperationalError, ProgrammingError) as e:
-            if 'already exists' in str(e):
-                log.info('Index already exists.')
-            else:
-                raise
-        db_config.database.commit()
-
-
-def _drop_index_if_needed(
-    table: Type[Model],
-    field_instance: Field,
-    foreign_key: bool = False,
-) -> None:
-    table_name = table.__name__.lower()
-    suffix = '_id' if foreign_key else ''
-    column_name = f'{table_name}_{field_instance.name}{suffix}'
-    migrator = db_config.get_migrator_instance()
-    log.info(f"Drop index from '{column_name}' field in '{table_name}'")
-    with db_config.database.transaction():
-        try:
-            migrate(migrator.drop_index(table_name, column_name))
-        except (OperationalError, ProgrammingError) as e:
-            if 'does not exist' in str(e):
-                log.info('Index already exists.')
-            else:
-                raise
-        db_config.database.commit()
-
-
-def _add_indices_if_needed():
-    table_field_pairs = (
-        (models.Notification, models.Notification.created),
-        (models.Notification, models.Notification.related_id),
-        (models.Exercise, models.Exercise.is_archived),
-        (models.Exercise, models.Exercise.order),
-        (models.Solution, models.Solution.state),
-        (models.Solution, models.Solution.submission_timestamp),
-    )
-    for table, field_instance in table_field_pairs:
-        _add_index_if_needed(table, field_instance)
-
-
-def _add_solution_state_if_needed():
-    _migrate_column_in_table_if_needed(models.Solution, models.Solution.state)
-    table_name = models.Solution.__name__.lower()
-    cols = {col.name for col in db_config.database.get_columns(table_name)}
-    latest_solution_migrate_ran = 'latest_solution' in cols
-    is_checked_migrate_ran = 'is_checked' in cols
-
-    if latest_solution_migrate_ran:
-        models.database.execute_sql(
-            'update solution set state=%s '
-            'where latest_solution = %s',
-            params=(
-                models.Solution.STATES.OLD_SOLUTION.name,
-                False,
-            ),
-        )
-        _drop_column_from_module_if_needed(
-            models.Solution,
-            'latest_solution',
-        )
-
-    if is_checked_migrate_ran:
-        models.database.execute_sql(
-            'update solution set state=%s '
-            'where is_checked = %s',
-            params=(
-                models.Solution.STATES.DONE.name,
-                True,
-            ),
-        )
-
-        _drop_column_from_module_if_needed(
-            models.Solution,
-            'is_checked',
-        )
-
-
-def _update_solution_hashes(s):
-    log.info('Updating solution hashes. Might take a while.')
-    create_hash = models.Solution.create_hash
-    for solution in s:
-        solution.hashed = create_hash(solution.json_data_str)
-        solution.save()
-
-
-def check_if_multiple_files_migration_is_needed():
+def has_column_named(table: Model, column_name: str) -> bool:
     db = db_config.database
-    solution_cols = {
-        col.name for col in db.get_columns(models.Solution.__name__.lower())
-    }
-    if 'json_data_str' not in solution_cols:
-        log.info('Skipping multiple files migration.')
+    columns = {col.name for col in db.get_columns(table.__name__.lower())}
+    if column_name not in columns:
         return False
     return True
 
 
-def _multiple_files_migration() -> bool:
-    f = models.SolutionFile
-
-    # Mock old solution. The null is needed for peewee's ALTER.
-    class Solution(models.Solution):
-        json_data_str = TextField(column_name='json_data_str')
-        hashed = TextField(null=True)
-    s = Solution
-
-    # Mock old comment. The null is needed for peewee's ALTER.
-    class Comment(models.Comment):
-        file = ForeignKeyField(f, backref='comments', null=True)
-    c = Comment
-
-    # Check if the migration is needed.
-    if not check_if_multiple_files_migration_is_needed():
-        return False
-
-    # Create Solution.hashed and populate it using json_data_str
-    _migrate_column_in_table_if_needed(s, s.hashed)
-    _update_solution_hashes(s)
-
-    # Copy the data from Solution to SolutionFile with the same id.
-    # This will allow us to redirect Comment.solution_id from pointing to
-    # Solution to pointing to SolutionFile, keeping old comments.
-    solutions = s.select(
-        s.id, s.id, '/main.py', s.json_data_str, s.hashed,
-    )
-    fields = [f.id, f.solution, f.path, f.code, f.file_hash]
-    f.insert_from(solutions, fields).execute()
-    _migrate_copy_column(c, dest='file_id', source='solution_id')
-    _drop_column_from_module_if_needed(c, 'solution_id')
-
-    # Add NOT NULL (can't use NOT NULL when ALTERing new columns)
-    _add_not_null(c, 'file_id')
-    _add_not_null(s, 'hashed')
-
-    # Drop the unneeded content code of solutions
-    _drop_column_from_module_if_needed(s, 'json_data_str')
-
-    # Update serial of SolutionFile to the last one.
-    # This will allow us to add new files without collusions.
-    _execute_sql_if_possible(
-        'SELECT setval('
-        "pg_get_serial_sequence('{table_name}', 'id'), "
-        'coalesce(max(id)+1, 1), '
-        'false'
-        ') FROM {table_name};'.format(table_name='solutionfile'),
-    )
-
-    # Done
-    log.info('Successfully migrated multiple files.')
-    return True
+def _add_api_keys_to_users_table(table: Model, _column: Field) -> None:
+    log.info('Adding API Keys for all users, might take some extra time...')
+    with db_config.database.transaction():
+        for user in table:
+            user.api_key = table.random_password(stronger=True)
+            user.save()
 
 
-def _prepare_postgres_to_multiple_files_migration() -> bool:
-    # Check if the migration is needed.
-    if not check_if_multiple_files_migration_is_needed():
-        return False
-
-    class Comment(models.Comment):
-        file = ForeignKeyField(
-            models.SolutionFile, backref='comments', null=True,
-        )
-    c = Comment
-
-    # Trick peewee to think there is a file column with no index,
-    # # than create it in the real Comments table
-    _drop_index_if_needed(c, c.file, foreign_key=True)
-
-    # Create Comments.file_id
-    _migrate_column_in_table_if_needed(c, c.file, field_name='file_id')
+def _api_keys_migration() -> bool:
+    User = models.User
+    _add_not_null_column(User, User.api_key, _add_api_keys_to_users_table)
     return True
 
 
 def main():
-    with models.database.connection_context():
-        models.database.create_tables([models.SolutionFile], safe=True)
-
-    _prepare_postgres_to_multiple_files_migration()
-
     with models.database.connection_context():
         models.database.create_tables(models.ALL_MODELS, safe=True)
 
@@ -433,15 +246,7 @@ def main():
         if models.User.select().count() == 0:
             models.create_demo_users()
 
-    _add_flake8_key_if_needed()
-    _add_notebook_num_if_needed()
-    _add_is_auto_if_needed()
-    _add_order_if_needed()
-    _add_exercise_due_date_if_needed()
-    _upgrade_notifications_if_needed()
-    _add_solution_state_if_needed()
-    _add_indices_if_needed()
-    _multiple_files_migration()
+    _api_keys_migration()
     text_fixer.fix_texts()
     import_tests.load_tests_from_path('/app_dir/notebooks-tests')
 
