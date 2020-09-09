@@ -16,6 +16,19 @@ function escapeUnicode(str) {
 }
 
 
+function copyCode(button) {
+  button.addEventListener('click', () => {
+    var copyText = document.getElementById('python-user-code');
+    navigator.clipboard.writeText(copyText.textContent);
+    var last = button.innerHTML;
+    button.innerHTML = 'Copied!';
+    setTimeout(function() {
+        button.innerHTML = last;
+    }, 2000);
+  });
+}
+
+
 function updateNotificationsBadge() {
   const dropdown = document.getElementById('navbarNavDropdown');
   const container = document.getElementById('notifications-list');
@@ -59,4 +72,5 @@ window.escapeUnicode = escapeUnicode;
 window.addEventListener('load', () => {
   updateNotificationsBadge();
   trackReadAllNotificationsButton(document.getElementById('read-notifications'));
+  copyCode(document.getElementById('copy-button'));
 });

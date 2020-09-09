@@ -563,6 +563,12 @@ code > .grader-add {
 }
 
 
+.comments-count {
+  align-self: center;
+  font-size: 18px;
+}
+
+
 #notification-icon {
   cursor: pointer;
 }
