@@ -9,15 +9,19 @@ function markLine(target, color) {
   target.style.background = color;
 }
 
-function hoverLine(target, hover) {
-  if (target.dataset && target.dataset.vimbackground === 'true') { return; }
+function hoverLine(targets, hover) {
+  const [lineTarget, addCommentTarget] = targets;
+  if (lineTarget.dataset && lineTarget.dataset.vimbackground === 'true') { return; }
   let parsedColor = hover;
   if (hover === true) {
     parsedColor = HOVER_LINE_STYLE;
+    addCommentOpacity = '1';
   } else if (hover === false) {
     parsedColor = 'none';
+    addCommentOpacity = '0';
   }
-  target.style.border = parsedColor;
+  lineTarget.style.border = parsedColor;
+  addCommentTarget.style.opacity = addCommentOpacity;
 }
 
 function isUserGrader() {
