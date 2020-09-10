@@ -1,5 +1,4 @@
 import enum
-import random
 import secrets
 import string
 from datetime import datetime
@@ -110,6 +109,7 @@ class User(UserMixin, BaseModel):
     mail_address = CharField(unique=True)
     password = CharField()
     role = ForeignKeyField(Role, backref='users')
+    api_key = CharField()
 
     def is_password_valid(self, password):
         return check_password_hash(self.password, password)
@@ -123,12 +123,14 @@ class User(UserMixin, BaseModel):
             User.fullname.name: 'Checker guru',
             User.role.name: Role.get_staff_role(),
             User.password.name: cls.random_password(),
+            User.api_key.name: cls.random_password(),
         })
         return instance
 
     @classmethod
-    def random_password(cls) -> str:
-        return ''.join(random.choices(string.printable.strip()[:65], k=12))
+    def random_password(cls, stronger=False) -> str:
+        length_params = {'min_len': 40, 'max_len': 41} if stronger else {}
+        return generate_password(**length_params)
 
     def get_notifications(self) -> Iterable['Notification']:
         return Notification.fetch(self)
@@ -145,6 +147,12 @@ def on_save_handler(model_class, instance, created):
     is_password_changed = not instance.password.startswith('pbkdf2:sha256')
     if created or is_password_changed:
         instance.password = generate_password_hash(instance.password)
+
+    is_api_key_changed = not instance.api_key.startswith('pbkdf2:sha256')
+    if created or is_api_key_changed:
+        if not instance.api_key:
+            instance.api_key = model_class.random_password()
+        instance.api_key = generate_password_hash(instance.api_key)
 
 
 class Notification(BaseModel):
@@ -722,9 +730,9 @@ class Comment(BaseModel):
         return tuple(cls._by_file(file_id).dicts())
 
 
-def generate_password():
+def generate_password(min_len=9, max_len=16):
     randomizer = secrets.SystemRandom()
-    length = randomizer.randrange(9, 16)
+    length = randomizer.randrange(min_len, max_len)
     password = randomizer.choices(string.printable[:66], k=length)
     return ''.join(password)
 
@@ -741,8 +749,9 @@ def create_demo_users():
 
     for entity in entities:
         user = dict(zip(fields, entity))
-        password = generate_password()
-        User.create(**user, password=password)
+        password = User.random_password()
+        api_key = User.random_password(stronger=True)
+        User.create(**user, password=password, api_key=api_key)
         print(f"User: {user['username']}, Password: {password}")  # noqa: T001
 
 

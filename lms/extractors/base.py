@@ -48,9 +48,9 @@ class Extractor:
 
     @classmethod
     def _split_header(cls, code: CodeFile) -> Tuple[str, str]:
-        code = cast(str, cls._convert_to_text(code))
+        code_as_text = cast(str, cls._convert_to_text(code))
 
-        clean_text = code.strip('#' + string.whitespace)
+        clean_text = code_as_text.strip('#' + string.whitespace)
         first_line_end = clean_text.find('\n')
         if first_line_end == -1:
             first_line_end = len(clean_text)
@@ -74,6 +74,9 @@ class Extractor:
         raise NotImplementedError()
 
     def get_exercises(self) -> Iterator[Tuple[int, List[File]]]:
+        raise NotImplementedError()
+
+    def can_extract(self) -> bool:
         raise NotImplementedError()
 
     def __iter__(self) -> Iterator[Tuple[int, List[File]]]:

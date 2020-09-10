@@ -61,6 +61,7 @@ def create_user(
         fullname=f'A{role_name}',
         mail_address=f'so-{role_name}-{index}@mail.com',
         password='fake pass',
+        api_key='fake key',
         role=Role.by_name(role_name),
     )
 
@@ -96,6 +97,7 @@ def admin_user():
         fullname='Buya',
         mail_address='mymail@mail.com',
         password='fake pass',
+        api_key='fake key',
         role=admin_role,
     )
 

@@ -1,10 +1,14 @@
 import fnmatch
+import pathlib
 from typing import Iterator, List, Set, Tuple
 from zipfile import BadZipFile, ZipFile
 
-from lms.extractors.base import Extractor, File, Text
+from lms.extractors.base import Extractor, File
 from lms.models.errors import BadUploadFile
 from lms.utils.log import log
+
+
+GITIGNORE_FILE = pathlib.Path(__file__).parent / 'ignorefiles.txt'
 
 
 class Ziparchive(Extractor):
@@ -58,7 +62,7 @@ class Ziparchive(Extractor):
 
     @staticmethod
     def get_unwanted_files_types() -> Iterator[str]:
-        with open('ignorefiles.txt', 'r') as file:
+        with open(GITIGNORE_FILE, 'r') as file:
             lines = file.read().splitlines()
 
         yield from (
@@ -67,7 +71,7 @@ class Ziparchive(Extractor):
             if line and not line.strip().startswith('#')
         )
 
-    def get_unwanted_files(self, namelist: List[Text]) -> Set:
+    def get_unwanted_files(self, namelist: List[str]) -> Set:
         unwanted_files = set()
         for pattern in self.get_unwanted_files_types():
             unwanted_files.update(fnmatch.filter(namelist, pattern))
