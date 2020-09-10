@@ -97,10 +97,10 @@ def _add_not_null_column(
     table: Model, column: Field,
     run_before_adding_not_null: Callable[[Model, Field], None] = None,
 ) -> bool:
-    table_name, column_name, already_exists = get_details(table, column)
+    already_exists, table_name, column_name = get_details(table, column)
     log.info(f'Adding {table_name}.{column_name}, if needed.')
     if already_exists:
-        log.info(f'Column {column.name} already exists in {table}')
+        log.info(f'Column {column_name} already exists in {table_name}.')
         return False
 
     migrator = db_config.get_migrator_instance()
