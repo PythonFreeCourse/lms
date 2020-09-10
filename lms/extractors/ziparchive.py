@@ -11,9 +11,6 @@ from lms.utils.log import log
 GITIGNORE_FILE = pathlib.Path(__file__).parent / 'ignorefiles.txt'
 
 
-GITIGNORE_FILE = pathlib.Path(__file__).parent / 'ignorefiles.txt'
-
-
 class Ziparchive(Extractor):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
