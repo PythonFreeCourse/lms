@@ -457,6 +457,7 @@ span.line {
   display: inline-block;
   text-align: left;
   width: 100%;
+  margin-left: 0.3em;
 }
 
 #grader-buttons {
@@ -495,19 +496,20 @@ code > code:last-of-type{
 
 .grader-add {
   position: relative;
-  float: left;
+  background-attachment: fixed;
+  left: -0.88em;
   width: 22px;
   height: 22px;
-  font-size: 22px;
+  font-size: 24px;
   cursor: pointer;
-  display: none;
-  left: -1.2em;
+  display: inline-block;
   color: #0366d6;
   border-radius: 6px;
   transition: transform .1s ease-in-out;
-  transform-origin: left;
+  transform-origin: center;
   transform: scale(.8);
   opacity: 0;
+  line-height: normal;
 }
 
 .grader-add:hover {
@@ -576,9 +578,18 @@ code > .grader-add {
 
 .comments-count {
   align-self: center;
-  font-size: 18px;
+  font-size: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin-top: -0.25rem;
 }
 
+.file-comments-count {
+  position: absolute;
+  margin-left: -0.8em;
+  margin-top: -1.5em;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 20px;
+}
 
 #notification-icon {
   cursor: pointer;

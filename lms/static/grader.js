@@ -101,10 +101,10 @@ function trackDragAreas(lineItems, addCommentItems) {
     let addCommentTarget;
     if (lineTarget === null) {
       addCommentTarget = span.closest('.grader-add');
-      const lines = document.getElementById('code-view').querySelectorAll('.line');
+      const lines = document.querySelectorAll('#code-view .line');
       lineTarget = lines[addCommentTarget.dataset.line - 1];
     } else {
-      const graderAdds = document.getElementById('code-view').querySelectorAll('.grader-add');
+      const graderAdds = document.querySelectorAll('#code-view .grader-add');
       addCommentTarget = graderAdds[lineTarget.dataset.line - 1];
     }
     return [lineTarget, addCommentTarget];

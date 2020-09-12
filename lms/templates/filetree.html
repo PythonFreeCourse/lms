@@ -7,7 +7,17 @@
       {%- if file.is_folder -%}
         icon hawcons-icon-folder">
       {%- else -%}
-        icon hawcons-icon-document-text hawcons-icon-file-{{ file.path.rsplit('.')[-1] | e }}">
+        icon hawcons-icon-document-text hawcons-icon-file-{{ file.path.rsplit('.')[-1] | e }}" style="padding-left: 0.5em">
+        <div class="file-comments-count">
+          <span class="badge badge-secondary" style="
+          {%- if file.comments_num -%}
+            margin-left: {{ file.indent }}em; background-color: red">
+          {%- else -%}
+            margin-left: {{ file.indent }}em; background-color: green">
+          {%- endif -%}
+          {{ file.comments_num }}
+          </span>
+        </div>
       {%- endif -%}
       </span>
       <a {% if not file.is_folder %}href="/view/{{ solution.id }}/{{ file.id }}"{% endif %} class="filename link" title="{{ file.path | e }}">{{ file.path | truncate(25, killwords=True) | e }}</a>
