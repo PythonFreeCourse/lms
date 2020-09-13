@@ -46,7 +46,6 @@ def get_files_tree(files: Iterable[SolutionFile]) -> List[Dict[str, Any]]:
     file_details = [
         {
             'id': file.id,
-            'comments_num': len(Comment.by_file(file.id)),
             'fullpath': file.path,
             'path': file.path.strip('/').rpartition('/')[2],
             'indent': file.path.strip('/').count('/'),

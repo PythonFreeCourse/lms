@@ -364,6 +364,7 @@ def view(solution_id: int, file_id: Optional[int] = None):
     view_params = {
         'solution': model_to_dict(solution),
         'files': files,
+        'comments': solution.comments_per_file,
         'current_file': file_to_show,
         'is_manager': is_manager,
         'role': current_user.role.name.lower(),

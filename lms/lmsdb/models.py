@@ -1,3 +1,4 @@
+from collections import defaultdict
 import enum
 import secrets
 import string
@@ -388,6 +389,13 @@ class Solution(BaseModel):
         return Comment.select().join(
             SolutionFile,
         ).where(SolutionFile.solution == self)
+
+    @property
+    def comments_per_file(self):
+        comments_per_file = defaultdict(int)
+        for comment in self.comments:
+            comments_per_file[comment.file.id] += 1
+        return comments_per_file
 
     @classmethod
     def create_solution(

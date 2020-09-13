@@ -9,13 +9,13 @@
       {%- else -%}
         icon hawcons-icon-document-text hawcons-icon-file-{{ file.path.rsplit('.')[-1] | e }}" style="padding-left: 0.5em">
         <div class="file-comments-count">
-          <span class="badge badge-secondary" style="
-          {%- if file.comments_num -%}
-            margin-left: {{ file.indent }}em; background-color: red">
+          <span style="margin-left: {{ file.indent }}em" class="
+          {%- if comments[file.id] -%}
+          badge badge-danger">
           {%- else -%}
-            margin-left: {{ file.indent }}em; background-color: green">
+          badge badge-success">
           {%- endif -%}
-          {{ file.comments_num }}
+          {{ comments[file.id] }}
           </span>
         </div>
       {%- endif -%}
