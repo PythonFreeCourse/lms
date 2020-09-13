@@ -1,7 +1,7 @@
 from operator import itemgetter
 from typing import Any, Dict, Iterable, List, Optional
 
-from lms.lmsdb.models import Comment, Solution, SolutionFile
+from lms.lmsdb.models import Solution, SolutionFile
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmsweb import config, routes
