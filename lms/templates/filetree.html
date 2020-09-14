@@ -7,13 +7,13 @@
       {%- if file.is_folder -%}
         icon hawcons-icon-folder">
       {%- else -%}
-        icon hawcons-icon-document-text hawcons-icon-file-{{ file.path.rsplit('.')[-1] | e }}" style="padding-left: 0.5em">
+        icon hawcons-icon-document-text hawcons-icon-file-{{ file.path.rsplit('.')[-1] | e }}">
         <div class="file-comments-count">
-          <span style="margin-left: {{ file.indent }}em" class="
+          <span style="margin-left: {{ file.indent }}em" class="badge badge-
           {%- if comments[file.id] -%}
-          badge badge-danger">
+          danger">
           {%- else -%}
-          badge badge-success">
+          success">
           {%- endif -%}
           {{ comments[file.id] }}
           </span>

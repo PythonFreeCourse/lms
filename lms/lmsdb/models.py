@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import Counter
 import enum
 import secrets
 import string
@@ -392,7 +392,7 @@ class Solution(BaseModel):
 
     @property
     def comments_per_file(self):
-        comments_per_file = defaultdict(int)
+        comments_per_file = Counter()
         for comment in self.comments:
             comments_per_file[comment.file.id] += 1
         return comments_per_file
