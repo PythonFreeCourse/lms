@@ -347,8 +347,8 @@ i.fa {
 
 .button-copy {
   position: absolute;
-  right: 1rem;
-  top: 1rem;
+  right: 1em;
+  top: 1em;
   background-color:gray;
   border-radius:14px;
   border:1px solid #ffffff;
@@ -578,9 +578,9 @@ code > .grader-add {
 
 .comments-count {
   align-self: center;
-  font-size: 20px;
+  font-size: 1.25rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  margin-top: -0.25rem;
+  margin-top: -0.25em;
 }
 
 .file-comments-count {
@@ -588,7 +588,7 @@ code > .grader-add {
   margin-left: -0.8em;
   margin-top: -1.5em;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 20px;
+  font-size: 1.25rem;
 }
 
 #notification-icon {

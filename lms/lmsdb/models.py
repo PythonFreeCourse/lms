@@ -392,10 +392,7 @@ class Solution(BaseModel):
 
     @property
     def comments_per_file(self):
-        comments_per_file = Counter()
-        for comment in self.comments:
-            comments_per_file[comment.file.id] += 1
-        return comments_per_file
+        return Counter(c.file.id for c in self.comments)
 
     @classmethod
     def create_solution(
