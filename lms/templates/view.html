@@ -107,6 +107,11 @@
       {% include 'filetree.html' %}
     {% endif -%}
   </div>
+  <a id="download-solution" href="/download/{{ solution['id'] }}">
+    <button class="btn btn-primary btn-sm btn-block">
+      <i class="fa fa-download"></i>הורד פיתרון
+    </button>
+  </a>
 </div>
 <script src="{{ url_for('static', filename='prism.js') }}"></script>
 <script src="{{ url_for('static', filename='comments.js') }}"></script>

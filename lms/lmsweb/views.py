@@ -5,7 +5,8 @@ from urllib.parse import urljoin, urlparse
 
 import arrow  # type: ignore
 from flask import (
-    abort, jsonify, render_template, request, send_from_directory, url_for,
+    abort, jsonify, render_template, request,
+    send_file, send_from_directory, url_for,
 )
 from flask_admin import Admin, AdminIndexView  # type: ignore
 from flask_admin.contrib.peewee import ModelView  # type: ignore
@@ -330,6 +331,26 @@ def upload_page():
         'exercise_matches': matches,
         'exercise_misses': misses,
     })
+
+
+@webapp.route(f'{routes.DOWNLOADS}/<int:solution_id>')
+@webapp.route(f'{routes.DOWNLOADS}/<int:solution_id>/<int:file_id>')
+@login_required
+def download(solution_id: int, file_id: Optional[int] = None):
+    solution = Solution.get_or_none(Solution.id == solution_id)
+    if solution is None:
+        return fail(404, 'Solution does not exist.')
+
+    viewer_is_solver = solution.solver.id == current_user.id
+    has_viewer_access = current_user.role.is_viewer
+    if not viewer_is_solver and not has_viewer_access:
+        return fail(403, 'This user has no permissions to view this page.')
+
+    return send_file(
+        filename_or_fp=solution.download_solution(),
+        attachment_filename=f'{solution.exercise.subject}.zip',
+        as_attachment=True
+    )
 
 
 @webapp.route(f'{routes.SOLUTIONS}/<int:solution_id>')

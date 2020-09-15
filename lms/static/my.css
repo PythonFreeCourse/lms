@@ -177,6 +177,13 @@ div#code-view {
   margin-top: 5vh;
 }
 
+#download-solution {
+  width: 6%;
+  font-size: 0.75rem;
+  size: 0.5rem;
+  align-self: center;
+}
+
 .our-button {
   border-radius: 8px;
   display: block;
