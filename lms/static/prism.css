@@ -215,6 +215,7 @@ pre[class*="language-"].line-numbers > code {
   top: 0;
   font-size: 100%;
   left: -3.8em;
+  margin-top: 0.1rem;
   width: 3em; /* works for line-numbers below 1000 lines */
   letter-spacing: -1px;
   border-right: 1px solid #999;

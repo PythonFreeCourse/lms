@@ -1181,6 +1181,9 @@
 .hawcons-icon-one-finger-swipe-down:before {
 	content: "\e782";
 }
+span.file-icon {
+	padding-left: 0.5em;
+}
 .hawcons-icon-file-numbers:before {
 	content: "\e783";
 }

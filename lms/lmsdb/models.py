@@ -1,3 +1,4 @@
+from collections import Counter
 import enum
 import secrets
 import string
@@ -378,6 +379,7 @@ class Solution(BaseModel):
             if exercise.get('solution_id') is None:
                 exercise['solution_id'] = solution.id
                 exercise['is_checked'] = solution.is_checked
+                exercise['comments_num'] = len(solution.comments)
                 if solution.is_checked and solution.checker:
                     exercise['checker'] = solution.checker.fullname
         return tuple(exercises.values())
@@ -387,6 +389,10 @@ class Solution(BaseModel):
         return Comment.select().join(
             SolutionFile,
         ).where(SolutionFile.solution == self)
+
+    @property
+    def comments_per_file(self):
+        return Counter(c.file.id for c in self.comments)
 
     @classmethod
     def create_solution(

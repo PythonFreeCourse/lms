@@ -94,39 +94,48 @@ function sendExistsComment(...commentData) {
 }
 
 
-function trackDragAreas(items) {
-  function findElementToMark(e) {
+function trackDragAreas(lineItems, addCommentItems) {
+  function findElementsToMark(e) {
     const span = (e.target.nodeType === 3) ? e.target.parentNode : e.target;
-    const target = span.closest('.line');
-    return target;
+    let lineTarget = span.closest('.line');
+    let addCommentTarget;
+    if (lineTarget === null) {
+      addCommentTarget = span.closest('.grader-add');
+      const lines = document.querySelectorAll('#code-view .line');
+      lineTarget = lines[addCommentTarget.dataset.line - 1];
+    } else {
+      const graderAdds = document.querySelectorAll('#code-view .grader-add');
+      addCommentTarget = graderAdds[lineTarget.dataset.line - 1];
+    }
+    return [lineTarget, addCommentTarget];
   }
 
-  Array.from(items).forEach((item) => {
+  Array.from(lineItems).concat(Array.from(addCommentItems)).forEach((item) => {
     item.addEventListener('dragover', (e) => {
       e.preventDefault();
-      window.hoverLine(findElementToMark(e), true);
+      window.hoverLine(findElementsToMark(e), true);
     }, false);
     item.addEventListener('dragleave', (e) => {
       e.preventDefault();
-      window.hoverLine(findElementToMark(e), false);
+      window.hoverLine(findElementsToMark(e), false);
     }, false);
     item.addEventListener('dragenter', (e) => {
       e.preventDefault();
     }, false);
     item.addEventListener('mouseenter', (e) => {
       e.preventDefault();
-      window.hoverLine(findElementToMark(e), true);
+      window.hoverLine(findElementsToMark(e), true);
     }, false);
     item.addEventListener('mouseleave', (e) => {
       e.preventDefault();
-      window.hoverLine(findElementToMark(e), false);
+      window.hoverLine(findElementsToMark(e), false);
     }, false);
     item.addEventListener('drop', (e) => {
       e.preventDefault();
-      const target = findElementToMark(e);
-      const { line } = target.dataset;
+      const targets = findElementsToMark(e);
+      const { line } = targets[0].dataset;
       const commentId = e.dataTransfer.getData('text/plain');
-      window.hoverLine(target, false);
+      window.hoverLine(targets, false);
       sendExistsComment(window.fileId, line, commentId);
     }, false);
   });
@@ -183,7 +192,7 @@ function addNewCommentButtons(elements) {
     const newNode = document.createElement('span');
     newNode.className = 'grader-add';
     newNode.dataset.line = lineNumber + 1;
-    newNode.innerHTML = '<i class="fa fa-plus" aria-hidden="true"></i>';
+    newNode.innerHTML = '<i class="fa fa-plus-square"></i>';
     item.parentNode.insertBefore(newNode, item);
     registerNewCommentPopover(newNode);
   });
@@ -194,11 +203,14 @@ function addNewCommentButtons(elements) {
 window.deleteComment = deleteComment;
 window.sendExistsComment = sendExistsComment;
 window.addEventListener('lines-numbered', () => {
-  const exerciseId = document.getElementById('code-view').dataset.exercise;
-  trackDragAreas(document.getElementsByClassName('line'));
+  const codeView = document.getElementById('code-view');
+  const exerciseId = codeView.dataset.exercise;
+  const lineItems = codeView.getElementsByClassName('line');
+  addNewCommentButtons(lineItems);
+  const addCommentItems = codeView.querySelectorAll('.grader-add');
+  trackDragAreas(lineItems, addCommentItems);
   trackDraggables(document.getElementsByClassName('known-comment'));
   trackFinished(exerciseId, window.solutionId, document.getElementById('save-check'));
-  addNewCommentButtons(document.getElementById('code-view').getElementsByClassName('line'));
   if (!window.isUserGrader()) {
     sessionStorage.setItem('role', 'grader');
   }

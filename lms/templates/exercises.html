@@ -16,6 +16,9 @@
           <div class="exercise-name"><div class="ex-title">{{ exercise['exercise_name'] | e }}</div></div>
         </div>
         <div class="left-side">
+          <div class="comments-count">
+            <span class="badge badge-secondary">{{ exercise['comments_num'] }}</span>
+          </div>
           {%- if exercise['notebook'] %}
           <div class="which-notebook">
             <i class="fa fa-book" aria-hidden="true"></i>
