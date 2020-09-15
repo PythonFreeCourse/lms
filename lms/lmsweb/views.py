@@ -349,7 +349,7 @@ def download(solution_id: int, file_id: Optional[int] = None):
     return send_file(
         filename_or_fp=solution.download_solution(),
         attachment_filename=f'{solution.exercise.subject}.zip',
-        as_attachment=True
+        as_attachment=True,
     )
 
 
