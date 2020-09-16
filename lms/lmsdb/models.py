@@ -1,6 +1,5 @@
 from collections import Counter
 import enum
-from io import BytesIO
 import secrets
 import string
 from datetime import datetime
@@ -8,7 +7,6 @@ from typing import (
     Any, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple,
     Type, Union, cast,
 )
-from zipfile import ZipFile
 
 from flask_login import UserMixin  # type: ignore
 from peewee import (  # type: ignore
@@ -320,15 +318,6 @@ class Solution(BaseModel):
             self,
     ) -> Union[Iterable['SolutionFile'], 'SolutionFile']:
         return SolutionFile.filter(SolutionFile.solution == self)
-
-    def download_solution(self) -> BytesIO:
-        memory_file = BytesIO()
-        with ZipFile(memory_file, 'w') as archive:
-            for file in self.solution_files:
-                if not file.path.endswith(('/', '\\')):
-                    archive.writestr(file.path.strip('\\/'), file.code)
-        memory_file.seek(0)
-        return memory_file
 
     @property
     def is_checked(self):

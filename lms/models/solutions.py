@@ -1,5 +1,8 @@
+from io import BytesIO
 from operator import itemgetter
+import os
 from typing import Any, Dict, Iterable, List, Optional
+from zipfile import ZipFile
 
 from lms.lmsdb.models import Solution, SolutionFile
 from lms.lmstests.public.general import tasks as general_tasks
@@ -40,6 +43,16 @@ def start_checking(solution: Optional[Solution]) -> bool:
         )
         return True
     return False
+
+
+def create_zip_from_solution(files: Iterable[SolutionFile]) -> bytes:
+    with BytesIO() as memory_file:
+        with ZipFile(memory_file, 'w') as archive:
+            for file in files:
+                if not file.path.endswith(os.path.sep):
+                    archive.writestr(file.path.strip(os.path.sep), file.code)
+        memory_file.seek(0)
+        return memory_file.read()
 
 
 def get_files_tree(files: Iterable[SolutionFile]) -> List[Dict[str, Any]]:
