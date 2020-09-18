@@ -500,7 +500,6 @@ code > code:last-of-type{
   left: -0.88em;
   width: 1.375rem;
   height: 1.375rem;
-  font-size: 1.5rem;
   cursor: pointer;
   display: inline-block;
   color: #0366d6;
@@ -509,7 +508,6 @@ code > code:last-of-type{
   transform-origin: center;
   transform: scale(.8);
   opacity: 0;
-  line-height: normal;
 }
 
 .grader-add:hover {
