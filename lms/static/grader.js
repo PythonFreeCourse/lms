@@ -153,7 +153,7 @@ function trackDraggables(elements) {
 
 function focusTextArea(lineNumber) {
   const target = document.querySelector(`textarea[data-line='${lineNumber}']`);
-  target.focus();
+  target.focus({preventScroll: true});
 }
 
 
