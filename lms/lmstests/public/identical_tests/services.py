@@ -2,6 +2,8 @@ import collections
 import logging
 import typing
 
+from flask_babel import gettext
+
 from lms.lmsdb import models
 from lms.models import notifications
 from lms.lmsweb import routes
@@ -99,7 +101,11 @@ class IdenticalSolutionSolver:
             kind=notifications.NotificationKind.CHECKED,
             user=to_solution.solver,
             related_id=to_solution,
-            message=f'הפתרון שלך לתרגיל {to_solution.exercise.subject} נבדק.',
+            message=''.join((
+                gettext('הפתרון שלך לתרגיל'),
+                f' {to_solution.exercise.subject} ',
+                gettext('נבדק.'),
+            )),
             action_url=f'{routes.SOLUTIONS}/{to_solution.id}',
         )
 

@@ -4,6 +4,8 @@ import os
 from typing import Any, Dict, Iterable, List, Optional
 from zipfile import ZipFile
 
+from flask_babel import gettext
+
 from lms.lmsdb.models import Solution, SolutionFile
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
@@ -14,7 +16,11 @@ from lms.models import notifications
 def mark_as_checked(solution_id: int, checker_id: int) -> bool:
     checked_solution: Solution = Solution.get_by_id(solution_id)
     is_updated = checked_solution.mark_as_checked(by=checker_id)
-    msg = f'הפתרון שלך לתרגיל "{checked_solution.exercise.subject}" נבדק.'
+    msg = ''.join((
+        gettext('הפתרון שלך לתרגיל'),
+        f' "{checked_solution.exercise.subject}" ',
+        gettext('נבדק.'),
+    ))
     if is_updated:
         notifications.send(
             kind=notifications.NotificationKind.CHECKED,

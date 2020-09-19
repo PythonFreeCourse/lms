@@ -22,7 +22,8 @@ from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Exercise, RoleOptions,
     Solution, SolutionFile, User, database,
 )
-from lms.lmsweb import routes, webapp
+from lms.lmsweb import babel, routes, webapp
+from lms.lmsweb.config import LANGUAGES, LOCALE
 from lms.models import notifications, solutions, upload
 from lms.models.errors import AlreadyExists, BadUploadFile
 from lms.utils.log import log
@@ -40,6 +41,18 @@ PERMISSIVE_CORS = {
 
 HIGH_ROLES = {str(RoleOptions.STAFF), str(RoleOptions.ADMINISTRATOR)}
 MAX_REQUEST_SIZE = 2_000_000  # 2MB (in bytes)
+
+DIRECTION = 'rtl' if LOCALE == 'he' else 'ltr'
+
+
+@babel.localeselector
+def get_locale():
+    """return request.accept_languages.best_match(
+        webapp.config['LANGUAGES'].keys(),
+    )"""
+    if LOCALE in LANGUAGES:
+        return LOCALE
+    return 'en'
 
 
 @webapp.before_request
@@ -112,7 +125,11 @@ def login():
             return fail(400, "The URL isn't safe.")
         return redirect(next_url or url_for('main'))
 
-    return render_template('login.html')
+    return render_template(
+        'login.html',
+        direction=DIRECTION,
+        locale=get_locale(),
+    )
 
 
 @webapp.route('/logout')
@@ -137,7 +154,11 @@ def banned_page():
         current_user.is_authenticated
         and current_user.role.is_banned
     ):
-        return render_template('banned.html')
+        return render_template(
+            'banned.html',
+            direction=DIRECTION,
+            locale=get_locale(),
+        )
 
 
 @webapp.route('/')
@@ -152,6 +173,8 @@ def main():
 def status():
     return render_template(
         'status.html',
+        direction=DIRECTION,
+        locale=get_locale(),
         exercises=Solution.status(),
     )
 
@@ -164,6 +187,8 @@ def exercises_page():
     is_manager = current_user.role.is_manager
     return render_template(
         'exercises.html',
+        direction=DIRECTION,
+        locale=get_locale(),
         exercises=exercises,
         is_manager=is_manager,
         fetch_archived=fetch_archived,
@@ -280,7 +305,11 @@ def comment():
 @webapp.route('/send/<int:_exercise_id>')
 @login_required
 def send(_exercise_id):
-    return render_template('upload.html')
+    return render_template(
+        'upload.html',
+        direction=DIRECTION,
+        locale=get_locale(),
+    )
 
 
 @webapp.route('/user/<int:user_id>')
@@ -294,6 +323,8 @@ def user(user_id):
 
     return render_template(
         'user.html',
+        direction=DIRECTION,
+        locale=get_locale(),
         solutions=Solution.of_user(target_user.id, with_archived=True),
         user=target_user,
     )
@@ -302,7 +333,11 @@ def user(user_id):
 @webapp.route('/send', methods=['GET'])
 @login_required
 def send_():
-    return render_template('upload.html')
+    return render_template(
+        'upload.html',
+        direction=DIRECTION,
+        locale=get_locale(),
+    )
 
 
 @webapp.route('/upload', methods=['POST'])
@@ -387,6 +422,8 @@ def view(solution_id: int, file_id: Optional[int] = None):
         return fail(404, 'File does not exist.')
 
     view_params = {
+        'direction': DIRECTION,
+        'locale': get_locale(),
         'solution': model_to_dict(solution),
         'files': files,
         'comments': solution.comments_per_file,
@@ -480,7 +517,7 @@ def common_comments(exercise_id=None):
 @webapp.template_filter('date_humanize')
 def _jinja2_filter_datetime(date):
     try:
-        return arrow.get(date).humanize(locale='he_IL')
+        return arrow.get(date).humanize(locale=get_locale())
     except ValueError:
         return str(arrow.get(date).date())
 

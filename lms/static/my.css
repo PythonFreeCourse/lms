@@ -1,7 +1,16 @@
 html {
   border: #f3f3f3;
+  text-align: right;
+}
+
+.rtl {
   direction: rtl;
   text-align: right;
+}
+
+.ltr {
+  direction: ltr;
+  text-align: left;
 }
 
 code,
@@ -12,19 +21,19 @@ div#code-view {
   text-align: left;
 }
 
-::-webkit-input-placeholder {
+:lang(he) ::-webkit-input-placeholder {
   text-align: right;
 }
 
-::-moz-placeholder {
+:lang(he) ::-moz-placeholder {
   text-align: right;
 }
 
-:-moz-placeholder {
+:lang(he) :-moz-placeholder {
   text-align: right;
 }
 
-:-ms-input-placeholder {
+:lang(he) :-ms-input-placeholder {
   text-align: right;
 }
 
@@ -46,9 +55,7 @@ div#code-view {
 }
 
 .page {
-  direction: rtl;
   margin: 3rem 0;
-  text-align: right;
 }
 
 #exercises-page {
@@ -178,7 +185,7 @@ div#code-view {
 }
 
 #download-solution {
-  width: 6%;
+  min-width: 6%;
   font-size: 0.75rem;
   size: 0.5rem;
   align-self: center;
@@ -258,6 +265,7 @@ i.fa {
 
 /* Check/see exercise view */
 #page-view {
+  direction: rtl;
   display: flex;
   flex-direction: column;
   justify-items: center;
@@ -272,7 +280,6 @@ i.fa {
 
 #view-head {
   align-items: center;
-  direction: rtl;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -371,7 +378,7 @@ i.fa {
 }
 
 pre {
-  width: 100%
+  width: 100%;
 }
 
 .test-results {
@@ -428,15 +435,12 @@ code {
 }
 
 #popular-comments h2 {
-  direction: rtl;
   font-size: 1.5rem;
   font-style: italic;
   margin-bottom: 1em;
-  text-align: right;
 }
 
 ol.comments {
-  direction: rtl;
   list-style-type: none;
   padding: 1em;
   text-align: right;
@@ -537,7 +541,6 @@ code > .grader-add {
 
 /* Status page */
 #page-status {
-  direction: rtl;
   text-align: right;
 }
 
@@ -565,10 +568,9 @@ code > .grader-add {
 /* Navigation bar */
 
 .mr-auto .dropdown-menu {
-    right: auto !important;
-    left: 0px;
+  right: auto !important;
+  left: 0px;
 }
-
 
 .nav-item {
   padding-left: 1em;
@@ -604,7 +606,6 @@ code > .grader-add {
 
 .notification {
   flex-direction: column;
-  text-align: right;
 }
 
 .notification[data-read="true"] .icon::before {
@@ -632,7 +633,6 @@ code > .grader-add {
 
 /* User's page */
 #user {
-  direction: rtl;
   text-align: right;
 }
 

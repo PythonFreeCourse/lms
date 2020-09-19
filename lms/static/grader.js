@@ -176,7 +176,7 @@ function registerNewCommentPopover(element) {
   const lineNumber = element.dataset.line;
   $(element).popover({
     html: true,
-    title: `הערה חדשה לשורה ${lineNumber}`,
+    title: `${addCommentString} ${lineNumber}`,
     sanitize: false,
     content: `<textarea data-line='${lineNumber}'></textarea>`,
   });
@@ -197,6 +197,15 @@ function addNewCommentButtons(elements) {
     registerNewCommentPopover(newNode);
   });
   $('[data-toggle=popover]').popover();
+}
+
+
+const lang = document.querySelector('html').lang;
+let addCommentString;
+if (lang == 'he') {
+  addCommentString = 'הערה חדשה לשורה';
+} else {
+  addCommentString = 'New comment for line no.';
 }
 
 

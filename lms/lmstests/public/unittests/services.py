@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 
+from flask_babel import gettext
 import junitparser
 
 from lms.lmsdb import models
@@ -79,12 +80,14 @@ class UnitTestChecker:
         if not results:
             self._logger.info('junit invalid results (%s) on solution %s',
                               junit_results, self._solution_id)
-            fail_user_message = 'הבודק האוטומטי לא הצליח להריץ את הקוד שלך.'
+            fail_user_message = gettext(
+                'הבודק האוטומטי לא הצליח להריץ את הקוד שלך.',
+            )
             models.SolutionExerciseTestExecution.create_execution_result(
                 solution=self._solution,
                 test_name=models.ExerciseTestName.FATAL_TEST_NAME,
                 user_message=fail_user_message,
-                staff_message='אחי, בדקת את הקוד שלך?',
+                staff_message=gettext('אחי, בדקת את הקוד שלך?'),
             )
             notifications.send(
                 kind=notifications.NotificationKind.UNITTEST_ERROR,
@@ -119,10 +122,12 @@ class UnitTestChecker:
         if not number_of_failures:
             return
 
-        fail_message = (
-            f'הבודק האוטומטי נכשל ב־{number_of_failures} '
-            f'דוגמאות בתרגיל "{self._solution.exercise.subject}".'
-        )
+        fail_message = ''.join((
+            gettext('הבודק האוטומטי נכשל ב־'),
+            f'{number_of_failures} ',
+            gettext('דוגמאות בתרגיל'),
+            f' "{self._solution.exercise.subject}".',
+        ))
         notifications.send(
             kind=notifications.NotificationKind.UNITTEST_ERROR,
             user=self._solution.solver,

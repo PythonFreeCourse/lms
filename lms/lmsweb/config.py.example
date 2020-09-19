@@ -17,3 +17,11 @@ FEATURE_FLAG_CHECK_IDENTICAL_CODE_ON = os.getenv(
 MAIL_WELCOME_MESSAGE = 'welcome-email'
 USERS_CSV = 'users.csv'
 ERRORS_CSV = 'errors.csv'
+
+
+# Babel config
+LANGUAGES = {
+    'he': 'Hebrew',
+    'en': 'English',
+}
+LOCALE = 'en'

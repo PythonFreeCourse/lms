@@ -2,6 +2,7 @@ import pathlib
 import shutil
 
 from flask import Flask
+from flask_babel import Babel
 from flask_wtf.csrf import CSRFProtect  # type: ignore
 
 project_dir = pathlib.Path(__file__).resolve().parent.parent
@@ -23,6 +24,9 @@ if not config_file.exists():
 webapp.config.from_pyfile(str(config_file))
 
 csrf = CSRFProtect(webapp)
+
+# Localizing configurations
+babel = Babel(webapp)
 
 # Must import files after app's creation
 from lms.lmsdb import models  # NOQA: F401, E402
