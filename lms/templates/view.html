@@ -17,7 +17,7 @@
     {% else %}
     <p id="solver"><strong>מגיש:</strong> <a href="/user/{{ solution['solver']['id'] }}">{{ solution['solver']['fullname'] | e }}</a></p>
     {% endif %}
-    <nav id="versions" aria-lael="ניווט בגרסאות ההגשה">
+    <nav id="versions" aria-label="ניווט בגרסאות ההגשה">
       <ul class="pagination">
       {%- for version in versions %}
         {% set current = version['id'] == solution['id'] %}
@@ -39,7 +39,7 @@
   <div id="view-body">
     <div class="code-view-container">
       <div id="code-view" data-id="{{ solution['id'] }}" data-file="{{ current_file.id }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}">
-        <pre><code id="python-user-code" class="language-python line-numbers highlight">{{- current_file.code | trim(chars=' ') | e -}}</code></pre>
+        <pre><code id="user-code" class="language-{{ current_file | language_name }} line-numbers highlight">{{- current_file.code | trim(chars=' ') | e -}}</code></pre>
       </div>
       <div id="copy-code">
         <a href="#" id="copy-button" class="button-copy" title="Copy code"><i class="fa fa-copy"></i></a>
@@ -55,12 +55,12 @@
                   </h5>
                   <span class="title">שגיאה:</span>
                   <span>
-                      <pre><code class="language-python highlight">{{ test_result.user_message | e }}</code></pre>
+                      <pre><code class="language-{{ current_file | language_name }} highlight">{{ test_result.user_message | e }}</code></pre>
                   </span>
                   {% if is_manager %}
                   <span class="title">שגיאת סגל:</span>
                   <span class="stack-trace">
-                      <pre><code class="language-python highlight">{{ test_result.staff_message | e }}</code></pre>
+                      <pre><code class="language-{{ current_file | language_name }} highlight">{{ test_result.staff_message | e }}</code></pre>
                   </span>
                   {% endif %}
               </li>
@@ -87,7 +87,7 @@
           {% endfor -%}
         </ol>
       </div>
-      <div id="all-comments">
+      <div id="my-all-comments">
         <h2>הערות בודק</h2>
         {% if user_comments %}
             <ol id="my-comments-list" class="comments my-comments">
