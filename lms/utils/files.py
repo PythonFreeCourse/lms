@@ -9,7 +9,6 @@ LANGUAGE_EXTENSIONS_TO_NAMES = {
     'py': 'python',
     'rb': 'ruby',
     'sh': 'bash',
-    'sh': 'bash',
     'sql': 'sql',
     'tex': 'latex',
     'yml': 'yaml',
