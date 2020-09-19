@@ -4,6 +4,7 @@ from tempfile import SpooledTemporaryFile
 from typing import Iterator
 from zipfile import ZipFile
 
+import pytest
 from werkzeug.datastructures import FileStorage
 
 from lms.extractors.base import File
@@ -41,6 +42,7 @@ class TestDownloadSolution:
         zip_file_storage.filename = DOWNLOAD_FILE.rpartition(os.path.sep)[-1]
         return zip_file_storage
 
+    @pytest.mark.skip('Should run with docker system access')
     def test_download_solution(
             self,
             exercise: Exercise,
