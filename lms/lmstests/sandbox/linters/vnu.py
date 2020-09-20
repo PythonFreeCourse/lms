@@ -27,10 +27,11 @@ class VNULinter(BaseLinter):
         results = self._execute_vnu_command()
 
         for result in results['messages']:
+            line = result.get('firstline') or result.get('lastLine')
+            if not line:  # set default line in case of empty element
+                line = 1
+
             try:
-                line = result.get('firstline') or result.get('lastLine')
-                if not line:  # set default line in case of empty element
-                    line = 1
                 response = LinterError(
                     error_code=result['type'],
                     line_number=line,
