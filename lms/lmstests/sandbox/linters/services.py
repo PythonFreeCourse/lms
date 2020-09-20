@@ -141,8 +141,7 @@ class VNULinter(BaseLinter):
     supported_files = ('html', 'htm', 'css')
 
     def get_error_text(self, error: LinterError):
-        default_text = f'{error.error_code}-{error.text}'
-        return defines.VNU_ERRORS_MAPPING.get(error.text, default_text)
+        return defines.VNU_ERRORS_MAPPING.get(error.text, error.text)
 
     @staticmethod
     def match_to_file_suffix(file_suffix: str) -> bool:
