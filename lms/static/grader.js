@@ -98,9 +98,8 @@ function trackDragAreas(lineItems, addCommentItems) {
   function findElementsToMark(e) {
     const span = (e.target.nodeType === 3) ? e.target.parentNode : e.target;
     let lineTarget = span.closest('.line');
-    let addCommentTarget;
-    if (lineTarget === null) {
-      addCommentTarget = span.closest('.grader-add');
+    let addCommentTarget = span.closest('.grader-add');
+    if (lineTarget === null || addCommentTarget !== null) {
       const lines = document.querySelectorAll('#code-view .line');
       lineTarget = lines[addCommentTarget.dataset.line - 1];
     } else {

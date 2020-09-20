@@ -524,6 +524,11 @@ code > code:last-of-type{
   transform: scale(1);
 }
 
+code .grader-add .fa {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .grader-delete {
   cursor: pointer;  /* Very bad semantically, think of another UI solution */
 }
