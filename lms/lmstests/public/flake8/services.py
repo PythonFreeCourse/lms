@@ -2,7 +2,7 @@ import logging
 import typing
 
 from celery.result import allow_join_result
-from flask_babel import gettext
+from flask_babel import gettext as _
 
 from lms.lmsdb import models
 from lms.lmstests.sandbox import flake8
@@ -93,12 +93,10 @@ class PyFlakeChecker:
 
         errors_len = len(self._errors)
         exercise_name = self.solution.exercise.subject
-        msg = ''.join((
-            gettext('הבודק האוטומטי נתן'),
-            f' {errors_len} ',
-            gettext('הערות על תרגילך'),
-            f' "{exercise_name}".',
-        ))
+        msg = _(
+            'הבודק האוטומטי נתן %(errors_num)s הערות על תרגילך %(name)s.',
+            errors_num=errors_len, name=exercise_name,
+        )
         return notifications.send(
             kind=notifications.NotificationKind.FLAKE8_ERROR,
             user=self.solution.solver,

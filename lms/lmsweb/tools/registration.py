@@ -2,7 +2,7 @@ import csv
 import os
 import typing
 
-from flask_babel import gettext
+from flask_babel import gettext as _
 
 from lms.lmsdb import models
 from lms.lmsweb import config
@@ -101,7 +101,7 @@ class UserRegistrationCreator:
                     'to': user,
                     'subject': (
                         'Learn Python - ',
-                        gettext('מערכת הגשת התרגילים'),
+                        _('מערכת הגשת התרגילים'),
                     ),
                     'html': text,
                 },

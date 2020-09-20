@@ -21,19 +21,19 @@ div#code-view {
   text-align: left;
 }
 
-:lang(he) ::-webkit-input-placeholder {
+.rtl-language > ::-webkit-input-placeholder {
   text-align: right;
 }
 
-:lang(he) ::-moz-placeholder {
+.rtl-language > ::-moz-placeholder {
   text-align: right;
 }
 
-:lang(he) :-moz-placeholder {
+.rtl-language > :-moz-placeholder {
   text-align: right;
 }
 
-:lang(he) :-ms-input-placeholder {
+.rtl-language > :-ms-input-placeholder {
   text-align: right;
 }
 

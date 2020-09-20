@@ -174,6 +174,7 @@ function trackTextArea(lineNumber) {
 
 function registerNewCommentPopover(element) {
   const lineNumber = element.dataset.line;
+  const addCommentString = 'הערה חדשה לשורה';
   $(element).popover({
     html: true,
     title: `${addCommentString} ${lineNumber}`,
@@ -197,15 +198,6 @@ function addNewCommentButtons(elements) {
     registerNewCommentPopover(newNode);
   });
   $('[data-toggle=popover]').popover();
-}
-
-
-const lang = document.querySelector('html').lang;
-let addCommentString;
-if (lang == 'he') {
-  addCommentString = 'הערה חדשה לשורה';
-} else {
-  addCommentString = 'New comment for line no.';
 }
 
 

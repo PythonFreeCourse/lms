@@ -26,6 +26,7 @@ from lms.lmsweb import babel, routes, webapp
 from lms.lmsweb.config import LANGUAGES, LOCALE
 from lms.models import notifications, solutions, upload
 from lms.models.errors import AlreadyExists, BadUploadFile
+from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.log import log
 
 login_manager = LoginManager()
@@ -41,8 +42,6 @@ PERMISSIVE_CORS = {
 
 HIGH_ROLES = {str(RoleOptions.STAFF), str(RoleOptions.ADMINISTRATOR)}
 MAX_REQUEST_SIZE = 2_000_000  # 2MB (in bytes)
-
-DIRECTION = 'rtl' if LOCALE == 'he' else 'ltr'
 
 
 @babel.localeselector
@@ -128,7 +127,6 @@ def login():
     return render_template(
         'login.html',
         direction=DIRECTION,
-        locale=get_locale(),
     )
 
 
@@ -157,7 +155,6 @@ def banned_page():
         return render_template(
             'banned.html',
             direction=DIRECTION,
-            locale=get_locale(),
         )
 
 
@@ -174,7 +171,6 @@ def status():
     return render_template(
         'status.html',
         direction=DIRECTION,
-        locale=get_locale(),
         exercises=Solution.status(),
     )
 
@@ -188,7 +184,6 @@ def exercises_page():
     return render_template(
         'exercises.html',
         direction=DIRECTION,
-        locale=get_locale(),
         exercises=exercises,
         is_manager=is_manager,
         fetch_archived=fetch_archived,
@@ -308,7 +303,6 @@ def send(_exercise_id):
     return render_template(
         'upload.html',
         direction=DIRECTION,
-        locale=get_locale(),
     )
 
 
@@ -324,7 +318,6 @@ def user(user_id):
     return render_template(
         'user.html',
         direction=DIRECTION,
-        locale=get_locale(),
         solutions=Solution.of_user(target_user.id, with_archived=True),
         user=target_user,
     )
@@ -336,7 +329,6 @@ def send_():
     return render_template(
         'upload.html',
         direction=DIRECTION,
-        locale=get_locale(),
     )
 
 
@@ -423,7 +415,6 @@ def view(solution_id: int, file_id: Optional[int] = None):
 
     view_params = {
         'direction': DIRECTION,
-        'locale': get_locale(),
         'solution': model_to_dict(solution),
         'files': files,
         'comments': solution.comments_per_file,
@@ -560,6 +551,8 @@ class AdminCommentTextView(AdminModelView):
         CommentText.flake8_key.name,
     )
 
+
+DIRECTION = 'rtl' if get_locale() in RTL_LANGUAGES else 'ltr'
 
 SPECIAL_MAPPING = {
     Solution: AdminSolutionView,
