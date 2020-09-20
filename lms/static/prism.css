@@ -1,5 +1,7 @@
-/* PrismJS 1.19.0
-https://prismjs.com/download.html#themes=prism&languages=markup+python&plugins=line-highlight+line-numbers+highlight-keywords */
+
+
+/* PrismJS 1.21.0
+https://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript+actionscript+ada+apacheconf+applescript+arduino+asciidoc+aspnet+asm6502+autohotkey+autoit+bash+basic+bbcode+c+csharp+cpp+cil+clojure+cmake+coffeescript+csp+crystal+css-extras+d+dart+diff+django+dns-zone-file+docker+editorconfig+eiffel+elixir+elm+etlua+erlang+excel-formula+fsharp+flow+fortran+git+go+graphql+groovy+haml+haskell+http+hpkp+hsts+ignore+ini+j+java+javadoc+javadoclike+javastacktrace+jolie+jsdoc+js-extras+json+json5+jsonp+jsstacktrace+js-templates+julia+kotlin+latex+less+lisp+llvm+lua+makefile+markdown+markup-templating+matlab+mongodb+naniscript+nasm+nginx+nim+nix+nsis+objectivec+ocaml+pascal+perl+php+phpdoc+php-extras+plsql+powerquery+powershell+properties+protobuf+puppet+python+r+racket+jsx+tsx+reason+regex+rest+ruby+rust+sass+scss+scala+scheme+shell-session+smalltalk+solution-file+sql+iecst+swift+textile+toml+typescript+typoscript+vbnet+vim+visual-basic+wasm+xquery+yaml&plugins=line-highlight+line-numbers+highlight-keywords */
 /**
  * prism.js default theme for JavaScript, CSS and HTML
  * Based on dabblet (http://dabblet.com)
@@ -11,7 +13,7 @@ pre[class*="language-"] {
   color: black;
   background: none;
   text-shadow: 0 1px white;
-  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
   font-size: 1em;
   text-align: left;
   white-space: pre;
@@ -30,18 +32,14 @@ pre[class*="language-"] {
   hyphens: none;
 }
 
-pre[class*="language-"]::-moz-selection,
-pre[class*="language-"] ::-moz-selection,
-code[class*="language-"]::-moz-selection,
-code[class*="language-"] ::-moz-selection {
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
   text-shadow: none;
   background: #b3d4fc;
 }
 
-pre[class*="language-"]::selection,
-pre[class*="language-"] ::selection,
-code[class*="language-"]::selection,
-code[class*="language-"] ::selection {
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
   text-shadow: none;
   background: #b3d4fc;
 }
@@ -56,7 +54,7 @@ code[class*="language-"] ::selection {
 /* Code blocks */
 pre[class*="language-"] {
   padding: 1em;
-  margin: 0.5em 0;
+  margin: .5em 0;
   overflow: auto;
 }
 
@@ -67,8 +65,8 @@ pre[class*="language-"] {
 
 /* Inline code */
 :not(pre) > code[class*="language-"] {
-  padding: 0.1em;
-  border-radius: 0.3em;
+  padding: .1em;
+  border-radius: .3em;
   white-space: normal;
 }
 
@@ -84,7 +82,7 @@ pre[class*="language-"] {
 }
 
 .token.namespace {
-  opacity: 0.7;
+  opacity: .7;
 }
 
 .token.property,
@@ -112,7 +110,8 @@ pre[class*="language-"] {
 .language-css .token.string,
 .style .token.string {
   color: #9a6e3a;
-  background: hsla(0, 0%, 100%, 0.5);
+  /* This background color was intended by the author of this theme. */
+  background: hsla(0, 0%, 100%, .5);
 }
 
 .token.atrule,
@@ -123,7 +122,7 @@ pre[class*="language-"] {
 
 .token.function,
 .token.class-name {
-  color: #dd4a68;
+  color: #DD4A68;
 }
 
 .token.regex,
@@ -156,12 +155,8 @@ pre[data-line] {
   padding: inherit 0;
   margin-top: 1em; /* Same as .prism’s padding-top */
 
-  background: hsla(24, 20%, 50%, 0.08);
-  background: linear-gradient(
-    to right,
-    hsla(24, 20%, 50%, 0.1) 70%,
-    hsla(24, 20%, 50%, 0)
-  );
+  background: hsla(24, 20%, 50%, .08);
+  background: linear-gradient(to right, hsla(24, 20%, 50%, .1) 70%, hsla(24, 20%, 50%, 0));
 
   pointer-events: none;
 
@@ -173,15 +168,15 @@ pre[data-line] {
 .line-highlight[data-end]:after {
   content: attr(data-start);
   position: absolute;
-  top: 0.4em;
-  left: 0.6em;
+  top: .4em;
+  left: .6em;
   min-width: 1em;
-  padding: 0 0.5em;
-  background-color: hsla(24, 20%, 50%, 0.4);
+  padding: 0 .5em;
+  background-color: hsla(24, 20%, 50%, .4);
   color: hsl(24, 20%, 95%);
   font: bold 65%/1.5 sans-serif;
   text-align: center;
-  vertical-align: 0.3em;
+  vertical-align: .3em;
   border-radius: 999px;
   text-shadow: none;
   box-shadow: 0 1px white;
@@ -190,12 +185,22 @@ pre[data-line] {
 .line-highlight[data-end]:after {
   content: attr(data-end);
   top: auto;
-  bottom: 0.4em;
+  bottom: .4em;
 }
 
 .line-numbers .line-highlight:before,
 .line-numbers .line-highlight:after {
   content: none;
+}
+
+pre[id].linkable-line-numbers span.line-numbers-rows {
+  pointer-events: all;
+}
+pre[id].linkable-line-numbers span.line-numbers-rows > span:before {
+  cursor: pointer;
+}
+pre[id].linkable-line-numbers span.line-numbers-rows > span:hover:before {
+  background-color: rgba(128, 128, 128, .2);
 }
 
 pre[class*="language-"].line-numbers {
@@ -215,7 +220,6 @@ pre[class*="language-"].line-numbers > code {
   top: 0;
   font-size: 100%;
   left: -3.8em;
-  margin-top: 0.1rem;
   width: 3em; /* works for line-numbers below 1000 lines */
   letter-spacing: -1px;
   border-right: 1px solid #999;
@@ -224,10 +228,10 @@ pre[class*="language-"].line-numbers > code {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+
 }
 
 .line-numbers-rows > span {
-  pointer-events: none;
   display: block;
   counter-increment: linenumber;
 }

@@ -27,6 +27,7 @@ from lms.lmsweb.config import LANGUAGES, LOCALE
 from lms.models import notifications, solutions, upload
 from lms.models.errors import AlreadyExists, BadUploadFile
 from lms.utils.consts import RTL_LANGUAGES
+from lms.utils.files import get_language_name_by_extension
 from lms.utils.log import log
 
 login_manager = LoginManager()
@@ -511,6 +512,12 @@ def _jinja2_filter_datetime(date):
         return arrow.get(date).humanize(locale=get_locale())
     except ValueError:
         return str(arrow.get(date).date())
+
+
+@webapp.template_filter('language_name')
+def _jinja2_filter_path_to_language_name(filename: str) -> str:
+    ext = filename.path.rsplit('.')[-1]
+    return get_language_name_by_extension(ext)
 
 
 class AccessibleByAdminMixin:
