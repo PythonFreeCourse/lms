@@ -19,8 +19,6 @@ class LinterError(typing.NamedTuple):
 
 
 class BaseLinter:
-    error_codes_whitelist = ()
-
     def __init__(
             self,
             logger: logging.Logger,
@@ -73,15 +71,6 @@ class BaseLinter:
         errors = self._get_errors_from_solution()
         response = []
         for error in errors:
-            if error.error_code in self.error_codes_whitelist:
-                self._logger.info(
-                    'Skipping error %s on line %s to solution file %s',
-                    error.error_code,
-                    error.line_number,
-                    self._solution_file_id,
-                )
-                continue
-
             self._logger.info(
                 'Adding error %s on line %s to solution file %s',
                 error.error_code,
@@ -101,8 +90,6 @@ class BaseLinter:
 
 
 class PythonLinter(BaseLinter):
-    error_codes_whitelist = defines.FLAKE_SKIP_ERRORS
-
     def initialize(self):
         self._app = application.Application()
         self._app.initialize(argv=['--import-order-style', 'google'])
@@ -132,17 +119,24 @@ class PythonLinter(BaseLinter):
             for result in results:
                 response = LinterError(
                     *result, solution_file_id=self._solution_file_id)
-                errors.append(response)
+                if response.error_code in defines.FLAKE_SKIP_ERRORS:
+                    self._logger.info(
+                        'Skipping error %s on line %s to solution file %s',
+                        response.error_code,
+                        response.line_number,
+                        self._solution_file_id,
+                    )
+                else:
+                    errors.append(response)
         return errors
 
 
 class VNULinter(BaseLinter):
-    error_codes_whitelist = defines.VNU_SKIP_ERRORS
     supported_files = ('html', 'htm')
 
     def get_error_text(self, error: LinterError):
         default_text = f'{error.error_code}-{error.text}'
-        return defines.VNU_ERRORS_MAPPING.get(error.error_code, default_text)
+        return defines.VNU_ERRORS_MAPPING.get(error.text, default_text)
 
     @staticmethod
     def match_to_file_suffix(file_suffix: str) -> bool:
@@ -177,7 +171,15 @@ class VNULinter(BaseLinter):
                         physical_line=result['extract'],
                         solution_file_id=self._solution_file_id,
                     )
-                    errors.append(response)
+                    if response.text in defines.VNU_SKIP_ERROR_MESSAGES:
+                        self._logger.info(
+                            'Skipping error %s on line %s to solution file %s',
+                            response.error_code,
+                            response.line_number,
+                            self._solution_file_id,
+                        )
+                    else:
+                        errors.append(response)
                 except KeyError:
                     self._logger.warning('failed to parse error, continue...')
         return errors

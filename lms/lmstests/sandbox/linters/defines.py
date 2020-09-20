@@ -143,8 +143,14 @@ FLAKE_SKIP_ERRORS = (
 )
 
 
-VNU_SKIP_ERRORS = (
+# In case you want to skip an error message in VNU linter, you should write this here.
+# Note that the mapping is based on the whole error message, and not code like in flake8
+# Since there are no 'error codes' in VNU
+VNU_SKIP_ERROR_MESSAGES = (
 )
 
+# Error message mapping - should be map the fully error text to a custom text
+# Note that the mapping is based on the whole error message, and not code like in flake8
+# Since there are no 'error codes' in VNU
 VNU_ERRORS_MAPPING = {
 }
