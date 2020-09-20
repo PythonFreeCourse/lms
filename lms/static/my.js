@@ -18,7 +18,7 @@ function escapeUnicode(str) {
 
 function trackCopyCodeButton(button) {
   button.addEventListener('click', () => {
-    const copyText = document.getElementById('python-user-code');
+    const copyText = document.getElementById('user-code');
     const last = button.innerHTML;
     navigator.clipboard.writeText(copyText.textContent);
     button.innerHTML = 'Copied!';
