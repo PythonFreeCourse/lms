@@ -16,7 +16,7 @@ class VNULinter(BaseLinter):
 
     supported_files = ('html', 'htm', 'css')
 
-    def get_error_text(self, error: LinterError):
+    def get_error_text(self, error: LinterError) -> str:
         return defines.VNU_ERRORS_MAPPING.get(error.text, error.text)
 
     @staticmethod

@@ -16,7 +16,7 @@ class PythonLinter(BaseLinter):
     def app(self) -> application.Application:
         return self._app
 
-    def get_error_text(self, error: LinterError):
+    def get_error_text(self, error: LinterError) -> str:
         default_text = f'{error.error_code}-{error.text}'
         return defines.FLAKE_ERRORS_MAPPING.get(error.error_code, default_text)
 

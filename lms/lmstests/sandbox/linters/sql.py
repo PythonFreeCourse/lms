@@ -18,7 +18,7 @@ class SQLLinter(BaseLinter):
     def app(self) -> Linter:
         return self._app
 
-    def get_error_text(self, error: LinterError):
+    def get_error_text(self, error: LinterError) -> str:
         return defines.SQL_ERRORS_MAPPING.get(error.text, error.text)
 
     @staticmethod

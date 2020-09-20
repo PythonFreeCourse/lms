@@ -54,7 +54,7 @@ class BaseLinter:
                     solution_file_id=solution_file_id,
                 )
 
-    def get_error_text(self, error: LinterError):
+    def get_error_text(self, error: LinterError) -> str:
         return error.text
 
     def run_check(self) -> typing.Sequence[LinterError]:

@@ -555,7 +555,8 @@ class SolutionFile(BaseModel):
 
     @property
     def suffix(self) -> str:
-        return self.path.split('.')[-1]
+        filename, _, ext = self.path.rpartition('.')
+        return ext if filename else ''
 
 
 class ExerciseTest(BaseModel):
