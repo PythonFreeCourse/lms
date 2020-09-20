@@ -123,7 +123,7 @@ class UnitTestChecker:
             return
 
         fail_message = _(
-            'הבודק האוטומטי נכשל ב־ %(number)s דוגמאות בתרגיל "%(subject)s".',
+            'הבודק האוטומטי נכשל ב־ %(number)d דוגמאות בתרגיל "%(subject)s".',
             number=number_of_failures,
             subject=self._solution.exercise.subject,
         )

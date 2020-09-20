@@ -122,10 +122,7 @@ def login():
             return fail(400, "The URL isn't safe.")
         return redirect(next_url or url_for('main'))
 
-    return render_template(
-        'login.html',
-        direction=DIRECTION,
-    )
+    return render_template('login.html')
 
 
 @webapp.route('/logout')
@@ -150,10 +147,7 @@ def banned_page():
         current_user.is_authenticated
         and current_user.role.is_banned
     ):
-        return render_template(
-            'banned.html',
-            direction=DIRECTION,
-        )
+        return render_template('banned.html')
 
 
 @webapp.route('/')
@@ -168,7 +162,6 @@ def main():
 def status():
     return render_template(
         'status.html',
-        direction=DIRECTION,
         exercises=Solution.status(),
     )
 
@@ -181,7 +174,6 @@ def exercises_page():
     is_manager = current_user.role.is_manager
     return render_template(
         'exercises.html',
-        direction=DIRECTION,
         exercises=exercises,
         is_manager=is_manager,
         fetch_archived=fetch_archived,
@@ -298,10 +290,7 @@ def comment():
 @webapp.route('/send/<int:_exercise_id>')
 @login_required
 def send(_exercise_id):
-    return render_template(
-        'upload.html',
-        direction=DIRECTION,
-    )
+    return render_template('upload.html')
 
 
 @webapp.route('/user/<int:user_id>')
@@ -315,7 +304,6 @@ def user(user_id):
 
     return render_template(
         'user.html',
-        direction=DIRECTION,
         solutions=Solution.of_user(target_user.id, with_archived=True),
         user=target_user,
     )
@@ -324,10 +312,7 @@ def user(user_id):
 @webapp.route('/send', methods=['GET'])
 @login_required
 def send_():
-    return render_template(
-        'upload.html',
-        direction=DIRECTION,
-    )
+    return render_template('upload.html')
 
 
 @webapp.route('/upload', methods=['POST'])
@@ -412,7 +397,6 @@ def view(solution_id: int, file_id: Optional[int] = None):
         return fail(404, 'File does not exist.')
 
     view_params = {
-        'direction': DIRECTION,
         'solution': model_to_dict(solution),
         'files': files,
         'comments': solution.comments_per_file,
@@ -515,6 +499,11 @@ def _jinja2_filter_datetime(date):
 def _jinja2_filter_path_to_language_name(filename: str) -> str:
     ext = filename.path.rsplit('.')[-1]
     return get_language_name_by_extension(ext)
+
+
+@webapp.context_processor
+def _jinja2_inject_direction():
+    return dict(direction=DIRECTION)
 
 
 class AccessibleByAdminMixin:
