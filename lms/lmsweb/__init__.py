@@ -28,39 +28,47 @@ def open_file(path: str) -> str:
         return file.read()
 
 
-def get_configs_values() -> Tuple[Set[str], Dict[str, int]]:
+def get_configs_values(
+    config_path: str, config_example_path: str,
+) -> Tuple[Set[str], Dict[str, int]]:
     config_values = {
         x.id for x in ast.walk(
-            ast.parse(open_file(str(config_file))),
+            ast.parse(open_file(config_path)),
         )
         if isinstance(x, ast.Name) and x.col_offset == 0
     }
     config_example_values = {
         x.id: x.lineno for x in ast.walk(
-            ast.parse(open_file(str(config_example_file))),
+            ast.parse(open_file(config_example_path)),
         )
         if isinstance(x, ast.Name) and x.col_offset == 0
     }
     return config_values, config_example_values
 
 
-def config_migrator() -> None:
-    config_values, config_example_values = get_configs_values()
+def config_migrator(config_path: str, config_example_path: str) -> Set[str]:
+    config_values, config_example_values = get_configs_values(
+        config_path, config_example_path,
+    )
     missing_values = set(config_example_values).difference(config_values)
 
-    example_lines = open_file(str(config_example_file)).splitlines()
+    example_lines = open_file(config_example_path).splitlines()
 
-    with open(str(config_file), 'a') as main_config:
+    with open(config_path, 'a') as main_config:
         for missing_value in missing_values:
             starting_line = config_example_values[missing_value] - 1
             next_value = next_dict_key(config_example_values, missing_value)
             if next_value is not None:
                 ending_line = config_example_values[next_value] - 1
                 for line in example_lines[starting_line:ending_line]:
-                    main_config.write(line + '\n')
+                    if line and not line.strip().startswith('#'):
+                        main_config.write(line + '\n')
             else:
                 for line in example_lines[starting_line:]:
-                    main_config.write(line + '\n')
+                    if line and not line.strip().startswith('#'):
+                        main_config.write(line + '\n')
+
+    return missing_values
 
 
 webapp = Flask(
@@ -72,7 +80,7 @@ webapp = Flask(
 
 if not config_file.exists():
     shutil.copy(str(config_example_file), str(config_file))
-config_migrator()
+config_migrator(str(config_file), str(config_example_file))
 
 webapp.config.from_pyfile(str(config_file))
 
