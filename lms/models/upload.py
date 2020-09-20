@@ -5,7 +5,7 @@ from werkzeug.datastructures import FileStorage
 from lms.extractors.base import Extractor, File
 from lms.lmsdb.models import Exercise, Solution, User
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
-from lms.lmstests.public.flake8 import tasks as flake8_tasks
+from lms.lmstests.public.linters import tasks as linters_tasks
 from lms.lmstests.public.unittests import tasks as unittests_tasks
 from lms.models.errors import AlreadyExists, UploadError
 from lms.lmsweb import config
@@ -41,7 +41,7 @@ def _upload_to_db(
 
 
 def _run_auto_checks(solution: Solution) -> None:
-    flake8_tasks.run_flake8_on_solution.apply_async(args=(solution.id,))
+    linters_tasks.run_linter_on_solution.apply_async(args=(solution.id,))
     unittests_tasks.run_tests_for_solution.apply_async(args=(solution.id,))
     if config.FEATURE_FLAG_CHECK_IDENTICAL_CODE_ON:
         check_ident = identical_tests_tasks.solve_solution_with_identical_code

@@ -553,6 +553,9 @@ class SolutionFile(BaseModel):
     def create_hash(content: Union[str, bytes], *args, **kwargs) -> str:
         return hashing.by_content(content, *args, **kwargs)
 
+    @property
+    def suffix(self) -> str:
+        return self.path.split('.')[-1]
 
 class ExerciseTest(BaseModel):
     exercise = ForeignKeyField(model=Exercise, unique=True)

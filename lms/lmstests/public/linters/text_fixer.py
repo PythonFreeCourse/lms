@@ -1,6 +1,6 @@
 from lms.lmsdb import database_config
 from lms.lmsdb import models
-from lms.lmstests.sandbox.flake8 import defines
+from lms.lmstests.sandbox.linters import defines
 
 
 def fix_texts():

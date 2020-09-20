@@ -8,7 +8,7 @@ from playhouse.migrate import migrate
 
 from lms.lmsdb import database_config as db_config
 from lms.lmsdb import models
-from lms.lmstests.public.flake8 import text_fixer
+from lms.lmstests.public.linters import text_fixer
 from lms.lmstests.public.unittests import import_tests
 from lms.utils.log import log
 

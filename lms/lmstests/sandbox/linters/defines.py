@@ -141,3 +141,10 @@ FLAKE_SKIP_ERRORS = (
     'W503',  # line break after operator
     'W605',  # invalid escape sequence
 )
+
+
+VNU_SKIP_ERRORS = (
+)
+
+VNU_ERRORS_MAPPING = {
+}
