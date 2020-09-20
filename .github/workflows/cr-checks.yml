@@ -22,10 +22,14 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r dev_requirements.txt
+        wget https://github.com/validator/validator/releases/download/20.6.30/vnu.linux.zip
+        unzip vnu.linux.zip -d /opt/vnu/
+        chmod +x /opt/vnu/vnu-runtime-image/bin/vnu
     - name: Lint
       run: |
         flake8 lms --count --show-source --statistics
     - name: Test
       run: |
         export PYTHONPATH=`pwd`
+        export PATH=/opt/vnu/vnu-runtime-image/bin:$PATH
         pytest -vvv --junitxml=junit/test-results.xml

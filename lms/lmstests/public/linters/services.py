@@ -4,16 +4,16 @@ import typing
 from celery.result import allow_join_result
 
 from lms.lmsdb import models
-from lms.lmstests.sandbox import flake8
+from lms.lmstests.sandbox import linters
 from lms.lmsweb import routes
 from lms.models import notifications
 
 
-PyFlakeResponse = flake8.services.PyFlakeResponse
+LinterError = linters.base.LinterError
 
 
-class PyFlakeChecker:
-    sandbox_tasks = flake8.tasks
+class LinterChecker:
+    sandbox_tasks = linters.tasks
 
     def __init__(
             self,
@@ -24,7 +24,7 @@ class PyFlakeChecker:
         self._app = None
         self._solution = None
         self._logger = logger
-        self._errors: typing.List[PyFlakeResponse] = []
+        self._errors: typing.List[LinterError] = []
 
     def initialize(self):
         self._solution = models.Solution.get_by_id(self._solution_id)
@@ -40,24 +40,27 @@ class PyFlakeChecker:
 
     def _run_in_sandbox_and_populate_errors(self):
         self._logger.info(
-            'Start running in remote sandbox flake8 checks on solution %s',
+            'Start running in remote sandbox linters checks on solution %s',
             self._solution_id,
         )
         response = self._run_in_sandbox()
         self._logger.info(
-            'End running in remote sandbox flake8 checks on solution %s',
+            'End running in remote sandbox linters checks on solution %s',
             self._solution_id,
         )
         for error in response:
-            self._errors.append(PyFlakeResponse(*error))
+            self._errors.append(LinterError(*error))
 
     def _run_in_sandbox(self):
         results = [
-            self.sandbox_tasks.run_flake8_on_sandbox_on_code.apply_async(
-                args=(solution_file.id, solution_file.code),
+            self.sandbox_tasks.run_linters_in_sandbox.apply_async(
+                args=(
+                    solution_file.id,
+                    solution_file.code,
+                    solution_file.suffix,
+                ),
             )
             for solution_file in self.solution.solution_files
-            if solution_file.path.endswith('.py')
         ]
         responses = []
         with allow_join_result():

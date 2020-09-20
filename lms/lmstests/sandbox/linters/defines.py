@@ -1,3 +1,5 @@
+import typing
+
 FLAKE_ERRORS_MAPPING = {
     'A001': 'השם שנתת למשתנה כבר נמצא בשימוש בפייתון. עדיף לתת לו שם אחר.',
     'A002': 'יש פה שם משתנה שיש לו משמעות מיוחדת עבור פייתון. בעצם הדריסה של השם הזה אתם לא מאפשרים לגשת אליו יותר. עדיף להמנע מהמצב הזה ולמצוא שם אחר למשתנה שלכם.',
@@ -141,3 +143,23 @@ FLAKE_SKIP_ERRORS = (
     'W503',  # line break after operator
     'W605',  # invalid escape sequence
 )
+
+
+# In case you want to skip an error message in VNU linter, you should write this here.
+# Note that the mapping is based on the whole error message, and not code like in flake8
+# Since there are no 'error codes' in VNU
+VNU_SKIP_ERROR_MESSAGES: typing.Tuple = (
+)
+
+# Error message mapping - should be map the fully error text to a custom text
+# Note that the mapping is based on the whole error message, and not code like in flake8
+# Since there are no 'error codes' in VNU
+VNU_ERRORS_MAPPING: typing.Dict = {
+}
+
+SQL_SKIP_ERROR_MESSAGES: typing.Tuple = (
+
+)
+SQL_ERRORS_MAPPING: typing.Dict = {
+
+}
