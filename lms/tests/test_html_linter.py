@@ -28,7 +28,7 @@ VALID_CODE = '''
 
 @pytest.mark.skipif(
     condition=os.system('which vnu') != 0,  # noqa: S605,S607
-    reason='should run with vnu env',
+    reason='should run with VNU linter in path. see VNULinter class for more information',
 )
 class TestHTMLLinter:
     def test_invalid_solution(self, solution: models.Solution):

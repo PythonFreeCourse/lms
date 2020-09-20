@@ -132,7 +132,13 @@ class PythonLinter(BaseLinter):
 
 
 class VNULinter(BaseLinter):
-    supported_files = ('html', 'htm')
+    """
+    This linter based on installed execute vnu.
+    This package installed in our lms/Dockerfile
+    See https://github.com/validator/validator
+    """
+
+    supported_files = ('html', 'htm', 'css')
 
     def get_error_text(self, error: LinterError):
         default_text = f'{error.error_code}-{error.text}'
@@ -153,6 +159,7 @@ class VNULinter(BaseLinter):
                     'vnu',
                     '--format',
                     'json',
+                    '--also-check-css',
                     temp_file.name,
                 ),
                 stdout=subprocess.PIPE,
