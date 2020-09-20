@@ -169,6 +169,8 @@ class VNULinter(BaseLinter):
             for result in results['messages']:
                 try:
                     line = result.get('firstline') or result.get('lastLine')
+                    if not line:  # set default line in case of empty element
+                        line = 1
                     response = LinterError(
                         error_code=result['type'],
                         line_number=line,
