@@ -9,7 +9,7 @@ from lms.lmsweb import routes
 from lms.models import notifications
 
 
-LinterError = linters.services.LinterError
+LinterError = linters.base.LinterError
 
 
 class LinterChecker:

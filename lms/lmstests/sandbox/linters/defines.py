@@ -154,3 +154,10 @@ VNU_SKIP_ERROR_MESSAGES = (
 # Since there are no 'error codes' in VNU
 VNU_ERRORS_MAPPING = {
 }
+
+SQL_SKIP_ERROR_MESSAGES = (
+
+)
+SQL_ERRORS_MAPPING = {
+
+}
