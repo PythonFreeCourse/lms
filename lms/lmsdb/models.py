@@ -557,6 +557,7 @@ class SolutionFile(BaseModel):
     def suffix(self) -> str:
         return self.path.split('.')[-1]
 
+
 class ExerciseTest(BaseModel):
     exercise = ForeignKeyField(model=Exercise, unique=True)
     code = TextField()

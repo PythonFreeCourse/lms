@@ -2,7 +2,7 @@ import json
 import logging
 import tempfile
 import typing
-import subprocess
+import subprocess  # noqa: S404
 
 from flake8.main import application
 
@@ -146,7 +146,7 @@ class VNULinter(BaseLinter):
 
     @staticmethod
     def match_to_file_suffix(file_suffix: str) -> bool:
-        return file_suffix.lower() in self.supported_files
+        return file_suffix.lower() in VNULinter.supported_files
 
     def _get_errors_from_solution(self) -> typing.List[LinterError]:
         errors = []
@@ -154,7 +154,7 @@ class VNULinter(BaseLinter):
                 'w', suffix=self._file_suffix) as temp_file:
             temp_file.write(self._code)
             temp_file.flush()
-            process = subprocess.Popen(
+            process = subprocess.Popen(  # noqa: S603
                 args=(
                     'vnu',
                     '--format',
@@ -162,14 +162,16 @@ class VNULinter(BaseLinter):
                     temp_file.name,
                 ),
                 stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
             )
             output_buffer, error_buffer = process.communicate()
             results = json.loads(error_buffer)
             for result in results['messages']:
                 try:
+                    line = result.get('firstline') or result.get('lastLine')
                     response = LinterError(
                         error_code=result['type'],
-                        line_number=result['firstline'],
+                        line_number=line,
                         column=result['firstColumn'],
                         text=result['message'],
                         physical_line=result['extract'],
@@ -177,5 +179,5 @@ class VNULinter(BaseLinter):
                     )
                     errors.append(response)
                 except KeyError:
-                    self._logger.info('failed to parse error, continue...')
+                    self._logger.warning('failed to parse error, continue...')
         return errors

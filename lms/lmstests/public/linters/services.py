@@ -40,12 +40,12 @@ class LinterChecker:
 
     def _run_in_sandbox_and_populate_errors(self):
         self._logger.info(
-            'Start running in remote sandbox flake8 checks on solution %s',
+            'Start running in remote sandbox linters checks on solution %s',
             self._solution_id,
         )
         response = self._run_in_sandbox()
         self._logger.info(
-            'End running in remote sandbox flake8 checks on solution %s',
+            'End running in remote sandbox linters checks on solution %s',
             self._solution_id,
         )
         for error in response:

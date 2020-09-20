@@ -16,7 +16,7 @@ EXECUTE_CODE = ('import os\n'
                 'eval(\'os.system("touch {}")\')')
 
 
-class TestAutoFlake8:
+class TestFlake8Linter:
     test_directory = None
 
     @classmethod
