@@ -3,7 +3,7 @@ import shutil
 import tempfile
 
 from lms.lmsdb import models
-from lms.lmstests.public.flake8 import tasks
+from lms.lmstests.public.linters import tasks
 from lms.models import notifications
 
 
@@ -16,7 +16,7 @@ EXECUTE_CODE = ('import os\n'
                 'eval(\'os.system("touch {}")\')')
 
 
-class TestAutoFlake8:
+class TestFlake8Linter:
     test_directory = None
 
     @classmethod
@@ -34,7 +34,7 @@ class TestAutoFlake8:
         solution_file = solution.solution_files.get()
         solution_file.code = self.execute_script
         solution_file.save()
-        tasks.run_flake8_on_solution(solution.id)
+        tasks.run_linter_on_solution(solution.id)
         comments = tuple(models.Comment.by_solution(solution))
         assert not os.listdir(self.test_directory)
         assert len(comments) == 2
@@ -45,7 +45,7 @@ class TestAutoFlake8:
         solution_file = solution.solution_files.get()
         solution_file.code = INVALID_CODE
         solution_file.save()
-        tasks.run_flake8_on_solution(solution.id)
+        tasks.run_linter_on_solution(solution.id)
         comments = tuple(models.Comment.by_solution(solution))
         assert comments
         assert len(comments) == 1
@@ -63,6 +63,6 @@ class TestAutoFlake8:
         solution_file = solution.solution_files.get()
         solution_file.code = VALID_CODE
         solution_file.save()
-        tasks.run_flake8_on_solution(solution.id)
+        tasks.run_linter_on_solution(solution.id)
         comments = tuple(models.Comment.by_solution(solution))
         assert not comments
