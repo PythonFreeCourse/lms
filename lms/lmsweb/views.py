@@ -47,9 +47,6 @@ MAX_REQUEST_SIZE = 2_000_000  # 2MB (in bytes)
 
 @babel.localeselector
 def get_locale():
-    """return request.accept_languages.best_match(
-        webapp.config['LANGUAGES'].keys(),
-    )"""
     if LOCALE in LANGUAGES:
         return LOCALE
     return 'en'
