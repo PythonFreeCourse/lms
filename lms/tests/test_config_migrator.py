@@ -22,11 +22,8 @@ class TestConfigMigrator:
 
     @staticmethod
     def test_config_migration():
-        missing_files = config_migrator.migrate(
-            CONFIG_FILE, CONFIG_EXAMPLE_FILE,
-        )
-        config_values, _ = config_migrator.get_configs_values(
-            CONFIG_FILE, CONFIG_EXAMPLE_FILE,
-        )
-        for file in missing_files:
-            assert file in config_values
+        config_migrator.migrate(CONFIG_FILE, CONFIG_EXAMPLE_FILE)
+        get_assignments = config_migrator.get_config_assignments
+        new = get_assignments(CONFIG_FILE).keys()
+        old = get_assignments(CONFIG_EXAMPLE_FILE).keys()
+        assert len(old - new) == 0
