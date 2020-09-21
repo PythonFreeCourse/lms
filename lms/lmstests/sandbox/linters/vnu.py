@@ -35,7 +35,7 @@ class VNULinter(BaseLinter):
                 response = LinterError(
                     error_code=result['type'],
                     line_number=line,
-                    column=result['firstColumn'],
+                    column=result.get('firstColumn', 0),
                     text=result['message'],
                     physical_line=result['extract'],
                     solution_file_id=self._solution_file_id,
