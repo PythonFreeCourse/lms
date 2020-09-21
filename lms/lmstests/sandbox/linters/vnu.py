@@ -60,16 +60,21 @@ class VNULinter(BaseLinter):
             temp_file.write(self._code)
             temp_file.flush()
             process = subprocess.Popen(  # noqa: S603
-                args=(
-                    'vnu',
-                    '--format',
-                    'json',
-                    '--also-check-css',
-                    temp_file.name,
-                ),
+                args=self._build_args(temp_file.name),
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )
             output_buffer, error_buffer = process.communicate()
         results = json.loads(error_buffer)
         return results
+
+    def _build_args(self, temp_file_path: str) -> typing.List[str]:
+        args = [
+            'vnu',
+            '--format',
+            'json',
+        ]
+        if self._file_suffix == 'css':
+            args.append('--css')
+        args.append(temp_file_path)
+        return args
