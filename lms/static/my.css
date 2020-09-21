@@ -219,6 +219,14 @@ i.fa {
   margin-left: 0;
 }
 
+.button-copy i.fa {
+  margin-left: 0;
+}
+
+.btn i.fa {
+  margin-left: 0;
+}
+
 #filetree {
   display: flex;
   overflow-x: none;
@@ -368,7 +376,7 @@ i.fa {
   cursor:pointer;
   color:#ffffff;
   font-size: 0.875rem;
-  padding: 0.375em 0.75em;
+  padding: 0.125em 0.5em;
   text-decoration: none;
 }
 
