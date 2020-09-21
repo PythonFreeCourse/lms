@@ -129,6 +129,9 @@
 *.sln
 *.sw?
 
+# Mac cache folder that created in the ZIP and not needed
+__MACOSX/*
+
 
 # Ours
 *lms/lmsweb/config.py
