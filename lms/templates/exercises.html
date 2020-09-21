@@ -11,7 +11,7 @@
     <div id="exercises">
       {% for exercise in exercises %}
       <div class="exercise">
-        <div class="right-side">
+        <div class="right-side {{ direction }}-language">
           <div class="exercise-id">{{ exercise['exercise_id'] }}</div>
           <div class="exercise-name"><div class="ex-title">{{ exercise['exercise_name'] | e }}</div></div>
         </div>
