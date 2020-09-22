@@ -254,7 +254,7 @@ def main():
             models.create_demo_users()
 
     _api_keys_migration()
-    _shareable_migration()
+    _shareable_migration()  # Only once
     text_fixer.fix_texts()
     import_tests.load_tests_from_path('/app_dir/notebooks-tests')
 
