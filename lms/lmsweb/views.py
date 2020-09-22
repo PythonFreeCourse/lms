@@ -236,6 +236,28 @@ def read_all_notification():
     return jsonify({'success': success_state})
 
 
+@webapp.route('/share', methods=['POST'])
+@login_required
+def share():
+    solution_id = int(request.json.get('solutionId', 0))
+    solution = Solution.get_or_none(solution_id)
+    if solution is None:
+        return fail(404, f'No such solution {solution_id}')
+
+    solver_id = solution.solver.id
+    if solver_id != current_user.id and not current_user.role.is_manager:
+        return fail(403, "You aren't allowed to access this page.")
+
+    if not solution.shareable_by_admin:
+        return fail(404, 'The solution is not shareable.')
+
+    success_state = solution.change_user_share()
+    return jsonify({
+        'success': success_state,
+        'shared': solution.shareable_by_user,
+    })
+
+
 @webapp.route('/comments', methods=['GET', 'POST'])
 @login_required
 def comment():
@@ -353,7 +375,12 @@ def download(solution_id: int, file_id: Optional[int] = None):
 
     viewer_is_solver = solution.solver.id == current_user.id
     has_viewer_access = current_user.role.is_viewer
-    if not viewer_is_solver and not has_viewer_access:
+    shareable_solution = solution.is_shareable
+    if (
+        not shareable_solution
+        and not viewer_is_solver
+        and not has_viewer_access
+    ):
         return fail(403, 'This user has no permissions to view this page.')
 
     response = make_response(
@@ -370,14 +397,16 @@ def download(solution_id: int, file_id: Optional[int] = None):
 @webapp.route(f'{routes.SOLUTIONS}/<int:solution_id>')
 @webapp.route(f'{routes.SOLUTIONS}/<int:solution_id>/<int:file_id>')
 @login_required
-def view(solution_id: int, file_id: Optional[int] = None):
+def view(
+    solution_id: int, file_id: Optional[int] = None, _shared: bool = False,
+):
     solution = Solution.get_or_none(Solution.id == solution_id)
     if solution is None:
         return fail(404, 'Solution does not exist.')
 
     viewer_is_solver = solution.solver.id == current_user.id
     has_viewer_access = current_user.role.is_viewer
-    if not viewer_is_solver and not has_viewer_access:
+    if not _shared and not viewer_is_solver and not has_viewer_access:
         return fail(403, 'This user has no permissions to view this page.')
 
     versions = solution.ordered_versions()
@@ -405,6 +434,7 @@ def view(solution_id: int, file_id: Optional[int] = None):
         'role': current_user.role.name.lower(),
         'versions': versions,
         'test_results': test_results,
+        'shared': _shared,
     }
 
     if is_manager:
@@ -423,6 +453,20 @@ def view(solution_id: int, file_id: Optional[int] = None):
         notifications.read_related(solution_id, current_user.id)
 
     return render_template('view.html', **view_params)
+
+
+@webapp.route(f'{routes.SHARED}/<int:solution_id>')
+@webapp.route(f'{routes.SHARED}/<int:solution_id>/<int:file_id>')
+@login_required
+def shared_solution(solution_id: int, file_id: Optional[int] = None):
+    solution = Solution.get_or_none(solution_id)
+    if solution is None:
+        return fail(404, 'Solution does not exist.')
+
+    shareable_solution = solution.is_shareable
+    return view(
+        solution_id=solution_id, file_id=file_id, _shared=shareable_solution,
+    )
 
 
 @webapp.route('/checked/<int:exercise_id>/<int:solution_id>', methods=['POST'])

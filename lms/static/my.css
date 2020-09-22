@@ -148,6 +148,69 @@ div#code-view {
   align-items: left;
 }
 
+.toggle-control {
+  display: none;
+}
+
+input.toggle-control + label {
+  position: relative;
+  display: block;
+  width: 2.5em;
+  height: 1.25em;
+  background: #ddd;
+  border-radius: 3.75em;
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+  margin-top: 0.125em;
+}
+
+input.toggle-control + label::before, input.toggle-control + label::after {
+  display: block;
+  position: absolute;
+  top: 0.0625em;
+  left: 0.0625em;
+  bottom: 0.0625em;
+  right: 0.0625em;
+  content: '';
+  transition: all 0.2s;
+}
+
+input.toggle-control + label::before {
+  background: #f1f1f1;
+  border-radius: 3.75em;
+}
+
+input.toggle-control + label::after {
+  width: 1.125em;
+  background: #fff;
+  border-radius: 100%;
+  box-shadow: 0 0.125em 0.3125em rgba(0, 0, 0, 0.3);
+}
+
+input.toggle-control:checked + label:before {
+  background: #007bff;
+}
+
+input.toggle-control:checked + label::after {
+  margin-right: 1.25em;
+}
+
+.shared-link {
+  display: none;
+  position: relative;
+  top: -1.85em;
+  left: 2em;
+}
+
+.shared-link:hover {
+  color: #f5f2f0;
+}
+
+.shared {
+  display: block;
+}
+
 .go-send {
   background: #247ba0;
   color: #ebf3f6;
@@ -231,6 +294,10 @@ i.fa {
 }
 
 .btn i.fa {
+  margin-left: 0;
+}
+
+.shared-link i.fa {
   margin-left: 0;
 }
 
