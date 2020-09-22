@@ -5,5 +5,5 @@ per-file-ignores =
   lms/tests/test_html_linter.py:Q001,E501
   lms/tests/test_css_linter.py:Q001,E501
   lms/tests/test_extractor.py:W293
-  lms/tests/samples/code2.py:E999,W293,W391,E227
+  lms/tests/samples/code2.py:E999,W293,W391,E227,E225,E228
 ignore=I100,S101,I201,W503
