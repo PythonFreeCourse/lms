@@ -3,21 +3,21 @@
 {% block page_content %}
 <div id="page-view">
   <div id="view-head">
-    <h1>תצוגת תרגיל {{ solution['exercise']['id'] }}: {{ solution['exercise']['subject'] }}</h1>
+    <h1>{{ _('תצוגת תרגיל') }} {{ solution['exercise']['id'] }}: {{ solution['exercise']['subject'] }}</h1>
     {% if not is_manager %}
       {% if solution['state'] == 'DONE' %}
-        <p class="checked-msg"><strong>התרגיל שלך נבדק!</strong> לחצו על השורות האדומות כדי לראות את הערות הבודקים.</p>
+        <p class="checked-msg {{ direction }}"><strong>{{ _('התרגיל שלך נבדק!') }}</strong> {{ _('לחצו על השורות האדומות כדי לראות את הערות הבודקים.') }}</p>
       {% elif solution['state'] == 'IN_CHECKING' %}
-        <p class="unchecked-msg"><strong>התרגיל שלך נבדק ברגעים אלו!</strong></p>
+        <p class="unchecked-msg {{ direction }}"><strong>{{ _('התרגיל שלך נבדק ברגעים אלו!') }}</strong></p>
       {% elif solution['state'] == 'OLD_SOLUTION' %}
-        <p class="unchecked-msg"><strong>פתרון זה אינו פתרון עדכני!</strong></p>
+        <p class="unchecked-msg {{ direction }}"><strong>{{ _('פתרון זה אינו פתרון עדכני!') }}</strong></p>
       {% else %}
-        <p class="unchecked-msg"><strong>התרגיל שלך מחכה לבדיקה.</strong> חשוב לנו שכל תרגיל יעבור בדיקה של עין אנושית.</p>
+        <p class="unchecked-msg {{ direction }}"><strong>{{ _('התרגיל שלך מחכה לבדיקה.') }}</strong> {{ _('חשוב לנו שכל תרגיל יעבור בדיקה של עין אנושית.') }}</p>
       {% endif %}
     {% else %}
-    <p id="solver"><strong>מגיש:</strong> <a href="/user/{{ solution['solver']['id'] }}">{{ solution['solver']['fullname'] | e }}</a></p>
+    <p id="solver"><strong>{{ _('מגיש') }}:</strong> <a href="/user/{{ solution['solver']['id'] }}">{{ solution['solver']['fullname'] | e }}</a></p>
     {% endif %}
-    <nav id="versions" aria-label="ניווט בגרסאות ההגשה">
+    <nav id="versions" aria-label="{{ _('ניווט בגרסאות ההגשה') }}">
       <ul class="pagination">
       {%- for version in versions %}
         {% set current = version['id'] == solution['id'] %}
@@ -31,7 +31,7 @@
     {% if is_manager %}
         <div class="progress manager-progress-bar">
             <div class="progress-bar" style="width: {{ left }}%;" role="progressbar" aria-valuenow="{{ left }}" aria-valuemax="100">
-                {{ left }}% לסיום בדיקה
+                {{ left }}% {{ _('לסיום בדיקה') }}
             </div>
         </div>
     {% endif %}
@@ -46,19 +46,19 @@
       </div>
       {% if test_results %}
       <div class="test-results">
-          <h3 class="test-result-title">בדיקות אוטומטיות</h3>
+          <h3 class="test-result-title">{{ _('בדיקות אוטומטיות') }}</h3>
           <ol class="test-results-list">
               {%- for test_result in test_results %}
               <li class="test-result">
                   <h5 class="test-name">
                       {{ test_result.pretty_test_name | e }}
                   </h5>
-                  <span class="title">שגיאה:</span>
+                  <span class="title">{{ _('שגיאה:') }}</span>
                   <span>
                       <pre><code class="language-{{ current_file | language_name }} highlight">{{ test_result.user_message | e }}</code></pre>
                   </span>
                   {% if is_manager %}
-                  <span class="title">שגיאת סגל:</span>
+                  <span class="title">{{ _('שגיאת סגל:') }}</span>
                   <span class="stack-trace">
                       <pre><code class="language-{{ current_file | language_name }} highlight">{{ test_result.staff_message | e }}</code></pre>
                   </span>
@@ -70,35 +70,35 @@
       {% endif %}
     </div>
     {% if is_manager %}
-    <div id="popular-comments">
+    <div id="popular-comments" class="{{ direction }}">
       <div id="exercise-comments">
-        <h2>הערות על התרגיל</h2>
+        <h2>{{ _('הערות על התרגיל') }}</h2>
         <ol id="exercise-comments-list" class="comments exercise-comments">
           {%- for comment in exercise_common_comments %}
-          <li class="known-comment" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text | e }}</li>
+          <li class="known-comment {{ direction }}" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text | e }}</li>
           {% endfor -%}
         </ol>
       </div>
-      <div id="all-comments">
-        <h2>הערות כלליות</h2>
+      <div id="all-comments" class="{{ direction }}">
+        <h2>{{ _('הערות כלליות') }}</h2>
         <ol id="all-comments-list" class="comments all-comments">
           {%- for comment in all_common_comments %}
-          <li class="known-comment" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text | e }}</li>
+          <li class="known-comment {{ direction }}" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text | e }}</li>
           {% endfor -%}
         </ol>
       </div>
-      <div id="my-all-comments">
-        <h2>הערות בודק</h2>
+      <div id="my-all-comments" class="{{ direction }}">
+        <h2>{{ _('הערות בודק') }}</h2>
         {% if user_comments %}
             <ol id="my-comments-list" class="comments my-comments">
               {%- for comment in user_comments %}
-              <li class="known-comment" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text | e }}</li>
+              <li class="known-comment {{ direction }}" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text | e }}</li>
               {% endfor -%}
             </ol>
         {% endif -%}
       </div>
-      <div id="grader-buttons">
-        <button id="save-check" class="btn btn-success">סיימתי לבדוק!</button>
+      <div id="grader-buttons" class="{{ direction }}">
+        <button id="save-check" class="btn btn-success">{{ _('סיימתי לבדוק!') }}</button>
         <a id="ninja" href="#" class="badge badge-dark" style="display: none;">Ninja Mode</a>
       </div>
     </div>
@@ -107,6 +107,11 @@
       {% include 'filetree.html' %}
     {% endif -%}
   </div>
+  <a id="download-solution" href="/download/{{ solution['id'] }}" class="{{ direction }}">
+    <button class="btn btn-primary btn-sm btn-block">
+      <i class="fa fa-download"></i> {{ _('הורד פתרון') }}
+    </button>
+  </a>
 </div>
 <script src="{{ url_for('static', filename='prism.js') }}"></script>
 <script src="{{ url_for('static', filename='comments.js') }}"></script>

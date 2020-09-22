@@ -5,7 +5,8 @@ from urllib.parse import urljoin, urlparse
 
 import arrow  # type: ignore
 from flask import (
-    abort, jsonify, render_template, request, send_from_directory, url_for,
+    abort, jsonify, make_response, render_template,
+    request, send_from_directory, url_for,
 )
 from flask_admin import Admin, AdminIndexView  # type: ignore
 from flask_admin.contrib.peewee import ModelView  # type: ignore
@@ -21,9 +22,11 @@ from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Exercise, RoleOptions,
     Solution, SolutionFile, User, database,
 )
-from lms.lmsweb import routes, webapp
+from lms.lmsweb import babel, routes, webapp
+from lms.lmsweb.config import LANGUAGES, LOCALE
 from lms.models import notifications, solutions, upload
 from lms.models.errors import AlreadyExists, BadUploadFile
+from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import get_language_name_by_extension
 from lms.utils.log import log
 
@@ -40,6 +43,13 @@ PERMISSIVE_CORS = {
 
 HIGH_ROLES = {str(RoleOptions.STAFF), str(RoleOptions.ADMINISTRATOR)}
 MAX_REQUEST_SIZE = 2_000_000  # 2MB (in bytes)
+
+
+@babel.localeselector
+def get_locale():
+    if LOCALE in LANGUAGES:
+        return LOCALE
+    return 'en'
 
 
 @webapp.before_request
@@ -333,6 +343,30 @@ def upload_page():
     })
 
 
+@webapp.route(f'{routes.DOWNLOADS}/<int:solution_id>')
+@webapp.route(f'{routes.DOWNLOADS}/<int:solution_id>/<int:file_id>')
+@login_required
+def download(solution_id: int, file_id: Optional[int] = None):
+    solution = Solution.get_or_none(solution_id)
+    if solution is None:
+        return fail(404, 'Solution does not exist.')
+
+    viewer_is_solver = solution.solver.id == current_user.id
+    has_viewer_access = current_user.role.is_viewer
+    if not viewer_is_solver and not has_viewer_access:
+        return fail(403, 'This user has no permissions to view this page.')
+
+    response = make_response(
+        solutions.create_zip_from_solution(solution.files),
+    )
+    response.headers.set('Content Type', 'zip')
+    response.headers.set(
+        'Content-Disposition', 'attachment',
+        filename=f'{solution.exercise.subject}.zip',
+    )
+    return response
+
+
 @webapp.route(f'{routes.SOLUTIONS}/<int:solution_id>')
 @webapp.route(f'{routes.SOLUTIONS}/<int:solution_id>/<int:file_id>')
 @login_required
@@ -456,7 +490,7 @@ def common_comments(exercise_id=None):
 @webapp.template_filter('date_humanize')
 def _jinja2_filter_datetime(date):
     try:
-        return arrow.get(date).humanize(locale='he_IL')
+        return arrow.get(date).humanize(locale=get_locale())
     except ValueError:
         return str(arrow.get(date).date())
 
@@ -465,6 +499,11 @@ def _jinja2_filter_datetime(date):
 def _jinja2_filter_path_to_language_name(filename: str) -> str:
     ext = filename.path.rsplit('.')[-1]
     return get_language_name_by_extension(ext)
+
+
+@webapp.context_processor
+def _jinja2_inject_direction():
+    return dict(direction=DIRECTION)
 
 
 class AccessibleByAdminMixin:
@@ -505,6 +544,8 @@ class AdminCommentTextView(AdminModelView):
         CommentText.flake8_key.name,
     )
 
+
+DIRECTION = 'rtl' if get_locale() in RTL_LANGUAGES else 'ltr'
 
 SPECIAL_MAPPING = {
     Solution: AdminSolutionView,

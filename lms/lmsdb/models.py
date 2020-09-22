@@ -8,6 +8,7 @@ from typing import (
     Type, Union, cast,
 )
 
+from flask_babel import gettext as _
 from flask_login import UserMixin  # type: ignore
 from peewee import (  # type: ignore
     BooleanField, Case, CharField, Check, DateTimeField, ForeignKeyField,
@@ -582,7 +583,7 @@ class ExerciseTest(BaseModel):
 
 class ExerciseTestName(BaseModel):
     FATAL_TEST_NAME = 'fatal_test_failure'
-    FATAL_TEST_PRETTY_TEST_NAME = 'כישלון חמור'
+    FATAL_TEST_PRETTY_TEST_NAME = _('כישלון חמור')
 
     exercise_test = ForeignKeyField(model=ExerciseTest)
     test_name = TextField()

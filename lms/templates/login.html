@@ -4,23 +4,23 @@
   <div class="container">
     <div id="login-container">
         <div id="login" class="text-center">
-            <img id="login-logo" src="{{ url_for('static', filename='avatar.jpg') }}" alt="תמונת הפרופיל של קורס פייתון" width="72" height="72">
-            <h1 id="main-title" class="h3 font-weight-normal">התחברות</h1>
+            <img id="login-logo" src="{{ url_for('static', filename='avatar.jpg') }}" alt="{{ _('תמונת הפרופיל של קורס פייתון') }}" width="72" height="72">
+            <h1 id="main-title" class="h3 font-weight-normal">{{ _('התחברות') }}</h1>
             <p>
-                ברוכים הבאים למערכת התרגילים!<br>
-                הזינו את שם המשתמש והסיסמה שלכם:
+                {{ _('ברוכים הבאים למערכת התרגילים!') }}<br>
+                {{ _('הזינו את שם המשתמש והסיסמה שלכם:') }}
             </p>
             <form method="post" action="/login" class="mb-6">
-                <div class="form-group">
-                    <input class="form-control form-control-lg" type="text" name="username" id="username" placeholder="שם משתמש" required autofocus>
+                <div class="form-group {{ direction }}-language">
+                    <input class="form-control form-control-lg" type="text" name="username" id="username" placeholder="{{ _('שם משתמש') }}" required autofocus>
                 </div>
-                <div class="form-group">
-                    <input class="form-control form-control-lg" type="password" name="password" id="password" placeholder="סיסמה" required>
+                <div class="form-group {{ direction }}-language">
+                    <input class="form-control form-control-lg" type="password" name="password" id="password" placeholder="{{ _('סיסמה') }}" required>
                 </div>
                 <div class="form-group">
                     <input class="form-control form-control-lg" type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token() }}" required>
                 </div>
-                <button class="btn btn-primary btn-lg btn-block">התחבר</button>
+                <button class="btn btn-primary btn-lg btn-block">{{ _('התחבר') }}</button>
             </form>
         </div>
     </div>

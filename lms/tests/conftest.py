@@ -133,14 +133,20 @@ def create_solution(
         exercise: Exercise,
         student_user: User,
         code: Optional[str] = None,
+        files: Optional[File] = None,
+        hash_: Optional[str] = None,
 ) -> Solution:
     if code is None:
         code = ''.join(random.choices(string.printable, k=100))
 
+    if files is None:
+        files = [File('exercise.py', code)]
+
     return Solution.create_solution(
         exercise=exercise,
         solver=student_user,
-        files=[File('exercise.py', code)],
+        files=files,
+        hash_=hash_,
     )
 
 
