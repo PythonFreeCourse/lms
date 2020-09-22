@@ -313,6 +313,8 @@ class Solution(BaseModel):
     )
     submission_timestamp = DateTimeField(index=True)
     hashed = TextField()
+    shareable_by_admin = BooleanField(default=False)
+    shareable_by_user = BooleanField(default=False)
 
     @property
     def solution_files(
@@ -323,6 +325,21 @@ class Solution(BaseModel):
     @property
     def is_checked(self):
         return self.state == self.STATES.DONE.name
+
+    @property
+    def is_shareable(self):
+        return (
+            self.shareable_by_admin
+            and self.shareable_by_user
+        )
+
+    def change_admin_share(self):
+        self.shareable_by_admin = not self.shareable_by_admin
+        return bool(self.save())
+
+    def change_user_share(self):
+        self.shareable_by_user = not self.shareable_by_user
+        return bool(self.save())
 
     @staticmethod
     def create_hash(content: Union[str, bytes], *args, **kwargs) -> str:

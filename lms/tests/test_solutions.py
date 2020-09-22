@@ -1,7 +1,10 @@
 from unittest import mock
 
+import pytest
+
 from lms.lmsdb.models import Comment, Exercise, Solution, User
 from lms.lmstests.public.general import tasks as general_tasks
+from lms.lmsweb import webapp
 from lms.models import notifications, solutions
 from lms.tests import conftest
 
@@ -184,3 +187,28 @@ class TestSolutionBridge:
                 assert is_checking
                 the_solution = Solution.get_by_id(solution.id)
                 assert the_solution.state == Solution.STATES.IN_CHECKING.name
+
+    @staticmethod
+    @pytest.mark.skip('Should run with docker system access')
+    def test_share_solution(
+        exercise: Exercise,
+        student_user: User,
+    ):
+        student_user2 = conftest.create_student_user(index=1)
+        solution = conftest.create_solution(exercise, student_user2)
+
+        client = webapp.test_client()
+        client.post(
+            '/login',
+            data=dict(  # noqa: S106
+                username=student_user.username,
+                password='fake pass',
+            ),
+            follow_redirects=True,
+        )
+        before_share_response = client.get('/shared-solution/1')
+        assert before_share_response.status_code != 200
+        solution.change_admin_share()
+        solution.change_user_share()
+        after_share_response = client.get('/shared-solution/1')
+        assert after_share_response.status_code == 200

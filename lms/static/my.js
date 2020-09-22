@@ -16,6 +16,36 @@ function escapeUnicode(str) {
 }
 
 
+function shareSolution(solutionId, isShared, element) {
+  element.checked = (isShared == 'True');
+  element.addEventListener('click', () => {
+    const shareButton = document.getElementById('solution-link');
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/share');
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.responseType = 'json';
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+          const response = JSON.parse(window.escapeUnicode(xhr.response))
+          if (element.checked) {
+            shareButton.style.display = 'block';
+          } else {
+            shareButton.style.display = 'none';
+          }
+        } else {
+          console.log(xhr.status);
+        }
+      }
+    };
+
+    xhr.send(JSON.stringify({
+      solutionId,
+    }));
+  });
+}
+
+
 function trackCopyCodeButton(button) {
   button.addEventListener('click', () => {
     const copyText = document.getElementById('user-code');
@@ -25,6 +55,19 @@ function trackCopyCodeButton(button) {
     setTimeout(function() {
         button.innerHTML = last;
     }, 2000);
+  });
+}
+
+
+function trackShareButton(button) {
+  button.addEventListener('click', () => {
+    const lastColor = button.style['color'];
+    const refLink = window.location.host + '/shared-solution/' + window.location.pathname.split('/')[2];
+    navigator.clipboard.writeText(refLink);
+    button.style['color'] = '#007bff';
+    setTimeout(function() {
+      button.style['color'] = lastColor;
+    }, 1000);
   });
 }
 
@@ -70,7 +113,12 @@ String.prototype.format = function(kwargs) {
 window.escapeUnicode = escapeUnicode;
 
 window.addEventListener('load', () => {
+  const codeElement = document.getElementById('code-view').dataset
+  const solutionId = codeElement.id;
+  const shared = codeElement.shared;
   updateNotificationsBadge();
   trackReadAllNotificationsButton(document.getElementById('read-notifications'));
   trackCopyCodeButton(document.getElementById('copy-button'));
+  shareSolution(solutionId, shared, document.getElementById('toggle'));
+  trackShareButton(document.getElementById('solution-link'));
 });

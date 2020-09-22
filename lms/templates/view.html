@@ -4,7 +4,7 @@
 <div id="page-view">
   <div id="view-head">
     <h1>{{ _('תצוגת תרגיל') }} {{ solution['exercise']['id'] }}: {{ solution['exercise']['subject'] }}</h1>
-    {% if not is_manager %}
+    {% if not is_manager and not shared %}
       {% if solution['state'] == 'DONE' %}
         <p class="checked-msg {{ direction }}"><strong>{{ _('התרגיל שלך נבדק!') }}</strong> {{ _('לחצו על השורות האדומות כדי לראות את הערות הבודקים.') }}</p>
       {% elif solution['state'] == 'IN_CHECKING' %}
@@ -17,6 +17,7 @@
     {% else %}
     <p id="solver"><strong>{{ _('מגיש') }}:</strong> <a href="/user/{{ solution['solver']['id'] }}">{{ solution['solver']['fullname'] | e }}</a></p>
     {% endif %}
+    {% if not shared %}
     <nav id="versions" aria-label="{{ _('ניווט בגרסאות ההגשה') }}">
       <ul class="pagination">
       {%- for version in versions %}
@@ -28,23 +29,32 @@
       {% endfor -%}
       </ul>
     </nav>
-    {% if is_manager %}
+    {% if solution['shareable_by_admin'] %}
+    <div class={{ direction }}>
+      <strong>{{ _('שיתוף תרגיל') }}:</strong>
+    </div>
+    <input id="toggle" class="toggle-control" type="checkbox">
+    <label for="toggle"></label>
+    <span id="solution-link" class="shared-link{% if solution['shareable_by_user'] %} shared{% endif %}"><i class="fa fa-share-alt"></i></span>
+    {% endif -%}
+    {% if is_manager and not shared %}
         <div class="progress manager-progress-bar">
             <div class="progress-bar" style="width: {{ left }}%;" role="progressbar" aria-valuenow="{{ left }}" aria-valuemax="100">
                 {{ left }}% {{ _('לסיום בדיקה') }}
             </div>
         </div>
     {% endif %}
+    {%- endif %}
   </div>
   <div id="view-body">
     <div class="code-view-container">
-      <div id="code-view" data-id="{{ solution['id'] }}" data-file="{{ current_file.id }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}">
+      <div id="code-view" data-id="{{ solution['id'] }}" data-file="{{ current_file.id }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}" data-shared="{{ solution['shareable_by_user'] }}">
         <pre><code id="user-code" class="language-{{ current_file | language_name }} line-numbers highlight">{{- current_file.code | trim(chars=' ') | e -}}</code></pre>
       </div>
       <div id="copy-code">
         <a href="#" id="copy-button" class="button-copy" title="Copy code"><i class="fa fa-copy"></i></a>
       </div>
-      {% if test_results %}
+      {% if test_results and not shared %}
       <div class="test-results">
           <h3 class="test-result-title">{{ _('בדיקות אוטומטיות') }}</h3>
           <ol class="test-results-list">
@@ -69,7 +79,7 @@
       </div>
       {% endif %}
     </div>
-    {% if is_manager %}
+    {% if is_manager and not shared %}
     <div id="popular-comments" class="{{ direction }}">
       <div id="exercise-comments">
         <h2>{{ _('הערות על התרגיל') }}</h2>
@@ -114,9 +124,11 @@
   </a>
 </div>
 <script src="{{ url_for('static', filename='prism.js') }}"></script>
+{% if not shared %}
 <script src="{{ url_for('static', filename='comments.js') }}"></script>
 {%- if is_manager %}
 <script src="{{ url_for('static', filename='grader.js') }}"></script>
 <script src="{{ url_for('static', filename='keyboard.js') }}"></script>
 {% endif -%}
+{% endif %}
 {% endblock %}
