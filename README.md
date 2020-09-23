@@ -17,7 +17,7 @@ The system objectives -
 ### Prerequisites
 1. Linux based system - either [WSL on windows](https://docs.microsoft.com/en-us/windows/wsl/install-win10) or full blown linux.
 2. [Python](https://www.python.org/downloads/release/python-385/) 
-3. [Docker](https://docs.docker.com/docker-for-windows/install/) and docker-compose
+3. [Docker](https://docs.docker.com/docker-for-windows/install/) and docker-compose.
 
 ### Minimal setup
 This setup is for debug purposes and will use sqlite database and frontend only.
@@ -50,8 +50,8 @@ After logging in, use [localhost admin](https://127.0.0.1:5000/admin) to modify 
 ### Full setup
 This setup will create the following items:
 * Application - LMS code.
-* Middleware (messaging queue) - rabbit-mq.
-* Persistence database - postgresql.
+* Middleware (messaging queue) - RabbitMQ.
+* Persistence database - PostgreSQL.
 
 Steps to do:
 
@@ -69,15 +69,16 @@ echo "SECRET_KEY = \"$(python -c 'import os;print(os.urandom(32).hex())')\"" >> 
 ./devops/start.sh
 ./devops/bootstrap.sh
 ```
+
+In case you want to add the stub data to PostgreSQL DB, run:
 ```
-In case you want to add the stub data to postgres db, run:
 docker exec -it lms_http_1 bash
 python lmsdb/bootstrap.py
 ```
 
 Enter http://127.0.0.1:8080, and the initial credentials should appear in your terminal. :)
 
-After logging in, use https://127.0.0.1:8080/admin to modify entries in the database.
+After logging in, use [localhost admin](https://127.0.0.1:8080/admin) to modify entries in the database.
 
 
 ## Code modification check list
