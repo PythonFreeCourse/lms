@@ -7,7 +7,8 @@
   <img title="LGTM JavaScript Grade" src="https://img.shields.io/lgtm/grade/javascript/github/PythonFreeCourse/LMS.svg">
 </p>
 
-👋 Welcome to Python course learning management system. 🐍 <br />
+👋 Welcome to Python course learning management system. 🐍
+
 The system objectives - 
 1. Allow teachers and mentors to input exercises list and provide feedback/comments to students exercises solutions.
 2. Allow students to load their exercises solutions and get feedback to their work.
@@ -19,11 +20,12 @@ The system objectives -
 3. [Docker](https://docs.docker.com/docker-for-windows/install/) and docker-compose
 
 ### Minimal setup
-This setup is for debug purposes and will use sqlite database and frontend only. <br />
+This setup is for debug purposes and will use sqlite database and frontend only.
+
 Steps to do:
-1. clone this repo
-2. set environment variables
-3. run the app
+1. Clone this repository.
+2. Set environment variables.
+3. Run the application.
 
 ```bash
 git clone https://github.com/PythonFreeCourse/lms
@@ -47,15 +49,15 @@ After logging in, use [localhost admin](https://127.0.0.1:5000/admin) to modify 
 
 ### Full setup
 This setup will create the following items:
-* application - lms code
-* middleware (messaging queue) - rabbit-mq
-* persistence database - postgresql
+* Application - LMS code.
+* Middleware (messaging queue) - rabbit-mq.
+* Persistence database - postgresql.
 
-Steps to do:<br />
-1. clone this repo
-#### `NOTE : in order to contribute to this repo you will need to `[fork](https://github.community/t/the-difference-between-forking-and-cloning-a-repository/10189) `it.`
-2. setup using docker & docker-compose
-3. run the app
+Steps to do:
+
+1. Clone this repository.
+2. Setup using docker & docker-compose.
+3. Run the application.
 
 ```bash
 git clone https://github.com/PythonFreeCourse/lms
