@@ -7,7 +7,24 @@
   <img title="LGTM JavaScript Grade" src="https://img.shields.io/lgtm/grade/javascript/github/PythonFreeCourse/LMS.svg">
 </p>
 
-## Minimized setup for debug (sqlite & FE only)
+👋 Welcome to Python course learning management system. 🐍 <br />
+The system objectives - 
+1. Allow teachers and mentors to input exercises list and provide feedback/comments to students exercises solutions.
+2. Allow students to load their exercises solutions and get feedback to their work.
+
+## Creating development environment
+### Prerequisites
+1. Linux based system - either [WSL on windows](https://docs.microsoft.com/en-us/windows/wsl/install-win10) or full blown linux.
+2. [Python](https://www.python.org/downloads/release/python-385/) 
+3. [Docker](https://docs.docker.com/docker-for-windows/install/) and docker-compose
+
+### Minimal setup
+This setup is for debug purposes and will use sqlite database and frontend only. <br />
+Steps to do:
+1. clone this repo
+2. set environment variables
+3. run the app
+
 ```bash
 git clone https://github.com/PythonFreeCourse/lms
 cd lms
@@ -25,13 +42,22 @@ cd ..
 flask run  # Run in root directory
 ```
 
-After logging in, use https://127.0.0.1:5000/admin to modify entries in the database.
+After logging in, use [localhost admin](https://127.0.0.1:5000/admin) to modify entries in the database.
 
 
-## Full setup
+### Full setup
+This setup will create the following items:
+* application - lms code
+* middleware (messaging queue) - rabbit-mq
+* persistence database - postgresql
+
+Steps to do:<br />
+1. clone this repo
+#### `NOTE : in order to contribute to this repo you will need to `[fork](https://github.community/t/the-difference-between-forking-and-cloning-a-repository/10189) `it.`
+2. setup using docker & docker-compose
+3. run the app
+
 ```bash
-Note: you should have docker + docker-compose installed on your computer
-
 git clone https://github.com/PythonFreeCourse/lms
 cd lms
 mv lms/lmsweb/config.py.example lms/lmsweb/config.py
@@ -52,13 +78,13 @@ Enter http://127.0.0.1:8080, and the initial credentials should appear in your t
 After logging in, use https://127.0.0.1:8080/admin to modify entries in the database.
 
 
-## Dev checks to run
-* Run flake8
+## Code modification check list
+### Run flake8 
 ```
 # on lms root directory
 flake8 lms
 ```
-* run tests
+### Run tests
 ```
 export PYTHONPATH=`pwd`
 pip install -r requirements.txt
