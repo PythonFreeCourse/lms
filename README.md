@@ -7,7 +7,26 @@
   <img title="LGTM JavaScript Grade" src="https://img.shields.io/lgtm/grade/javascript/github/PythonFreeCourse/LMS.svg">
 </p>
 
-## Minimized setup for debug (sqlite & FE only)
+👋 Welcome to Python course learning management system. 🐍
+
+The system objectives - 
+1. Allow teachers and mentors to input exercises list and provide feedback/comments to students exercises solutions.
+2. Allow students to load their exercises solutions and get feedback to their work.
+
+## Creating development environment
+### Prerequisites
+1. Linux based system - either [WSL on windows](https://docs.microsoft.com/en-us/windows/wsl/install-win10) or full blown linux.
+2. [Python](https://www.python.org/downloads/release/python-385/) 
+3. [Docker](https://docs.docker.com/docker-for-windows/install/) and docker-compose.
+
+### Minimal setup
+This setup is for debug purposes and will use sqlite database and frontend only.
+
+Steps to do:
+1. Clone this repository.
+2. Set environment variables.
+3. Run the application.
+
 ```bash
 git clone https://github.com/PythonFreeCourse/lms
 cd lms
@@ -25,13 +44,22 @@ cd ..
 flask run  # Run in root directory
 ```
 
-After logging in, use https://127.0.0.1:5000/admin to modify entries in the database.
+After logging in, use [localhost admin](https://127.0.0.1:5000/admin) to modify entries in the database.
 
 
-## Full setup
+### Full setup
+This setup will create the following items:
+* Application - LMS code.
+* Middleware (messaging queue) - RabbitMQ.
+* Persistence database - PostgreSQL.
+
+Steps to do:
+
+1. Clone this repository.
+2. Setup using docker & docker-compose.
+3. Run the application.
+
 ```bash
-Note: you should have docker + docker-compose installed on your computer
-
 git clone https://github.com/PythonFreeCourse/lms
 cd lms
 mv lms/lmsweb/config.py.example lms/lmsweb/config.py
@@ -41,24 +69,25 @@ echo "SECRET_KEY = \"$(python -c 'import os;print(os.urandom(32).hex())')\"" >> 
 ./devops/start.sh
 ./devops/bootstrap.sh
 ```
+
+In case you want to add the stub data to PostgreSQL DB, run:
 ```
-In case you want to add the stub data to postgres db, run:
 docker exec -it lms_http_1 bash
 python lmsdb/bootstrap.py
 ```
 
 Enter http://127.0.0.1:8080, and the initial credentials should appear in your terminal. :)
 
-After logging in, use https://127.0.0.1:8080/admin to modify entries in the database.
+After logging in, use [localhost admin](https://127.0.0.1:8080/admin) to modify entries in the database.
 
 
-## Dev checks to run
-* Run flake8
+## Code modification check list
+### Run flake8 
 ```
 # on lms root directory
 flake8 lms
 ```
-* run tests
+### Run tests
 ```
 export PYTHONPATH=`pwd`
 pip install -r requirements.txt
