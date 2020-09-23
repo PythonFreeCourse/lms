@@ -19,7 +19,7 @@ function escapeUnicode(str) {
 function shareSolution(solutionId, isShared, element) {
   element.checked = (isShared == 'True');
   element.addEventListener('click', () => {
-    const shareButton = document.getElementById('solution-link');
+    const shareButton = document.getElementById('share-solution');
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/share');
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -63,10 +63,13 @@ function trackShareButton(button) {
   button.addEventListener('click', () => {
     const lastColor = button.style['color'];
     const refLink = window.location.host + '/shared-solution/' + window.location.pathname.split('/')[2];
+    const balloonText = document.getElementById('shared-link-text');
     navigator.clipboard.writeText(refLink);
     button.style['color'] = '#007bff';
+    balloonText.style.visibility = 'visible';
     setTimeout(function() {
       button.style['color'] = lastColor;
+      balloonText.style.visibility = 'hidden';
     }, 1000);
   });
 }

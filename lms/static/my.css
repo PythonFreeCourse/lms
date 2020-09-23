@@ -89,7 +89,7 @@ div#code-view {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
+  margin-bottom: .5rem;
   padding: 1rem;
   text-align: center;
 }
@@ -162,16 +162,16 @@ input.toggle-control + label {
   cursor: pointer;
   outline: none;
   user-select: none;
-  margin-top: 0.125em;
+  margin-top: .125em;
 }
 
 input.toggle-control + label::before, input.toggle-control + label::after {
   display: block;
   position: absolute;
-  top: 0.0625em;
-  left: 0.0625em;
-  bottom: 0.0625em;
-  right: 0.0625em;
+  top: .0625em;
+  left: .0625em;
+  bottom: .0625em;
+  right: .0625em;
   content: '';
   transition: all 0.2s;
 }
@@ -185,7 +185,7 @@ input.toggle-control + label::after {
   width: 1.125em;
   background: #fff;
   border-radius: 100%;
-  box-shadow: 0 0.125em 0.3125em rgba(0, 0, 0, 0.3);
+  box-shadow: 0 .125em .3125em rgba(0, 0, 0, 0.3);
 }
 
 input.toggle-control:checked + label:before {
@@ -196,20 +196,32 @@ input.toggle-control:checked + label::after {
   margin-right: 1.25em;
 }
 
-.shared-link {
+.share-button {
   display: none;
   position: relative;
   top: -1.85em;
   left: 2em;
 }
 
-.shared-link:hover {
+#solution-link:hover {
   color: #f5f2f0;
 }
 
 .shared {
   display: block;
 }
+
+#shared-link-text {
+  visibility: hidden;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: .375em;
+  position: absolute;
+  margin-right: -6.5em;
+  z-index: 1;
+}
+
 
 .go-send {
   background: #247ba0;
@@ -255,17 +267,17 @@ input.toggle-control:checked + label::after {
 
 #download-solution {
   min-width: 6%;
-  font-size: 0.75rem;
-  size: 0.5rem;
+  font-size: .75rem;
+  size: .5rem;
   align-self: center;
 }
 
 .our-button {
   border-radius: 8px;
   display: block;
-  margin-right: 0.5em;
+  margin-right: .5em;
   outline: none;
-  padding: 0.55rem 1rem;
+  padding: .55rem 1rem;
   white-space: nowrap;
   width: 8em;
 }
@@ -297,7 +309,7 @@ i.fa {
   margin-left: 0;
 }
 
-.shared-link i.fa {
+#solution-link i.fa {
   margin-left: 0;
 }
 
@@ -312,7 +324,7 @@ i.fa {
   margin: 0 1rem;
   direction: ltr;
   white-space: nowrap;
-  padding: 0.2rem;
+  padding: .2rem;
   line-height: 2;
 }
 
@@ -445,12 +457,12 @@ i.fa {
   right: 1em;
   top: 1em;
   background-color: gray;
-  border-radius: 0.875em;
-  border: 0.0625em solid #ffffff;
+  border-radius: .875em;
+  border: .0625em solid #ffffff;
   cursor:pointer;
   color:#ffffff;
-  font-size: 0.875rem;
-  padding: 0.125em 0.5em;
+  font-size: .875rem;
+  padding: .125em .5em;
   text-decoration: none;
 }
 
@@ -531,8 +543,8 @@ ol.comments > li {
   background: #c3dbe5;
   border: 1px solid #4b93b1;
   cursor: grab;
-  margin-bottom: 0.7em;
-  padding: 0.5em;
+  margin-bottom: .7em;
+  padding: .5em;
 }
 
 ol.comments > li:active {
@@ -549,7 +561,7 @@ span.line {
   display: inline-block;
   text-align: left;
   width: 100%;
-  margin-left: 0.3em;
+  margin-left: .3em;
 }
 
 #grader-buttons {
@@ -589,13 +601,13 @@ code > code:last-of-type{
 .grader-add {
   position: relative;
   background-attachment: fixed;
-  left: -0.88em;
+  left: -.88em;
   width: 1.375rem;
   height: 1.375rem;
   cursor: pointer;
   display: inline-block;
   color: #0366d6;
-  border-radius: 0.375rem;
+  border-radius: .375rem;
   transition: transform .1s ease-in-out;
   transform-origin: center;
   transform: scale(.8);
@@ -664,8 +676,8 @@ code > .grader-add {
 
 .which-notebook {
   align-self: center;
-  margin-left: 0.5em;
-  padding: 0.55rem 1rem;
+  margin-left: .5em;
+  padding: .55rem 1rem;
 }
 
 
@@ -673,12 +685,12 @@ code > .grader-add {
   align-self: center;
   font-size: 1.25rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  margin-top: -0.25em;
+  margin-top: -.25em;
 }
 
 .file-comments-count {
   position: absolute;
-  margin-left: -0.8em;
+  margin-left: -.8em;
   margin-top: -1.5em;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 1.25rem;
@@ -711,7 +723,7 @@ code > .grader-add {
 }
 
 .notification-date {
-  font-size: 0.8em;
+  font-size: .8em;
 }
 
 

@@ -35,7 +35,10 @@
     </div>
     <input id="toggle" class="toggle-control" type="checkbox">
     <label for="toggle"></label>
-    <span id="solution-link" class="shared-link{% if solution['shareable_by_user'] %} shared{% endif %}"><i class="fa fa-share-alt"></i></span>
+    <div id="share-solution" class="share-button{% if solution['shareable_by_user'] %} shared{% endif %}">
+      <span id="solution-link"><i class="fa fa-share-alt"></i></span>
+      <span id="shared-link-text">Link copied</span>
+    </div>
     {% endif -%}
     {% if is_manager and not shared %}
         <div class="progress manager-progress-bar">
