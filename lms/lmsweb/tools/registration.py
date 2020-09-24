@@ -2,6 +2,8 @@ import csv
 import os
 import typing
 
+from flask_babel import gettext as _
+
 from lms.lmsdb import models
 from lms.lmsweb import config
 from lms.utils.log import log
@@ -97,7 +99,10 @@ class UserRegistrationCreator:
                 data={
                     'from': f'lms@{config.MAILGUN_DOMAIN}',
                     'to': user,
-                    'subject': 'Learn Python - מערכת הגשת התרגילים',
+                    'subject': (
+                        'Learn Python - ',
+                        _('מערכת הגשת התרגילים'),
+                    ),
                     'html': text,
                 },
                 auth=('api', config.MAILGUN_API_KEY))

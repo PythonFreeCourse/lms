@@ -2,26 +2,26 @@
 
 {% block page_content %}
 <div id="page-user">
-  <div id="user">
+  <div id="user" class="{{ direction }}">
     <h1>{{ user.fullname | e }}</h1>
     <div class="body">
-      <div class="user-details">
-        <h2>פרטי משתמש:</h2>
+      <div class="user-details {{ direction }}">
+        <h2>{{ _('פרטי משתמש:') }}</h2>
         <ul>
-          <li>שם משתמש: {{ user.username | e }}</li>
-          <li>דואר אלקטרוני: {{ user.mail_address | e }}</li>
+          <li>{{ _('שם משתמש:') }} {{ user.username | e }}</li>
+          <li>{{ _('דואר אלקטרוני:') }} {{ user.mail_address | e }}</li>
         </ul>
       </div>
-      <div class="user-exercises">
-      <h2>תרגילים שהוגשו:</h2>
+      <div class="user-exercises {{ direction }}">
+      <h2>{{ _('תרגילים שהוגשו:') }}</h2>
         <table class="table table-hover">
           <thead>
             <tr>
               <th scope="col">#</th>
-              <th scope="col">שם תרגיל</th>
-              <th scope="col">מצב הגשה</th>
-              <th scope="col">הגשה</th>
-              <th scope="col">בודק</th>
+              <th scope="col">{{ _('שם תרגיל') }}</th>
+              <th scope="col">{{ _('מצב הגשה') }}</th>
+              <th scope="col">{{ _('הגשה') }}</th>
+              <th scope="col">{{ _('בודק') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -29,7 +29,9 @@
             <tr>
               <th scope="row">{{ solution.exercise_id | e }}</th>
               <td>{{ solution.exercise_name | e }}</td>
-              <td>{{ 'נבדק' if solution.is_checked else 'הוגש' if solution.solution_id else 'לא הוגש' }}</td>
+              <td>
+                {{ _('נבדק') if solution.is_checked else _('הוגש') if solution.solution_id else _('לא הוגש') }}
+              </td>
               <td><a href="/view/{{ solution.solution_id }}">{{ solution.solution_id }}</a></td>
               <td>{{ solution.get('checker', '') | e }}</a></td>
             </tr>

@@ -2,6 +2,7 @@ import logging
 import typing
 
 from celery.result import allow_join_result
+from flask_babel import gettext as _
 
 from lms.lmsdb import models
 from lms.lmstests.sandbox import linters
@@ -95,9 +96,9 @@ class LinterChecker:
 
         errors_len = len(self._errors)
         exercise_name = self.solution.exercise.subject
-        msg = (
-            f'הבודק האוטומטי נתן {errors_len} '
-            f'הערות על תרגילך "{exercise_name}".'
+        msg = _(
+            'הבודק האוטומטי נתן %(errors_num)d הערות על תרגילך %(name)s.',
+            errors_num=errors_len, name=exercise_name,
         )
         return notifications.send(
             kind=notifications.NotificationKind.FLAKE8_ERROR,

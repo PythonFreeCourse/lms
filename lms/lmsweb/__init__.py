@@ -2,13 +2,17 @@ import pathlib
 import shutil
 
 from flask import Flask
+from flask_babel import Babel
 from flask_wtf.csrf import CSRFProtect  # type: ignore
+
+from lms.utils import config_migrator
 
 project_dir = pathlib.Path(__file__).resolve().parent.parent
 web_dir = project_dir / 'lmsweb'
 template_dir = project_dir / 'templates'
 static_dir = project_dir / 'static'
 config_file = web_dir / 'config.py'
+config_example_file = web_dir / 'config.py.example'
 
 
 webapp = Flask(
@@ -19,13 +23,18 @@ webapp = Flask(
 
 
 if not config_file.exists():
-    shutil.copy(str(web_dir / 'config.py.example'), str(config_file))
+    shutil.copy(str(config_example_file), str(config_file))
+config_migrator.migrate(config_file, config_example_file)
+
 webapp.config.from_pyfile(str(config_file))
 
 csrf = CSRFProtect(webapp)
 
+# Localizing configurations
+babel = Babel(webapp)
+
 # Must import files after app's creation
-from lms.lmsdb import models  # NOQA: F401, E402
+from lms.lmsdb import models  # NOQA: F401, E402, I202
 from lms.lmsweb import views  # NOQA: F401, E402
 
 

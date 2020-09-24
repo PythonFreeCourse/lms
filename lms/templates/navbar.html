@@ -4,21 +4,27 @@
     <span class="navbar-toggler-icon"></span>
   </button>
   <a class="navbar-brand" href="{{ config.HOME_URL or "/" }}">
-    <img src="{{ url_for('static', filename='avatar.jpg') }}" width="30" height="30" class="d-inline-block align-top" alt="הלוגו של פרויקט לומדים פייתון: נחש צהוב על רקע עיגול בצבע תכלת, ומתחתיו כתוב 'לומדים פייתון'.">
+    <img src="{{ url_for('static', filename='avatar.jpg') }}" width="30" height="30" class="d-inline-block align-top" alt="{{ _('הלוגו של פרויקט לומדים פייתון: נחש צהוב על רקע עיגול בצבע תכלת, ומתחתיו כתוב - לומדים פייתון.') }}">
   </a>
   <div class="collapse navbar-collapse" id="navbarNavDropdown">
     <ul class="navbar-nav">
       <li class="nav-item dropdown">
         <a id="notifications-icon" href="#" class="nav-link" aria-expanded="false" aria-haspopup="true" aria-label="Notifications" role="button" data-toggle="dropdown">
           <i class="fa fa-bell" aria-hidden="true"></i>
-          הודעות
+          {{ _('הודעות') }}
           <span id="notification-count" class="badge badge-secondary">0</span>
         </a>
-        <div id="notifications-list" class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+        <div id="notifications-list" aria-labelledby="navbarDropdown" class="dropdown-menu 
+        {%- if direction == 'rtl' %}
+        dropdown-menu-right
+        {%- else %}
+        dropdown-menu-left
+        {%- endif %}
+        ">
           {% for notification in current_user.get_notifications() %}
-          <div class="notification dropdown-item" data-read="{{ notification.viewed | lower }}">
+          <div class="notification dropdown-item {{ direction }}" data-read="{{ notification.viewed | lower }}">
             <i class="fa icon" aria-hidden="true"></i>
-            <a href="{{ notification.action_url }}" class="notification-text">
+            <a href="{{ notification.action_url }}" class="notification-text {{ direction }}">
               {{ notification.message | e }}
             </a>
             <span class="notification-date" title="{{ notification.created }}">{{ notification.created | date_humanize }}</span>
@@ -26,21 +32,21 @@
           {% endfor -%}
           <div id="read-notifications" class="notification dropdown-item">
             <i class="fa fa-check" aria-hidden="true"></i>
-            <a href="#">סמן הכל כנקרא.</a>
+            <a href="#">{{ _('סמן הכל כנקרא') }}.</a>
           </div>
         </div>
       </li>
       <li class="nav-item">
         <a href="/send" class="nav-link">
           <i class="fa fa-upload" aria-hidden="true"></i>
-          העלאת תרגילים
+          {{ _('העלאת תרגילים') }}
         </a>
       </li>
       {%- if not exercises or fetch_archived %}
       <li class="nav-item">
         <a href="/exercises" class="nav-link">
           <i class="fa fa-book" aria-hidden="true"></i>
-          רשימת התרגילים
+          {{ _('רשימת התרגילים') }}
         </a>
       </li>
       {% endif -%}
@@ -48,24 +54,30 @@
       <li class="nav-item">
         <a href="/exercises?archived=1" class="nav-link">
           <i class="fa fa-archive" aria-hidden="true"></i>
-          ארכיון התרגילים
+          {{ _('ארכיון התרגילים') }}
         </a>
       </li>
       {% endif -%}
     </ul>
-    <ul class="navbar-nav mr-auto">
+    <ul class="navbar-nav 
+    {%- if direction == 'rtl' %}
+    mr-auto
+    {%- else %}
+    ml-auto
+    {% endif -%}
+    ">
       {%- if current_user.role.is_manager %}
       <li class="nav-item">
         <a href="/status" class="nav-link">
           <i class="fa fa-check-square-o" aria-hidden="true"></i>
-          בדוק תרגילים
+          {{ _('בדוק תרגילים') }}
         </a>
       </li>
       {% endif -%}
       <li class="nav-item">
         <a href="/logout" class="nav-link">
           <i class="fa fa-sign-out" aria-hidden="true"></i>
-          התנתקות
+          {{ _('התנתקות') }}
         </a>
       </li>
     </ul>

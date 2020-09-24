@@ -1,5 +1,10 @@
+from io import BytesIO
 from operator import itemgetter
+import os
 from typing import Any, Dict, Iterable, List, Optional
+from zipfile import ZipFile
+
+from flask_babel import gettext as _
 
 from lms.lmsdb.models import Solution, SolutionFile
 from lms.lmstests.public.general import tasks as general_tasks
@@ -11,7 +16,10 @@ from lms.models import notifications
 def mark_as_checked(solution_id: int, checker_id: int) -> bool:
     checked_solution: Solution = Solution.get_by_id(solution_id)
     is_updated = checked_solution.mark_as_checked(by=checker_id)
-    msg = f'הפתרון שלך לתרגיל "{checked_solution.exercise.subject}" נבדק.'
+    msg = _(
+        'הפתרון שלך לתרגיל "%(subject)s" נבדק.',
+        subject=checked_solution.exercise.subject,
+    )
     if is_updated:
         notifications.send(
             kind=notifications.NotificationKind.CHECKED,
@@ -40,6 +48,16 @@ def start_checking(solution: Optional[Solution]) -> bool:
         )
         return True
     return False
+
+
+def create_zip_from_solution(files: Iterable[SolutionFile]) -> bytes:
+    with BytesIO() as memory_file:
+        with ZipFile(memory_file, 'w') as archive:
+            for file in files:
+                if not file.path.endswith(os.path.sep):
+                    archive.writestr(file.path.strip(os.path.sep), file.code)
+        memory_file.seek(0)
+        return memory_file.read()
 
 
 def get_files_tree(files: Iterable[SolutionFile]) -> List[Dict[str, Any]]:

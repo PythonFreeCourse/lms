@@ -5,23 +5,18 @@ import os
 WTF_CSRF_ENABLED = False  # On production, delete this line!
 
 SECRET_KEY = ''
-MAILGUN_API_KEY = os.getenv('MAILGUN_API_KEY')
-MAILGUN_DOMAIN = os.getenv('MAILGUN_DOMAIN', 'mail.pythonic.guru')
-SERVER_ADDRESS = os.getenv('SERVER_ADDRESS', '127.0.0.1:5000')
+SERVER_ADDRESS = os.getenv('SERVER_ADDRESS', '127.0.0.1:80')
 
 FEATURE_FLAG_CHECK_IDENTICAL_CODE_ON = os.getenv(
     'FEATURE_FLAG_CHECK_IDENTICAL_CODE_ON', False,
 )
 
 
-MAIL_WELCOME_MESSAGE = 'welcome-email'
 USERS_CSV = 'users.csv'
-ERRORS_CSV = 'errors.csv'
 
 
 # Babel config
 LANGUAGES = {
-    'he': 'Hebrew',
     'en': 'English',
+    'he': 'Hebrew',
 }
-LOCALE = 'en'

@@ -1,7 +1,15 @@
 html {
   border: #f3f3f3;
+}
+
+.rtl {
   direction: rtl;
   text-align: right;
+}
+
+.ltr {
+  direction: ltr;
+  text-align: left;
 }
 
 code,
@@ -12,19 +20,19 @@ div#code-view {
   text-align: left;
 }
 
-::-webkit-input-placeholder {
+.rtl-language > ::-webkit-input-placeholder {
   text-align: right;
 }
 
-::-moz-placeholder {
+.rtl-language > ::-moz-placeholder {
   text-align: right;
 }
 
-:-moz-placeholder {
+.rtl-language > :-moz-placeholder {
   text-align: right;
 }
 
-:-ms-input-placeholder {
+.rtl-language > :-ms-input-placeholder {
   text-align: right;
 }
 
@@ -46,9 +54,7 @@ div#code-view {
 }
 
 .page {
-  direction: rtl;
   margin: 3rem 0;
-  text-align: right;
 }
 
 #exercises-page {
@@ -108,10 +114,17 @@ div#code-view {
   display: flex;
   height: 3rem;
   justify-content: center;
-  margin-left: 2em;
   overflow: hidden;
   text-align: center;
   width: 3rem;
+}
+
+.rtl-language > .exercise-id {
+  margin-left: 2em;
+}
+
+.ltr-language > .exercise-id {
+  margin-right: 2em;
 }
 
 .exercise-name {
@@ -177,6 +190,13 @@ div#code-view {
   margin-top: 5vh;
 }
 
+#download-solution {
+  min-width: 6%;
+  font-size: 0.75rem;
+  size: 0.5rem;
+  align-self: center;
+}
+
 .our-button {
   border-radius: 8px;
   display: block;
@@ -203,6 +223,14 @@ i.fa {
 }
 
 .our-button-small > i.fa {
+  margin-left: 0;
+}
+
+.button-copy i.fa {
+  margin-left: 0;
+}
+
+.btn i.fa {
   margin-left: 0;
 }
 
@@ -251,6 +279,7 @@ i.fa {
 
 /* Check/see exercise view */
 #page-view {
+  direction: rtl;
   display: flex;
   flex-direction: column;
   justify-items: center;
@@ -265,7 +294,6 @@ i.fa {
 
 #view-head {
   align-items: center;
-  direction: rtl;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -355,7 +383,7 @@ i.fa {
   cursor:pointer;
   color:#ffffff;
   font-size: 0.875rem;
-  padding: 0.375em 0.75em;
+  padding: 0.125em 0.5em;
   text-decoration: none;
 }
 
@@ -364,7 +392,7 @@ i.fa {
 }
 
 pre {
-  width: 100%
+  width: 100%;
 }
 
 .test-results {
@@ -421,15 +449,12 @@ code {
 }
 
 #popular-comments h2 {
-  direction: rtl;
   font-size: 1.5rem;
   font-style: italic;
   margin-bottom: 1em;
-  text-align: right;
 }
 
 ol.comments {
-  direction: rtl;
   list-style-type: none;
   padding: 1em;
   text-align: right;
@@ -514,6 +539,11 @@ code > code:last-of-type{
   transform: scale(1);
 }
 
+code .grader-add .fa {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .grader-delete {
   cursor: pointer;  /* Very bad semantically, think of another UI solution */
 }
@@ -528,7 +558,6 @@ code > .grader-add {
 
 /* Status page */
 #page-status {
-  direction: rtl;
   text-align: right;
 }
 
@@ -556,10 +585,9 @@ code > .grader-add {
 /* Navigation bar */
 
 .mr-auto .dropdown-menu {
-    right: auto !important;
-    left: 0px;
+  right: auto !important;
+  left: 0px;
 }
-
 
 .nav-item {
   padding-left: 1em;
@@ -595,7 +623,6 @@ code > .grader-add {
 
 .notification {
   flex-direction: column;
-  text-align: right;
 }
 
 .notification[data-read="true"] .icon::before {
@@ -623,7 +650,6 @@ code > .grader-add {
 
 /* User's page */
 #user {
-  direction: rtl;
   text-align: right;
 }
 
