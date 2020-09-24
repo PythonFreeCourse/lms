@@ -12,16 +12,13 @@ function markLine(target, color) {
 function hoverLine(targets, hover) {
   const [lineTarget, addCommentTarget] = targets;
   if (lineTarget.dataset && lineTarget.dataset.vimbackground === 'true') { return; }
-  let parsedColor = hover;
-  if (hover === true) {
-    parsedColor = HOVER_LINE_STYLE;
-    addCommentOpacity = '1';
-  } else if (hover === false) {
-    parsedColor = 'none';
-    addCommentOpacity = '0';
-  }
+  let parsedColor = (
+    (hover === true) ? HOVER_LINE_STYLE :
+      (hover === false ? 'none' : hover)
+  )
+  let commentOpacity = (hover === true) ? '1' : '0';
   lineTarget.style.border = parsedColor;
-  addCommentTarget.style.opacity = addCommentOpacity;
+  addCommentTarget.style.opacity = commentOpacity;
 }
 
 function isUserGrader() {
@@ -92,11 +89,26 @@ function pullComments(fileId, callback) {
 }
 
 
+function countOpenedSpans(line) {
+  const spansOpenCount = (line.match(/\<span/g) || []).length;
+  const spansCloseCount = (line.match(/\<\/span\>/g) || []).length;
+  return spansOpenCount - spansCloseCount;
+}
+
+
 function addLineSpansToPre(items) {
+  let spansOpened = 0;
   Array.from(items).forEach((item) => {
-    item.innerHTML = item.innerHTML.split('\n')
-      .map((line, i) => `<span data-line="${i + 1}" class="line"> ${line}</span>`)
-      .join('\n');
+    const code = item.innerHTML.trim().split('\n');
+    item.innerHTML = code.map(
+      (line, i) => {
+        const optionalOpening = (spansOpened === 0) ? `<span data-line="${i + 1}" class="line">` : '';
+        spansOpened += countOpenedSpans(line);
+        const optionalClosing = (spansOpened === 0) ? '</span>' : '';
+        const newLine = `${optionalOpening}${line}${optionalClosing}`;
+        return newLine;
+      }
+    ).join('\n');
   });
   window.dispatchEvent(new Event('lines-numbered'));
 }

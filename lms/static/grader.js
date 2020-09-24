@@ -99,12 +99,13 @@ function trackDragAreas(lineItems, addCommentItems) {
     const span = (e.target.nodeType === 3) ? e.target.parentNode : e.target;
     let lineTarget = span.closest('.line');
     let addCommentTarget = span.closest('.grader-add');
+    const codeView = document.querySelector('#code-view');
     if (lineTarget === null || addCommentTarget !== null) {
-      const lines = document.querySelectorAll('#code-view .line');
-      lineTarget = lines[addCommentTarget.dataset.line - 1];
+      const commentLine = addCommentTarget.dataset.line;
+      lineTarget = codeView.querySelector(`.line[data-line="${commentLine}"]`);
     } else {
-      const graderAdds = document.querySelectorAll('#code-view .grader-add');
-      addCommentTarget = graderAdds[lineTarget.dataset.line - 1];
+      const commentLine = lineTarget.dataset.line;
+      addCommentTarget = codeView.querySelector(`.grader-add[data-line="${commentLine}"]`);
     }
     return [lineTarget, addCommentTarget];
   }
@@ -188,10 +189,10 @@ function registerNewCommentPopover(element) {
 
 
 function addNewCommentButtons(elements) {
-  Array.from(elements).forEach((item, lineNumber) => {
+  Array.from(elements).forEach((item) => {
     const newNode = document.createElement('span');
     newNode.className = 'grader-add';
-    newNode.dataset.line = lineNumber + 1;
+    newNode.dataset.line = item.dataset.line;
     newNode.innerHTML = '<i class="fa fa-plus-square"></i>';
     item.parentNode.insertBefore(newNode, item);
     registerNewCommentPopover(newNode);
