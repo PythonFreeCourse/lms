@@ -20,10 +20,10 @@ from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Exercise, RoleOptions,
-    Solution, SolutionFile, User, database,
+    SharedSolution, Solution, SolutionFile, User, database,
 )
 from lms.lmsweb import babel, routes, webapp
-from lms.lmsweb.config import LANGUAGES, LOCALE
+from lms.lmsweb.config import LANGUAGES, LOCALE, SHAREABLE_SOLUTIONS
 from lms.models import notifications, solutions, upload
 from lms.models.errors import AlreadyExists, BadUploadFile
 from lms.utils.consts import RTL_LANGUAGES
@@ -248,14 +248,54 @@ def share():
     if solver_id != current_user.id and not current_user.role.is_manager:
         return fail(403, "You aren't allowed to access this page.")
 
-    if not solution.shareable_by_admin:
-        return fail(404, 'The solution is not shareable.')
+    if not SHAREABLE_SOLUTIONS:
+        return fail(404, 'Shareable solutions are not allowed.')
 
-    success_state = solution.change_user_share()
+    shared_solution = SharedSolution.get_or_none(
+        SharedSolution.solution == solution,
+    )
+    if shared_solution is None:
+        SharedSolution.create_shared_solution(
+            solution=solution,
+        )
+        return jsonify({
+            'success': 'true',
+            'shared': True,
+        })
+
+    shared_solution.delete_instance()
+
     return jsonify({
-        'success': success_state,
-        'shared': solution.shareable_by_user,
+        'success': 'true',
+        'shared': False,
     })
+
+
+@webapp.route('/share-link', methods=['POST'])
+@login_required
+def share_link():
+    solution_id = int(request.json.get('solutionId', 0))
+    solution = Solution.get_or_none(solution_id)
+    if solution is None:
+        return fail(404, f'No such solution {solution_id}')
+
+    solver_id = solution.solver.id
+    if solver_id != current_user.id and not current_user.role.is_manager:
+        return fail(403, "You aren't allowed to access this page.")
+
+    if not SHAREABLE_SOLUTIONS:
+        return fail(404, 'Shareable solutions are not allowed.')
+
+    shared_solution = SharedSolution.get_or_none(
+        SharedSolution.solution == solution,
+    )
+    if shared_solution:
+        return jsonify({
+            'success': 'true',
+            'shared_link': shared_solution.shared_url,
+        })
+
+    return fail(400, 'Not allowed operation.')
 
 
 @webapp.route('/comments', methods=['GET', 'POST'])
@@ -375,9 +415,9 @@ def download(solution_id: int, file_id: Optional[int] = None):
 
     viewer_is_solver = solution.solver.id == current_user.id
     has_viewer_access = current_user.role.is_viewer
-    shareable_solution = solution.is_shareable
+    shareable = solution.is_shared and SHAREABLE_SOLUTIONS
     if (
-        not shareable_solution
+        not shareable
         and not viewer_is_solver
         and not has_viewer_access
     ):
@@ -398,7 +438,8 @@ def download(solution_id: int, file_id: Optional[int] = None):
 @webapp.route(f'{routes.SOLUTIONS}/<int:solution_id>/<int:file_id>')
 @login_required
 def view(
-    solution_id: int, file_id: Optional[int] = None, _shared: bool = False,
+    solution_id: int, file_id: Optional[int] = None,
+    shared: bool = False, shared_url: Optional[str] = None,
 ):
     solution = Solution.get_or_none(Solution.id == solution_id)
     if solution is None:
@@ -406,7 +447,7 @@ def view(
 
     viewer_is_solver = solution.solver.id == current_user.id
     has_viewer_access = current_user.role.is_viewer
-    if not _shared and not viewer_is_solver and not has_viewer_access:
+    if not shared and not viewer_is_solver and not has_viewer_access:
         return fail(403, 'This user has no permissions to view this page.')
 
     versions = solution.ordered_versions()
@@ -434,7 +475,10 @@ def view(
         'role': current_user.role.name.lower(),
         'versions': versions,
         'test_results': test_results,
-        'shared': _shared,
+        'shared': shared,
+        'shareable_solutions': SHAREABLE_SOLUTIONS,
+        'shareable_by_user': solution.is_shared,
+        'shared_url': shared_url,
     }
 
     if is_manager:
@@ -455,20 +499,23 @@ def view(
     return render_template('view.html', **view_params)
 
 
-@webapp.route(f'{routes.SHARED}/<int:solution_id>')
-@webapp.route(f'{routes.SHARED}/<int:solution_id>/<int:file_id>')
+@webapp.route(f'{routes.SHARED}/<string:shared_url>')
+@webapp.route(f'{routes.SHARED}/<string:shared_url>/<int:file_id>')
 @login_required
-def shared_solution(solution_id: int, file_id: Optional[int] = None):
-    solution = Solution.get_or_none(solution_id)
-    if solution is None:
-        return fail(404, 'Solution does not exist.')
+def shared_solution(shared_url: str, file_id: Optional[int] = None):
+    if not SHAREABLE_SOLUTIONS:
+        return fail(404, 'Solutions are not shareable.')
 
-    shareable_solution = solution.is_shareable
-    if not shareable_solution:
-        return fail(403, 'The solution is not shareable.')
+    shared_solution = SharedSolution.get_or_none(
+        SharedSolution.shared_url == shared_url,
+    )
+    if shared_solution is None:
+        return fail(404, 'The solution does not exist.')
 
+    solution_id = shared_solution.solution.id
     return view(
-        solution_id=solution_id, file_id=file_id, _shared=shareable_solution,
+        solution_id=solution_id, file_id=file_id,
+        shared=True, shared_url=shared_solution.shared_url,
     )
 
 

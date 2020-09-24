@@ -2,6 +2,8 @@ const templatedWords = /\$\{(\w+?)\}/g;
 const style = getComputedStyle(document.documentElement);
 const badColor = style.getPropertyValue('--danger');
 const naturalColor = style.getPropertyValue('--secondary');
+const clickedColor = '#007bff'
+const notClickedColor = '#999'
 
 
 
@@ -16,10 +18,11 @@ function escapeUnicode(str) {
 }
 
 
-function shareSolution(solutionId, isShared, element) {
-  element.checked = (isShared == 'True');
-  element.addEventListener('click', () => {
-    const shareButton = document.getElementById('share-solution');
+function shareSolution(solutionId, isShared, sharedByUser, button, getLinkButton) {
+  const element = document.getElementById('share-solution');
+  button.style.display = (isShared == 'True') ? 'block' : 'none';
+  getLinkButton.style.display = (sharedByUser == 'True') ? 'block' : 'none';
+  button.addEventListener('click', () => {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/share');
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -27,11 +30,12 @@ function shareSolution(solutionId, isShared, element) {
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
-          const response = JSON.parse(window.escapeUnicode(xhr.response))
-          if (element.checked) {
-            shareButton.style.display = 'block';
+          if (xhr.response.shared) {
+            element.style['color'] = clickedColor;
+            getLinkButton.style.display = 'block';
           } else {
-            shareButton.style.display = 'none';
+            element.style['color'] = notClickedColor;
+            getLinkButton.style.display = 'none';
           }
         } else {
           console.log(xhr.status);
@@ -61,16 +65,29 @@ function trackCopyCodeButton(button) {
 
 function trackShareButton(button) {
   button.addEventListener('click', () => {
-    const lastColor = button.style['color'];
-    const refLink = window.location.host + '/shared-solution/' + window.location.pathname.split('/')[2];
-    const balloonText = document.getElementById('shared-link-text');
-    navigator.clipboard.writeText(refLink);
-    button.style['color'] = '#007bff';
-    balloonText.style.visibility = 'visible';
-    setTimeout(function() {
-      button.style['color'] = lastColor;
-      balloonText.style.visibility = 'hidden';
-    }, 1000);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/share-link');
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.responseType = 'json';
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+          const balloonText = document.getElementById('shared-link-text');
+          const fullLink = window.location.host + '/shared-solution/' + xhr.response.shared_link;
+          navigator.clipboard.writeText(fullLink);
+          balloonText.style.visibility = 'visible';
+          setTimeout(function() {
+            balloonText.style.visibility = 'hidden';
+          }, 1000);
+        } else {
+          console.log(xhr.status);
+        }
+      }
+    };
+
+    xhr.send(JSON.stringify({
+      solutionId,
+    }));
   });
 }
 
@@ -117,11 +134,13 @@ window.escapeUnicode = escapeUnicode;
 
 window.addEventListener('load', () => {
   const codeElement = document.getElementById('code-view').dataset
+  const getLinkButton = document.getElementById('get-shared-link');
   const solutionId = codeElement.id;
   const shared = codeElement.shared;
+  const sharedByUser = codeElement.user_shared;
   updateNotificationsBadge();
   trackReadAllNotificationsButton(document.getElementById('read-notifications'));
   trackCopyCodeButton(document.getElementById('copy-button'));
-  shareSolution(solutionId, shared, document.getElementById('toggle'));
-  trackShareButton(document.getElementById('solution-link'));
+  shareSolution(solutionId, shared, sharedByUser, document.getElementById('solution-link'), getLinkButton);
+  trackShareButton(getLinkButton);
 });

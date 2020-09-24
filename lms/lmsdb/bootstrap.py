@@ -237,13 +237,6 @@ def _api_keys_migration() -> bool:
     return True
 
 
-def _shareable_migration() -> bool:
-    Solution = models.Solution
-    _add_not_null_column(Solution, Solution.shareable_by_admin, None)
-    _add_not_null_column(Solution, Solution.shareable_by_user, None)
-    return True
-
-
 def main():
     with models.database.connection_context():
         models.database.create_tables(models.ALL_MODELS, safe=True)
@@ -254,7 +247,6 @@ def main():
             models.create_demo_users()
 
     _api_keys_migration()
-    _shareable_migration()  # Only once
     text_fixer.fix_texts()
     import_tests.load_tests_from_path('/app_dir/notebooks-tests')
 

@@ -148,67 +148,32 @@ div#code-view {
   align-items: left;
 }
 
-.toggle-control {
-  display: none;
-}
-
-input.toggle-control + label {
-  position: relative;
-  display: block;
-  width: 2.5em;
-  height: 1.25em;
-  background: #ddd;
-  border-radius: 3.75em;
-  cursor: pointer;
-  outline: none;
-  user-select: none;
-  margin-top: .125em;
-}
-
-input.toggle-control + label::before, input.toggle-control + label::after {
-  display: block;
-  position: absolute;
-  top: .0625em;
-  left: .0625em;
-  bottom: .0625em;
-  right: .0625em;
-  content: '';
-  transition: all 0.2s;
-}
-
-input.toggle-control + label::before {
-  background: #f1f1f1;
-  border-radius: 3.75em;
-}
-
-input.toggle-control + label::after {
-  width: 1.125em;
-  background: #fff;
-  border-radius: 100%;
-  box-shadow: 0 .125em .3125em rgba(0, 0, 0, 0.3);
-}
-
-input.toggle-control:checked + label:before {
-  background: #007bff;
-}
-
-input.toggle-control:checked + label::after {
-  margin-right: 1.25em;
-}
-
 .share-button {
-  display: none;
   position: relative;
-  top: -1.85em;
-  left: 2em;
+  color: #999;
+}
+
+.shared {
+  color: #007bff;
+}
+
+#solution-link {
+  position: relative;
+  right: .5em; /* will be changed in the toolbar */
 }
 
 #solution-link:hover {
   color: #f5f2f0;
 }
 
-.shared {
-  display: block;
+#get-shared-link {
+  position: absolute;
+  left: .5em; /* will be changed in the toolbar */
+  top: 0;
+}
+
+#get-shared-link:hover {
+  color: #f5f2f0;
 }
 
 #shared-link-text {
@@ -218,7 +183,8 @@ input.toggle-control:checked + label::after {
   text-align: center;
   border-radius: .375em;
   position: absolute;
-  margin-right: -6.5em;
+  left: 2.5em;
+  top: 0;
   z-index: 1;
 }
 

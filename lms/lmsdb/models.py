@@ -3,6 +3,7 @@ import enum
 import secrets
 import string
 from datetime import datetime
+import random
 from typing import (
     Any, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple,
     Type, Union, cast,
@@ -313,8 +314,6 @@ class Solution(BaseModel):
     )
     submission_timestamp = DateTimeField(index=True)
     hashed = TextField()
-    shareable_by_admin = BooleanField(default=False)
-    shareable_by_user = BooleanField(default=False)
 
     @property
     def solution_files(
@@ -323,23 +322,12 @@ class Solution(BaseModel):
         return SolutionFile.filter(SolutionFile.solution == self)
 
     @property
-    def is_checked(self):
-        return self.state == self.STATES.DONE.name
+    def is_shared(self):
+        return bool(SharedSolution.filter(SharedSolution.solution == self))
 
     @property
-    def is_shareable(self):
-        return (
-            self.shareable_by_admin
-            and self.shareable_by_user
-        )
-
-    def change_admin_share(self):
-        self.shareable_by_admin = not self.shareable_by_admin
-        return bool(self.save())
-
-    def change_user_share(self):
-        self.shareable_by_user = not self.shareable_by_user
-        return bool(self.save())
+    def is_checked(self):
+        return self.state == self.STATES.DONE.name
 
     @staticmethod
     def create_hash(content: Union[str, bytes], *args, **kwargs) -> str:
@@ -575,6 +563,21 @@ class SolutionFile(BaseModel):
     def suffix(self) -> str:
         filename, _, ext = self.path.rpartition('.')
         return ext if filename else ''
+
+
+class SharedSolution(BaseModel):
+    shared_url = TextField(unique=True)
+    solution = ForeignKeyField(Solution, backref='sharedsolutions')
+
+    @classmethod
+    def create_shared_solution(
+        cls, solution: Solution,
+    ) -> str:
+        new_url = ''.join(random.choices(
+            string.digits + string.ascii_letters, k=10,
+        ))
+        cls.get_or_create(shared_url=new_url, solution=solution)
+        return new_url
 
 
 class ExerciseTest(BaseModel):

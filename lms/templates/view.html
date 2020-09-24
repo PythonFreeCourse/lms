@@ -29,14 +29,13 @@
       {% endfor -%}
       </ul>
     </nav>
-    {% if solution['shareable_by_admin'] %}
+    {% if shareable_solutions %}
     <div class={{ direction }}>
       <strong>{{ _('שיתוף תרגיל') }}:</strong>
     </div>
-    <input id="toggle" class="toggle-control" type="checkbox">
-    <label for="toggle"></label>
-    <div id="share-solution" class="share-button{% if solution['shareable_by_user'] %} shared{% endif %}">
-      <span id="solution-link"><i class="fa fa-share-alt"></i></span>
+    <div id="share-solution" class="share-button{%- if shareable_by_user %} shared{% endif -%}">
+      <span id="solution-link"><i class="fa fa-share-alt" title="Enable or disable solution share"></i></span>
+      <span id="get-shared-link"><i class="fa fa-cloud" title="Copy solution shared link"></i></span>
       <span id="shared-link-text">Link copied</span>
     </div>
     {% endif -%}
@@ -51,7 +50,7 @@
   </div>
   <div id="view-body">
     <div class="code-view-container">
-      <div id="code-view" data-id="{{ solution['id'] }}" data-file="{{ current_file.id }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}" data-shared="{{ solution['shareable_by_user'] }}">
+      <div id="code-view" data-id="{{ solution['id'] }}" data-file="{{ current_file.id }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}" data-shared="{{ shareable_solutions }}" data-user_shared="{{ shareable_by_user }}">
         <pre><code id="user-code" class="language-{{ current_file | language_name }} line-numbers highlight">{{- current_file.code | trim(chars=' ') | e -}}</code></pre>
       </div>
       <div id="copy-code">

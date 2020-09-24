@@ -1,10 +1,8 @@
 from unittest import mock
 
-import pytest
-
-from lms.lmsdb.models import Comment, Exercise, Solution, User
+from lms.lmsdb.models import Comment, Exercise, SharedSolution, Solution, User
 from lms.lmstests.public.general import tasks as general_tasks
-from lms.lmsweb import webapp
+from lms.lmsweb import routes
 from lms.models import notifications, solutions
 from lms.tests import conftest
 
@@ -189,7 +187,6 @@ class TestSolutionBridge:
                 assert the_solution.state == Solution.STATES.IN_CHECKING.name
 
     @staticmethod
-    @pytest.mark.skip('Should run with docker system access')
     def test_share_solution(
         exercise: Exercise,
         student_user: User,
@@ -197,18 +194,13 @@ class TestSolutionBridge:
         student_user2 = conftest.create_student_user(index=1)
         solution = conftest.create_solution(exercise, student_user2)
 
-        client = webapp.test_client()
-        client.post(
-            '/login',
-            data=dict(  # noqa: S106
-                username=student_user.username,
-                password='fake pass',
-            ),
-            follow_redirects=True,
+        client = conftest.get_logged_user(student_user.username)
+        shared_url = conftest.create_shared_solution(solution)
+        shared_solution = SharedSolution.get_or_none(
+            SharedSolution.shared_url == shared_url,
         )
-        before_share_response = client.get('/shared-solution/1')
-        assert before_share_response.status_code != 200
-        solution.change_admin_share()
-        solution.change_user_share()
-        after_share_response = client.get('/shared-solution/1')
-        assert after_share_response.status_code == 200
+        shared_response = client.get(f'{routes.SHARED}/{shared_url}')
+        assert shared_response.status_code == 200
+        shared_solution.delete_instance()
+        delete_shared_response = client.get(f'{routes.SHARED}/{shared_url}')
+        assert delete_shared_response.status_code != 200
