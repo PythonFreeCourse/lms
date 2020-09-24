@@ -51,6 +51,8 @@ def db(db_in_memory):
 def celery_eager():
     public_app.conf.update(task_always_eager=True)
     sandbox_app.conf.update(task_always_eager=True)
+    public_app.conf.update(SHAREABLE_SOLUTIONS=True)
+    sandbox_app.conf.update(SHAREABLE_SOLUTIONS=True)
 
 
 def get_logged_user(username: str) -> FlaskClient:
