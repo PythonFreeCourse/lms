@@ -135,7 +135,7 @@ def logout():
 @webapp.route('/favicon.ico')
 def favicon():
     return send_from_directory(
-        os.path.join(webapp.root_path, 'static'),
+        os.path.join(webapp.static_folder),
         'favicon.ico',
         mimetype='image/vnd.microsoft.icon',
     )
