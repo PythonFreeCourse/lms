@@ -89,24 +89,43 @@ function pullComments(fileId, callback) {
 }
 
 
-function countOpenedSpans(line) {
-  const spansOpenCount = (line.match(/\<span/g) || []).length;
-  const spansCloseCount = (line.match(/\<\/span\>/g) || []).length;
-  return spansOpenCount - spansCloseCount;
+function updateOpenedSpans(currentSpans, line) {
+  /* Because we have each line wrapped in it's own span, we must close
+   * all the opened spans in this specific line and re-open them in the next
+   * line. This function help us to manage the state of open span tags.
+   */
+  let isCatching = false;
+  let phrase = '';
+  for (const c of line) {
+    if (c === '>') {
+      isCatching = false;
+      phrase = `<${phrase}>`;
+      if (phrase === '</span>') {
+        currentSpans.pop();
+      } else if (phrase.startsWith('<span')) {
+        currentSpans.push(phrase);
+      }
+      phrase = '';
+    } else if (c === '<') {
+      isCatching = true;
+    } else if (isCatching) {
+      phrase += c;
+    }
+  }
 }
 
 
 function addLineSpansToPre(items) {
-  let spansOpened = 0;
+  let openSpans = [];
   Array.from(items).forEach((item) => {
     const code = item.innerHTML.trim().split('\n');
     item.innerHTML = code.map(
       (line, i) => {
-        const optionalOpening = (spansOpened === 0) ? `<span data-line="${i + 1}" class="line">` : '';
-        spansOpened += countOpenedSpans(line);
-        const optionalClosing = (spansOpened === 0) ? '</span>' : '';
-        const newLine = `${optionalOpening}${line}${optionalClosing}`;
-        return newLine;
+        let lineContent = openSpans.join('') + line;
+        updateOpenedSpans(openSpans, line);
+        lineContent += '</span>'.repeat(openSpans.length);
+        const wrappedLine = `<span data-line="${i + 1}" class="line">${lineContent}</span>`;
+        return wrappedLine;
       }
     ).join('\n');
   });
