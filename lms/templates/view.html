@@ -22,7 +22,7 @@
       {%- for version in versions %}
         {% set current = version['id'] == solution['id'] %}
         <li class="page-item version{% if current %} active{% endif %}"{% if current %} aria-current="page"{% endif %}>
-          <a href="{{ version['id'] }}" class="version page-link">{{ loop.index }}</a>
+          <a href="{{ url_for('view', solution_id=version['id']) }}" class="version page-link">{{ loop.index }}</a>
           {%- if current %}<span class="sr-only">(current)</span>{% endif -%}
         </li>
       {% endfor -%}
