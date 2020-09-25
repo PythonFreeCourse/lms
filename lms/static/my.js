@@ -74,3 +74,15 @@ window.addEventListener('load', () => {
   trackReadAllNotificationsButton(document.getElementById('read-notifications'));
   trackCopyCodeButton(document.getElementById('copy-button'));
 });
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker
+    .register('./sw.js')
+    .then(function (registration) {
+      console.log('Service Worker Registered!');
+      return registration;
+    })
+    .catch(function (err) {
+      console.error('Unable to register service worker.', err);
+    });
+}
