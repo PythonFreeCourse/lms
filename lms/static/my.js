@@ -75,9 +75,9 @@ function trackShareButton(button) {
           const balloonText = document.getElementById('shared-link-text');
           const fullLink = window.location.host + '/shared-solution/' + xhr.response.shared_link;
           navigator.clipboard.writeText(fullLink);
-          balloonText.style.visibility = 'visible';
+          balloonText.style.display = 'block';
           setTimeout(function() {
-            balloonText.style.visibility = 'hidden';
+            balloonText.style.display = 'none';
           }, 1000);
         } else {
           console.log(xhr.status);
@@ -137,7 +137,7 @@ window.addEventListener('load', () => {
   const getLinkButton = document.getElementById('get-shared-link');
   const solutionId = codeElement.id;
   const shared = codeElement.shared;
-  const sharedByUser = codeElement.user_shared;
+  const sharedByUser = codeElement.userShared;
   updateNotificationsBadge();
   trackReadAllNotificationsButton(document.getElementById('read-notifications'));
   trackCopyCodeButton(document.getElementById('copy-button'));

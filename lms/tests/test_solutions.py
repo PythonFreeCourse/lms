@@ -1,5 +1,7 @@
 from unittest import mock
 
+from flask import json
+
 from lms.lmsdb.models import Comment, Exercise, SharedSolution, Solution, User
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmsweb import routes
@@ -195,6 +197,10 @@ class TestSolutionBridge:
         solution = conftest.create_solution(exercise, student_user2)
 
         client = conftest.get_logged_user(student_user.username)
+        another_share_response = client.post('/share', data=json.dumps(dict(
+            solutionId=solution.id,
+        )), content_type='application/json')
+        assert another_share_response.status_code == 403
         shared_url = conftest.create_shared_solution(solution)
         shared_solution = SharedSolution.get_or_none(
             SharedSolution.shared_url == shared_url,

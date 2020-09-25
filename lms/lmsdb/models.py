@@ -3,7 +3,6 @@ import enum
 import secrets
 import string
 from datetime import datetime
-import random
 from typing import (
     Any, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple,
     Type, Union, cast,
@@ -323,7 +322,7 @@ class Solution(BaseModel):
 
     @property
     def is_shared(self):
-        return bool(SharedSolution.filter(SharedSolution.solution == self))
+        return bool(self.sharedsolution)
 
     @property
     def is_checked(self):
@@ -566,16 +565,16 @@ class SolutionFile(BaseModel):
 
 
 class SharedSolution(BaseModel):
-    shared_url = TextField(unique=True)
-    solution = ForeignKeyField(Solution, backref='sharedsolutions')
+    shared_url = TextField(primary_key=True, unique=True)
+    solution = ForeignKeyField(Solution, backref='sharedsolution')
 
     @classmethod
     def create_shared_solution(
         cls, solution: Solution,
     ) -> str:
-        new_url = ''.join(random.choices(
-            string.digits + string.ascii_letters, k=10,
-        ))
+        new_url = generate_password(min_len=10, max_len=11)
+        while new_url.startswith(string.punctuation):
+            new_url = generate_password(min_len=10, max_len=11)
         cls.get_or_create(shared_url=new_url, solution=solution)
         return new_url
 

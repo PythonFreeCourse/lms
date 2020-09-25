@@ -5,7 +5,7 @@ from urllib.parse import urljoin, urlparse
 
 import arrow  # type: ignore
 from flask import (
-    abort, jsonify, make_response, render_template,
+    jsonify, make_response, render_template,
     request, send_from_directory, url_for,
 )
 from flask_admin import Admin, AdminIndexView  # type: ignore
@@ -24,8 +24,8 @@ from lms.lmsdb.models import (
 )
 from lms.lmsweb import babel, routes, webapp
 from lms.lmsweb.config import LANGUAGES, LOCALE, SHAREABLE_SOLUTIONS
-from lms.models import notifications, solutions, upload
-from lms.models.errors import AlreadyExists, BadUploadFile
+from lms.models import notifications, share_link, solutions, upload
+from lms.models.errors import AlreadyExists, BadUploadFile, fail
 from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import get_language_name_by_extension
 from lms.utils.log import log
@@ -85,16 +85,6 @@ def managers_only(func):
             return func(*args, **kwargs)
 
     return wrapper
-
-
-def fail(status_code: int, error_msg: str):
-    data = {
-        'status': 'failed',
-        'msg': error_msg,
-    }
-    response = jsonify(data)
-    response.status_code = status_code
-    return abort(response)
 
 
 def is_safe_url(target):
@@ -240,20 +230,7 @@ def read_all_notification():
 @login_required
 def share():
     solution_id = int(request.json.get('solutionId', 0))
-    solution = Solution.get_or_none(solution_id)
-    if solution is None:
-        return fail(404, f'No such solution {solution_id}')
-
-    solver_id = solution.solver.id
-    if solver_id != current_user.id and not current_user.role.is_manager:
-        return fail(403, "You aren't allowed to access this page.")
-
-    if not SHAREABLE_SOLUTIONS:
-        return fail(404, 'Shareable solutions are not allowed.')
-
-    shared_solution = SharedSolution.get_or_none(
-        SharedSolution.solution == solution,
-    )
+    solution, shared_solution = share_link.solution_and_shared(solution_id)
     if shared_solution is None:
         SharedSolution.create_shared_solution(
             solution=solution,
@@ -273,22 +250,9 @@ def share():
 
 @webapp.route('/share-link', methods=['POST'])
 @login_required
-def share_link():
+def get_share_link():
     solution_id = int(request.json.get('solutionId', 0))
-    solution = Solution.get_or_none(solution_id)
-    if solution is None:
-        return fail(404, f'No such solution {solution_id}')
-
-    solver_id = solution.solver.id
-    if solver_id != current_user.id and not current_user.role.is_manager:
-        return fail(403, "You aren't allowed to access this page.")
-
-    if not SHAREABLE_SOLUTIONS:
-        return fail(404, 'Shareable solutions are not allowed.')
-
-    shared_solution = SharedSolution.get_or_none(
-        SharedSolution.solution == solution,
-    )
+    _, shared_solution = share_link.solution_and_shared(solution_id)
     if shared_solution:
         return jsonify({
             'success': 'true',
@@ -416,11 +380,7 @@ def download(solution_id: int, file_id: Optional[int] = None):
     viewer_is_solver = solution.solver.id == current_user.id
     has_viewer_access = current_user.role.is_viewer
     shareable = solution.is_shared and SHAREABLE_SOLUTIONS
-    if (
-        not shareable
-        and not viewer_is_solver
-        and not has_viewer_access
-    ):
+    if not shareable and not viewer_is_solver and not has_viewer_access:
         return fail(403, 'This user has no permissions to view this page.')
 
     response = make_response(
@@ -438,8 +398,7 @@ def download(solution_id: int, file_id: Optional[int] = None):
 @webapp.route(f'{routes.SOLUTIONS}/<int:solution_id>/<int:file_id>')
 @login_required
 def view(
-    solution_id: int, file_id: Optional[int] = None,
-    shared: bool = False, shared_url: Optional[str] = None,
+    solution_id: int, file_id: Optional[int] = None, is_shared: bool = False,
 ):
     solution = Solution.get_or_none(Solution.id == solution_id)
     if solution is None:
@@ -447,7 +406,7 @@ def view(
 
     viewer_is_solver = solution.solver.id == current_user.id
     has_viewer_access = current_user.role.is_viewer
-    if not shared and not viewer_is_solver and not has_viewer_access:
+    if not is_shared and not viewer_is_solver and not has_viewer_access:
         return fail(403, 'This user has no permissions to view this page.')
 
     versions = solution.ordered_versions()
@@ -475,11 +434,15 @@ def view(
         'role': current_user.role.name.lower(),
         'versions': versions,
         'test_results': test_results,
-        'shared': shared,
-        'shareable_solutions': SHAREABLE_SOLUTIONS,
-        'shareable_by_user': solution.is_shared,
-        'shared_url': shared_url,
+        'is_shared': is_shared,
     }
+
+    if solution.is_shared:
+        view_params = {
+            **view_params,
+            'shareable_by_user': solution.is_shared,
+            'shared_url': solution.sharedsolution[0],
+        }
 
     if is_manager:
         view_params = {
@@ -513,10 +476,7 @@ def shared_solution(shared_url: str, file_id: Optional[int] = None):
         return fail(404, 'The solution does not exist.')
 
     solution_id = shared_solution.solution.id
-    return view(
-        solution_id=solution_id, file_id=file_id,
-        shared=True, shared_url=shared_solution.shared_url,
-    )
+    return view(solution_id=solution_id, file_id=file_id, is_shared=True)
 
 
 @webapp.route('/checked/<int:exercise_id>/<int:solution_id>', methods=['POST'])

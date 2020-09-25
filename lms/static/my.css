@@ -177,7 +177,7 @@ div#code-view {
 }
 
 #shared-link-text {
-  visibility: hidden;
+  display: none;
   background-color: black;
   color: #fff;
   text-align: center;
