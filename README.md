@@ -88,12 +88,6 @@ After logging in, use [localhost admin](https://127.0.0.1:8080/admin) to modify 
 flake8 lms
 ```
 ### Run tests
-Running tests inside the docker container:
-```
-docker exec -it lms_http_1 bash
-py.test -vvv
-```
-Running tests without docker require full dependencies installation:
 ```
 export PYTHONPATH=`pwd`
 pip install -r requirements.txt
