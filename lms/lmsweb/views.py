@@ -139,6 +139,23 @@ def favicon():
         'favicon.ico',
         mimetype='image/vnd.microsoft.icon',
     )
+    
+@webapp.route('/manifest.json')
+def manifest():
+    return send_from_directory(
+        os.path.join(webapp.static_folder),
+        'manifest.json',
+        mimetype='application/json',
+    )
+
+@webapp.route('/sw.js')
+def serviceWorker():
+    response = make_response(send_from_directory(
+        os.path.join(webapp.static_folder),
+        'sw.js'
+    ))
+    response.headers['Cache-Control'] = 'no-cache'
+    return response
 
 
 @webapp.before_request
