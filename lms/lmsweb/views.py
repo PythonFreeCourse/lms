@@ -386,7 +386,7 @@ def download(solution_id: int, file_id: Optional[int] = None):
     response = make_response(
         solutions.create_zip_from_solution(solution.files),
     )
-    response.headers.set('Content Type', 'zip')
+    response.headers.set('Content-Type', 'zip')
     response.headers.set(
         'Content-Disposition', 'attachment',
         filename=f'{solution.exercise.subject}.zip',

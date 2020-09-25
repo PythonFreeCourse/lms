@@ -405,7 +405,6 @@ i.fa {
   direction: ltr;
   text-align: left;
   height: min-content;
-  display: flex;
   flex-grow: 1;
   flex-basis: min(75vw, -moz-available);
   overflow-x: hidden;
