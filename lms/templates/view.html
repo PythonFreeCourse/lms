@@ -33,10 +33,15 @@
     <div class={{ direction }}>
       <strong>{{ _('שיתוף תרגיל') }}:</strong>
     </div>
-    <div id="share-solution" class="share-button{%- if shareable_by_user %} shared{% endif -%}">
-      <span id="solution-link"><i class="fa fa-share-alt" title="Enable or disable solution share"></i></span>
-      <span id="get-shared-link"><i class="fa fa-cloud" title="Copy solution shared link"></i></span>
-      <span id="shared-link-text">Link copied</span>
+    <div id="share-solution" class="share-function">
+      <span id="solution-link" title="Share solution"><i class="fa fa-share-alt"></i></span>
+      <div id="share-content-box">
+        <div id="share-box-input">
+          <span id="cancel-share" title="Disable share solution"><i class="fa fa-trash"></i></span>
+          <span id="copy-link" title="Copy shared link"><i class="fa fa-copy"></i></span>
+          <input type="text" id="link-input" readonly>
+        </div>
+      </div>
     </div>
     {% endif -%}
     {% if is_manager and not is_shared %}
@@ -50,7 +55,7 @@
   </div>
   <div id="view-body">
     <div class="code-view-container">
-      <div id="code-view" data-id="{{ solution['id'] }}" data-file="{{ current_file.id }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}" data-shared="{{ config.SHAREABLE_SOLUTIONS }}" data-user-shared="{{ shareable_by_user }}">
+      <div id="code-view" data-id="{{ solution['id'] }}" data-file="{{ current_file.id }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}" data-shared="{{ config.SHAREABLE_SOLUTIONS }}">
         <pre><code id="user-code" class="language-{{ current_file | language_name }} line-numbers highlight">{{- current_file.code | trim(chars=' ') | e -}}</code></pre>
       </div>
       <div id="copy-code">

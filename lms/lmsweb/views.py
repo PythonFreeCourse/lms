@@ -229,37 +229,31 @@ def read_all_notification():
 @webapp.route('/share', methods=['POST'])
 @login_required
 def share():
+    act = request.json.get('act')
     solution_id = int(request.json.get('solutionId', 0))
-    solution, shared_solution = share_link.solution_and_shared(solution_id)
-    if shared_solution is None:
-        SharedSolution.create_shared_solution(
-            solution=solution,
-        )
-        return jsonify({
-            'success': 'true',
-            'shared': True,
-        })
+    solution, shared_solution = share_link.get(solution_id)
 
-    shared_solution.delete_instance()
-
-    return jsonify({
-        'success': 'true',
-        'shared': False,
-    })
-
-
-@webapp.route('/share-link', methods=['POST'])
-@login_required
-def get_share_link():
-    solution_id = int(request.json.get('solutionId', 0))
-    _, shared_solution = share_link.solution_and_shared(solution_id)
-    if shared_solution:
+    if act == 'get':
+        if shared_solution is None:
+            shared_url = SharedSolution.create_shared_solution(
+                solution=solution,
+            )
+            return jsonify({
+                'success': 'true',
+                'shared_link': shared_url,
+            })
         return jsonify({
             'success': 'true',
             'shared_link': shared_solution.shared_url,
         })
+    if act == 'delete':
+        shared_solution.delete_instance()
+        return jsonify({
+            'success': 'true',
+            'shared_link': 'false',
+        })
 
-    return fail(400, 'Not allowed operation.')
+    return fail(400, f'Unknown or unset act value "{act}"')
 
 
 @webapp.route('/comments', methods=['GET', 'POST'])
@@ -440,7 +434,6 @@ def view(
     if solution.is_shared:
         view_params = {
             **view_params,
-            'shareable_by_user': solution.is_shared,
             'shared_url': solution.sharedsolution[0],
         }
 

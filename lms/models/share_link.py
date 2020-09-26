@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from flask_login import current_user
 
 from lms.lmsdb.models import SharedSolution, Solution
@@ -5,7 +7,7 @@ from lms.lmsweb.config import SHAREABLE_SOLUTIONS
 from lms.models.errors import fail
 
 
-def solution_and_shared(solution_id):
+def get(solution_id: int) -> Tuple[Solution, SharedSolution]:
     solution = Solution.get_or_none(solution_id)
     if solution is None:
         return fail(404, f'No such solution {solution_id}')

@@ -148,46 +148,62 @@ div#code-view {
   align-items: left;
 }
 
-.share-button {
+#solution-link {
   position: relative;
   color: #999;
 }
 
-.shared {
+#solution-link:hover {
   color: #007bff;
 }
 
-#solution-link {
-  position: relative;
-  right: .5em; /* will be changed in the toolbar */
-}
-
-#solution-link:hover {
-  color: #f5f2f0;
-}
-
-#get-shared-link {
-  position: absolute;
-  left: .5em; /* will be changed in the toolbar */
-  top: 0;
-}
-
-#get-shared-link:hover {
-  color: #f5f2f0;
-}
-
-#shared-link-text {
+#share-content-box {
   display: none;
-  background-color: black;
-  color: #fff;
-  text-align: center;
-  border-radius: .375em;
-  position: absolute;
-  left: 2.5em;
-  top: 0;
-  z-index: 1;
 }
 
+#share-box-input {
+  position: absolute;
+  display: table;
+  border: 1px solid #e1e4e8;
+  border-radius: 0.375em;
+  margin-right: -7.5em;
+}
+
+#copy-link, #cancel-share {
+  position: relative;
+  display: table-cell;
+  background-color: #fafbfc;
+  color: #24292e;
+  border: 1px solid;
+  border-radius: 0.25em;
+  border-color: rgba(27,31,35,.15);
+}
+
+#copy-link {
+  border-radius: 0;
+}
+
+#cancel-share {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+#cancel-share:hover {
+  color: #007bff;
+}
+
+#link-input {
+  position: relative;
+  display: table-cell;
+  background-color: #fafbfc;
+  color: #24292e;
+  min-height: 2em;
+  border: 1px solid;
+  border-radius: 0.25em;
+  border-color: rgba(27,31,35,.15);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
 
 .go-send {
   background: #247ba0;
@@ -277,6 +293,14 @@ i.fa {
 
 #solution-link i.fa {
   margin-left: 0;
+}
+
+#copy-link i.fa {
+  margin: 0.4em;
+}
+
+#cancel-share i.fa {
+  margin: 0.4em;
 }
 
 #filetree {

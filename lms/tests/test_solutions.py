@@ -189,7 +189,7 @@ class TestSolutionBridge:
                 assert the_solution.state == Solution.STATES.IN_CHECKING.name
 
     @staticmethod
-    def test_share_solution(
+    def test_share_solution_by_another_user(
         exercise: Exercise,
         student_user: User,
     ):
@@ -197,16 +197,59 @@ class TestSolutionBridge:
         solution = conftest.create_solution(exercise, student_user2)
 
         client = conftest.get_logged_user(student_user.username)
-        another_share_response = client.post('/share', data=json.dumps(dict(
-            solutionId=solution.id,
+
+        not_exist_share_response = client.post('/share', data=json.dumps(dict(
+            solutionId=solution.id + 1, act='get',
         )), content_type='application/json')
-        assert another_share_response.status_code == 403
-        shared_url = conftest.create_shared_solution(solution)
-        shared_solution = SharedSolution.get_or_none(
-            SharedSolution.shared_url == shared_url,
+        assert not_exist_share_response.status_code == 404
+
+        not_user_solution_share_response = client.post(
+            '/share', data=json.dumps(dict(
+                solutionId=solution.id, act='get',
+            )), content_type='application/json',
         )
+        assert not_user_solution_share_response.status_code == 403
+
+    @staticmethod
+    def test_share_solution_function(
+        exercise: Exercise,
+        student_user: User,
+    ):
+        student_user2 = conftest.create_student_user(index=1)
+        solution = conftest.create_solution(exercise, student_user2)
+
+        client2 = conftest.get_logged_user(student_user2.username)
+
+        shared_response = client2.post('/share', data=json.dumps(dict(
+            solutionId=solution.id, act='get',
+        )), content_type='application/json')
+        assert shared_response.status_code == 200
+
+        shared_url = SharedSolution.get_or_none(
+            SharedSolution.solution == solution,
+        )
+        conftest.logout_user(client2)
+        client = conftest.get_logged_user(student_user.username)
         shared_response = client.get(f'{routes.SHARED}/{shared_url}')
         assert shared_response.status_code == 200
-        shared_solution.delete_instance()
-        delete_shared_response = client.get(f'{routes.SHARED}/{shared_url}')
-        assert delete_shared_response.status_code != 200
+
+        delete_not_user_solution_response = client.post(
+            '/share', data=json.dumps(dict(
+                solutionId=solution.id, act='delete',
+            )), content_type='application/json',
+        )
+        assert delete_not_user_solution_response.status_code == 403
+
+        conftest.logout_user(client)
+        client2 = conftest.get_logged_user(student_user2.username)
+        delete_share_response = client2.post('/share', data=json.dumps(dict(
+            solutionId=solution.id, act='delete',
+        )), content_type='application/json')
+        assert delete_share_response.status_code == 200
+
+        conftest.logout_user(client2)
+        client = conftest.get_logged_user(student_user.username)
+        not_shared_solution_response = client.get(
+            f'{routes.SHARED}/{shared_url}',
+        )
+        assert not_shared_solution_response.status_code == 404

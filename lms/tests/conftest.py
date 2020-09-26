@@ -70,6 +70,10 @@ def get_logged_user(username: str) -> FlaskClient:
     return client
 
 
+def logout_user(client: FlaskClient) -> None:
+    client.post('/logout', follow_redirects=True)
+
+
 def create_user(
         role_name: str = RoleOptions.STUDENT.value,
         index: int = 1,

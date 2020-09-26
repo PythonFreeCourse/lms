@@ -22,6 +22,7 @@ from werkzeug.security import (
 from lms.lmsdb import database_config
 from lms.models.errors import AlreadyExists
 from lms.utils import hashing
+from lms.utils.log import log
 
 
 database = database_config.get_db_instance()
@@ -132,7 +133,7 @@ class User(UserMixin, BaseModel):
     @classmethod
     def random_password(cls, stronger=False) -> str:
         length_params = {'min_len': 40, 'max_len': 41} if stronger else {}
-        return generate_password(**length_params)
+        return generate_string(**length_params)
 
     def get_notifications(self) -> Iterable['Notification']:
         return Notification.fetch(self)
@@ -572,9 +573,21 @@ class SharedSolution(BaseModel):
     def create_shared_solution(
         cls, solution: Solution,
     ) -> str:
-        new_url = generate_password(min_len=10, max_len=11)
-        while new_url.startswith(string.punctuation):
-            new_url = generate_password(min_len=10, max_len=11)
+        new_url = generate_string(
+            min_len=10, max_len=11, allow_punctuation=False,
+        )
+        exists = cls.get_or_none(cls.shared_url == new_url)
+        while exists is not None:
+            if exists:
+                log.debug(
+                    f'Collision with creating link to {solution.id} solution ',
+                    ', trying again.',
+                )
+            new_url = generate_string(
+                min_len=10, max_len=11, allow_punctuation=False,
+            )
+            exists = cls.get_or_none(cls.shared_url == new_url)
+
         cls.get_or_create(shared_url=new_url, solution=solution)
         return new_url
 
@@ -761,10 +774,17 @@ class Comment(BaseModel):
         return tuple(cls._by_file(file_id).dicts())
 
 
-def generate_password(min_len=9, max_len=16):
+def generate_string(
+    min_len: int = 9, max_len: int = 16, allow_punctuation: bool = True,
+) -> str:
     randomizer = secrets.SystemRandom()
     length = randomizer.randrange(min_len, max_len)
-    password = randomizer.choices(string.printable[:66], k=length)
+    if allow_punctuation:
+        password = randomizer.choices(string.printable[:66], k=length)
+    else:
+        password = randomizer.choices(
+            string.ascii_letters + string.digits, k=length,
+        )
     return ''.join(password)
 
 
