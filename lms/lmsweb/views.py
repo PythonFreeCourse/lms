@@ -363,27 +363,34 @@ def upload_page():
     })
 
 
-@webapp.route(f'{routes.DOWNLOADS}/<int:solution_id>')
-@webapp.route(f'{routes.DOWNLOADS}/<int:solution_id>/<int:file_id>')
+@webapp.route(f'{routes.DOWNLOADS}/<string:endpoint>')
 @login_required
-def download(solution_id: int, file_id: Optional[int] = None):
-    solution = Solution.get_or_none(solution_id)
-    if solution is None:
+def download(endpoint: str):
+    solution = Solution.get_or_none(Solution.id == endpoint)
+    shared_solution = SharedSolution.get_or_none(
+        SharedSolution.shared_url == endpoint,
+    )
+    if solution is None and shared_solution is None:
         return fail(404, 'Solution does not exist.')
 
-    viewer_is_solver = solution.solver.id == current_user.id
-    has_viewer_access = current_user.role.is_viewer
-    shareable = solution.is_shared and SHAREABLE_SOLUTIONS
-    if not shareable and not viewer_is_solver and not has_viewer_access:
-        return fail(403, 'This user has no permissions to view this page.')
+    if shared_solution is None:
+        viewer_is_solver = solution.solver.id == current_user.id
+        has_viewer_access = current_user.role.is_viewer
+        if not viewer_is_solver and not has_viewer_access:
+            return fail(403, 'This user has no permissions to view this page.')
 
-    response = make_response(
-        solutions.create_zip_from_solution(solution.files),
-    )
+    if solution is not None:
+        files = solution.files
+        filename = solution.exercise.subject
+    else:
+        files = shared_solution.solution.files
+        filename = shared_solution.solution.exercise.subject
+
+    response = make_response(solutions.create_zip_from_solution(files))
     response.headers.set('Content-Type', 'zip')
     response.headers.set(
         'Content-Disposition', 'attachment',
-        filename=f'{solution.exercise.subject}.zip',
+        filename=f'{filename}.zip',
     )
     return response
 

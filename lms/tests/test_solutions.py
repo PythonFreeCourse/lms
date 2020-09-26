@@ -233,6 +233,14 @@ class TestSolutionBridge:
         shared_response = client.get(f'{routes.SHARED}/{shared_url}')
         assert shared_response.status_code == 200
 
+        solution_id_download_response = client.get(
+            f'{routes.DOWNLOADS}/{solution.id}',
+        )
+        assert solution_id_download_response.status_code == 403
+
+        download_response = client.get(f'{routes.DOWNLOADS}/{shared_url}')
+        assert download_response.status_code == 200
+
         delete_not_user_solution_response = client.post(
             '/share', data=json.dumps(dict(
                 solutionId=solution.id, act='delete',

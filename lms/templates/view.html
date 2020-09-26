@@ -124,7 +124,7 @@
       {% include 'filetree.html' %}
     {% endif -%}
   </div>
-  <a id="download-solution" href="/download/{{ solution['id'] }}" class="{{ direction }}">
+  <a id="download-solution" href="/download/{% if is_shared %}{{ shared_url }}{% else %}{{ solution['id'] }}{% endif %}" class="{{ direction }}">
     <button class="btn btn-primary btn-sm btn-block">
       <i class="fa fa-download"></i> {{ _('הורד פתרון') }}
     </button>
