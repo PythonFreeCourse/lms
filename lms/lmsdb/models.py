@@ -578,11 +578,10 @@ class SharedSolution(BaseModel):
         )
         exists = cls.get_or_none(cls.shared_url == new_url)
         while exists is not None:
-            if exists:
-                log.debug(
-                    f'Collision with creating link to {solution.id} solution ',
-                    ', trying again.',
-                )
+            log.debug(
+                f'Collision with creating link to {solution.id} solution ',
+                ', trying again.',
+            )
             new_url = generate_string(
                 min_len=10, max_len=11, allow_punctuation=False,
             )
