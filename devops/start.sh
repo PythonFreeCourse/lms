@@ -12,5 +12,10 @@ SCRIPT_FILE_PATH=$(readlink -f "${0}")
 SCRIPT_FOLDER=$(dirname "${SCRIPT_FILE_PATH}")
 
 docker network create lms
-docker-compose -p lms -f "${SCRIPT_FOLDER}/lms.yaml" down
-docker-compose -p lms -f "${SCRIPT_FOLDER}/lms.yaml" up -d
+if [[ -z "${FLASK_DEBUG}" ]]; then
+  docker-compose -p lms -f "${SCRIPT_FOLDER}/lms.yml" down
+  docker-compose -p lms -f "${SCRIPT_FOLDER}/lms.yml" up -d
+else
+  docker-compose -p lms -f "${SCRIPT_FOLDER}/lms.yml" -f "${SCRIPT_FOLDER}/lms.debug.yml" down
+  docker-compose -p lms -f "${SCRIPT_FOLDER}/lms.yml" -f "${SCRIPT_FOLDER}/lms.debug.yml" up -d
+fi

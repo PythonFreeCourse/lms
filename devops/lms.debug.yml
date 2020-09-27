@@ -1,0 +1,36 @@
+# this file overrides lms.yaml. the should be run together, e.g.
+#   docker-compose -f lms.yaml -f lms.debug.yaml up
+
+version: "3"
+
+services:
+  http:
+    image: lms:latest
+    entrypoint: /bin/bash
+    command: -c "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 -m flask run --no-debugger --no-reload --host 0.0.0.0 --port 8080"
+    volumes:
+      - ../lms:/app_dir/lms
+      - ../../notebooks-tests:/app_dir/notebooks-tests
+    environment:
+      - DB_NAME=${DB_NAME:-db}
+      - DB_USER=${DB_USERNAME:-postgres}
+      - DB_PORT=5432
+      - DB_HOST=db
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - CELERY_RABBITMQ_ERLANG_COOKIE=AAVyo5djdSMGIZXiwEQs3JeVaBx5l14z
+      - CELERY_RABBITMQ_DEFAULT_USER=rabbit-user
+      - CELERY_RABBITMQ_DEFAULT_PASS=YgKlCvnYVzpTa3T9adG3NrMoUNe4Z5aZ
+      - CELERY_CHECKS_PUBLIC_VHOST=lmstests-public
+      - CELERY_RABBITMQ_HOST=rabbitmq
+      - CELERY_RABBITMQ_PORT=5672
+    links:
+      - db
+      - rabbitmq
+    ports:
+      - 8080:8080
+      - 5678:5678
+    depends_on:
+      - db
+      - rabbitmq
+    networks:
+      - lms
