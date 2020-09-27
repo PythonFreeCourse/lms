@@ -131,7 +131,7 @@ class User(UserMixin, BaseModel):
         return instance
 
     @classmethod
-    def random_password(cls, stronger=False) -> str:
+    def random_password(cls, stronger: bool = False) -> str:
         length_params = {'min_len': 40, 'max_len': 41} if stronger else {}
         return generate_string(**length_params)
 
@@ -323,7 +323,7 @@ class Solution(BaseModel):
 
     @property
     def is_shared(self):
-        return bool(self.sharedsolution)
+        return bool(self.shared)
 
     @property
     def is_checked(self):
@@ -567,7 +567,7 @@ class SolutionFile(BaseModel):
 
 class SharedSolution(BaseModel):
     shared_url = TextField(primary_key=True, unique=True)
-    solution = ForeignKeyField(Solution, backref='sharedsolution')
+    solution = ForeignKeyField(Solution, backref='shared')
 
     @classmethod
     def create_shared_solution(
@@ -579,15 +579,15 @@ class SharedSolution(BaseModel):
         exists = cls.get_or_none(cls.shared_url == new_url)
         while exists is not None:
             log.debug(
-                f'Collision with creating link to {solution.id} solution ',
-                ', trying again.',
+                f'Collision with creating link to {solution.id} solution, ',
+                'trying again.',
             )
             new_url = generate_string(
                 min_len=10, max_len=11, allow_punctuation=False,
             )
             exists = cls.get_or_none(cls.shared_url == new_url)
 
-        cls.get_or_create(shared_url=new_url, solution=solution)
+        cls.create(shared_url=new_url, solution=solution)
         return new_url
 
 

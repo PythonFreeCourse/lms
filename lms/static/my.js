@@ -32,11 +32,10 @@ function shareSolution(solutionId, isShared, button) {
           if (shareTextBox.style.display == 'block') {
             shareTextBox.style.display = 'none';
           } else {
-            const link = window.location.host + '/shared-solution/' + xhr.response.shared_link;
+            const link = window.location.host + '/shared/' + xhr.response.shared_link;
             document.getElementById('link-input').value = link;
             shareTextBox.style.display = 'block';
-            trackCopyLinkButton(document.getElementById('copy-link'), link);
-            trackDisableShareButton(document.getElementById('cancel-share'), shareTextBox);
+            trackCopyButton(document.getElementById('copy-link'), link);
           }
         } else {
           console.log(xhr.status);
@@ -47,25 +46,15 @@ function shareSolution(solutionId, isShared, button) {
     xhr.send(
       JSON.stringify({
         'act': 'get',
-        solutionId
+        solutionId,
       }),
     );
   });
 }
 
 
-function trackCopyLinkButton(button, link) {
-  button.addEventListener('click', () => {
-    navigator.clipboard.writeText(link);
-    button.style['color'] = '#dcdcdc';
-    setTimeout(function() {
-      button.style['color'] = 'black';
-    }, 100);
-  });
-}
-
-
-function trackDisableShareButton(button, shareTextBox) {
+function trackDisableShareButton(button) {
+  const shareTextBox = document.getElementById('share-content-box');
   button.addEventListener('click', () => {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/share');
@@ -91,15 +80,9 @@ function trackDisableShareButton(button, shareTextBox) {
 }
 
 
-function trackCopyCodeButton(button) {
+function trackCopyButton(button, context) {
   button.addEventListener('click', () => {
-    const copyText = document.getElementById('user-code');
-    const last = button.innerHTML;
-    navigator.clipboard.writeText(copyText.textContent);
-    button.innerHTML = 'Copied!';
-    setTimeout(function() {
-        button.innerHTML = last;
-    }, 2000);
+    navigator.clipboard.writeText(context);
   });
 }
 
@@ -147,9 +130,10 @@ window.escapeUnicode = escapeUnicode;
 window.addEventListener('load', () => {
   const codeElement = document.getElementById('code-view').dataset
   const solutionId = codeElement.id;
-  const shared = codeElement.shared;
+  const shared = codeElement.shareable;
   updateNotificationsBadge();
   trackReadAllNotificationsButton(document.getElementById('read-notifications'));
-  trackCopyCodeButton(document.getElementById('copy-button'));
+  trackCopyButton(document.getElementById('copy-button'), document.getElementById('user-code').textContent);
   shareSolution(solutionId, shared, document.getElementById('solution-link'));
+  trackDisableShareButton(document.getElementById('cancel-share'));
 });

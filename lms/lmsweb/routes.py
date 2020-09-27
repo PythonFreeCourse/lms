@@ -1,4 +1,4 @@
 SOLUTIONS = '/view'
 STATUS = '/status'
 DOWNLOADS = '/download'
-SHARED = '/shared-solution'
+SHARED = '/shared'

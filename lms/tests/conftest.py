@@ -53,12 +53,20 @@ def celery_eager():
     sandbox_app.conf.update(task_always_eager=True)
 
 
-def get_logged_user(username: str) -> FlaskClient:
+@pytest.fixture(autouse=True, scope='session')
+def webapp_configurations():
+    webapp.config['SHAREABLE_SOLUTIONS'] = True
     webapp.secret_key = ''.join(
         random.choices(string.ascii_letters + string.digits, k=64),
     )
+
+
+def disable_shareable_solutions():
+    webapp.config['SHAREABLE_SOLUTIONS'] = False
+
+
+def get_logged_user(username: str) -> FlaskClient:
     client = webapp.test_client()
-    webapp.config['SHAREABLE_SOLUTIONS'] = True
     client.post(
         '/login',
         data=dict(  # noqa: S106
