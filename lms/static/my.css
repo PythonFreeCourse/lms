@@ -161,6 +161,14 @@ div#code-view {
   color: #007bff;
 }
 
+.not-shared {
+  display: none;
+}
+
+.shared {
+  display: block;
+}
+
 #share-content-box {
   display: none;
 }

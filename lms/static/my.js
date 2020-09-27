@@ -18,8 +18,7 @@ function escapeUnicode(str) {
 }
 
 
-function shareSolution(solutionId, isShared, button) {
-  button.style.display = (isShared == 'True') ? 'block' : 'none';
+function shareSolution(solutionId, button) {
   const shareTextBox = document.getElementById('share-content-box');
   button.addEventListener('click', () => {
     const xhr = new XMLHttpRequest();
@@ -130,10 +129,9 @@ window.escapeUnicode = escapeUnicode;
 window.addEventListener('load', () => {
   const codeElement = document.getElementById('code-view').dataset
   const solutionId = codeElement.id;
-  const shared = codeElement.shareable;
   updateNotificationsBadge();
   trackReadAllNotificationsButton(document.getElementById('read-notifications'));
   trackCopyButton(document.getElementById('copy-button'), document.getElementById('user-code').textContent);
-  shareSolution(solutionId, shared, document.getElementById('solution-link'));
+  shareSolution(solutionId, document.getElementById('solution-link'));
   trackDisableShareButton(document.getElementById('cancel-share'));
 });

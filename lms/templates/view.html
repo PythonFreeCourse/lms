@@ -34,7 +34,7 @@
       <strong>{{ _('שיתוף תרגיל') }}:</strong>
     </div>
     <div id="share-solution" class="share-function">
-      <span id="solution-link" title="Share solution"><i class="fa fa-share-alt"></i></span>
+      <span id="solution-link" class="{% if config.SHAREABLE_SOLUTIONS %}shared{% else %}not-shared{% endif %}" title="Share solution"><i class="fa fa-share-alt"></i></span>
       <div id="share-content-box">
         <div id="share-box-input">
           <span id="cancel-share" title="Disable share solution"><i class="fa fa-trash"></i></span>
@@ -55,7 +55,7 @@
   </div>
   <div id="view-body">
     <div class="code-view-container">
-      <div id="code-view" data-id="{{ solution['id'] }}" data-file="{{ current_file.id }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}" data-shareable="{{ config.SHAREABLE_SOLUTIONS }}">
+      <div id="code-view" data-id="{{ solution['id'] }}" data-file="{{ current_file.id }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}">
         <pre><code id="user-code" class="language-{{ current_file | language_name }} line-numbers highlight">{{- current_file.code | trim(chars=' ') | e -}}</code></pre>
       </div>
       <div id="copy-code">

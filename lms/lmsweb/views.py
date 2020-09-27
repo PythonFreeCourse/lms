@@ -238,15 +238,13 @@ def share():
             shared_url = SharedSolution.create_shared_solution(
                 solution=solution,
             )
-            return jsonify({
-                'success': 'true',
-                'shared_link': shared_url,
-            })
+        else:
+            shared_url = shared_solution.shared_url
         return jsonify({
             'success': 'true',
-            'shared_link': shared_solution.shared_url,
+            'shared_link': shared_url,
         })
-    if act == 'delete':
+    elif act == 'delete':
         shared_solution.delete_instance()
         return jsonify({
             'success': 'true',
@@ -369,21 +367,21 @@ def download(download_id: str):
     """Downloading a zip file of the code files.
 
     Args:
-        download_id (str): Can be a solution.id or sharedsolution.shared_url.
+        download_id (str): Can be on each side of
+                           a solution.id and sharedsolution.shared_url.
     """
-    solution = Solution.get_or_none(Solution.id == download_id)
+    solution = Solution.get_or_none(download_id)
     shared_solution = SharedSolution.get_or_none(
         SharedSolution.shared_url == download_id,
     )
     if solution is None and shared_solution is None:
         return fail(404, 'Solution does not exist.')
+
     if shared_solution is None:
         viewer_is_solver = solution.solver.id == current_user.id
         has_viewer_access = current_user.role.is_viewer
         if not viewer_is_solver and not has_viewer_access:
             return fail(403, 'This user has no permissions to view this page.')
-
-    if solution is not None:
         files = solution.files
         filename = solution.exercise.subject
     else:
