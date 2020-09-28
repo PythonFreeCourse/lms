@@ -1,9 +1,6 @@
-const templatedWords = /\$\{(\w+?)\}/g;
 const style = getComputedStyle(document.documentElement);
 const badColor = style.getPropertyValue('--danger');
 const naturalColor = style.getPropertyValue('--secondary');
-
-
 
 function escapeUnicode(str) {
   // Thanks to https://stackoverflow.com/a/45315988
@@ -15,19 +12,17 @@ function escapeUnicode(str) {
   });
 }
 
-
 function trackCopyCodeButton(button) {
   button.addEventListener('click', () => {
     const copyText = document.getElementById('user-code');
     const last = button.innerHTML;
     navigator.clipboard.writeText(copyText.textContent);
     button.innerHTML = 'Copied!';
-    setTimeout(function() {
-        button.innerHTML = last;
+    setTimeout(() => {
+      button.innerHTML = last;
     }, 2000);
   });
 }
-
 
 function updateNotificationsBadge() {
   const dropdown = document.getElementById('navbarNavDropdown');
@@ -39,13 +34,11 @@ function updateNotificationsBadge() {
   counter.style['background-color'] = bgColor;
 }
 
-
 function sendReadAllNotificationsRequest() {
   const request = new XMLHttpRequest();
   request.open('PATCH', '/read');
   return request.send();
 }
-
 
 function trackReadAllNotificationsButton(button) {
   button.addEventListener('click', () => {
@@ -57,15 +50,6 @@ function trackReadAllNotificationsButton(button) {
     updateNotificationsBadge();
   });
 }
-
-
-String.prototype.format = function(kwargs) {
-  return text.replace(templatedWords, function(wholeMatch, identifier) {
-    const isReplacementExists = Object.keys(kwargs).includes(identifier);
-    return isReplacementExists ? kwargs[identifier] : identifier;
-  });
-}
-
 
 window.escapeUnicode = escapeUnicode;
 
