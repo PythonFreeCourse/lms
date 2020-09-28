@@ -30,17 +30,15 @@
       </ul>
     </nav>
     {% if config.SHAREABLE_SOLUTIONS %}
-    <div class={{ direction }}>
-      <strong>{{ _('שיתוף תרגיל') }}:</strong>
-    </div>
-    <div id="share-solution" class="share-function">
-      <span id="solution-link" class="{% if config.SHAREABLE_SOLUTIONS %}shared{% else %}not-shared{% endif %}" title="Share solution"><i class="fa fa-share-alt"></i></span>
-      <div id="share-content-box">
-        <div id="share-box-input">
-          <span id="cancel-share" title="Disable share solution"><i class="fa fa-trash"></i></span>
-          <span id="copy-link" title="Copy shared link"><i class="fa fa-copy"></i></span>
-          <input type="text" id="link-input" readonly>
-        </div>
+    <div id="share-solution" class="share-function {{ direction }}">
+      <div id="share-text">
+        <span>{{ _('שיתוף תרגיל') }}: </span>
+        <button id="share-action" title="{{ _('שיתוף תרגיל') }}"><i class="fa fa-share-alt"></i></button>
+      </div>
+      <div id="share-box" class="d-none">
+        <span id="cancel-share" title="Disable share solution"><i class="fa fa-trash"></i></span>
+        <span id="copy-link" title="Copy shared link"><i class="fa fa-copy"></i></span>
+        <input type="text" id="shareable-link" size="42" readonly>
       </div>
     </div>
     {% endif -%}

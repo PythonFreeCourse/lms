@@ -25,7 +25,7 @@ from lms.lmsdb.models import (
 from lms.lmsweb import babel, routes, webapp
 from lms.lmsweb.config import LANGUAGES, LOCALE
 from lms.models import notifications, share_link, solutions, upload
-from lms.models.errors import AlreadyExists, BadUploadFile, fail
+from lms.models.errors import AlreadyExists, BadUploadFile, LmsError, fail
 from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import get_language_name_by_extension
 from lms.utils.log import log
@@ -231,24 +231,23 @@ def read_all_notification():
 def share():
     act = request.json.get('act')
     solution_id = int(request.json.get('solutionId', 0))
-    solution, shared_solution = share_link.get(solution_id)
+
+    try:
+        shared_solution = share_link.get(solution_id)
+    except LmsError as e:
+        error_message, status_code = e.args
+        return fail(error_message, status_code)
 
     if act == 'get':
-        if shared_solution is None:
-            shared_url = SharedSolution.create_shared_solution(
-                solution=solution,
-            )
-        else:
-            shared_url = shared_solution.shared_url
         return jsonify({
             'success': 'true',
-            'shared_link': shared_url,
+            'share_link': shared_solution.shared_url,
         })
     elif act == 'delete':
         shared_solution.delete_instance()
         return jsonify({
             'success': 'true',
-            'shared_link': 'false',
+            'share_link': 'false',
         })
 
     return fail(400, f'Unknown or unset act value "{act}".')

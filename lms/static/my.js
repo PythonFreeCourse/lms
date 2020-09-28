@@ -18,63 +18,70 @@ function escapeUnicode(str) {
 }
 
 
-function shareSolution(solutionId, button) {
-  const shareTextBox = document.getElementById('share-content-box');
-  button.addEventListener('click', () => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/share');
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.responseType = 'json';
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState === 4) {
-        if (xhr.status === 200) {
-          if (shareTextBox.style.display == 'block') {
-            shareTextBox.style.display = 'none';
-          } else {
-            const link = window.location.host + '/shared/' + xhr.response.shared_link;
-            document.getElementById('link-input').value = link;
-            shareTextBox.style.display = 'block';
-            trackCopyButton(document.getElementById('copy-link'), link);
-          }
-        } else {
-          console.log(xhr.status);
-        }
-      }
-    };
+function sendShareRequest(act, solutionId, callback) {
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', '/share');
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.responseType = 'json';
 
-    xhr.send(
-      JSON.stringify({
-        'act': 'get',
-        solutionId,
-      }),
-    );
+  xhr.onreadystatechange = () => { callback(xhr); };
+
+  xhr.send(
+    JSON.stringify({
+      'act': act,
+      solutionId,
+    }),
+  );
+  return xhr;
+}
+
+
+function updateShareLink(xhr) {
+  const shareBox = document.getElementById('share-box');
+  const shareText = document.getElementById('share-text');
+  if (xhr.readyState === 4) {
+    if (xhr.status === 200) {
+      if (shareBox.classList.contains('d-none')) {
+        const link = `${window.location.origin}/shared/${xhr.response.share_link}`;
+        const linkTextbox = document.getElementById('shareable-link')
+        linkTextbox.value = link;
+        linkTextbox.size = link.length;
+        shareBox.classList.remove('d-none');
+        shareText.classList.add('d-none');
+        trackCopyButton(document.getElementById('copy-link'), link);
+      }
+      shareBox.parentNode.querySelector('i').className = 'fa fa-share-alt';
+    } else {
+      console.log(xhr.status);
+    }
+  }
+}
+
+
+function hideShareLink(xhr) {
+  const shareBox = document.getElementById('share-box');
+  const shareText = document.getElementById('share-text');
+  if (xhr.readyState === 4) {
+    if (xhr.status === 200) {
+        shareBox.classList.add('d-none');
+        shareText.classList.remove('d-none');
+    } else {
+      console.log(xhr.status);
+    }
+  }
+}
+
+function shareSolution(solutionId, button) {
+  button.addEventListener('click', () => {
+    button.querySelector('i').className = 'fa fa-spinner fa-pulse';
+    sendShareRequest('get', solutionId, updateShareLink);
   });
 }
 
 
-function trackDisableShareButton(button) {
-  const shareTextBox = document.getElementById('share-content-box');
+function trackDisableShareButton(solutionId, button) {
   button.addEventListener('click', () => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/share');
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.responseType = 'json';
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState === 4) {
-        if (xhr.status === 200) {
-          shareTextBox.style.display = 'none';
-        } else {
-          console.log(xhr.status);
-        }
-      }
-    };
-
-    xhr.send(
-      JSON.stringify({
-        'act': 'delete',
-        solutionId,
-      }),
-    );
+    sendShareRequest('delete', solutionId, hideShareLink);
   });
 }
 
@@ -132,6 +139,6 @@ window.addEventListener('load', () => {
   updateNotificationsBadge();
   trackReadAllNotificationsButton(document.getElementById('read-notifications'));
   trackCopyButton(document.getElementById('copy-button'), document.getElementById('user-code').textContent);
-  shareSolution(solutionId, document.getElementById('solution-link'));
-  trackDisableShareButton(document.getElementById('cancel-share'));
+  shareSolution(solutionId, document.getElementById('share-action'));
+  trackDisableShareButton(solutionId, document.getElementById('cancel-share'));
 });

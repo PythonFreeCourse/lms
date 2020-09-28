@@ -570,9 +570,9 @@ class SharedSolution(BaseModel):
     solution = ForeignKeyField(Solution, backref='shared')
 
     @classmethod
-    def create_shared_solution(
+    def create_new(
         cls, solution: Solution,
-    ) -> str:
+    ) -> 'SharedSolution':
         new_url = generate_string(
             min_len=10, max_len=11, allow_punctuation=False,
         )
@@ -587,8 +587,7 @@ class SharedSolution(BaseModel):
             )
             exists = cls.get_or_none(cls.shared_url == new_url)
 
-        cls.create(shared_url=new_url, solution=solution)
-        return new_url
+        return cls.create(shared_url=new_url, solution=solution)
 
 
 class ExerciseTest(BaseModel):

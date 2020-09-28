@@ -161,24 +161,29 @@ div#code-view {
   color: #007bff;
 }
 
-.not-shared {
-  display: none;
+#share-solution {
+  display: flex;
+  margin-bottom: 1em;
 }
 
-.shared {
-  display: block;
+button#share-action {
+  display: flex;
+  border: none;
+  background: inherit;
+  align-self: center;
+  align-content: center;
+  justify-content: center;
+  padding: 0;
+  outline: none;
 }
 
-#share-content-box {
-  display: none;
+#share-text {
+  display: flex;
+  font-weight: bold;
 }
 
-#share-box-input {
-  position: absolute;
-  display: table;
-  border: 1px solid #e1e4e8;
-  border-radius: .375em;
-  margin-right: -7.5em;
+#share-box {
+  display: flex;
 }
 
 #copy-link, #cancel-share {
