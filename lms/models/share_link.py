@@ -7,11 +7,11 @@ from lms.models.errors import LmsError
 
 def get(solution_id: int) -> SharedSolution:
     if not webapp.config.get('SHAREABLE_SOLUTIONS', False):
-        raise LmsError('Shareable solutions are not allowed.', 404)
+        raise LmsError('Shareable solutions are not allowed.', 403)
 
     solution = Solution.get_or_none(solution_id)
     if solution is None:
-        raise LmsError(f'No such solution {solution_id}', 403)
+        raise LmsError(f'No such solution {solution_id}', 404)
 
     solver_id = solution.solver.id
     if solver_id != current_user.id and not current_user.role.is_manager:

@@ -236,7 +236,7 @@ def share():
         shared_solution = share_link.get(solution_id)
     except LmsError as e:
         error_message, status_code = e.args
-        return fail(error_message, status_code)
+        return fail(status_code, error_message)
 
     if act == 'get':
         return jsonify({

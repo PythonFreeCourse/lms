@@ -282,4 +282,4 @@ class TestSolutionBridge:
         shared_response = client.post('/share', data=json.dumps(dict(
             solutionId=solution.id, act='get',
         )), content_type='application/json')
-        assert shared_response.status_code == 404
+        assert shared_response.status_code == 403
