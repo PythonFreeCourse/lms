@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  lmsweb-1.0\n"
 "Report-Msgid-Bugs-To: bugs@mesicka.com\n"
-"POT-Creation-Date: 2020-09-22 21:30+0300\n"
+"POT-Creation-Date: 2020-09-28 15:12+0300\n"
 "PO-Revision-Date: 2020-09-16 18:29+0300\n"
 "Last-Translator: Or Ronai\n"
 "Language: en\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.8.0\n"
 
-#: lmsdb/models.py:603
+#: lmsdb/models.py:616
 msgid "כישלון חמור"
 msgstr "Fatal error"
 
@@ -266,42 +266,42 @@ msgstr "Presenter"
 msgid "ניווט בגרסאות ההגשה"
 msgstr "Navigate in solution versions"
 
-#: templates/view.html:34
+#: templates/view.html:35
 msgid "שיתוף תרגיל"
 msgstr "Share solution"
 
-#: templates/view.html:43
+#: templates/view.html:48
 msgid "לסיום בדיקה"
 msgstr "Finish Checking"
 
-#: templates/view.html:59
+#: templates/view.html:64
 msgid "בדיקות אוטומטיות"
 msgstr "Automatic Checking"
 
-#: templates/view.html:66
+#: templates/view.html:71
 msgid "שגיאה:"
 msgstr "Error:"
 
-#: templates/view.html:71
+#: templates/view.html:76
 msgid "שגיאת סגל:"
 msgstr "Staff Error:"
 
-#: templates/view.html:85
+#: templates/view.html:90
 msgid "הערות על התרגיל"
 msgstr "Comments for the exercise"
 
-#: templates/view.html:93
+#: templates/view.html:98
 msgid "הערות כלליות"
 msgstr "General comments"
 
-#: templates/view.html:101
+#: templates/view.html:106
 msgid "הערות בודק"
 msgstr "Checker comments"
 
-#: templates/view.html:111
+#: templates/view.html:116
 msgid "סיימתי לבדוק!"
 msgstr "Done Checking!"
 
-#: templates/view.html:122
+#: templates/view.html:127
 msgid "הורד פתרון"
 msgstr "Download Solution"

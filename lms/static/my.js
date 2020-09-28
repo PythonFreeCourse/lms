@@ -2,9 +2,6 @@ const templatedWords = /\$\{(\w+?)\}/g;
 const style = getComputedStyle(document.documentElement);
 const badColor = style.getPropertyValue('--danger');
 const naturalColor = style.getPropertyValue('--secondary');
-const clickedColor = '#007bff'
-const notClickedColor = '#999'
-
 
 
 function escapeUnicode(str) {
@@ -43,7 +40,7 @@ function updateShareLink(xhr) {
     if (xhr.status === 200) {
       if (shareBox.classList.contains('d-none')) {
         const link = `${window.location.origin}/shared/${xhr.response.share_link}`;
-        const linkTextbox = document.getElementById('shareable-link')
+        const linkTextbox = document.getElementById('shareable-link');
         linkTextbox.value = link;
         linkTextbox.size = link.length;
         shareBox.classList.remove('d-none');
@@ -71,7 +68,7 @@ function hideShareLink(xhr) {
   }
 }
 
-function shareSolution(solutionId, button) {
+function trackShareSolution(solutionId, button) {
   button.addEventListener('click', () => {
     button.querySelector('i').className = 'fa fa-spinner fa-pulse';
     sendShareRequest('get', solutionId, updateShareLink);
@@ -134,11 +131,11 @@ String.prototype.format = function(kwargs) {
 window.escapeUnicode = escapeUnicode;
 
 window.addEventListener('load', () => {
-  const codeElement = document.getElementById('code-view').dataset
+  const codeElement = document.getElementById('code-view').dataset;
   const solutionId = codeElement.id;
   updateNotificationsBadge();
   trackReadAllNotificationsButton(document.getElementById('read-notifications'));
   trackCopyButton(document.getElementById('copy-button'), document.getElementById('user-code').textContent);
-  shareSolution(solutionId, document.getElementById('share-action'));
+  trackShareSolution(solutionId, document.getElementById('share-action'));
   trackDisableShareButton(solutionId, document.getElementById('cancel-share'));
 });
