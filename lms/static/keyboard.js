@@ -96,7 +96,7 @@ function listenToKeys() {
         `.known-comment[data-vimkey="${key}"]`
       ).dataset.commentid;
       if (commentId && lineNumber) {
-        window.sendExistsComment(window.solutionId, lineNumber, commentId);
+        window.sendExistsComment(window.fileId, lineNumber, commentId);
         resetStatus();
       }
     } else if (letterMode && (key == "`" || key == ";")) {
