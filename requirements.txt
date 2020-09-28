@@ -12,6 +12,7 @@ chardet==3.0.4
 click==7.1.2
 colorama==0.4.3
 configparser==5.0.0
+debugpy==1.0.0rc2
 decorator==4.4.2
 diff-cover==2.6.1
 entrypoints==0.3

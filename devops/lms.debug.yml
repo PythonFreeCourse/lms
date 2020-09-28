@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  http:
+    command: flask run --no-debugger --host 0.0.0.0 --port 8080
+    environment:
+      - DEBUGGER=True
+      - FLASK_APP=app.py
+      - FLASK_DEBUG=1
+      - FLASK_ENV=development
+    ports:
+      - 5678:5678
