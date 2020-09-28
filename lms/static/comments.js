@@ -28,8 +28,7 @@ function isUserGrader() {
 }
 
 function formatCommentData(commentData) {
-  let changedCommentText = commentData.text;
-  changedCommentText = `<span class="comment-author">${commentData.author_name}:</span> ${commentData.text}`;
+  let changedCommentText = `<span class="comment-author">${commentData.author_name}:</span> ${commentData.text}`;
   if (isUserGrader()) {
     const deleteButton = `<i class="fa fa-trash grader-delete" aria-hidden="true" data-commentid="${commentData.id}" onclick="deleteComment(${window.fileId}, ${commentData.id});"></i>`;
     changedCommentText = `${deleteButton} ${changedCommentText}`;
