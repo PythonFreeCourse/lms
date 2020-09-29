@@ -26,10 +26,14 @@ function isUserGrader() {
   return ['staff', 'administrator'].includes(sessionStorage.getItem('role'));
 }
 
+function isSolverComment(commentData) {
+  return commentData.author_name === sessionStorage.getItem('solver');
+}
+
 function formatCommentData(commentData) {
   let changedCommentText = commentData.text;
   changedCommentText = `<span class="comment-author">${commentData.author_name}:</span> ${commentData.text}`
-  if (isUserGrader()) {
+  if (isUserGrader() || isSolverComment(commentData)) {
     const deleteButton = `<i class="fa fa-trash grader-delete" aria-hidden="true" data-commentid="${commentData.id}" onclick="deleteComment(${window.fileId}, ${commentData.id});"></i>`;
     changedCommentText = `${deleteButton} ${changedCommentText}`;
   }
@@ -142,6 +146,7 @@ window.addEventListener('load', () => {
   window.solutionId = codeElement.id;
   window.fileId = codeElement.file;
   sessionStorage.setItem('role', codeElement.role);
+  sessionStorage.setItem('solver', codeElement.solver);
   addLineSpansToPre(document.getElementsByTagName('code'));
   pullComments(window.fileId, treatComments);
 });
