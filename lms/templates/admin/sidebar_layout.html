@@ -1,0 +1,54 @@
+{% import 'admin/layout.html' as layout with context -%}
+{% extends 'admin/base.html' %}
+
+{% block head_css %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='admin/style.css') }}">
+{% endblock %}
+
+
+{% block page_body %}
+  <div class="container{%if config.get('FLASK_ADMIN_FLUID_LAYOUT', False) %}-fluid{% endif %}">
+
+    <div class="sidebar sidebar-default" role="navigation">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#admin-navbar-collapse">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        {% block brand %}
+        <a class="navbar-brand" href="{{ admin_view.admin.url }}">
+          <img src="{{ url_for('static', filename='avatar.jpg') }}" width="30" height="30" class="d-inline-block align-top" alt="{{ _('הלוגו של פרויקט לומדים פייתון: נחש צהוב על רקע עיגול בצבע תכלת, ומתחתיו כתוב - לומדים פייתון.') }}">
+        </a>
+        {% endblock %}
+      </div>
+      <!-- navbar content -->
+      <div class="collapse navbar-collapse" id="admin-navbar-collapse">
+        {% block main_menu %}
+        <ul class="nav navbar-nav">
+          {{ layout.menu() }}
+        </ul>
+        {% endblock %}
+
+        {% block menu_links %}
+        <ul class="nav navbar-nav navbar-right">
+          {{ layout.menu_links() }}
+        </ul>
+        {% endblock %}
+        {% block access_control %}
+        {% endblock %}
+      </div>
+    </div>
+
+    {% block messages %}
+    {{ layout.messages() }}
+    {% endblock %}
+
+    {# store the jinja2 context for form_rules rendering logic #}
+    {% set render_ctx = h.resolve_ctx() %}
+
+    {% block body %}{% endblock %}
+  </div>
+{% endblock %}

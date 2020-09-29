@@ -556,6 +556,7 @@ SPECIAL_MAPPING = {
 admin = Admin(
     webapp,
     name='LMS',
+    base_template='admin/sidebar_layout.html',
     template_mode='bootstrap3',
     index_view=MyAdminIndexView(),
 )
