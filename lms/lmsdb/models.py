@@ -725,6 +725,7 @@ class Comment(BaseModel):
             CommentText.id.alias('comment_id'), CommentText.text,
             SolutionFile.id.alias('file_id'),
             User.fullname.alias('author_name'),
+            User.role.alias('author_role'),
         ]
         return (
             cls

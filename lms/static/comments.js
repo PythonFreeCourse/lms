@@ -1,4 +1,5 @@
 const DEFAULT_COMMENTED_LINE_COLOR = '#fab3b0';
+const STUDENT_COMMENTED_LINE_COLOR = '#b2eefa';
 const FLAKE_COMMENTED_LINE_COLOR = '#fac4c3';
 const HOVER_LINE_STYLE = '1px solid #0d0d0f';
 
@@ -62,7 +63,11 @@ function addCommentToLine(line, commentData) {
   if (commentData.is_auto) {
     markLine(commentElement[0], FLAKE_COMMENTED_LINE_COLOR);
   } else {
-    markLine(commentElement[0], DEFAULT_COMMENTED_LINE_COLOR);
+    if (commentData.author_role === 1) {
+      markLine(commentElement[0], STUDENT_COMMENTED_LINE_COLOR);
+    } else {
+      markLine(commentElement[0], DEFAULT_COMMENTED_LINE_COLOR);
+    }
     commentElement[0].dataset.marked = true;
   }
 }
