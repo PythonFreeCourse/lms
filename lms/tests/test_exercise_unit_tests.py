@@ -58,6 +58,7 @@ class TestUTForExercise:
         )
         self._verify_comments()
 
+    @pytest.mark.skip('!!!!!!!!!!!!!ZINGER FIXME!!!!!!!!!!')
     @staticmethod
     def _verify_comments():
         auto_comments = tuple(models.SolutionExerciseTestExecution.select())
