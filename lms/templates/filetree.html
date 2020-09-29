@@ -5,9 +5,10 @@
       <span class="indent" style="padding-left: {{ file.indent }}em"></span>
       <span class="
       {%- if file.is_folder -%}
-        icon hawcons-icon-folder">
+      icon hawcons-icon-folder">
       {%- else -%}
-        icon hawcons-icon-document-text hawcons-icon-file-{{ file.path.rsplit('.')[-1] | e }} file-icon">
+      icon hawcons-icon-document-text hawcons-icon-file-{{ file.path.rsplit('.')[-1] | e }} file-icon">
+      {%- if not shared_url %}
         <div class="file-comments-count">
           <span style="margin-left: {{ file.indent }}em" class="badge badge-
           {%- if comments[file.id] -%}
@@ -18,9 +19,10 @@
           {{ comments[file.id] }}
           </span>
         </div>
+      {% endif -%}
       {%- endif -%}
       </span>
-      <a {% if not file.is_folder %}href="/view/{{ solution.id }}/{{ file.id }}"{% endif %} class="filename link" title="{{ file.path | e }}">{{ file.path | truncate(25, killwords=True) | e }}</a>
+      <a {% if not file.is_folder %}href="/{%- if not shared_url %}view/{{ solution.id }}{%- else %}shared/{{ shared_url }}{% endif -%}/{{ file.id }}"{% endif %} class="filename link" title="{{ file.path | e }}">{{ file.path | truncate(25, killwords=True) | e }}</a>
     </li>
     {% endfor -%}
   </ol>
