@@ -87,6 +87,7 @@ function pullComments(fileId, callback) {
   xhr.send('');
 }
 
+
 function updateOpenedSpans(currentSpans, line) {
   /* Because we have each line wrapped in it's own span, we must close
    * all the opened spans in this specific line and re-open them in the next
