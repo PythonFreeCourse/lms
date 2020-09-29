@@ -1,11 +1,7 @@
 from dataclasses import dataclass
 import re
-from re import IGNORECASE
 import string
-from typing import (
-    Any, ClassVar, Iterator, List,
-    Pattern, Sequence, Tuple, Union, cast,
-)
+from typing import Any, Iterator, List, Sequence, Tuple, Union, cast
 
 from werkzeug.datastructures import FileStorage
 
@@ -23,7 +19,7 @@ class File:
 
 
 class Extractor:
-    UPLOAD_TITLE: ClassVar[Pattern] = re.compile(r'Upload\s+(\d+)', IGNORECASE)
+    UPLOAD_TITLE = re.compile(r'Upload\s+(\d+)', re.IGNORECASE)
 
     def __init__(self, to_extract: FileStorage):
         self.to_extract = to_extract

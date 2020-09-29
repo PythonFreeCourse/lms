@@ -22,7 +22,6 @@ function trackFinished(exerciseId, solutionId, element) {
   });
 }
 
-
 function sendComment(kind, fileId, line, commentData) {
   const xhr = new XMLHttpRequest();
   xhr.open('POST', '/comments');
@@ -56,14 +55,13 @@ function visuallyRemoveComment(commentId) {
   const hr = commentElement.nextElementSibling || commentElement.previousElementSibling;
   if (hr === null) {
     lineElement.dataset.marked = false;
-    window.markLine(lineElement, "none");
+    window.markLine(lineElement, 'none');
     $(lineElement).popover('dispose');
   } else {
     hr.parentNode.removeChild(hr);
     commentElement.parentNode.removeChild(commentElement);
   }
 }
-
 
 function deleteComment(fileId, commentId) {
   const xhr = new XMLHttpRequest();
@@ -88,11 +86,9 @@ function sendNewComment(...commentData) {
   return sendComment('text', ...commentData);
 }
 
-
 function sendExistsComment(...commentData) {
   return sendComment('id', ...commentData);
 }
-
 
 function trackDragAreas(lineItems, addCommentItems) {
   function findElementsToMark(e) {
@@ -141,7 +137,6 @@ function trackDragAreas(lineItems, addCommentItems) {
   });
 }
 
-
 function trackDraggables(elements) {
   Array.from(elements).forEach((item) => {
     item.addEventListener('dragstart', (e) => {
@@ -150,27 +145,24 @@ function trackDraggables(elements) {
   });
 }
 
-
 function focusTextArea(lineNumber) {
   const target = document.querySelector(`textarea[data-line='${lineNumber}']`);
-  target.focus({preventScroll: true});
+  target.focus({ preventScroll: true });
 }
-
 
 function trackTextArea(lineNumber) {
   const target = `textarea[data-line='${lineNumber}']`;
   const popoverElement = `.grader-add[data-line='${lineNumber}']`;
   $(target).keydown((ev) => {
-    if ((ev.which == 10 || ev.which == 13) && ev.ctrlKey) {  // CTRL + ENTER
+    if ((ev.which === 10 || ev.which === 13) && ev.ctrlKey) { // CTRL + ENTER
       sendNewComment(window.fileId, lineNumber, ev.target.value);
       $(popoverElement).popover('hide');
-    } else if (ev.key == 'Escape') {
+    } else if (ev.key === 'Escape') {
       ev.preventDefault();
       $(popoverElement).popover('hide');
     }
   });
 }
-
 
 function registerNewCommentPopover(element) {
   const lineNumber = element.dataset.line;
@@ -187,7 +179,6 @@ function registerNewCommentPopover(element) {
   });
 }
 
-
 function addNewCommentButtons(elements) {
   Array.from(elements).forEach((item) => {
     const newNode = document.createElement('span');
@@ -199,7 +190,6 @@ function addNewCommentButtons(elements) {
   });
   $('[data-toggle=popover]').popover();
 }
-
 
 window.deleteComment = deleteComment;
 window.sendExistsComment = sendExistsComment;

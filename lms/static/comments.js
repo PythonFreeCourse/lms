@@ -2,7 +2,6 @@ const DEFAULT_COMMENTED_LINE_COLOR = '#fab3b0';
 const FLAKE_COMMENTED_LINE_COLOR = '#fac4c3';
 const HOVER_LINE_STYLE = '1px solid #0d0d0f';
 
-
 function markLine(target, color) {
   if (target.dataset && target.dataset.marked === 'true') { return; }
   if (target.dataset && target.dataset.vimbackground === 'true') { return; }
@@ -12,11 +11,13 @@ function markLine(target, color) {
 function hoverLine(targets, hover) {
   const [lineTarget, addCommentTarget] = targets;
   if (lineTarget.dataset && lineTarget.dataset.vimbackground === 'true') { return; }
-  let parsedColor = (
-    (hover === true) ? HOVER_LINE_STYLE :
-      (hover === false ? 'none' : hover)
-  )
-  let commentOpacity = (hover === true) ? '1' : '0';
+  const commentOpacity = (hover === true) ? '1' : '0';
+  let parsedColor = hover;
+  if (hover === true) {
+    parsedColor = HOVER_LINE_STYLE;
+  } else if (hover === false) {
+    parsedColor = 'none';
+  }
   lineTarget.style.border = parsedColor;
   addCommentTarget.style.opacity = commentOpacity;
 }
@@ -27,8 +28,7 @@ function isUserGrader() {
 }
 
 function formatCommentData(commentData) {
-  let changedCommentText = commentData.text;
-  changedCommentText = `<span class="comment-author">${commentData.author_name}:</span> ${commentData.text}`
+  let changedCommentText = `<span class="comment-author">${commentData.author_name}:</span> ${commentData.text}`;
   if (isUserGrader()) {
     const deleteButton = `<i class="fa fa-trash grader-delete" aria-hidden="true" data-commentid="${commentData.id}" onclick="deleteComment(${window.fileId}, ${commentData.id});"></i>`;
     changedCommentText = `${deleteButton} ${changedCommentText}`;
@@ -56,7 +56,7 @@ function addCommentToLine(line, commentData) {
     $(commentElement).popover();
   }
   if (commentData.is_auto) {
-      markLine(commentElement[0], FLAKE_COMMENTED_LINE_COLOR);
+    markLine(commentElement[0], FLAKE_COMMENTED_LINE_COLOR);
   } else {
     markLine(commentElement[0], DEFAULT_COMMENTED_LINE_COLOR);
     commentElement[0].dataset.marked = true;
@@ -73,7 +73,6 @@ function treatComments(comments) {
   });
 }
 
-
 function pullComments(fileId, callback) {
   const url = `/comments?act=fetch&fileId=${fileId}`;
   const xhr = new XMLHttpRequest();
@@ -88,7 +87,6 @@ function pullComments(fileId, callback) {
   xhr.send('');
 }
 
-
 function updateOpenedSpans(currentSpans, line) {
   /* Because we have each line wrapped in it's own span, we must close
    * all the opened spans in this specific line and re-open them in the next
@@ -96,7 +94,8 @@ function updateOpenedSpans(currentSpans, line) {
    */
   let isCatching = false;
   let phrase = '';
-  for (const c of line) {
+  for (let i = 0; i < line.length; i += 1) {
+    const c = line.length[i];
     if (c === '>') {
       isCatching = false;
       phrase = `<${phrase}>`;
@@ -114,9 +113,8 @@ function updateOpenedSpans(currentSpans, line) {
   }
 }
 
-
 function addLineSpansToPre(items) {
-  let openSpans = [];
+  const openSpans = [];
   Array.from(items).forEach((item) => {
     const code = item.innerHTML.trim().split('\n');
     item.innerHTML = code.map(
@@ -126,12 +124,11 @@ function addLineSpansToPre(items) {
         lineContent += '</span>'.repeat(openSpans.length);
         const wrappedLine = `<span data-line="${i + 1}" class="line">${lineContent}</span>`;
         return wrappedLine;
-      }
+      },
     ).join('\n');
   });
   window.dispatchEvent(new Event('lines-numbered'));
 }
-
 
 window.markLink = markLine;
 window.hoverLine = hoverLine;
