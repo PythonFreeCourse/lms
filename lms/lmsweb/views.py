@@ -19,7 +19,7 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, CommentText, Exercise, RoleOptions,
+    ALL_MODELS, Comment, CommentText, Exercise, Role, RoleOptions,
     Solution, SolutionFile, User, database,
 )
 from lms.lmsweb import babel, routes, webapp
@@ -450,9 +450,13 @@ def _common_comments(exercise_id=None, user_id=None):
     Most common comments throughout all exercises.
     Filter by exercise id when specified.
     """
-    query = CommentText.filter(**{
-        CommentText.flake8_key.name: None,
-    }).select(CommentText.id, CommentText.text).join(Comment)
+    query = (
+        CommentText.select(CommentText.id, CommentText.text).join(Comment)
+        .join(User).join(Role).where(
+            CommentText.flake8_key.name is not None,
+            Comment.commenter.role > Role.get_student_role().id,
+        ).switch(Comment)
+    )
 
     if exercise_id is not None:
         query = (
