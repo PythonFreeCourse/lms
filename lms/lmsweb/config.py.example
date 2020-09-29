@@ -18,6 +18,8 @@ MAIL_WELCOME_MESSAGE = 'welcome-email'
 USERS_CSV = 'users.csv'
 ERRORS_CSV = 'errors.csv'
 
+# Shareable option
+SHAREABLE_SOLUTIONS = True
 
 # Babel config
 LANGUAGES = {

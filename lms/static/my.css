@@ -148,6 +148,84 @@ div#code-view {
   align-items: left;
 }
 
+#share-solution {
+  display: flex;
+  margin-bottom: 1em;
+}
+
+button#share-action {
+  display: flex;
+  color: rgba(0, 0, 0, 0.5);
+  border: none;
+  background: inherit;
+  align-self: center;
+  align-content: center;
+  justify-content: center;
+  padding: 0;
+  outline: none;
+}
+
+button#share-action:hover {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+button#share-action:active {
+  color: #007bff;
+}
+
+#share-text {
+  display: flex;
+  font-weight: bold;
+}
+
+#share-box {
+  display: flex;
+  direction: rtl;
+}
+
+#copy-link,
+#cancel-share {
+  position: relative;
+  display: table-cell;
+  background-color: #fafbfc;
+  color: rgba(0, 0, 0, 0.5);
+  border: 1px solid;
+  border-radius: 0.25em;
+  border-color: rgba(27, 31, 35, 0.15);
+}
+
+#copy-link {
+  border-radius: 0;
+}
+
+#copy-link:hover,
+#cancel-share:hover {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+#copy-link:active,
+#cancel-share:active {
+  color: #007bff;
+}
+
+#cancel-share {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+#link-input {
+  position: relative;
+  display: table-cell;
+  background-color: #fafbfc;
+  color: #24292e;
+  min-height: 2em;
+  border: 1px solid;
+  border-radius: 0.25em;
+  border-color: rgba(27, 31, 35, 0.15);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
 .go-send {
   background: #247ba0;
   color: #ebf3f6;
@@ -231,6 +309,22 @@ i.fa {
 
 .btn i.fa {
   margin-left: 0;
+}
+
+.rtl #share-action i.fa {
+  margin-right: 0.4em;
+}
+
+.ltr #share-action i.fa {
+  margin-left: 0.4em;
+}
+
+#copy-link i.fa {
+  margin: 0.4em;
+}
+
+#cancel-share i.fa {
+  margin: 0.4em;
 }
 
 #filetree {
@@ -358,7 +452,6 @@ i.fa {
   direction: ltr;
   text-align: left;
   height: min-content;
-  display: flex;
   flex-grow: 1;
   flex-basis: min(75vw, -moz-available);
   overflow-x: hidden;
@@ -374,17 +467,22 @@ i.fa {
   position: absolute;
   right: 1em;
   top: 1em;
+  color: rgba(0, 0, 0, 0.5);
   background-color: gray;
   border-radius: 0.875em;
   border: 0.0625em solid #fff;
   cursor: pointer;
-  color: #fff;
   font-size: 0.875rem;
   padding: 0.125em 0.5em;
   text-decoration: none;
 }
 
 .button-copy:hover {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.button-copy:active {
+  color: #007bff;
   background-color: white;
 }
 
