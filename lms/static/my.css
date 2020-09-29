@@ -184,7 +184,6 @@ div#code-view {
   color: #1f2d3d;
 }
 
-
 #back-to-exercises {
   width: 100%;
   margin-top: 5vh;
@@ -325,13 +324,13 @@ i.fa {
 
 /* RTL Fix for pagination */
 .pagination .page-item:first-child .page-link {
-    border-top-right-radius: .25rem;
-    border-bottom-right-radius: .25rem;
+  border-top-right-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
 }
 
 .pagination .page-item:last-child .page-link {
-    border-top-left-radius: .25rem;
-    border-bottom-left-radius: .25rem;
+  border-top-left-radius: 0.25rem;
+  border-bottom-left-radius: 0.25rem;
 }
 
 /*
@@ -356,7 +355,6 @@ i.fa {
 
 .code-view-container {
   position: relative;
-  display: flex;
   direction: ltr;
   text-align: left;
   height: min-content;
@@ -365,7 +363,6 @@ i.fa {
   flex-basis: min(75vw, -moz-available);
   overflow-x: hidden;
 }
-
 
 #code-view {
   display: flex;
@@ -379,16 +376,16 @@ i.fa {
   top: 1em;
   background-color: gray;
   border-radius: 0.875em;
-  border: 0.0625em solid #ffffff;
-  cursor:pointer;
-  color:#ffffff;
+  border: 0.0625em solid #fff;
+  cursor: pointer;
+  color: #fff;
   font-size: 0.875rem;
   padding: 0.125em 0.5em;
   text-decoration: none;
 }
 
 .button-copy:hover {
-	background-color:white;
+  background-color: white;
 }
 
 pre {
@@ -415,7 +412,6 @@ pre {
   margin: 5px 0;
   display: flex;
   flex-direction: column;
-
   border: 1px solid #c2bdbd;
 }
 
@@ -532,7 +528,7 @@ code > code:last-of-type{
   cursor: pointer;
   color: #0366d6;
   border-radius: 0.375rem;
-  transition: transform .2s ease-in-out;
+  transition: transform 0.2s ease-in-out;
   transform-origin: center;
   opacity: 0;
 }
@@ -576,12 +572,11 @@ code .grader-add .fa {
   text-align: center;
 }
 
-
 /* Navigation bar */
 
 .mr-auto .dropdown-menu {
   right: auto !important;
-  left: 0px;
+  left: 0;
 }
 
 .nav-item {
@@ -589,13 +584,11 @@ code .grader-add .fa {
   padding-right: 1em;
 }
 
-
 .which-notebook {
   align-self: center;
   margin-left: 0.5em;
   padding: 0.55rem 1rem;
 }
-
 
 .comments-count {
   align-self: center;
@@ -641,7 +634,6 @@ code .grader-add .fa {
 .notification-date {
   font-size: 0.8em;
 }
-
 
 /* User's page */
 #user {
