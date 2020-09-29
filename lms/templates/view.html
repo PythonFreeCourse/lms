@@ -4,7 +4,7 @@
 <div id="page-view">
   <div id="view-head">
     <h1>{{ _('תצוגת תרגיל') }} {{ solution['exercise']['id'] }}: {{ solution['exercise']['subject'] }}</h1>
-    {% if not is_manager %}
+    {% if not is_manager and not shared_url %}
       {% if solution['state'] == 'DONE' %}
         <p class="checked-msg {{ direction }}"><strong>{{ _('התרגיל שלך נבדק!') }}</strong> {{ _('לחצו על השורות האדומות כדי לראות את הערות הבודקים.') }}</p>
       {% elif solution['state'] == 'IN_CHECKING' %}
@@ -17,6 +17,7 @@
     {% else %}
     <p id="solver"><strong>{{ _('מגיש') }}:</strong> <a href="/user/{{ solution['solver']['id'] }}">{{ solution['solver']['fullname'] | e }}</a></p>
     {% endif %}
+    {% if not shared_url %}
     <nav id="versions" aria-label="{{ _('ניווט בגרסאות ההגשה') }}">
       <ul class="pagination">
       {%- for version in versions %}
@@ -28,13 +29,27 @@
       {% endfor -%}
       </ul>
     </nav>
-    {% if is_manager %}
+    {% if config.SHAREABLE_SOLUTIONS %}
+    <div id="share-solution" class="share-function {{ direction }}">
+      <div id="share-text">
+        <span>{{ _('שיתוף תרגיל') }}: </span>
+        <button id="share-action" title="Share solution"><i class="fa fa-share-alt"></i></button>
+      </div>
+      <div id="share-box" class="d-none">
+        <span id="cancel-share" title="Disable share solution"><i class="fa fa-trash"></i></span>
+        <span id="copy-link" title="Copy shared link"><i class="fa fa-copy"></i></span>
+        <input type="text" id="shareable-link" size="42" readonly>
+      </div>
+    </div>
+    {% endif -%}
+    {% if is_manager and not shared_url %}
         <div class="progress manager-progress-bar">
             <div class="progress-bar" style="width: {{ left }}%;" role="progressbar" aria-valuenow="{{ left }}" aria-valuemax="100">
                 {{ left }}% {{ _('לסיום בדיקה') }}
             </div>
         </div>
     {% endif %}
+    {%- endif %}
   </div>
   <div id="view-body">
     <div class="code-view-container">
@@ -44,7 +59,7 @@
       <div id="copy-code">
         <a href="#" id="copy-button" class="button-copy" title="Copy code"><i class="fa fa-copy"></i></a>
       </div>
-      {% if test_results %}
+      {% if test_results and not shared_url %}
       <div class="test-results">
           <h3 class="test-result-title">{{ _('בדיקות אוטומטיות') }}</h3>
           <ol class="test-results-list">
@@ -69,7 +84,7 @@
       </div>
       {% endif %}
     </div>
-    {% if is_manager %}
+    {% if is_manager and not shared_url %}
     <div id="popular-comments" class="{{ direction }}">
       <div id="exercise-comments">
         <h2>{{ _('הערות על התרגיל') }}</h2>
@@ -107,16 +122,18 @@
       {% include 'filetree.html' %}
     {% endif -%}
   </div>
-  <a id="download-solution" href="/download/{{ solution['id'] }}" class="{{ direction }}">
+  <a id="download-solution" href="/download/{% if shared_url %}{{ shared_url }}{% else %}{{ solution['id'] }}{% endif %}" class="{{ direction }}">
     <button class="btn btn-primary btn-sm btn-block">
       <i class="fa fa-download"></i> {{ _('הורד פתרון') }}
     </button>
   </a>
 </div>
 <script src="{{ url_for('static', filename='prism.js') }}"></script>
+{% if not shared_url %}
 <script src="{{ url_for('static', filename='comments.js') }}"></script>
 {%- if is_manager %}
 <script src="{{ url_for('static', filename='grader.js') }}"></script>
 <script src="{{ url_for('static', filename='keyboard.js') }}"></script>
 {% endif -%}
+{% endif %}
 {% endblock %}

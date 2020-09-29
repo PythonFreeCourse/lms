@@ -12,15 +12,70 @@ function escapeUnicode(str) {
   });
 }
 
-function trackCopyCodeButton(button) {
+function sendShareRequest(act, solutionId, callback) {
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', '/share');
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.responseType = 'json';
+
+  xhr.onreadystatechange = () => { callback(xhr); };
+
+  xhr.send(
+    JSON.stringify({ act, solutionId }),
+  );
+  return xhr;
+}
+
+function trackCopyButton(button, context) {
   button.addEventListener('click', () => {
-    const copyText = document.getElementById('user-code');
-    const last = button.innerHTML;
-    navigator.clipboard.writeText(copyText.textContent);
-    button.innerHTML = 'Copied!';
-    setTimeout(() => {
-      button.innerHTML = last;
-    }, 2000);
+    navigator.clipboard.writeText(context);
+  });
+}
+
+function updateShareLink(xhr) {
+  const shareBox = document.getElementById('share-box');
+  const shareText = document.getElementById('share-text');
+  if (xhr.readyState === 4) {
+    if (xhr.status === 200) {
+      if (shareBox.classList.contains('d-none')) {
+        const link = `${window.location.origin}/shared/${xhr.response.share_link}`;
+        const linkTextbox = document.getElementById('shareable-link');
+        linkTextbox.value = link;
+        linkTextbox.size = link.length;
+        shareBox.classList.remove('d-none');
+        shareText.classList.add('d-none');
+        trackCopyButton(document.getElementById('copy-link'), link);
+      }
+      shareBox.parentNode.querySelector('i').className = 'fa fa-share-alt';
+    } else {
+      console.log(xhr.status);
+    }
+  }
+}
+
+function hideShareLink(xhr) {
+  const shareBox = document.getElementById('share-box');
+  const shareText = document.getElementById('share-text');
+  if (xhr.readyState === 4) {
+    if (xhr.status === 200) {
+      shareBox.classList.add('d-none');
+      shareText.classList.remove('d-none');
+    } else {
+      console.log(xhr.status);
+    }
+  }
+}
+
+function trackShareSolution(solutionId, button) {
+  button.addEventListener('click', () => {
+    button.querySelector('i').className = 'fa fa-spinner fa-pulse';
+    sendShareRequest('get', solutionId, updateShareLink);
+  });
+}
+
+function trackDisableShareButton(solutionId, button) {
+  button.addEventListener('click', () => {
+    sendShareRequest('delete', solutionId, hideShareLink);
   });
 }
 
@@ -54,7 +109,11 @@ function trackReadAllNotificationsButton(button) {
 window.escapeUnicode = escapeUnicode;
 
 window.addEventListener('load', () => {
+  const codeElement = document.getElementById('code-view').dataset;
+  const solutionId = codeElement.id;
   updateNotificationsBadge();
   trackReadAllNotificationsButton(document.getElementById('read-notifications'));
-  trackCopyCodeButton(document.getElementById('copy-button'));
+  trackCopyButton(document.getElementById('copy-button'), document.getElementById('user-code').textContent);
+  trackShareSolution(solutionId, document.getElementById('share-action'));
+  trackDisableShareButton(solutionId, document.getElementById('cancel-share'));
 });

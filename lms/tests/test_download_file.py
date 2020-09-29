@@ -4,12 +4,11 @@ from tempfile import SpooledTemporaryFile
 from typing import Iterator
 from zipfile import ZipFile
 
-import pytest
 from werkzeug.datastructures import FileStorage
 
 from lms.extractors.base import File
 from lms.lmsdb.models import Exercise, User
-from lms.lmsweb import webapp
+from lms.lmsweb import routes
 from lms.tests import conftest
 from lms.utils import hashing
 
@@ -42,7 +41,6 @@ class TestDownloadSolution:
         zip_file_storage.filename = DOWNLOAD_FILE.rpartition(os.path.sep)[-1]
         return zip_file_storage
 
-    @pytest.mark.skip('Should run with docker system access')
     def test_download_solution(
             self,
             exercise: Exercise,
@@ -50,22 +48,14 @@ class TestDownloadSolution:
     ):
         storage = self.create_zipfile_storage()
         hash_ = hashing.by_file(storage)
-        conftest.create_solution(
+        solution = conftest.create_solution(
             exercise=exercise,
             student_user=student_user,
             files=list(TestDownloadSolution.get_zip_files()),
             hash_=hash_,
         )
-        client = webapp.test_client()
-        client.post(
-            '/login',
-            data=dict(  # noqa: S106
-                username=student_user.username,
-                password='fake pass',
-            ),
-            follow_redirects=True,
-        )
-        download_response = client.get('/download/1')
+        client = conftest.get_logged_user(student_user.username)
+        download_response = client.get(f'{routes.DOWNLOADS}/{solution.id}')
         downloaded_bytes_file = BytesIO(download_response.data)
         downloaded_zipfile = ZipFile(downloaded_bytes_file, 'r')
         exist_zipfile = ZipFile(self.zipfile_file, 'r')

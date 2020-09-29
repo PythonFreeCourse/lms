@@ -5,7 +5,7 @@ from urllib.parse import urljoin, urlparse
 
 import arrow  # type: ignore
 from flask import (
-    abort, jsonify, make_response, render_template,
+    jsonify, make_response, render_template,
     request, send_from_directory, url_for,
 )
 from flask_admin import Admin, AdminIndexView  # type: ignore
@@ -20,12 +20,12 @@ from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Exercise, RoleOptions,
-    Solution, SolutionFile, User, database,
+    SharedSolution, Solution, SolutionFile, User, database,
 )
 from lms.lmsweb import babel, routes, webapp
 from lms.lmsweb.config import LANGUAGES, LOCALE
-from lms.models import notifications, solutions, upload
-from lms.models.errors import AlreadyExists, BadUploadFile
+from lms.models import notifications, share_link, solutions, upload
+from lms.models.errors import AlreadyExists, BadUploadFile, LmsError, fail
 from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import get_language_name_by_extension
 from lms.utils.log import log
@@ -85,16 +85,6 @@ def managers_only(func):
             return func(*args, **kwargs)
 
     return wrapper
-
-
-def fail(status_code: int, error_msg: str):
-    data = {
-        'status': 'failed',
-        'msg': error_msg,
-    }
-    response = jsonify(data)
-    response.status_code = status_code
-    return abort(response)
 
 
 def is_safe_url(target):
@@ -191,23 +181,23 @@ def _create_comment(
     user = User.get_or_none(User.id == user_id)
     if user is None:
         # should never happen, we checked session_id == solver_id
-        return fail(404, 'No such user')
+        return fail(404, 'No such user.')
 
     if (not kind) or (kind not in ('id', 'text')):
-        return fail(400, 'Invalid kind')
+        return fail(400, 'Invalid kind.')
 
     if line_number <= 0:
-        return fail(422, f'Invalid line number: {line_number}')
+        return fail(422, f'Invalid line number: {line_number}.')
 
     if kind == 'id':
         new_comment_id = comment_id
     elif kind == 'text':
         if not comment_text:
-            return fail(422, 'Empty comments are not allowed')
+            return fail(422, 'Empty comments are not allowed.')
         new_comment_id = CommentText.create_comment(text=comment_text).id
     else:
         # should never happend, kind was checked before
-        return fail(400, 'Invalid kind')
+        return fail(400, 'Invalid kind.')
 
     comment_ = Comment.create(
         commenter=user,
@@ -236,6 +226,33 @@ def read_all_notification():
     return jsonify({'success': success_state})
 
 
+@webapp.route('/share', methods=['POST'])
+@login_required
+def share():
+    act = request.json.get('act')
+    solution_id = int(request.json.get('solutionId', 0))
+
+    try:
+        shared_solution = share_link.get(solution_id)
+    except LmsError as e:
+        error_message, status_code = e.args
+        return fail(status_code, error_message)
+
+    if act == 'get':
+        return jsonify({
+            'success': 'true',
+            'share_link': shared_solution.shared_url,
+        })
+    elif act == 'delete':
+        shared_solution.delete_instance()
+        return jsonify({
+            'success': 'true',
+            'share_link': 'false',
+        })
+
+    return fail(400, f'Unknown or unset act value "{act}".')
+
+
 @webapp.route('/comments', methods=['GET', 'POST'])
 @login_required
 def comment():
@@ -248,7 +265,7 @@ def comment():
 
     file = SolutionFile.get_or_none(file_id)
     if file is None:
-        return fail(404, f'No such file {file_id}')
+        return fail(404, f'No such file {file_id}.')
 
     solver_id = file.solution.solver.id
     if solver_id != current_user.id and not current_user.role.is_manager:
@@ -284,7 +301,7 @@ def comment():
             comment_id,
         )
 
-    return fail(400, f'Unknown or unset act value "{act}"')
+    return fail(400, f'Unknown or unset act value "{act}".')
 
 
 @webapp.route('/send/<int:_exercise_id>')
@@ -321,7 +338,7 @@ def upload_page():
     user_id = current_user.id
     user = User.get_or_none(User.id == user_id)  # should never happen
     if user is None:
-        return fail(404, 'User not found')
+        return fail(404, 'User not found.')
     if request.content_length > MAX_REQUEST_SIZE:
         return fail(
             413, f'File is too big. {MAX_REQUEST_SIZE // 1000000}MB allowed',
@@ -329,7 +346,7 @@ def upload_page():
 
     file: Optional[FileStorage] = request.files.get('file')
     if file is None:
-        return fail(422, 'No file was given')
+        return fail(422, 'No file was given.')
 
     try:
         matches, misses = upload.new(user, file)
@@ -343,26 +360,38 @@ def upload_page():
     })
 
 
-@webapp.route(f'{routes.DOWNLOADS}/<int:solution_id>')
-@webapp.route(f'{routes.DOWNLOADS}/<int:solution_id>/<int:file_id>')
+@webapp.route(f'{routes.DOWNLOADS}/<string:download_id>')
 @login_required
-def download(solution_id: int, file_id: Optional[int] = None):
-    solution = Solution.get_or_none(solution_id)
-    if solution is None:
+def download(download_id: str):
+    """Downloading a zip file of the code files.
+
+    Args:
+        download_id (str): Can be on each side of
+                           a solution.id and sharedsolution.shared_url.
+    """
+    solution = Solution.get_or_none(download_id)
+    shared_solution = SharedSolution.get_or_none(
+        SharedSolution.shared_url == download_id,
+    )
+    if solution is None and shared_solution is None:
         return fail(404, 'Solution does not exist.')
 
-    viewer_is_solver = solution.solver.id == current_user.id
-    has_viewer_access = current_user.role.is_viewer
-    if not viewer_is_solver and not has_viewer_access:
-        return fail(403, 'This user has no permissions to view this page.')
+    if shared_solution is None:
+        viewer_is_solver = solution.solver.id == current_user.id
+        has_viewer_access = current_user.role.is_viewer
+        if not viewer_is_solver and not has_viewer_access:
+            return fail(403, 'This user has no permissions to view this page.')
+        files = solution.files
+        filename = solution.exercise.subject
+    else:
+        files = shared_solution.solution.files
+        filename = shared_solution.solution.exercise.subject
 
-    response = make_response(
-        solutions.create_zip_from_solution(solution.files),
-    )
-    response.headers.set('Content Type', 'zip')
+    response = make_response(solutions.create_zip_from_solution(files))
+    response.headers.set('Content-Type', 'zip')
     response.headers.set(
         'Content-Disposition', 'attachment',
-        filename=f'{solution.exercise.subject}.zip',
+        filename=f'{filename}.zip',
     )
     return response
 
@@ -370,14 +399,16 @@ def download(solution_id: int, file_id: Optional[int] = None):
 @webapp.route(f'{routes.SOLUTIONS}/<int:solution_id>')
 @webapp.route(f'{routes.SOLUTIONS}/<int:solution_id>/<int:file_id>')
 @login_required
-def view(solution_id: int, file_id: Optional[int] = None):
+def view(
+    solution_id: int, file_id: Optional[int] = None, shared_url: str = '',
+):
     solution = Solution.get_or_none(Solution.id == solution_id)
     if solution is None:
         return fail(404, 'Solution does not exist.')
 
     viewer_is_solver = solution.solver.id == current_user.id
     has_viewer_access = current_user.role.is_viewer
-    if not viewer_is_solver and not has_viewer_access:
+    if not shared_url and not viewer_is_solver and not has_viewer_access:
         return fail(403, 'This user has no permissions to view this page.')
 
     versions = solution.ordered_versions()
@@ -405,6 +436,7 @@ def view(solution_id: int, file_id: Optional[int] = None):
         'role': current_user.role.name.lower(),
         'versions': versions,
         'test_results': test_results,
+        'shared_url': shared_url,
     }
 
     if is_manager:
@@ -423,6 +455,25 @@ def view(solution_id: int, file_id: Optional[int] = None):
         notifications.read_related(solution_id, current_user.id)
 
     return render_template('view.html', **view_params)
+
+
+@webapp.route(f'{routes.SHARED}/<string:shared_url>')
+@webapp.route(f'{routes.SHARED}/<string:shared_url>/<int:file_id>')
+@login_required
+def shared_solution(shared_url: str, file_id: Optional[int] = None):
+    if not webapp.config.get('SHAREABLE_SOLUTIONS', False):
+        return fail(404, 'Solutions are not shareable.')
+
+    shared_solution = SharedSolution.get_or_none(
+        SharedSolution.shared_url == shared_url,
+    )
+    if shared_solution is None:
+        return fail(404, 'The solution does not exist.')
+
+    solution_id = shared_solution.solution.id
+    return view(
+        solution_id=solution_id, file_id=file_id, shared_url=shared_url,
+    )
 
 
 @webapp.route('/checked/<int:exercise_id>/<int:solution_id>', methods=['POST'])
