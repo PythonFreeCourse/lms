@@ -504,7 +504,7 @@ def _common_comments(exercise_id=None, user_id=None):
     query = (
         CommentText.select(CommentText.id, CommentText.text).join(Comment)
         .join(User).join(Role).where(
-            CommentText.flake8_key.name is not None,
+            CommentText.flake8_key.is_null(True),
             Comment.commenter.role > Role.get_student_role().id,
         ).switch(Comment)
     )
