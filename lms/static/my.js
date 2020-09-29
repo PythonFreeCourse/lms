@@ -1,8 +1,6 @@
-const templatedWords = /\$\{(\w+?)\}/g;
 const style = getComputedStyle(document.documentElement);
 const badColor = style.getPropertyValue('--danger');
 const naturalColor = style.getPropertyValue('--secondary');
-
 
 function escapeUnicode(str) {
   // Thanks to https://stackoverflow.com/a/45315988
@@ -14,7 +12,6 @@ function escapeUnicode(str) {
   });
 }
 
-
 function sendShareRequest(act, solutionId, callback) {
   const xhr = new XMLHttpRequest();
   xhr.open('POST', '/share');
@@ -24,14 +21,16 @@ function sendShareRequest(act, solutionId, callback) {
   xhr.onreadystatechange = () => { callback(xhr); };
 
   xhr.send(
-    JSON.stringify({
-      'act': act,
-      solutionId,
-    }),
+    JSON.stringify({ act, solutionId }),
   );
   return xhr;
 }
 
+function trackCopyButton(button, context) {
+  button.addEventListener('click', () => {
+    navigator.clipboard.writeText(context);
+  });
+}
 
 function updateShareLink(xhr) {
   const shareBox = document.getElementById('share-box');
@@ -54,14 +53,13 @@ function updateShareLink(xhr) {
   }
 }
 
-
 function hideShareLink(xhr) {
   const shareBox = document.getElementById('share-box');
   const shareText = document.getElementById('share-text');
   if (xhr.readyState === 4) {
     if (xhr.status === 200) {
-        shareBox.classList.add('d-none');
-        shareText.classList.remove('d-none');
+      shareBox.classList.add('d-none');
+      shareText.classList.remove('d-none');
     } else {
       console.log(xhr.status);
     }
@@ -75,20 +73,11 @@ function trackShareSolution(solutionId, button) {
   });
 }
 
-
 function trackDisableShareButton(solutionId, button) {
   button.addEventListener('click', () => {
     sendShareRequest('delete', solutionId, hideShareLink);
   });
 }
-
-
-function trackCopyButton(button, context) {
-  button.addEventListener('click', () => {
-    navigator.clipboard.writeText(context);
-  });
-}
-
 
 function updateNotificationsBadge() {
   const dropdown = document.getElementById('navbarNavDropdown');
@@ -100,13 +89,11 @@ function updateNotificationsBadge() {
   counter.style['background-color'] = bgColor;
 }
 
-
 function sendReadAllNotificationsRequest() {
   const request = new XMLHttpRequest();
   request.open('PATCH', '/read');
   return request.send();
 }
-
 
 function trackReadAllNotificationsButton(button) {
   button.addEventListener('click', () => {
@@ -118,15 +105,6 @@ function trackReadAllNotificationsButton(button) {
     updateNotificationsBadge();
   });
 }
-
-
-String.prototype.format = function(kwargs) {
-  return text.replace(templatedWords, function(wholeMatch, identifier) {
-    const isReplacementExists = Object.keys(kwargs).includes(identifier);
-    return isReplacementExists ? kwargs[identifier] : identifier;
-  });
-}
-
 
 window.escapeUnicode = escapeUnicode;
 

@@ -89,7 +89,7 @@ div#code-view {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  margin-bottom: .5rem;
+  margin-bottom: 0.5rem;
   padding: 1rem;
   text-align: center;
 }
@@ -155,7 +155,7 @@ div#code-view {
 
 button#share-action {
   display: flex;
-  color: rgba(0, 0, 0, .5);
+  color: rgba(0, 0, 0, 0.5);
   border: none;
   background: inherit;
   align-self: center;
@@ -166,7 +166,7 @@ button#share-action {
 }
 
 button#share-action:hover {
-  color: rgba(0, 0, 0, .7);
+  color: rgba(0, 0, 0, 0.7);
 }
 
 button#share-action:active {
@@ -183,25 +183,28 @@ button#share-action:active {
   direction: rtl;
 }
 
-#copy-link, #cancel-share {
+#copy-link,
+#cancel-share {
   position: relative;
   display: table-cell;
   background-color: #fafbfc;
-  color: rgba(0, 0, 0, .5);
+  color: rgba(0, 0, 0, 0.5);
   border: 1px solid;
-  border-radius: .25em;
-  border-color: rgba(27,31,35,.15);
+  border-radius: 0.25em;
+  border-color: rgba(27, 31, 35, 0.15);
 }
 
 #copy-link {
   border-radius: 0;
 }
 
-#copy-link:hover, #cancel-share:hover {
-  color: rgba(0, 0, 0, .7);
+#copy-link:hover,
+#cancel-share:hover {
+  color: rgba(0, 0, 0, 0.7);
 }
 
-#copy-link:active, #cancel-share:active {
+#copy-link:active,
+#cancel-share:active {
   color: #007bff;
 }
 
@@ -217,8 +220,8 @@ button#share-action:active {
   color: #24292e;
   min-height: 2em;
   border: 1px solid;
-  border-radius: .25em;
-  border-color: rgba(27,31,35,.15);
+  border-radius: 0.25em;
+  border-color: rgba(27, 31, 35, 0.15);
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
@@ -259,7 +262,6 @@ button#share-action:active {
   color: #1f2d3d;
 }
 
-
 #back-to-exercises {
   width: 100%;
   margin-top: 5vh;
@@ -267,17 +269,17 @@ button#share-action:active {
 
 #download-solution {
   min-width: 6%;
-  font-size: .75rem;
-  size: .5rem;
+  font-size: 0.75rem;
+  size: 0.5rem;
   align-self: center;
 }
 
 .our-button {
   border-radius: 8px;
   display: block;
-  margin-right: .5em;
+  margin-right: 0.5em;
   outline: none;
-  padding: .55rem 1rem;
+  padding: 0.55rem 1rem;
   white-space: nowrap;
   width: 8em;
 }
@@ -294,7 +296,7 @@ button#share-action:active {
 }
 
 i.fa {
-  margin-left: .3em;
+  margin-left: 0.3em;
 }
 
 .our-button-small > i.fa {
@@ -310,19 +312,19 @@ i.fa {
 }
 
 .rtl #share-action i.fa {
-  margin-right: .4em;
+  margin-right: 0.4em;
 }
 
 .ltr #share-action i.fa {
-  margin-left: .4em;
+  margin-left: 0.4em;
 }
 
 #copy-link i.fa {
-  margin: .4em;
+  margin: 0.4em;
 }
 
 #cancel-share i.fa {
-  margin: .4em;
+  margin: 0.4em;
 }
 
 #filetree {
@@ -336,7 +338,7 @@ i.fa {
   margin: 0 1rem;
   direction: ltr;
   white-space: nowrap;
-  padding: .2rem;
+  padding: 0.2rem;
   line-height: 2;
 }
 
@@ -416,13 +418,13 @@ i.fa {
 
 /* RTL Fix for pagination */
 .pagination .page-item:first-child .page-link {
-    border-top-right-radius: .25rem;
-    border-bottom-right-radius: .25rem;
+  border-top-right-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
 }
 
 .pagination .page-item:last-child .page-link {
-    border-top-left-radius: .25rem;
-    border-bottom-left-radius: .25rem;
+  border-top-left-radius: 0.25rem;
+  border-bottom-left-radius: 0.25rem;
 }
 
 /*
@@ -447,7 +449,6 @@ i.fa {
 
 .code-view-container {
   position: relative;
-  display: flex;
   direction: ltr;
   text-align: left;
   height: min-content;
@@ -455,7 +456,6 @@ i.fa {
   flex-basis: min(75vw, -moz-available);
   overflow-x: hidden;
 }
-
 
 #code-view {
   display: flex;
@@ -467,19 +467,23 @@ i.fa {
   position: absolute;
   right: 1em;
   top: 1em;
-  color: rgba(0, 0, 0, .5);
-  font-size: .875rem;
-  cursor: default;
-  padding: .125em .5em;
+  color: rgba(0, 0, 0, 0.5);
+  background-color: gray;
+  border-radius: 0.875em;
+  border: 0.0625em solid #fff;
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0.125em 0.5em;
   text-decoration: none;
 }
 
 .button-copy:hover {
-	color: rgba(0, 0, 0, .7);
+  color: rgba(0, 0, 0, 0.7);
 }
 
 .button-copy:active {
   color: #007bff;
+  background-color: white;
 }
 
 pre {
@@ -506,7 +510,6 @@ pre {
   margin: 5px 0;
   display: flex;
   flex-direction: column;
-
   border: 1px solid #c2bdbd;
 }
 
@@ -555,8 +558,8 @@ ol.comments > li {
   background: #c3dbe5;
   border: 1px solid #4b93b1;
   cursor: grab;
-  margin-bottom: .7em;
-  padding: .5em;
+  margin-bottom: 0.7em;
+  padding: 0.5em;
 }
 
 ol.comments > li:active {
@@ -573,7 +576,7 @@ span.line {
   display: inline-block;
   text-align: left;
   width: 100%;
-  margin-left: .3em;
+  margin-left: 0.3em;
 }
 
 #grader-buttons {
@@ -615,15 +618,15 @@ code > code:last-of-type{
   position: absolute;
   display: block;
   z-index: 100;
-  left: -.88em;
-  right: -.88em;
+  left: -0.88em;
+  right: -0.88em;
   width: 1rem;
   height: 1.5em;
   line-height: 1em;
   cursor: pointer;
   color: #0366d6;
-  border-radius: .375rem;
-  transition: transform .2s ease-in-out;
+  border-radius: 0.375rem;
+  transition: transform 0.2s ease-in-out;
   transform-origin: center;
   opacity: 0;
 }
@@ -667,12 +670,11 @@ code .grader-add .fa {
   text-align: center;
 }
 
-
 /* Navigation bar */
 
 .mr-auto .dropdown-menu {
   right: auto !important;
-  left: 0px;
+  left: 0;
 }
 
 .nav-item {
@@ -680,24 +682,22 @@ code .grader-add .fa {
   padding-right: 1em;
 }
 
-
 .which-notebook {
   align-self: center;
-  margin-left: .5em;
-  padding: .55rem 1rem;
+  margin-left: 0.5em;
+  padding: 0.55rem 1rem;
 }
-
 
 .comments-count {
   align-self: center;
   font-size: 1.25rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  margin-top: -.25em;
+  margin-top: -0.25em;
 }
 
 .file-comments-count {
   position: absolute;
-  margin-left: -.8em;
+  margin-left: -0.8em;
   margin-top: -1.5em;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 1.25rem;
@@ -730,9 +730,8 @@ code .grader-add .fa {
 }
 
 .notification-date {
-  font-size: .8em;
+  font-size: 0.8em;
 }
-
 
 /* User's page */
 #user {

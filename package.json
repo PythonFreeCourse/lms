@@ -1,30 +1,17 @@
 {
   "name": "lms",
   "version": "1.0.0",
-  "description": "<p align=\"center\">   <img title=\"BSD-3 Clause\" src=\"https://img.shields.io/github/license/PythonFreeCourse/LMS.svg\">   <img title=\"Travis (.com) branch\" src=\"https://img.shields.io/travis/com/PythonFreeCourse/LMS/master.svg\">   <img title=\"LGTM Python Grade\" src=\"https://img.shields.io/lgtm/grade/python/github/PythonFreeCourse/LMS.svg\">   <img title=\"LGTM JavaScript Grade\" src=\"https://img.shields.io/lgtm/grade/javascript/github/PythonFreeCourse/LMS.svg\"> </p>",
-  "main": "index.js",
-  "directories": {
-    "test": "tests"
-  },
+  "description": "Learning Management System - Exercise management",
+  "main": "lms/static/my.js",
+  "repository": "https://github.com/PythonFreeCourse/lms",
+  "author": "Yam Mesicka <yammesicka@gmail.com>",
+  "license": "BSD-3-Clause",
   "dependencies": {},
   "devDependencies": {
-    "eslint": "^6.8.0",
-    "eslint-config-airbnb-base": "^14.1.0",
-    "eslint-plugin-import": "^2.20.1",
-    "stylelint": "^13.2.1",
+    "eslint": "^7.10.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "stylelint": "^13.7.2",
     "stylelint-config-standard": "^20.0.0"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/PythonFreeCourse/LMS.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/PythonFreeCourse/LMS/issues"
-  },
-  "homepage": "https://github.com/PythonFreeCourse/LMS#readme"
+  }
 }
