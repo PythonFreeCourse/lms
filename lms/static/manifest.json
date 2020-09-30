@@ -4,8 +4,8 @@
   "theme_color": "#1290f4",
   "background_color": "#2196f3",
   "display": "standalone",
-  "scope": "https://a466824bc7ed.ngrok.io/login?next=%2F",
-  "start_url": "https://a466824bc7ed.ngrok.io/login?next=%2F",
+  "scope": "/",
+  "start_url": "/",
   "icons": [
     {
       "src": "/static/avatar.jpg",
