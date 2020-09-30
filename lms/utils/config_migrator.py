@@ -37,8 +37,9 @@ def migrate(config: Path, template_config: Path) -> None:
 
     new_lines = (v for k, v in template_assignments.items() if k in new_keys)
     missing_configuration = get_missing_config(template_config, new_lines)
-    with config.open('a') as main_config:
-        main_config.write(f'\n{missing_configuration}')
+    if missing_configuration:
+        with config.open('a') as main_config:
+            main_config.write(f'\n{missing_configuration}')
 
 
 # TODO: Support slicing on the left side of the assignment.  # NOQA

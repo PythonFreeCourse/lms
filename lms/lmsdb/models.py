@@ -22,6 +22,7 @@ from werkzeug.security import (
 from lms.lmsdb import database_config
 from lms.models.errors import AlreadyExists
 from lms.utils import hashing
+from lms.utils.log import log
 
 
 database = database_config.get_db_instance()
@@ -130,9 +131,9 @@ class User(UserMixin, BaseModel):
         return instance
 
     @classmethod
-    def random_password(cls, stronger=False) -> str:
+    def random_password(cls, stronger: bool = False) -> str:
         length_params = {'min_len': 40, 'max_len': 41} if stronger else {}
-        return generate_password(**length_params)
+        return generate_string(**length_params)
 
     def get_notifications(self) -> Iterable['Notification']:
         return Notification.fetch(self)
@@ -319,6 +320,10 @@ class Solution(BaseModel):
             self,
     ) -> Union[Iterable['SolutionFile'], 'SolutionFile']:
         return SolutionFile.filter(SolutionFile.solution == self)
+
+    @property
+    def is_shared(self):
+        return bool(self.shared)
 
     @property
     def is_checked(self):
@@ -560,6 +565,31 @@ class SolutionFile(BaseModel):
         return ext if filename else ''
 
 
+class SharedSolution(BaseModel):
+    shared_url = TextField(primary_key=True, unique=True)
+    solution = ForeignKeyField(Solution, backref='shared')
+
+    @classmethod
+    def create_new(
+        cls, solution: Solution,
+    ) -> 'SharedSolution':
+        new_url = generate_string(
+            min_len=10, max_len=11, allow_punctuation=False,
+        )
+        exists = cls.get_or_none(cls.shared_url == new_url)
+        while exists is not None:
+            log.debug(
+                f'Collision with creating link to {solution.id} solution, ',
+                'trying again.',
+            )
+            new_url = generate_string(
+                min_len=10, max_len=11, allow_punctuation=False,
+            )
+            exists = cls.get_or_none(cls.shared_url == new_url)
+
+        return cls.create(shared_url=new_url, solution=solution)
+
+
 class ExerciseTest(BaseModel):
     exercise = ForeignKeyField(model=Exercise, unique=True)
     code = TextField()
@@ -742,10 +772,17 @@ class Comment(BaseModel):
         return tuple(cls._by_file(file_id).dicts())
 
 
-def generate_password(min_len=9, max_len=16):
+def generate_string(
+    min_len: int = 9, max_len: int = 16, allow_punctuation: bool = True,
+) -> str:
     randomizer = secrets.SystemRandom()
     length = randomizer.randrange(min_len, max_len)
-    password = randomizer.choices(string.printable[:66], k=length)
+    if allow_punctuation:
+        password = randomizer.choices(string.printable[:66], k=length)
+    else:
+        password = randomizer.choices(
+            string.ascii_letters + string.digits, k=length,
+        )
     return ''.join(password)
 
 
