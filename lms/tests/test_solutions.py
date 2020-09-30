@@ -253,8 +253,8 @@ class TestSolutionBridge:
         solution = conftest.create_solution(exercise, student_user)
 
         client = conftest.get_logged_user(staff_user.username)
-        # Disabling user comments option
-        conftest.disable_users_comments()
+        # Enabling user comments option
+        conftest.enable_users_comments()
         # Creating a comment
         comment_response = client.post('/comments', data=json.dumps(dict(
             fileId=solution.files[0].id, act='create', kind='text',

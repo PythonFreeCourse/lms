@@ -70,6 +70,10 @@ def disable_users_comments():
     webapp.config['USERS_COMMENTS'] = False
 
 
+def enable_users_comments():
+    webapp.config['USERS_COMMENTS'] = True
+
+
 def get_logged_user(username: str) -> FlaskClient:
     client = webapp.test_client()
     client.post(

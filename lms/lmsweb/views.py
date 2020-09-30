@@ -283,6 +283,11 @@ def comment():
     if act == 'delete':
         comment_id = int(request.args.get('commentId'))
         comment_ = Comment.get_or_none(Comment.id == comment_id)
+        if (
+            comment_.commenter.id != current_user.id
+            and not current_user.role.is_manager
+        ):
+            return fail(403, "You aren't allowed to access this page.")
         if comment_ is not None:
             comment_.delete_instance()
         return jsonify({'success': 'true'})
@@ -511,7 +516,8 @@ def _common_comments(exercise_id=None, user_id=None):
         CommentText.select(CommentText.id, CommentText.text).join(Comment)
         .join(User).join(Role).where(
             CommentText.flake8_key.is_null(True),
-            Comment.commenter.role > Role.get_student_role().id,
+            (Comment.commenter.role == Role.get_staff_role().id)
+            | (Comment.commenter.role == Role.get_admin_role().id),
         ).switch(Comment)
     )
 

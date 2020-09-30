@@ -75,6 +75,10 @@ class Role(BaseModel):
         return cls.get(Role.name == RoleOptions.STAFF.value)
 
     @classmethod
+    def get_admin_role(cls) -> 'Role':
+        return cls.get(Role.name == RoleOptions.ADMINISTRATOR.value)
+
+    @classmethod
     def by_name(cls, name) -> 'Role':
         if name.startswith('_'):
             raise ValueError('That could lead to a security issue.')
