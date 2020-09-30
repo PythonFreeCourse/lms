@@ -28,7 +28,9 @@ function isUserGrader() {
 }
 
 function isSolverComment(commentData) {
-  return commentData.author_name === sessionStorage.getItem('solver');
+  const authorIsSolver = commentData.author_name === sessionStorage.getItem('solver');
+  const allowedComment = sessionStorage.getItem('allowedComment') === 'true';
+  return (authorIsSolver && allowedComment);
 }
 
 function formatCommentData(commentData) {
@@ -144,6 +146,7 @@ window.addEventListener('load', () => {
   window.fileId = codeElement.file;
   sessionStorage.setItem('role', codeElement.role);
   sessionStorage.setItem('solver', codeElement.solver);
+  sessionStorage.setItem('allowedComment', codeElement.allowedComment);
   addLineSpansToPre(document.getElementsByTagName('code'));
   pullComments(window.fileId, treatComments);
 });

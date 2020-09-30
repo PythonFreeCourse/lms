@@ -53,7 +53,7 @@
   </div>
   <div id="view-body">
     <div class="code-view-container">
-      <div id="code-view" data-id="{{ solution['id'] }}" data-file="{{ current_file.id }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}" data-solver="{{ solution['solver']['fullname'] }}">
+      <div id="code-view" data-id="{{ solution['id'] }}" data-file="{{ current_file.id }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}" data-solver="{{ solution['solver']['fullname'] }}" data-allowed-comment="{{ config['USERS_COMMENTS'] | lower }}">
         <pre><code id="user-code" class="language-{{ current_file | language_name }} line-numbers highlight">{{- current_file.code | trim(chars=' ') | e -}}</code></pre>
       </div>
       <div id="copy-code">

@@ -274,6 +274,12 @@ def comment():
     if act == 'fetch':
         return jsonify(Comment.by_file(file_id))
 
+    if (
+        not webapp.config.get('USERS_COMMENTS', False)
+        and not current_user.role.is_manager
+    ):
+        return fail(403, "You aren't allowed to access this page.")
+
     if act == 'delete':
         comment_id = int(request.args.get('commentId'))
         comment_ = Comment.get_or_none(Comment.id == comment_id)
