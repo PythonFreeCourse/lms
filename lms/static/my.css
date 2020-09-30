@@ -218,6 +218,10 @@ i.fa {
   margin-left: 0;
 }
 
+.share-button > i.fa {
+  margin-left: 0;
+}
+
 #filetree {
   display: flex;
   overflow-x: none;
@@ -365,13 +369,15 @@ i.fa {
   align-items: center;
   flex-direction: row;
   margin-bottom: -0.5em;
-  padding: 1em;
+  padding: 0.5em;
 }
 
-.glowing button:hover,
-.glowing button:focus,
-.glowing button:active {
+.glowing button:hover {
   color: rgb(0, 123, 255) !important;
+}
+
+.glowing button:active {
+  color: rgb(0, 123, 195) !important;
 }
 
 .code-toolbar-button {
@@ -384,6 +390,7 @@ i.fa {
 #code-toolbar button {
   border: none;
   outline: none;
+  background: none;
 }
 
 #number-of-lines {
@@ -401,9 +408,10 @@ i.fa {
 #share-box {
   display: flex;
   position: absolute;
+  direction: rtl;
   align-items: center;
-  margin-top: 1.3em;
-  margin-left: -19em;
+  top: 3em;
+  right: 0.5em;
   z-index: 10;
   padding: 0.25em;
   border: 1px solid lightgray;
@@ -414,18 +422,25 @@ i.fa {
 #share-box * {
   position: relative;
   display: flex;
-  background-color: #fafbfc;
   line-height: unset;
 }
 
 #share-box button {
   color: rgba(0, 0, 0, 0.5);
+  border: 1px solid lightgray;
+  border-radius: 0;
+}
+
+#share-box #cancel-share {
+  border-top-right-radius: 0.25em;
+  border-bottom-right-radius: 0.25em;
 }
 
 #share-box input {
-  border: 1px solid;
+  border: 1px solid lightgray;
   border-radius: 0.25em;
-  border-color: rgba(27, 31, 35, 0.15);
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
 }
 
 pre {

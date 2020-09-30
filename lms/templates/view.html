@@ -44,15 +44,8 @@
         <div id="number-of-lines">{{ current_file.code.splitlines() | length }} lines</div>
         <div id="code-toolbar-buttons">
           {% if config.SHAREABLE_SOLUTIONS and not shared_url %}
-          <div id="share-solution" class="share-function {{ direction }}">
-            <div id="share-text" class="code-toolbar-button glowing">
-              <button id="share-action" title="Share solution"><i class="fa fa-share-alt"></i></button>
-            </div>
-            <div id="share-box" class="glowing d-none">
-              <button id="cancel-share" class="share-button" title="Disable share solution"><i class="fa fa-trash"></i></button>
-              <button id="copy-link" class="share-button" title="Copy shared link"><i class="fa fa-copy"></i></button>
-              <input id="shareable-link" type="text" readonly>
-            </div>
+          <div id="share-text" class="code-toolbar-button glowing">
+            <button id="share-action" title="Share solution"><i class="fa fa-share-alt"></i></button>
           </div>
           {% endif -%}
           <div id="download-code" class="code-toolbar-button glowing">
@@ -68,6 +61,11 @@
         </div>
       </div>
       <div id="code-view" data-id="{{ solution['id'] }}" data-file="{{ current_file.id }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}">
+        <div id="share-box" class="glowing d-none">
+          <button id="cancel-share" class="share-button" title="Disable share solution"><i class="fa fa-trash"></i></button>
+          <button id="copy-link" class="share-button" title="Copy shared link"><i class="fa fa-copy"></i></button>
+          <input id="shareable-link" type="text" readonly>
+        </div>
         <pre><code id="user-code" class="language-{{ current_file | language_name }} line-numbers highlight">{{- current_file.code | trim(chars=' ') | e -}}</code></pre>
       </div>
       {% if test_results and not shared_url %}
