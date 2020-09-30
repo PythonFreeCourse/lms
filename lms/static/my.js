@@ -34,7 +34,6 @@ function trackCopyButton(button, context) {
 
 function updateShareLink(xhr) {
   const shareBox = document.getElementById('share-box');
-  const shareText = document.getElementById('share-text');
   if (xhr.readyState === 4) {
     if (xhr.status === 200) {
       if (shareBox.classList.contains('d-none')) {
