@@ -65,8 +65,8 @@ class TestUTForExercise:
         first = auto_comments[0]
         assert first.exercise_test_name.test_name == 'test_check_bar_bar'
         assert first.exercise_test_name.pretty_test_name == 'שם כזה מגניב 2'
-        expected = ('AssertionError: איזה ברברון '
-                    "assert 'bar' == 'barbaron'   - bar   + barbaron")
+        expected = ('AssertionError: איזה ברברון'
+                    "assert 'bar' == 'barbaron'  - barbaron  + bar")
         assert expected == first.user_message
         assert "foo('bar') == 'barbaron'" in first.staff_message
 
