@@ -512,12 +512,15 @@ def _common_comments(exercise_id=None, user_id=None):
     Most common comments throughout all exercises.
     Filter by exercise id when specified.
     """
+    is_moderator_comments = (
+        (Comment.commenter.role == Role.get_staff_role().id)
+        | (Comment.commenter.role == Role.get_admin_role().id),
+    )
     query = (
-        CommentText.select(CommentText.id, CommentText.text).join(Comment)
-        .join(User).join(Role).where(
+        CommentText.select(CommentText.id, CommentText.text)
+        .join(Comment).join(User).join(Role).where(
             CommentText.flake8_key.is_null(True),
-            (Comment.commenter.role == Role.get_staff_role().id)
-            | (Comment.commenter.role == Role.get_admin_role().id),
+            is_moderator_comments,
         ).switch(Comment)
     )
 
