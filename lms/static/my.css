@@ -60,6 +60,11 @@ div#code-view {
 #exercises-page {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+  text-align: center;
+  width: 100%;
 }
 
 #exercises-header {
@@ -146,6 +151,7 @@ div#code-view {
   display: flex;
   flex-direction: row;
   align-items: left;
+  height: 100%;
 }
 
 .go-send {
