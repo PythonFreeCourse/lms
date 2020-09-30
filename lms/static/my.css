@@ -148,84 +148,6 @@ div#code-view {
   align-items: left;
 }
 
-#share-solution {
-  display: flex;
-  margin-bottom: 1em;
-}
-
-button#share-action {
-  display: flex;
-  color: rgba(0, 0, 0, 0.5);
-  border: none;
-  background: inherit;
-  align-self: center;
-  align-content: center;
-  justify-content: center;
-  padding: 0;
-  outline: none;
-}
-
-button#share-action:hover {
-  color: rgba(0, 0, 0, 0.7);
-}
-
-button#share-action:active {
-  color: #007bff;
-}
-
-#share-text {
-  display: flex;
-  font-weight: bold;
-}
-
-#share-box {
-  display: flex;
-  direction: rtl;
-}
-
-#copy-link,
-#cancel-share {
-  position: relative;
-  display: table-cell;
-  background-color: #fafbfc;
-  color: rgba(0, 0, 0, 0.5);
-  border: 1px solid;
-  border-radius: 0.25em;
-  border-color: rgba(27, 31, 35, 0.15);
-}
-
-#copy-link {
-  border-radius: 0;
-}
-
-#copy-link:hover,
-#cancel-share:hover {
-  color: rgba(0, 0, 0, 0.7);
-}
-
-#copy-link:active,
-#cancel-share:active {
-  color: #007bff;
-}
-
-#cancel-share {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-#link-input {
-  position: relative;
-  display: table-cell;
-  background-color: #fafbfc;
-  color: #24292e;
-  min-height: 2em;
-  border: 1px solid;
-  border-radius: 0.25em;
-  border-color: rgba(27, 31, 35, 0.15);
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
 .go-send {
   background: #247ba0;
   color: #ebf3f6;
@@ -265,13 +187,6 @@ button#share-action:active {
 #back-to-exercises {
   width: 100%;
   margin-top: 5vh;
-}
-
-#download-solution {
-  min-width: 6%;
-  font-size: 0.75rem;
-  size: 0.5rem;
-  align-self: center;
 }
 
 .our-button {
@@ -452,9 +367,11 @@ i.fa {
   direction: ltr;
   text-align: left;
   height: min-content;
+  display: flex;
   flex-grow: 1;
   flex-basis: min(75vw, -moz-available);
   overflow-x: hidden;
+  flex-flow: column wrap;
 }
 
 #code-view {
@@ -463,18 +380,40 @@ i.fa {
   overflow-x: hidden;
 }
 
-.button-copy {
-  position: absolute;
-  right: 1em;
-  top: 1em;
+#code-toolbar {
+  display: flex;
+  background-color: #f5f2f0;
+  border: 1px solid #e1e4e8;
+  border-top-left-radius: 0.5em;
+  border-top-right-radius: 0.5em;
+  align-items: center;
+  flex-direction: row;
+  margin-bottom: -0.5em;
+  padding-left: 1em;
+}
+
+#number-of-lines {
+  font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
+  font-size: 0.875rem;
   color: rgba(0, 0, 0, 0.5);
-  background-color: gray;
-  border-radius: 0.875em;
-  border: 0.0625em solid #fff;
+  flex: auto;
+}
+
+#code-toolbar-buttons {
+  display: flex;
+  margin-right: 0.4em;
+  align-items: center;
+}
+
+.code-toolbar-button {
+  margin-left: 0.4em;
+}
+
+.button-copy {
+  color: rgba(0, 0, 0, 0.5);
   cursor: pointer;
   font-size: 0.875rem;
   padding: 0.125em 0.5em;
-  text-decoration: none;
 }
 
 .button-copy:hover {
@@ -483,7 +422,94 @@ i.fa {
 
 .button-copy:active {
   color: #007bff;
-  background-color: white;
+}
+
+#download-solution {
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 0.875rem;
+}
+
+#download-solution:hover {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+#download-solution:active {
+  color : #007bff;
+}
+
+#share-solution {
+  display: flex;
+}
+
+button#share-action {
+  display: flex;
+  color: rgba(0, 0, 0, 0.5);
+  border: none;
+  background: inherit;
+  align-self: center;
+  align-content: center;
+  justify-content: center;
+  padding: 0;
+  outline: none;
+  margin-right: 0.2em;
+}
+
+button#share-action:hover {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+button#share-action:active {
+  color: #007bff;
+}
+
+#share-text {
+  display: flex;
+  font-weight: bold;
+}
+
+#share-box {
+  display: flex;
+  direction: rtl;
+  position: absolute;
+  margin-top: 1.3em;
+  margin-left: -19em;
+  z-index: 10;
+}
+
+#copy-link,
+#cancel-share,
+#shareable-link {
+  position: relative;
+  display: table-cell;
+  background-color: #fafbfc;
+  color: rgba(0, 0, 0, 0.5);
+  border: 1px solid;
+  border-radius: 0.25em;
+  border-color: rgba(27, 31, 35, 0.15);
+}
+
+#copy-link {
+  border-radius: 0;
+}
+
+#copy-link:hover,
+#cancel-share:hover {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+#copy-link:active,
+#cancel-share:active {
+  color: #007bff;
+}
+
+#cancel-share {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+#shareable-link {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 pre {
