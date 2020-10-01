@@ -1,5 +1,6 @@
-{% extends 'base.html' %}
+{% extends 'base.j2' %}
 
+{% block head_scripts %}<%= htmlWebpackPlugin.tags.headTags %>{% endblock %}
 {% block page_content %}
 <div class="container">
     <div id="login-container">
@@ -15,4 +16,5 @@
         </div>
     </div> 
 </div>
+ <%= htmlWebpackPlugin.tags.bodyTags %>
 {% endblock %}

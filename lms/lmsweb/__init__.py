@@ -9,8 +9,8 @@ from lms.utils import config_migrator, debug
 
 project_dir = pathlib.Path(__file__).resolve().parent.parent
 web_dir = project_dir / 'lmsweb'
-template_dir = project_dir / 'templates'
-static_dir = project_dir / 'static'
+template_dir = project_dir / 'templates' / 'dist'
+static_dir = project_dir / 'static' / 'dist'
 config_file = web_dir / 'config.py'
 config_example_file = web_dir / 'config.py.example'
 

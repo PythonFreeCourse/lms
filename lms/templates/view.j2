@@ -1,5 +1,6 @@
-{% extends 'base.html' %}
+{% extends 'base.j2' %}
 
+{% block head_scripts %}<%= htmlWebpackPlugin.tags.headTags %>{% endblock %}
 {% block page_content %}
 <div id="page-view">
   <div id="view-head">
@@ -119,7 +120,7 @@
     </div>
     {% endif %}
     {%- if files | length > 1 %}
-      {% include 'filetree.html' %}
+      {% include 'filetree.j2' %}
     {% endif -%}
   </div>
   <a id="download-solution" href="/download/{% if shared_url %}{{ shared_url }}{% else %}{{ solution['id'] }}{% endif %}" class="{{ direction }}">
@@ -128,11 +129,8 @@
     </button>
   </a>
 </div>
-<script src="{{ url_for('static', filename='prism.js') }}"></script>
-{% if not shared_url %}
 <%= htmlWebpackPlugin.tags.bodyTags[htmlWebpackPlugin.options.chunks.indexOf('view')] %>
 {%- if is_manager %}
 <%= htmlWebpackPlugin.tags.bodyTags[htmlWebpackPlugin.options.chunks.indexOf('view_admin')] %>
 {% endif -%}
-{% endif %}
 {% endblock %}

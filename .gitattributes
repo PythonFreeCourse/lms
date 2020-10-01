@@ -96,6 +96,8 @@
 *.css             text
 *.htm             text diff=html
 *.html            text diff=html
+*.j2              text diff=html
+*.jinja           text diff=html
 *.inc             text
 *.ini             text
 *.js              text

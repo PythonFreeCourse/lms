@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ _('מערכת הגשת תרגילים לקורס פייתון') }}</title>
-    <%= htmlWebpackPlugin.tags.headTags %> 
+    {% block head_scripts %}{% endblock %}
 </head>
 <body>
-    {% include 'navbar.html' %}
+    {% include 'navbar.j2' %}
     {% block page_content %}{% endblock %}
 </body>
 </html>

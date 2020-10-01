@@ -1,7 +1,7 @@
 {
-  "name": "my-webpack-project",
+  "name": "lms",
   "version": "1.0.0",
-  "description": "My webpack project",
+  "description": "Learning Management System - Exercise management",
   "main": "lms/static/my.js",
   "repository": "https://github.com/PythonFreeCourse/lms",
   "author": "Yam Mesicka <yammesicka@gmail.com>",
@@ -33,6 +33,7 @@
     "postcss": "^8.1.1",
     "postcss-loader": "^4.0.2",
     "precss": "^4.0.0",
+    "sass": "^1.26.11",
     "sass-loader": "^10.0.2",
     "style-loader": "^1.2.1",
     "stylelint": "^13.7.2",

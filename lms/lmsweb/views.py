@@ -112,7 +112,7 @@ def login():
             return fail(400, "The URL isn't safe.")
         return redirect(next_url or url_for('main'))
 
-    return render_template('login.html')
+    return render_template('login.j2')
 
 
 @webapp.route('/logout')
@@ -137,7 +137,7 @@ def banned_page():
         current_user.is_authenticated
         and current_user.role.is_banned
     ):
-        return render_template('banned.html')
+        return render_template('banned.j2')
 
 
 @webapp.route('/')
@@ -150,10 +150,7 @@ def main():
 @managers_only
 @login_required
 def status():
-    return render_template(
-        'status.html',
-        exercises=Solution.status(),
-    )
+    return render_template('status.j2', exercises=Solution.status())
 
 
 @webapp.route('/exercises')
@@ -163,7 +160,7 @@ def exercises_page():
     exercises = Solution.of_user(current_user.id, fetch_archived)
     is_manager = current_user.role.is_manager
     return render_template(
-        'exercises.html',
+        'exercises.j2',
         exercises=exercises,
         is_manager=is_manager,
         fetch_archived=fetch_archived,
@@ -307,7 +304,7 @@ def comment():
 @webapp.route('/send/<int:_exercise_id>')
 @login_required
 def send(_exercise_id):
-    return render_template('upload.html')
+    return render_template('upload.j2')
 
 
 @webapp.route('/user/<int:user_id>')
@@ -320,7 +317,7 @@ def user(user_id):
         return fail(404, 'There is no such user.')
 
     return render_template(
-        'user.html',
+        'user.j2',
         solutions=Solution.of_user(target_user.id, with_archived=True),
         user=target_user,
     )
@@ -329,7 +326,7 @@ def user(user_id):
 @webapp.route('/send', methods=['GET'])
 @login_required
 def send_():
-    return render_template('upload.html')
+    return render_template('upload.j2')
 
 
 @webapp.route('/upload', methods=['POST'])
@@ -454,7 +451,7 @@ def view(
     if viewer_is_solver:
         notifications.read_related(solution_id, current_user.id)
 
-    return render_template('view.html', **view_params)
+    return render_template('view.j2', **view_params)
 
 
 @webapp.route(f'{routes.SHARED}/<string:shared_url>')
