@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block page_content %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.0/min/dropzone.min.css" integrity="sha256-AgL8yEmNfLtCpH+gYp9xqJwiDITGqcwAbI8tCfnY2lw=" crossorigin="anonymous" />
 <div class="container">
   <div id="send-page" class="page">
     <h1 id="send-head" class="text-center">{{ _('העלאת מחברות') }}</h1>
@@ -13,7 +12,7 @@
       </form>
       <a id="back-to-exercises" class="btn btn-primary btn-lg" href="/exercises">{{ _('חזרו לרשימת התרגילים') }}</a>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.0/min/dropzone.min.js" integrity="sha256-OG/103wXh6XINV06JTPspzNgKNa/jnP1LjPP5Y3XQDY=" crossorigin="anonymous"></script>
+     <%= htmlWebpackPlugin.tags.bodyTags %>
   </div>
 </div>
 {% endblock %}
