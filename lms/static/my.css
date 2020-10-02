@@ -148,84 +148,6 @@ div#code-view {
   align-items: left;
 }
 
-#share-solution {
-  display: flex;
-  margin-bottom: 1em;
-}
-
-button#share-action {
-  display: flex;
-  color: rgba(0, 0, 0, 0.5);
-  border: none;
-  background: inherit;
-  align-self: center;
-  align-content: center;
-  justify-content: center;
-  padding: 0;
-  outline: none;
-}
-
-button#share-action:hover {
-  color: rgba(0, 0, 0, 0.7);
-}
-
-button#share-action:active {
-  color: #007bff;
-}
-
-#share-text {
-  display: flex;
-  font-weight: bold;
-}
-
-#share-box {
-  display: flex;
-  direction: rtl;
-}
-
-#copy-link,
-#cancel-share {
-  position: relative;
-  display: table-cell;
-  background-color: #fafbfc;
-  color: rgba(0, 0, 0, 0.5);
-  border: 1px solid;
-  border-radius: 0.25em;
-  border-color: rgba(27, 31, 35, 0.15);
-}
-
-#copy-link {
-  border-radius: 0;
-}
-
-#copy-link:hover,
-#cancel-share:hover {
-  color: rgba(0, 0, 0, 0.7);
-}
-
-#copy-link:active,
-#cancel-share:active {
-  color: #007bff;
-}
-
-#cancel-share {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-#link-input {
-  position: relative;
-  display: table-cell;
-  background-color: #fafbfc;
-  color: #24292e;
-  min-height: 2em;
-  border: 1px solid;
-  border-radius: 0.25em;
-  border-color: rgba(27, 31, 35, 0.15);
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
 .go-send {
   background: #247ba0;
   color: #ebf3f6;
@@ -267,13 +189,6 @@ button#share-action:active {
   margin-top: 5vh;
 }
 
-#download-solution {
-  min-width: 6%;
-  font-size: 0.75rem;
-  size: 0.5rem;
-  align-self: center;
-}
-
 .our-button {
   border-radius: 8px;
   display: block;
@@ -303,28 +218,8 @@ i.fa {
   margin-left: 0;
 }
 
-.button-copy i.fa {
+.share-button > i.fa {
   margin-left: 0;
-}
-
-.btn i.fa {
-  margin-left: 0;
-}
-
-.rtl #share-action i.fa {
-  margin-right: 0.4em;
-}
-
-.ltr #share-action i.fa {
-  margin-left: 0.4em;
-}
-
-#copy-link i.fa {
-  margin: 0.4em;
-}
-
-#cancel-share i.fa {
-  margin: 0.4em;
 }
 
 #filetree {
@@ -452,9 +347,11 @@ i.fa {
   direction: ltr;
   text-align: left;
   height: min-content;
+  display: flex;
   flex-grow: 1;
   flex-basis: min(75vw, -moz-available);
   overflow-x: hidden;
+  flex-flow: column wrap;
 }
 
 #code-view {
@@ -463,27 +360,87 @@ i.fa {
   overflow-x: hidden;
 }
 
-.button-copy {
-  position: absolute;
-  right: 1em;
-  top: 1em;
+#code-toolbar {
+  display: flex;
+  background-color: #f5f2f0;
+  border: 1px solid #e1e4e8;
+  border-top-left-radius: 0.5em;
+  border-top-right-radius: 0.5em;
+  align-items: center;
+  flex-direction: row;
+  margin-bottom: -0.5em;
+  padding: 0.5em;
+}
+
+.glowing button:hover {
+  color: rgb(0, 123, 255) !important;
+}
+
+.glowing button:active {
+  color: rgb(0, 123, 195) !important;
+}
+
+.code-toolbar-button {
+  padding: 0 0.8em;
+  margin-left: 0.2em;
   color: rgba(0, 0, 0, 0.5);
-  background-color: gray;
-  border-radius: 0.875em;
-  border: 0.0625em solid #fff;
   cursor: pointer;
+}
+
+#code-toolbar button {
+  border: none;
+  outline: none;
+  background: none;
+}
+
+#number-of-lines {
+  font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
   font-size: 0.875rem;
-  padding: 0.125em 0.5em;
-  text-decoration: none;
+  color: rgba(0, 0, 0, 0.5);
+  flex: auto;
 }
 
-.button-copy:hover {
-  color: rgba(0, 0, 0, 0.7);
+#code-toolbar-buttons {
+  display: flex;
+  align-items: center;
 }
 
-.button-copy:active {
-  color: #007bff;
-  background-color: white;
+#share-box {
+  display: flex;
+  position: absolute;
+  direction: rtl;
+  align-items: center;
+  top: 3em;
+  right: 0.5em;
+  z-index: 10;
+  padding: 0.25em;
+  border: 1px solid lightgray;
+  background: white;
+  border-radius: 5px;
+}
+
+#share-box * {
+  position: relative;
+  display: flex;
+  line-height: unset;
+}
+
+#share-box button {
+  color: rgba(0, 0, 0, 0.5);
+  border: 1px solid lightgray;
+  border-radius: 0;
+}
+
+#share-box #cancel-share {
+  border-top-right-radius: 0.25em;
+  border-bottom-right-radius: 0.25em;
+}
+
+#share-box input {
+  border: 1px solid lightgray;
+  border-radius: 0.25em;
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
 }
 
 pre {
