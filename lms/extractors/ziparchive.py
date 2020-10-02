@@ -1,10 +1,10 @@
 import fnmatch
+import os
 import pathlib
-from typing import Iterator, List, Set, Tuple
+from typing import Iterator, List, Set, Text, Tuple
 from zipfile import BadZipFile, ZipFile
 
 from lms.extractors.base import Extractor, File
-from lms.models.errors import BadUploadFile
 from lms.utils.log import log
 
 
@@ -30,35 +30,60 @@ class Ziparchive(Extractor):
         return self.is_zipfile
 
     @staticmethod
-    def _extract(archive: ZipFile, filename: str) -> File:
+    def _extract(archive: ZipFile, filename: str, dirname: str = '') -> File:
         with archive.open(filename) as current_file:
             log.debug(f'Extracting from archive: {filename}')
             code = current_file.read()
         decoded = code.decode('utf-8', errors='replace').replace('\x00', '')
-        return File(path=f'/{filename}', code=decoded)
+        return File(path=f'/{filename.lstrip(dirname)}', code=decoded)
 
-    def get_exercise(self, file: ZipFile) -> Tuple[int, List[File]]:
+    def get_files(
+        self, archive: ZipFile, namelist: List[Text], dirname: str = '',
+    ) -> List[File]:
+        unwanted_files = self.get_unwanted_files(namelist)
+        return [
+            self._extract(archive, filename, dirname)
+            for filename in namelist
+            if (
+                filename.startswith(dirname)
+                and filename not in unwanted_files
+                and filename != dirname
+            )
+        ]
+
+    def get_exercises_by_dirs(
+        self, archive: ZipFile, namelist: List[Text],
+    ) -> Iterator[Tuple[int, List[File]]]:
+        for dirname in namelist:
+            exercise_id, _ = self._clean(dirname.rpartition(os.path.sep)[0])
+            if exercise_id and not dirname.rpartition(os.path.sep)[-1]:
+                # Checking if the dirname is the first dir in the zipfile
+                # and the first dir is the exercise id.
+                files = self.get_files(archive, namelist, dirname)
+
+                yield exercise_id, files
+
+    def get_exercise(self, file: ZipFile) -> Iterator[Tuple[int, List[File]]]:
         assert self.filename is not None
         exercise_id, _ = self._clean(self.filename.rpartition('.')[0])
-        if not exercise_id:
-            raise BadUploadFile('Invalid zip name', self.filename)
 
         with file as archive:
             namelist = archive.namelist()
-            unwanted_files = self.get_unwanted_files(namelist)
+            if not exercise_id:
+                yield from(
+                    (exercise_id, files)
+                    for exercise_id, files in (
+                        self.get_exercises_by_dirs(archive, namelist)
+                    ))
 
-            files = [
-                self._extract(archive, filename)
-                for filename in namelist
-                if filename not in unwanted_files
-            ]
-
-        return exercise_id, files
+            else:
+                files = self.get_files(archive, namelist)
+                yield exercise_id, files
 
     def get_exercises(self) -> Iterator[Tuple[int, List[File]]]:
-        exercise_id, files = self.get_exercise(self.archive)
-        if exercise_id and files and any(file.code for file in files):
-            yield (exercise_id, files)
+        for exercise_id, files in self.get_exercise(self.archive):
+            if exercise_id and files and any(file.code for file in files):
+                yield (exercise_id, files)
 
     @staticmethod
     def get_unwanted_files_types() -> Iterator[str]:
