@@ -97,7 +97,7 @@ def is_safe_url(target):
 
 
 def get_next_url(url_next_param: Optional[str]):
-    next_url = url_next_param
+    next_url = url_next_param if url_next_param else None
     if not is_safe_url(next_url):
         return fail(400, "The URL isn't safe.")
     return redirect(next_url or url_for('main'))
