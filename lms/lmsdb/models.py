@@ -335,7 +335,7 @@ class Solution(BaseModel):
     ) -> bool:
         hash_ = cls.create_hash(content) if not already_hashed else content
 
-        sub_query = cls.select(fn.MAX(cls.submission_timestamp)).where(
+        latest_timestamp_query = cls.select(fn.MAX(cls.submission_timestamp)).where(
             cls.solver == user,
             cls.exercise == exercise,
         )
@@ -343,7 +343,7 @@ class Solution(BaseModel):
         return cls.select().where(
             cls.hashed == hash_,
             cls.solver == user,
-            cls.submission_timestamp == sub_query,
+            cls.submission_timestamp == latest_timestamp_query,
         ).exists()
 
     def start_checking(self) -> bool:

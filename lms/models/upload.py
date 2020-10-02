@@ -59,7 +59,6 @@ def _run_auto_checks(solution: Solution) -> None:
 
 def new(user: User, file: FileStorage) -> Tuple[List[int], List[int]]:
     solution_hash = hashing.by_file(file)
-
     matches: List[int] = []
     misses: List[int] = []
     for exercise_id, files in Extractor(file):
