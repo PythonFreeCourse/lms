@@ -23,7 +23,7 @@ from lms.lmsdb.models import (
     SharedSolution, Solution, SolutionFile, User, database,
 )
 from lms.lmsweb import babel, routes, webapp
-from lms.lmsweb.config import LANGUAGES, LOCALE, SESSION_COOKIE_SECURE
+from lms.lmsweb.config import LANGUAGES, LOCALE
 from lms.models import notifications, share_link, solutions, upload
 from lms.models.errors import AlreadyExists, BadUploadFile, LmsError, fail
 from lms.utils.consts import RTL_LANGUAGES
