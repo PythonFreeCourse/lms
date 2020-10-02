@@ -34,4 +34,4 @@ LANGUAGES = {
     'he': 'Hebrew',
     'en': 'English',
 }
-LOCALE = 'he'
+LOCALE = 'en'
