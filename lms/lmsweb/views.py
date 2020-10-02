@@ -23,7 +23,7 @@ from lms.lmsdb.models import (
     SharedSolution, Solution, SolutionFile, User, database,
 )
 from lms.lmsweb import babel, routes, webapp
-from lms.lmsweb.config import LANGUAGES, LOCALE
+from lms.lmsweb.config import LANGUAGES, LOCALE, SESSION_COOKIE_SECURE
 from lms.models import notifications, share_link, solutions, upload
 from lms.models.errors import AlreadyExists, BadUploadFile, LmsError, fail
 from lms.utils.consts import RTL_LANGUAGES
@@ -96,21 +96,28 @@ def is_safe_url(target):
     )
 
 
+def get_next_url(url_next_param: Optional[str]):
+    next_url = url_next_param
+    if not is_safe_url(next_url):
+        return fail(400, "The URL isn't safe.")
+    return redirect(next_url or url_for('main'))
+
+
 @webapp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('main'))
+        return get_next_url(request.args.get('next'))
 
     username = request.form.get('username')
     password = request.form.get('password')
+    next_page = request.form.get('next')
     user = User.get_or_none(username=username)
 
     if user is not None and user.is_password_valid(password):
         login_user(user)
-        next_url = request.args.get('next_url')
-        if not is_safe_url(next_url):
-            return fail(400, "The URL isn't safe.")
-        return redirect(next_url or url_for('main'))
+        return get_next_url(next_page)
+    elif user is not None:
+        return redirect(url_for('login', **{'next': next_page}))
 
     return render_template('login.html')
 
