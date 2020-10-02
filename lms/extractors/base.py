@@ -77,7 +77,7 @@ class Extractor:
     def can_extract(self) -> bool:
         raise NotImplementedError()
 
-    def __iter__(self) -> Iterator[Tuple[int, List[File]]]:
+    def __iter__(self) -> Iterator[Tuple[int, List[File], str]]:
         for cls in self.__class__.__subclasses__():
             log.debug(f'Trying extractor: {cls.__name__}')
             extractor = cls(to_extract=self.to_extract)

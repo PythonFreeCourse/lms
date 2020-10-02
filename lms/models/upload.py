@@ -7,7 +7,7 @@ from lms.lmsdb.models import Exercise, Solution, User
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmstests.public.linters import tasks as linters_tasks
 from lms.lmstests.public.unittests import tasks as unittests_tasks
-from lms.models.errors import AlreadyExists, BadUploadFile, UploadError
+from lms.models.errors import AlreadyExists, LmsError, UploadError
 from lms.lmsweb import config
 from lms.utils.log import log
 
@@ -52,21 +52,19 @@ def _run_auto_checks(solution: Solution) -> None:
 def new(user: User, file: FileStorage) -> Tuple[List[int], List[int]]:
     matches: List[int] = []
     misses: List[int] = []
-    error = None
+    errors: List[LmsError] = []
     for exercise_id, files, solution_hash in Extractor(file):
         try:
             solution = _upload_to_db(exercise_id, user, files, solution_hash)
             _run_auto_checks(solution)
         except (UploadError, AlreadyExists) as e:
             log.debug(e)
-            error = e
+            errors.append(e)
             misses.append(exercise_id)
         else:
             matches.append(exercise_id)
 
-    if not matches:
-        if error is not None:
-            raise error
-        raise BadUploadFile("Can't resolve exercise id", file.filename)
+    if not matches and errors:
+        raise LmsError(errors)
 
     return matches, misses

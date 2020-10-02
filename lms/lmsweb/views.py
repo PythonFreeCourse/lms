@@ -350,7 +350,7 @@ def upload_page():
 
     try:
         matches, misses = upload.new(user, file)
-    except (AlreadyExists, BadUploadFile) as e:
+    except (AlreadyExists, BadUploadFile, LmsError) as e:
         log.debug(e)
         return fail(400, str(e))
 
