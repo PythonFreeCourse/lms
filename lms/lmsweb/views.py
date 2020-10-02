@@ -100,7 +100,9 @@ def get_next_url(url_next_param: Optional[str]):
     next_url = url_next_param
     if not is_safe_url(next_url):
         return fail(400, "The URL isn't safe.")
-    return redirect(next_url or url_for('main'))
+    if next_url and next_url != 'None':
+        return redirect(next_url)
+    return redirect(url_for('main'))
 
 
 @webapp.route('/login', methods=['GET', 'POST'])
