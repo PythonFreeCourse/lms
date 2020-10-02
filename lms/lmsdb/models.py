@@ -413,7 +413,12 @@ class Solution(BaseModel):
         if len(files) == 1:
             hash_ = cls.create_hash(files[0].code)
 
-        if hash_ and cls.is_duplicate(hash_, solver, exercise, already_hashed=True):
+        if hash_ and cls.is_duplicate(
+            hash_,
+            solver,
+            exercise,
+            already_hashed=True,
+        ):
             raise AlreadyExists('This solution already exists.')
 
         instance = cls.create(**{

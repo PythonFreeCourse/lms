@@ -23,8 +23,8 @@ class TestSolutionDb:
             exercise: Exercise,
             student_user: User,
     ):
-        first_solution = conftest.create_solution(exercise, student_user)
-        second_solution = conftest.create_solution(exercise, student_user)
+        first_solution: Solution = conftest.create_solution(exercise, student_user)
+        second_solution: Solution = conftest.create_solution(exercise, student_user)
         assert second_solution.state == self.created_state
         assert first_solution.refresh().state == self.old_solution_state
 
@@ -47,10 +47,28 @@ class TestSolutionDb:
         assert next_unchecked.id == second_solution.id
         assert next_unchecked_by_id.id == second_solution.id
 
-        third_solution = conftest.create_solution(exercise, student_user, code='123')
-        fourth_solution = conftest.create_solution(exercise, student_user, code='1234')
-        assert Solution.is_duplicate(fourth_solution.hashed, student_user, exercise, already_hashed=True)
-        assert not Solution.is_duplicate(third_solution.hashed, student_user, exercise, already_hashed=True)
+        third_solution: Solution = conftest.create_solution(
+            exercise,
+            student_user,
+            code='123',
+        )
+        fourth_solution: Solution = conftest.create_solution(
+            exercise,
+            student_user,
+            code='1234',
+        )
+        assert Solution.is_duplicate(
+            fourth_solution.hashed,
+            student_user,
+            exercise,
+            already_hashed=True,
+        )
+        assert not Solution.is_duplicate(
+            third_solution.hashed,
+            student_user,
+            exercise,
+            already_hashed=True,
+        )
 
     def test_next_exercise_with_cleanest_code(
             self,
