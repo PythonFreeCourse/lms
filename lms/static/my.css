@@ -371,9 +371,9 @@ i.fa {
 }
 
 .upload-feedback {
-  text-align: center;
-  display: block;
+  display: flex;
   padding-top: 1em;
+  justify-content: center;
 }
 
 /* Check/see exercise view */

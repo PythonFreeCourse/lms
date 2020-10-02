@@ -107,19 +107,19 @@ function trackReadAllNotificationsButton(button) {
 }
 
 function getPostUploadMessage() {
-  const myDropzone = Dropzone.forElement("#demo-upload");
+  const myDropzone = Dropzone.forElement('#demo-upload');
   const feedbacks = document.getElementById('upload-feedbacks');
   const matchesSpan = document.getElementById('upload-matches');
   const missesSpan = document.getElementById('upload-misses');
   myDropzone.on('success', function() {
-    const args = Array.prototype.slice.call(arguments)[1];
+    const args = Array.from(arguments).slice(1)[0];
     const matches = args['exercise_matches'];
     const misses = args['exercise_misses'];
     if (matches.length) {
-      matchesSpan.append(matches + ',');
+      matchesSpan.innerHTML += matches + ',';
     }
     if (misses.length) {
-      missesSpan.append(misses + ',');
+      missesSpan.innerHTML += misses + ',';
     }
     feedbacks.classList.remove('d-none');
   });
@@ -130,14 +130,15 @@ window.escapeUnicode = escapeUnicode;
 window.addEventListener('load', () => {
   updateNotificationsBadge();
   trackReadAllNotificationsButton(document.getElementById('read-notifications'));
-  try {
+  if (document.getElementById('code-view') !== null) {
     const codeElement = document.getElementById('code-view').dataset;
     const solutionId = codeElement.id;
-    trackCopyButton(document.getElementById('copy-button'), document.getElementById('user-code').textContent);
+    const userCode = document.getElementById('user-code').textContent;
+    trackCopyButton(document.getElementById('copy-button'), userCode);
     trackShareSolution(solutionId, document.getElementById('share-action'));
     trackDisableShareButton(solutionId, document.getElementById('cancel-share'));
-  } catch(e) {}
-  try {
+  }
+  if (document.getElementById('demo-upload') !== null) {
     getPostUploadMessage();
-  } catch(e) {}
+  }
 });
