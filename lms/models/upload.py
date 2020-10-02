@@ -19,10 +19,7 @@ def _is_uploaded_before(
         file_hash: str,
 ) -> bool:
     return Solution.is_duplicate(
-        file_hash,
-        user,
-        exercise,
-        already_hashed=True,
+        file_hash, user, exercise, already_hashed=True,
     )
 
 
@@ -59,8 +56,10 @@ def _run_auto_checks(solution: Solution) -> None:
 
 def new(user: User, file: FileStorage) -> Tuple[List[int], List[int]]:
     solution_hash = hashing.by_file(file)
+
     matches: List[int] = []
     misses: List[int] = []
+
     for exercise_id, files in Extractor(file):
         exercise: Exercise = Exercise.get_or_none(exercise_id)
         if _is_uploaded_before(user, exercise, solution_hash):
