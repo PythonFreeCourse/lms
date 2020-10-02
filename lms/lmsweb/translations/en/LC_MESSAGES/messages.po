@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  lmsweb-1.0\n"
 "Report-Msgid-Bugs-To: bugs@mesicka.com\n"
-"POT-Creation-Date: 2020-09-28 15:12+0300\n"
+"POT-Creation-Date: 2020-10-02 17:31+0300\n"
 "PO-Revision-Date: 2020-09-16 18:29+0300\n"
 "Last-Translator: Or Ronai\n"
 "Language: en\n"
@@ -32,18 +32,18 @@ msgstr "Your solution for the %(subject)s exercise has been checked."
 msgid "הבודק האוטומטי נתן %(errors_num)d הערות על תרגילך %(name)s."
 msgstr "The automatic checker gave you %(errors_num)d for your %(name)s solution."
 
-#: lmstests/public/unittests/services.py:83
-msgid "הבודק האוטומטי לא הצליח להריץ את הקוד שלך."
-msgstr "The automatic checker couldn't run your code."
-
-#: lmstests/public/unittests/services.py:90
-msgid "אחי, בדקת את הקוד שלך?"
-msgstr "Bro, did you check your code?"
-
-#: lmstests/public/unittests/services.py:125
+#: lmstests/public/unittests/services.py:96
 #, python-format
 msgid "הבודק האוטומטי נכשל ב־ %(number)d דוגמאות בתרגיל \"%(subject)s\"."
 msgstr "The automatic checker failed in %(number)d examples in your \"%(subject)s\" solution."
+
+#: lmstests/public/unittests/services.py:112
+msgid "הבודק האוטומטי לא הצליח להריץ את הקוד שלך."
+msgstr "The automatic checker couldn't run your code."
+
+#: lmstests/public/unittests/services.py:119
+msgid "אחי, בדקת את הקוד שלך?"
+msgstr "Bro, did you check your code?"
 
 #: lmsweb/tools/registration.py:104
 msgid "מערכת הגשת התרגילים"
@@ -185,6 +185,14 @@ msgstr "Drag here the notebook file or click and choose it from your computer."
 #: templates/upload.html:14
 msgid "חזרו לרשימת התרגילים"
 msgstr "Back to Exercises List"
+
+#: templates/upload.html:17
+msgid "הועלו"
+msgstr "Matches"
+
+#: templates/upload.html:18
+msgid "נכשלו"
+msgstr "Misses"
 
 #: templates/user.html:9
 msgid "פרטי משתמש:"
