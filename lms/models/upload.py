@@ -13,7 +13,7 @@ from lms.utils import hashing
 from lms.utils.log import log
 
 
-def _is_uploaded_before(user: User, file_hash: str, exercise: Exercise) -> bool:
+def _is_uploaded_before(user: User, exercise: Exercise, file_hash: str) -> bool:
     return Solution.is_duplicate(file_hash, user, exercise, already_hashed=True)
 
 
@@ -51,12 +51,11 @@ def _run_auto_checks(solution: Solution) -> None:
 def new(user: User, file: FileStorage) -> Tuple[List[int], List[int]]:
     solution_hash = hashing.by_file(file)
 
-
     matches: List[int] = []
     misses: List[int] = []
     for exercise_id, files in Extractor(file):
         exercise: Exercise = Exercise.get_or_none(exercise_id)
-        if _is_uploaded_before(user, solution_hash):
+        if _is_uploaded_before(user, exercise, solution_hash):
             raise AlreadyExists('You try to reupload an old solution.')
         try:
             solution = _upload_to_db(exercise_id, user, files, solution_hash)

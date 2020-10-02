@@ -337,7 +337,7 @@ class Solution(BaseModel):
 
         sub_query = cls.select(fn.MAX(cls.submission_timestamp)).where(
             cls.solver == user,
-            cls.exercise == exercise
+            cls.exercise == exercise,
         )
 
         return cls.select().where(
