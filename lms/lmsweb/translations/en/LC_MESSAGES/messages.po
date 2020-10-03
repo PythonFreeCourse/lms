@@ -266,10 +266,6 @@ msgstr "Presenter"
 msgid "ניווט בגרסאות ההגשה"
 msgstr "Navigate in solution versions"
 
-#: templates/view.html:35
-msgid "שיתוף תרגיל"
-msgstr "Share solution"
-
 #: templates/view.html:48
 msgid "לסיום בדיקה"
 msgstr "Finish Checking"

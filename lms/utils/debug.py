@@ -12,4 +12,4 @@ def start() -> None:
     if pid is not None and pid > 1:
         import debugpy  # type: ignore  # NOQA
 
-        debugpy.listen(('0.0.0.0', 5678))
+        debugpy.listen(('0.0.0.0', 5678))  # NOQA
