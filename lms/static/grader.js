@@ -52,12 +52,18 @@ function sendComment(kind, fileId, line, commentData) {
 function visuallyRemoveComment(commentId) {
   const commentElement = document.querySelector(`.grader-delete[data-commentid="${commentId}"]`).closest('.comment');
   const lineElement = document.querySelector(`.line[data-line="${commentElement.dataset.line}"]`);
+  const existingPopover = $(lineElement).data('bs.popover');
   const hr = commentElement.nextElementSibling || commentElement.previousElementSibling;
   if (hr === null) {
     lineElement.dataset.marked = false;
     window.markLine(lineElement, 'none');
     $(lineElement).popover('dispose');
   } else {
+    let removeContent = '<hr>' + commentElement.outerHTML;
+    if (!existingPopover.config.content.includes(removeContent)) {
+      removeContent = commentElement.outerHTML + ' <hr>';
+    }
+    existingPopover.config.content = existingPopover.config.content.replace(removeContent, '');
     hr.parentNode.removeChild(hr);
     commentElement.parentNode.removeChild(commentElement);
   }
