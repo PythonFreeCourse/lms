@@ -372,8 +372,26 @@ i.fa {
 
 .upload-feedback {
   display: flex;
-  padding-top: 1em;
+  margin-top: 1em;
   justify-content: center;
+}
+
+.feedback-message {
+  display: block;
+  opacity: 1;
+}
+
+.feedback-hidden {
+  display: none;
+}
+
+.feedback-transition.feedback-hidden {
+  display: block;
+  opacity: 0;
+}
+
+.feedback-transition {
+  transition: opacity 0.5s ease;
 }
 
 /* Check/see exercise view */

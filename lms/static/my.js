@@ -112,16 +112,24 @@ function getPostUploadMessage() {
   const matchesSpan = document.getElementById('upload-matches');
   const missesSpan = document.getElementById('upload-misses');
   myDropzone.on('success', function() {
-    const args = Array.from(arguments).slice(1)[0];
-    const matches = args['exercise_matches'];
-    const misses = args['exercise_misses'];
+    const uploadStatus = Array.from(arguments).slice(1)[0];
+    const matches = uploadStatus['exercise_matches'];
+    const misses = uploadStatus['exercise_misses'];
+    if (!feedbacks.classList.contains('feedback-hidden')) {
+      feedbacks.classList.add('feedback-hidden');
+    }
     if (matches.length) {
-      matchesSpan.innerHTML += matches + ',';
+      matchesSpan.innerText += matches + ',';
     }
     if (misses.length) {
-      missesSpan.innerHTML += misses + ',';
+      missesSpan.innerText += misses + ',';
     }
-    feedbacks.classList.remove('d-none');
+    feedbacks.classList.add('feedback-transition');
+    feedbacks.clientWidth;
+    feedbacks.classList.remove('feedback-hidden');
+    feedbacks.addEventListener('transitionend', function() {
+      feedbacks.classList.remove('feedback-transition');
+    });
   });
 }
 
@@ -130,9 +138,10 @@ window.escapeUnicode = escapeUnicode;
 window.addEventListener('load', () => {
   updateNotificationsBadge();
   trackReadAllNotificationsButton(document.getElementById('read-notifications'));
-  if (document.getElementById('code-view') !== null) {
-    const codeElement = document.getElementById('code-view').dataset;
-    const solutionId = codeElement.id;
+  const codeElement = document.getElementById('code-view')
+  if (codeElement !== null) {
+    const codeElementData = codeElement.dataset;
+    const solutionId = codeElementData.id;
     const userCode = document.getElementById('user-code').textContent;
     trackCopyButton(document.getElementById('copy-button'), userCode);
     trackShareSolution(solutionId, document.getElementById('share-action'));
