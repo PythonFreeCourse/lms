@@ -35,31 +35,36 @@ class Ziparchive(Extractor):
             log.debug(f'Extracting from archive: {filename}')
             code = current_file.read()
         decoded = code.decode('utf-8', errors='replace').replace('\x00', '')
-        return File(path=f'/{filename.lstrip(dirname)}', code=decoded)
+        filename = filename[len(dirname):]
+        return File(path=f'/{filename}', code=decoded)
 
     def get_files(
-        self, archive: ZipFile, namelist: List[Text], dirname: str = '',
-    ) -> List[File]:
-        unwanted_files = self.get_unwanted_files(namelist)
-        return [
+        self, archive: ZipFile, filenames: List[Text], dirname: str = '',
+    ) -> Iterator[File]:
+        unwanted_files = self.get_unwanted_files(filenames)
+        yield from(
             self._extract(archive, filename, dirname)
-            for filename in namelist
+            for filename in filenames
             if (
                 filename.startswith(dirname)
                 and filename not in unwanted_files
                 and filename != dirname
             )
-        ]
+        )
 
     def get_exercises_by_dirs(
-        self, archive: ZipFile, namelist: List[Text],
+        self, archive: ZipFile, filenames: List[Text],
     ) -> Iterator[Tuple[int, List[File]]]:
-        for dirname in namelist:
-            exercise_id, _ = self._clean(dirname.rpartition(os.path.sep)[0])
-            if exercise_id and not dirname.rpartition(os.path.sep)[-1]:
+        for dirname in filenames:
+            parent_name, _ = os.path.split(dirname)
+            exercise_id, _ = self._clean(parent_name)
+            if (
+                exercise_id
+                and len(dirname.strip(os.path.sep).split(os.path.sep)) == 1
+            ):
                 # Checking if the dirname is the first dir in the zipfile
                 # and the first dir is the exercise id.
-                files = self.get_files(archive, namelist, dirname)
+                files = list(self.get_files(archive, filenames, dirname))
 
                 yield exercise_id, files
 
@@ -68,16 +73,16 @@ class Ziparchive(Extractor):
         exercise_id, _ = self._clean(self.filename.rpartition('.')[0])
 
         with file as archive:
-            namelist = archive.namelist()
+            filenames = archive.namelist()
             if not exercise_id:
-                yield from(
+                yield from (
                     (exercise_id, files)
-                    for exercise_id, files in (
-                        self.get_exercises_by_dirs(archive, namelist)
-                    ))
+                    for exercise_id, files
+                    in self.get_exercises_by_dirs(archive, filenames)
+                )
 
             else:
-                files = self.get_files(archive, namelist)
+                files = list(self.get_files(archive, filenames))
                 yield exercise_id, files
 
     def get_exercises(self) -> Iterator[Tuple[int, List[File]]]:

@@ -65,6 +65,6 @@ def new(user: User, file: FileStorage) -> Tuple[List[int], List[int]]:
             matches.append(exercise_id)
 
     if not matches and errors:
-        raise LmsError(errors)
+        raise UploadError(errors)
 
     return matches, misses
