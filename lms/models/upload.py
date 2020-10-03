@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 from werkzeug.datastructures import FileStorage
 
@@ -7,7 +7,7 @@ from lms.lmsdb.models import Exercise, Solution, User
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmstests.public.linters import tasks as linters_tasks
 from lms.lmstests.public.unittests import tasks as unittests_tasks
-from lms.models.errors import AlreadyExists, LmsError, UploadError
+from lms.models.errors import AlreadyExists, UploadError
 from lms.lmsweb import config
 from lms.utils.log import log
 
@@ -52,7 +52,7 @@ def _run_auto_checks(solution: Solution) -> None:
 def new(user: User, file: FileStorage) -> Tuple[List[int], List[int]]:
     matches: List[int] = []
     misses: List[int] = []
-    errors: List[LmsError] = []
+    errors: List[Union[UploadError, AlreadyExists]] = []
     for exercise_id, files, solution_hash in Extractor(file):
         try:
             solution = _upload_to_db(exercise_id, user, files, solution_hash)

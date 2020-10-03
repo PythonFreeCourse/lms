@@ -42,7 +42,7 @@ class Ziparchive(Extractor):
         self, archive: ZipFile, filenames: List[Text], dirname: str = '',
     ) -> Iterator[File]:
         unwanted_files = self.get_unwanted_files(filenames)
-        yield from(
+        yield from (
             self._extract(archive, filename, dirname)
             for filename in filenames
             if (
@@ -56,17 +56,14 @@ class Ziparchive(Extractor):
         self, archive: ZipFile, filenames: List[Text],
     ) -> Iterator[Tuple[int, List[File]]]:
         for dirname in filenames:
-            parent_name, _ = os.path.split(dirname)
-            exercise_id, _ = self._clean(parent_name)
-            if (
-                exercise_id
-                and len(dirname.strip(os.path.sep).split(os.path.sep)) == 1
-            ):
-                # Checking if the dirname is the first dir in the zipfile
-                # and the first dir is the exercise id.
-                files = list(self.get_files(archive, filenames, dirname))
+            if len(dirname.strip(os.path.sep).split(os.path.sep)) == 1:
+                # Checking if the dirname is in the first dir in the zipfile
+                parent_name, _ = os.path.split(dirname)
+                exercise_id, _ = self._clean(parent_name)
+                if exercise_id:
+                    files = list(self.get_files(archive, filenames, dirname))
 
-                yield exercise_id, files
+                    yield exercise_id, files
 
     def get_exercise(self, file: ZipFile) -> Iterator[Tuple[int, List[File]]]:
         assert self.filename is not None
@@ -74,16 +71,12 @@ class Ziparchive(Extractor):
 
         with file as archive:
             filenames = archive.namelist()
-            if not exercise_id:
-                yield from (
-                    (exercise_id, files)
-                    for exercise_id, files
-                    in self.get_exercises_by_dirs(archive, filenames)
-                )
-
-            else:
+            if exercise_id:
                 files = list(self.get_files(archive, filenames))
                 yield exercise_id, files
+
+            else:
+                yield from self.get_exercises_by_dirs(archive, filenames)
 
     def get_exercises(self) -> Iterator[Tuple[int, List[File]]]:
         for exercise_id, files in self.get_exercise(self.archive):
