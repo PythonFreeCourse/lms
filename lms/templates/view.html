@@ -29,19 +29,6 @@
       {% endfor -%}
       </ul>
     </nav>
-    {% if config.SHAREABLE_SOLUTIONS %}
-    <div id="share-solution" class="share-function {{ direction }}">
-      <div id="share-text">
-        <span>{{ _('שיתוף תרגיל') }}: </span>
-        <button id="share-action" title="Share solution"><i class="fa fa-share-alt"></i></button>
-      </div>
-      <div id="share-box" class="d-none">
-        <span id="cancel-share" title="Disable share solution"><i class="fa fa-trash"></i></span>
-        <span id="copy-link" title="Copy shared link"><i class="fa fa-copy"></i></span>
-        <input type="text" id="shareable-link" size="42" readonly>
-      </div>
-    </div>
-    {% endif -%}
     {% if is_manager and not shared_url %}
         <div class="progress manager-progress-bar">
             <div class="progress-bar" style="width: {{ left }}%;" role="progressbar" aria-valuenow="{{ left }}" aria-valuemax="100">
@@ -53,11 +40,35 @@
   </div>
   <div id="view-body">
     <div class="code-view-container">
+      <div id="code-toolbar">
+        <div id="number-of-lines">{{ current_file.code.splitlines() | length }} lines</div>
+        <div id="code-toolbar-buttons">
+          {% if config.SHAREABLE_SOLUTIONS and not shared_url %}
+          <div id="share-solution" class="share-function">
+            <div id="share-text" class="code-toolbar-button glowing">
+              <button id="share-action" title="Share solution"><i class="fa fa-share-alt"></i></button>
+            </div>
+            <div id="share-box" class="glowing d-none">
+              <button id="cancel-share" class="share-button" title="Disable share solution"><i class="fa fa-trash"></i></button>
+              <button id="copy-link" class="share-button" title="Copy shared link"><i class="fa fa-copy"></i></button>
+              <input id="shareable-link" type="text" readonly>
+            </div>
+          </div>
+          {% endif -%}
+          <div id="download-code" class="code-toolbar-button glowing">
+            <form>
+              <button id="download-solution" formaction="/download/{% if shared_url %}{{ shared_url }}{% else %}{{ solution['id'] }}{% endif %}">
+                <i class="fa fa-download"></i>
+              </button>
+            </form>
+          </div>
+          <div id="copy-code" class="code-toolbar-button glowing">
+            <button id="copy-button" class="button-copy" title="Copy code"><i class="fa fa-copy"></i></button>
+          </div>
+        </div>
+      </div>
       <div id="code-view" data-id="{{ solution['id'] }}" data-file="{{ current_file.id }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}">
         <pre><code id="user-code" class="language-{{ current_file | language_name }} line-numbers highlight">{{- current_file.code | trim(chars=' ') | e -}}</code></pre>
-      </div>
-      <div id="copy-code">
-        <a href="#" id="copy-button" class="button-copy" title="Copy code"><i class="fa fa-copy"></i></a>
       </div>
       {% if test_results and not shared_url %}
       <div class="test-results">
@@ -122,11 +133,6 @@
       {% include 'filetree.html' %}
     {% endif -%}
   </div>
-  <a id="download-solution" href="/download/{% if shared_url %}{{ shared_url }}{% else %}{{ solution['id'] }}{% endif %}" class="{{ direction }}">
-    <button class="btn btn-primary btn-sm btn-block">
-      <i class="fa fa-download"></i> {{ _('הורד פתרון') }}
-    </button>
-  </a>
 </div>
 <script src="{{ url_for('static', filename='prism.js') }}"></script>
 {% if not shared_url %}

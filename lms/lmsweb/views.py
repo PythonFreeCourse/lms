@@ -369,7 +369,7 @@ def download(download_id: str):
         download_id (str): Can be on each side of
                            a solution.id and sharedsolution.shared_url.
     """
-    solution = Solution.get_or_none(download_id)
+    solution = Solution.get_or_none(Solution.id == download_id)
     shared_solution = SharedSolution.get_or_none(
         SharedSolution.shared_url == download_id,
     )
