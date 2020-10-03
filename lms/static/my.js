@@ -81,6 +81,10 @@ function trackDisableShareButton(solutionId, button) {
 function updateNotificationsBadge() {
   const dropdown = document.getElementById('navbarNavDropdown');
   const container = document.getElementById('notifications-list');
+  if (dropdown === null || container === null) {
+    return;
+  }
+
   const unread = container.querySelectorAll('.dropdown-item[data-read="false"]');
   const counter = dropdown.querySelector('#notification-count');
   const bgColor = (unread.length > 0) ? badColor : naturalColor;
@@ -95,6 +99,10 @@ function sendReadAllNotificationsRequest() {
 }
 
 function trackReadAllNotificationsButton(button) {
+  if (button === null) {
+    return;
+  }
+
   button.addEventListener('click', () => {
     sendReadAllNotificationsRequest();
     const notifications = document.querySelectorAll('.dropdown-item[data-read="false"]');
@@ -105,20 +113,9 @@ function trackReadAllNotificationsButton(button) {
   });
 }
 
-function getPostUploadMessage() {
-  const myDropzone = Dropzone.forElement('#demo-upload');
-  const feedbacks = document.getElementById('upload-feedbacks');
-  const matchesSpan = document.getElementById('upload-matches');
-  const missesSpan = document.getElementById('upload-misses');
-  myDropzone.on('success', function() {
-    const uploadStatus = Array.from(arguments).slice(1)[0];
-    postUploadMessageUpdate(feedbacks, uploadStatus, matchesSpan, missesSpan);
-  });
-}
-
 function postUploadMessageUpdate(feedbacks, uploadStatus, matchesSpan, missesSpan) {
-  const matches = uploadStatus['exercise_matches'];
-  const misses = uploadStatus['exercise_misses'];
+  const matches = uploadStatus.exercise_matches;
+  const misses = uploadStatus.exercise_misses;
   if (!feedbacks.classList.contains('feedback-hidden')) {
     feedbacks.classList.add('feedback-hidden');
   }
@@ -131,10 +128,23 @@ function postUploadMessageUpdate(feedbacks, uploadStatus, matchesSpan, missesSpa
     missesSpan.classList.remove('feedback-hidden');
   }
   feedbacks.classList.add('feedback-transition');
-  feedbacks.clientWidth;  // Forces layout to ensure the transition
+  feedbacks.clientWidth; // Forces layout to ensure the transition
   feedbacks.classList.remove('feedback-hidden');
-  feedbacks.addEventListener('transitionend', function() {
+  feedbacks.addEventListener('transitionend', () => {
     feedbacks.classList.remove('feedback-transition');
+  });
+}
+
+function getPostUploadMessage() {
+  const myDropzone = Dropzone.forElement('#demo-upload');
+  const feedbacks = document.getElementById('upload-feedbacks');
+  const matchesSpan = document.getElementById('upload-matches');
+  const missesSpan = document.getElementById('upload-misses');
+  myDropzone.on('success', (...args) => {
+    const uploadStatus = Array.from(args).slice(1)[0];
+    if (uploadStatus !== null) {
+      postUploadMessageUpdate(feedbacks, uploadStatus, matchesSpan, missesSpan);
+    }
   });
 }
 
@@ -143,7 +153,7 @@ window.escapeUnicode = escapeUnicode;
 window.addEventListener('load', () => {
   updateNotificationsBadge();
   trackReadAllNotificationsButton(document.getElementById('read-notifications'));
-  const codeElement = document.getElementById('code-view')
+  const codeElement = document.getElementById('code-view');
   if (codeElement !== null) {
     const codeElementData = codeElement.dataset;
     const solutionId = codeElementData.id;
