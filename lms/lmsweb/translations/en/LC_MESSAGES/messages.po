@@ -57,7 +57,7 @@ msgstr "%(solver)s has replied for your \"%(subject)s\" check."
 #: models/solutions.py:29
 #, python-format
 msgid "%(checker)s הגיב לך על תרגיל \"%(subject)s\"."
-msgstr "%(checker)s replied for \"(subject)s\"."
+msgstr "%(checker)s replied for \"%(subject)s\"."
 
 #: models/solutions.py:55
 #, python-format

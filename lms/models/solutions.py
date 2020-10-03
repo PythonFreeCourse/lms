@@ -6,7 +6,7 @@ from zipfile import ZipFile
 
 from flask_babel import gettext as _
 
-from lms.lmsdb.models import Solution, SolutionFile, User
+from lms.lmsdb.models import Comment, Solution, SolutionFile, User
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmsweb import config, routes
@@ -30,11 +30,14 @@ def send_notification_after_check(user: User, solution: Solution) -> bool:
                 subject=solution.exercise.subject,
             )
             addressee = solution.solver
-
         if (
             not solution.comments
-            or solution.comments
-            and not solution.comments[-1].commenter == user
+            or (
+                solution.comments
+                and not solution.comments.order_by(
+                    Comment.timestamp.desc(),
+                )[0].commenter == user
+            )
         ):
             notifications.send(
                 kind=notifications.NotificationKind.USER_RESPONSE,
