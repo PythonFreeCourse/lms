@@ -206,8 +206,7 @@ def _create_comment(
         # should never happend, kind was checked before
         return fail(400, 'Invalid kind.')
 
-    if user.role == Role.get_student_role():
-        solutions.send_notification_after_check(file.solution)
+    solutions.send_notification_after_check(user, file.solution)
 
     comment_ = Comment.create(
         commenter=user,

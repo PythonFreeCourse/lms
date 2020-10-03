@@ -202,7 +202,7 @@ class TestNotification:
             )), content_type='application/json',
         )
         assert staff_comment_response.status_code == 200
-        assert len(list(notifications.get(student_user))) == 1
+        assert len(list(notifications.get(student_user))) == 2
 
         conftest.logout_user(client2)
         client = conftest.get_logged_user(student_user.username)

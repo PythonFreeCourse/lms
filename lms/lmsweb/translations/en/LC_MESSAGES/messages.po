@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  lmsweb-1.0\n"
 "Report-Msgid-Bugs-To: bugs@mesicka.com\n"
-"POT-Creation-Date: 2020-10-03 15:07+0300\n"
+"POT-Creation-Date: 2020-10-03 17:26+0300\n"
 "PO-Revision-Date: 2020-09-16 18:29+0300\n"
 "Last-Translator: Or Ronai\n"
 "Language: en\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.8.0\n"
 
-#: lmsdb/models.py:620
+#: lmsdb/models.py:627
 msgid "כישלון חמור"
 msgstr "Fatal error"
 
@@ -49,12 +49,17 @@ msgstr "Bro, did you check your code?"
 msgid "מערכת הגשת התרגילים"
 msgstr "Exercuse submission system"
 
-#: models/solutions.py:18
+#: models/solutions.py:21
 #, python-format
 msgid "%(solver)s הגיב לך על בדיקת תרגיל \"%(subject)s\"."
 msgstr "%(solver)s has replied for your \"%(subject)s\" check."
 
-#: models/solutions.py:43
+#: models/solutions.py:29
+#, python-format
+msgid "%(checker)s הגיב לך על תרגיל \"%(subject)s\"."
+msgstr "%(checker)s replied for \"(subject)s\"."
+
+#: models/solutions.py:55
 #, python-format
 msgid "הפתרון שלך לתרגיל \"%(subject)s\" נבדק."
 msgstr "Your solution for the \"%(subject)s\" exercise has been checked."
