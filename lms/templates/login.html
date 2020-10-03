@@ -25,6 +25,13 @@
                 </div>
                 <button class="btn btn-primary btn-lg btn-block">{{ _('התחבר') }}</button>
             </form>
+            {% if login_error %}
+            <div id="login-messege-box" class="text-center">
+                <p>
+                    {{ login_error }}
+                </p>
+            </div>
+            {% endif %}
         </div>
     </div>
   </div>
