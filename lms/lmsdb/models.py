@@ -330,12 +330,13 @@ class Solution(BaseModel):
 
     @classmethod
     def is_duplicate(
-            cls, content: Union[str, bytes], user: User, exercise: Exercise, *,
-            already_hashed: bool = False,
+            cls, content: Union[str, bytes], user: User, exercise: Exercise,
+            *, already_hashed: bool = False,
     ) -> bool:
+
         hash_ = cls.create_hash(content) if not already_hashed else content
 
-        latest_timestamp = cls.select(fn.MAX(cls.submission_timestamp)).where(
+        last_submission = cls.select(fn.MAX(cls.submission_timestamp)).where(
             cls.solver == user,
             cls.exercise == exercise,
         )
@@ -343,7 +344,7 @@ class Solution(BaseModel):
         return cls.select().where(
             cls.hashed == hash_,
             cls.solver == user,
-            cls.submission_timestamp == latest_timestamp,
+            cls.submission_timestamp == last_submission,
         ).exists()
 
     def start_checking(self) -> bool:

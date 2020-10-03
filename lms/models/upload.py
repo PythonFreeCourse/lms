@@ -14,9 +14,7 @@ from lms.utils.log import log
 
 
 def _is_uploaded_before(
-        user: User,
-        exercise: Exercise,
-        file_hash: str,
+        user: User, exercise: Exercise, file_hash: str,
 ) -> bool:
     return Solution.is_duplicate(
         file_hash, user, exercise, already_hashed=True,

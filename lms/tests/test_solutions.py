@@ -47,11 +47,11 @@ class TestSolutionDb:
         assert next_unchecked.id == second_solution.id
         assert next_unchecked_by_id.id == second_solution.id
 
-        third_solution = conftest.create_solution(exercise, student_user,
-            code='123',
+        third_solution = conftest.create_solution(
+            exercise, student_user, code='123',
         )
-        fourth_solution = conftest.create_solution(exercise, student_user,
-            code='1234',
+        fourth_solution = conftest.create_solution(
+            exercise, student_user, code='1234',
         )
         assert Solution.is_duplicate(
             fourth_solution.hashed, student_user, exercise,
