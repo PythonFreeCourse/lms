@@ -3,24 +3,32 @@ function isNumeric(str) {
 }
 
 function hideAllOpenComments() {
-  $('[data-toggle="popover"]').popover('hide');
+  const popovers = Array.from(document.querySelectorAll('[data-comment="true"]'));
+  popovers.forEach((popoverElement) => {
+    const popover = bootstrap.Popover.getInstance(popoverElement);
+    if (popover !== null) {
+      popover.hide();
+    }
+  });
 }
 
 function destroyCommentsNotations(comments) {
   Array.from(comments).forEach((comment) => {
     comment.removeAttribute('data-vimkey');
+    const popover = bootstrap.Popover.getInstance(comment);
+    if (popover !== null) {
+      popover.dispose();
+    }
   });
-  $(comments).popover('dispose');
 }
 
 function showCommentsNotations(comments) {
   Array.from(comments).forEach((comment, id) => {
     const vimkey = String.fromCharCode(97 + id);
-    $(comment).popover({ content: vimkey });
-    $(comment).popover('show');
+    const commentPopover = new bootstrap.Popover(comment, { content: vimkey });
+    commentPopover.show();
     comment.dataset.vimkey = vimkey;
   });
-  $(comments).popover();
 }
 
 function highlightLinesThatStartsWith(lineNumber, enable) {
@@ -49,7 +57,7 @@ function listenToKeys() {
     lineMode = false;
     letterMode = false;
     lineNumber = '';
-    destroyCommentsNotations(knownComments);
+    destroyCommentsNotations(knownComments || []);
     hideAllOpenComments();
     highlightLinesThatStartsWith('', false);
   }
