@@ -189,6 +189,111 @@ class TestSolutionBridge:
                 assert the_solution.state == Solution.STATES.IN_CHECKING.name
 
     @staticmethod
+    def test_user_comments(
+        exercise: Exercise,
+        student_user: User,
+    ):
+        solution = conftest.create_solution(exercise, student_user)
+
+        client = conftest.get_logged_user(student_user.username)
+        # Creating a comment
+        comment_response = client.post('/comments', data=json.dumps(dict(
+            fileId=solution.files[0].id, act='create', kind='text',
+            comment='hey', line=1,
+        )), content_type='application/json')
+        assert comment_response.status_code == 200
+
+        # Creating another comment
+        another_comment_response = client.post(
+            '/comments', data=json.dumps(dict(
+                fileId=solution.files[0].id, act='create', kind='text',
+                comment='noice', line=2,
+            )), content_type='application/json',
+        )
+        assert another_comment_response.status_code == 200
+
+        # Removing the second comment
+        json_response_another_comment = json.loads(
+            another_comment_response.get_data(as_text=True),
+        )
+        delete_response = client.get('/comments', query_string=dict(
+            fileId=solution.files[0].id, act='delete',
+            commentId=json_response_another_comment['id'],
+        ), content_type='application/json')
+        assert delete_response.status_code == 200
+
+        # Disabling users comments option
+        conftest.disable_users_comments()
+
+        # Trying to remove a comment
+        json_response_comment = json.loads(
+            comment_response.get_data(as_text=True),
+        )
+        delete_response = client.get('/comments', query_string=dict(
+            fileId=solution.files[0].id, act='delete',
+            commentId=json_response_comment['id'],
+        ), content_type='application/json')
+        assert delete_response.status_code == 403
+
+        # Trying to create a comment
+        disable_comment_response = client.post(
+            '/comments', data=json.dumps(dict(
+                fileId=solution.files[0].id, act='create', kind='text',
+                comment='well well well', line=2,
+            )), content_type='application/json',
+        )
+        assert disable_comment_response.status_code == 403
+
+    @staticmethod
+    def test_staff_and_user_comments(
+        exercise: Exercise,
+        student_user: User,
+        staff_user: User,
+    ):
+        solution = conftest.create_solution(exercise, student_user)
+
+        client = conftest.get_logged_user(staff_user.username)
+        # Enabling user comments option
+        conftest.enable_users_comments()
+        # Creating a comment
+        comment_response = client.post('/comments', data=json.dumps(dict(
+            fileId=solution.files[0].id, act='create', kind='text',
+            comment='try again', line=1,
+        )), content_type='application/json')
+        assert comment_response.status_code == 200
+
+        # Creating another comment
+        another_comment_response = client.post(
+            '/comments', data=json.dumps(dict(
+                fileId=solution.files[0].id, act='create', kind='text',
+                comment='hey', line=1,
+            )), content_type='application/json',
+        )
+        assert another_comment_response.status_code == 200
+
+        # Removing the second comment
+        json_response_another_comment = json.loads(
+            another_comment_response.get_data(as_text=True),
+        )
+        delete_response = client.get('/comments', query_string=dict(
+            fileId=solution.files[0].id, act='delete',
+            commentId=json_response_another_comment['id'],
+        ), content_type='application/json')
+        assert delete_response.status_code == 200
+
+        conftest.logout_user(client)
+        client2 = conftest.get_logged_user(student_user.username)
+        # Trying to remove a comment
+        json_response_comment = json.loads(
+            comment_response.get_data(as_text=True),
+        )
+        delete_response = client2.get('/comments', query_string=dict(
+            fileId=solution.files[0].id, act='delete',
+            commentId=json_response_comment['id'],
+        ), content_type='application/json')
+        assert delete_response.status_code == 403
+
+    @staticmethod
     def test_share_solution_by_another_user(
         exercise: Exercise,
         student_user: User,

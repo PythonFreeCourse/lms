@@ -56,6 +56,7 @@ def celery_eager():
 @pytest.fixture(autouse=True, scope='session')
 def webapp_configurations():
     webapp.config['SHAREABLE_SOLUTIONS'] = True
+    webapp.config['USERS_COMMENTS'] = True
     webapp.secret_key = ''.join(
         random.choices(string.ascii_letters + string.digits, k=64),
     )
@@ -63,6 +64,14 @@ def webapp_configurations():
 
 def disable_shareable_solutions():
     webapp.config['SHAREABLE_SOLUTIONS'] = False
+
+
+def disable_users_comments():
+    webapp.config['USERS_COMMENTS'] = False
+
+
+def enable_users_comments():
+    webapp.config['USERS_COMMENTS'] = True
 
 
 def get_logged_user(username: str) -> FlaskClient:

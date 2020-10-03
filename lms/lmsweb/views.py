@@ -19,7 +19,7 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, CommentText, Exercise, RoleOptions,
+    ALL_MODELS, Comment, CommentText, Exercise, Role, RoleOptions,
     SharedSolution, Solution, SolutionFile, User, database,
 )
 from lms.lmsweb import babel, routes, webapp
@@ -215,8 +215,8 @@ def _create_comment(
 
     return jsonify({
         'success': 'true', 'text': comment_.comment.text,
-        'author_name': user.fullname, 'is_auto': False, 'id': comment_.id,
-        'line_number': line_number,
+        'author_name': user.fullname, 'author_role': user.role.id,
+        'is_auto': False, 'id': comment_.id, 'line_number': line_number,
     })
 
 
@@ -281,9 +281,20 @@ def comment():
     if act == 'fetch':
         return jsonify(Comment.by_file(file_id))
 
+    if (
+        not webapp.config.get('USERS_COMMENTS', False)
+        and not current_user.role.is_manager
+    ):
+        return fail(403, "You aren't allowed to access this page.")
+
     if act == 'delete':
         comment_id = int(request.args.get('commentId'))
         comment_ = Comment.get_or_none(Comment.id == comment_id)
+        if (
+            comment_.commenter.id != current_user.id
+            and not current_user.role.is_manager
+        ):
+            return fail(403, "You aren't allowed to access this page.")
         if comment_ is not None:
             comment_.delete_instance()
         return jsonify({'success': 'true'})
@@ -508,9 +519,17 @@ def _common_comments(exercise_id=None, user_id=None):
     Most common comments throughout all exercises.
     Filter by exercise id when specified.
     """
-    query = CommentText.filter(**{
-        CommentText.flake8_key.name: None,
-    }).select(CommentText.id, CommentText.text).join(Comment)
+    is_moderator_comments = (
+        (Comment.commenter.role == Role.get_staff_role().id)
+        | (Comment.commenter.role == Role.get_admin_role().id),
+    )
+    query = (
+        CommentText.select(CommentText.id, CommentText.text)
+        .join(Comment).join(User).join(Role).where(
+            CommentText.flake8_key.is_null(True),
+            is_moderator_comments,
+        ).switch(Comment)
+    )
 
     if exercise_id is not None:
         query = (
