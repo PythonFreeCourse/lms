@@ -167,6 +167,7 @@ window.addEventListener('load', () => {
   }
 });
 
+/*
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker
     .register('./sw.js')
@@ -178,3 +179,4 @@ if ('serviceWorker' in navigator) {
       console.error('Unable to register service worker.', err);
     });
 }
+*/
