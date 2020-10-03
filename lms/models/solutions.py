@@ -13,6 +13,30 @@ from lms.lmsweb import config, routes
 from lms.models import notifications
 
 
+def send_notification_after_check(solution: Solution) -> bool:
+    is_checked = solution.is_checked
+    msg = _(
+        '%(solver)s הגיב לך על בדיקת תרגיל "%(subject)s".',
+        solver=solution.solver.fullname,
+        subject=solution.exercise.subject,
+    )
+    if is_checked:
+        if (
+            not solution.comments
+            or solution.comments
+            and not solution.comments[-1].commenter.role.is_student
+        ):
+            notifications.send(
+                kind=notifications.NotificationKind.USER_RESPONSE,
+                user=solution.checker,
+                related_id=solution.id,
+                message=msg,
+                action_url=f'{routes.SOLUTIONS}/{solution.id}',
+            )
+            return True
+    return False
+
+
 def mark_as_checked(solution_id: int, checker_id: int) -> bool:
     checked_solution: Solution = Solution.get_by_id(solution_id)
     is_updated = checked_solution.mark_as_checked(by=checker_id)

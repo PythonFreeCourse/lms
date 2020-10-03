@@ -8,6 +8,7 @@ class NotificationKind(enum.Enum):
     CHECKED = 1
     FLAKE8_ERROR = 2
     UNITTEST_ERROR = 3
+    USER_RESPONSE = 4
 
 
 def get(user: User) -> Iterable[Notification]:
