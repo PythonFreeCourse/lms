@@ -62,7 +62,6 @@ class TestSolutionDb:
             already_hashed=True,
         )
 
-
     def test_next_exercise_with_cleanest_code(
             self,
             comment: Comment,
