@@ -32,6 +32,17 @@ function trackCopyButton(button, context) {
   });
 }
 
+function hideShareLink(xhr) {
+  const shareBox = document.getElementById('share-box');
+  if (xhr.readyState === 4) {
+    if (xhr.status === 200) {
+      shareBox.classList.add('d-none');
+    } else {
+      console.log(xhr.status);
+    }
+  }
+}
+
 function updateShareLink(xhr) {
   const shareBox = document.getElementById('share-box');
   const shareText = document.getElementById('share-text');
@@ -43,23 +54,11 @@ function updateShareLink(xhr) {
         linkTextbox.value = link;
         linkTextbox.size = link.length;
         shareBox.classList.remove('d-none');
-        shareText.classList.add('d-none');
         trackCopyButton(document.getElementById('copy-link'), link);
+      } else {
+        hideShareLink(xhr);
       }
-      shareBox.parentNode.querySelector('i').className = 'fa fa-share-alt';
-    } else {
-      console.log(xhr.status);
-    }
-  }
-}
-
-function hideShareLink(xhr) {
-  const shareBox = document.getElementById('share-box');
-  const shareText = document.getElementById('share-text');
-  if (xhr.readyState === 4) {
-    if (xhr.status === 200) {
-      shareBox.classList.add('d-none');
-      shareText.classList.remove('d-none');
+      shareText.querySelector('i').className = 'fa fa-share-alt';
     } else {
       console.log(xhr.status);
     }
