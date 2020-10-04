@@ -770,6 +770,7 @@ class Comment(BaseModel):
             .switch()
             .join(User)
             .where(cls.file == file_id)
+            .order_by(cls.timestamp.asc())
         )
 
     @classmethod

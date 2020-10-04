@@ -67,8 +67,11 @@ function visuallyRemoveComment(commentId) {
       removeContent = `${commentElement.outerHTML} <hr>`;
     }
     existingPopover.config.content = existingPopover.config.content.replace(removeContent, '');
+    const commentParent = commentElement.parentNode;
     hr.parentNode.removeChild(hr);
-    commentElement.parentNode.removeChild(commentElement);
+    commentParent.removeChild(commentElement);
+    newLineColor = window.getLineColorByRole(commentParent.lastChild.previousElementSibling.dataset.authorRole);
+    window.markLine(lineElement, newLineColor, true);
   }
 }
 
