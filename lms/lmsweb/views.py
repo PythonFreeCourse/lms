@@ -25,7 +25,7 @@ from lms.lmsdb.models import (
 from lms.lmsweb import babel, routes, webapp
 from lms.lmsweb.config import LANGUAGES, LOCALE
 from lms.models import notifications, share_link, solutions, upload
-from lms.models.errors import AlreadyExists, BadUploadFile, LmsError, fail
+from lms.models.errors import LmsError, UploadError, fail
 from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import get_language_name_by_extension
 from lms.utils.log import log
@@ -368,7 +368,7 @@ def upload_page():
 
     try:
         matches, misses = upload.new(user, file)
-    except (AlreadyExists, BadUploadFile) as e:
+    except UploadError as e:
         log.debug(e)
         return fail(400, str(e))
 
