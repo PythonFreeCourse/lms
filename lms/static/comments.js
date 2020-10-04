@@ -5,7 +5,7 @@ const HOVER_LINE_STYLE = '1px solid #0d0d0f';
 
 function markLine(target, color, deletion = false) {
   if (target.dataset && target.dataset.marked === 'true' && !deletion) { return; }
-  if (target.dataset && target.dataset.vimbackground === 'true' && ! deletion) { return; }
+  if (target.dataset && target.dataset.vimbackground === 'true' && !deletion) { return; }
   target.style.background = color;
 }
 
@@ -66,7 +66,7 @@ function addCommentToLine(line, commentData) {
   if (commentData.is_auto) {
     markLine(commentElement, FLAKE_COMMENTED_LINE_COLOR);
   } else {
-    const lineColor = getLineColorByRole(commentData.author_role);
+    const lineColor = window.getLineColorByRole(commentData.author_role);
     markLine(commentElement, lineColor, true);
     commentElement.dataset.marked = true;
   }

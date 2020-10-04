@@ -70,7 +70,8 @@ function visuallyRemoveComment(commentId) {
     const commentParent = commentElement.parentNode;
     hr.parentNode.removeChild(hr);
     commentParent.removeChild(commentElement);
-    const newLineColor = window.getLineColorByRole(commentParent.lastChild.previousElementSibling.dataset.authorRole);
+    const lastAuthorRole = commentParent.lastChild.previousElementSibling.dataset.authorRole;
+    const newLineColor = window.getLineColorByRole(lastAuthorRole);
     window.markLine(lineElement, newLineColor, true);
   }
 }
