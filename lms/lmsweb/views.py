@@ -142,7 +142,7 @@ def manifest():
 @webapp.route('/sw.js')
 def serviceWorker():
     response = make_response(send_from_directory(
-        os.path.join(webapp.static_folder),
+        webapp.static_folder,
         'sw.js',
     ))
     response.headers['Cache-Control'] = 'no-cache'
