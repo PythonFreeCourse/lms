@@ -1,4 +1,3 @@
-import os
 from functools import wraps
 from typing import Optional
 from urllib.parse import urljoin, urlparse
@@ -29,6 +28,7 @@ from lms.models.errors import LmsError, UploadError, fail
 from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import get_language_name_by_extension
 from lms.utils.log import log
+from lms.lmsweb.manifest import MANIFEST
 
 
 login_manager = LoginManager()
