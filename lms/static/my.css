@@ -434,8 +434,7 @@ button#share-action:hover {
 }
 
 .code-toolbar-button,
-#share-text,
-#share-box button {
+#share-text {
   padding: 0.4rem;
   margin: 0 0.2rem;
   border-radius: 0;
@@ -443,7 +442,7 @@ button#share-action:hover {
 }
 
 #share-box > button {
-  padding: 0.7rem;
+  padding: 0 0.7rem;
 }
 
 #shareable-link {
@@ -578,7 +577,7 @@ span.line {
   direction: ltr;
   display: inline-block;
   text-align: left;
-  width: 100%;
+  width: calc(100% - 1.4em);
   margin-left: 0.3em;
 }
 
