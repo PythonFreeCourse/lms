@@ -4,32 +4,27 @@ from typing import Optional
 from urllib.parse import urljoin, urlparse
 
 import arrow  # type: ignore
-from flask import (
-    jsonify, make_response, render_template,
-    request, send_from_directory, url_for,
-)
+from flask import (jsonify, make_response, render_template, request,
+                   send_from_directory, url_for)
 from flask_admin import Admin, AdminIndexView  # type: ignore
 from flask_admin.contrib.peewee import ModelView  # type: ignore
-from flask_login import (  # type: ignore
-    LoginManager, current_user, login_required, login_user, logout_user,
-)
-from peewee import fn  # type: ignore
-from playhouse.shortcuts import model_to_dict  # type: ignore
-from werkzeug.datastructures import FileStorage
-from werkzeug.utils import redirect
-
-from lms.lmsdb.models import (
-    ALL_MODELS, Comment, CommentText, Exercise, Role, RoleOptions,
-    SharedSolution, Solution, SolutionFile, User, database,
-)
+from flask_login import (LoginManager, current_user,  # type: ignore
+                         login_required, login_user, logout_user)
+from lms.lmsdb.models import (ALL_MODELS, Comment, CommentText, Exercise, Role,
+                              RoleOptions, SharedSolution, Solution,
+                              SolutionFile, User, database)
 from lms.lmsweb import babel, routes, webapp
-from lms.lmsweb.config import LANGUAGES, LOCALE, SERVER_ADDRESS
+from lms.lmsweb.config import LANGUAGES, LOCALE
+from lms.lmsweb.manifest import MANIFEST
 from lms.models import notifications, share_link, solutions, upload
 from lms.models.errors import LmsError, UploadError, fail
 from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import get_language_name_by_extension
 from lms.utils.log import log
-
+from peewee import fn  # type: ignore
+from playhouse.shortcuts import model_to_dict  # type: ignore
+from werkzeug.datastructures import FileStorage
+from werkzeug.utils import redirect
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
@@ -44,60 +39,6 @@ PERMISSIVE_CORS = {
 
 HIGH_ROLES = {str(RoleOptions.STAFF), str(RoleOptions.ADMINISTRATOR)}
 MAX_REQUEST_SIZE = 2_000_000  # 2MB (in bytes)
-
-
-MANIFEST = {
-    'name': "Python's Course LMS",
-    'short_name': 'LMS',
-    'theme_color': '#1290f4',
-    'background_color': '#2196f3',
-    'display': 'standalone',
-    'scope': SERVER_ADDRESS,
-    'start_url': SERVER_ADDRESS,
-    'icons': [
-        {
-            'src': '/static/avatar.jpg',
-            'type': 'image/jpeg',
-            'sizes': '512x512',
-        },
-        {
-            'src': '/static/icons/android-icon-36x36.png',
-            'sizes': '36x36',
-            'type': 'image/png',
-            'density': '0.75',
-        },
-        {
-            'src': '/static/icons/android-icon-48x48.png',
-            'sizes': '48x48',
-            'type': 'image/png',
-            'density': '1.0',
-        },
-        {
-            'src': '/static/icons/android-icon-72x72.png',
-            'sizes': '72x72',
-            'type': 'image/png',
-            'density': '1.5',
-        },
-        {
-            'src': '/static/icons/android-icon-96x96.png',
-            'sizes': '96x96',
-            'type': 'image/png',
-            'density': '2.0',
-        },
-        {
-            'src': '/static/icons/android-icon-144x144.png',
-            'sizes': '144x144',
-            'type': 'image/png',
-            'density': '3.0',
-        },
-        {
-            'src': '/static/icons/android-icon-192x192.png',
-            'sizes': '192x192',
-            'type': 'image/png',
-            'density': '4.0',
-        },
-    ],
-}
 
 
 @babel.localeselector
