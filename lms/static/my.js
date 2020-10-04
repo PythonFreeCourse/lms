@@ -125,7 +125,7 @@ function postUploadMessageUpdate(feedbacks, uploadStatus, matchesSpan, missesSpa
   matchesSpan.innerText += matches.length ? `${matches},` : '';
   missesSpan.innerText += misses.length ? `${misses},` : '';
   feedbacks.classList.add('feedback-transition');
-  feedbacks.clientWidth;
+  feedbacks.clientWidth;  // Forces layout to ensure the transition
   feedbacks.classList.remove('feedback-hidden');
   feedbacks.addEventListener('transitionend', function() {
     feedbacks.classList.remove('feedback-transition');
