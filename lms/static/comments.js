@@ -144,12 +144,12 @@ window.hoverLine = hoverLine;
 window.addCommentToLine = addCommentToLine;
 window.isUserGrader = isUserGrader;
 window.addEventListener('load', () => {
-  const codeElement = document.getElementById('code-view').dataset;
-  window.solutionId = codeElement.id;
-  window.fileId = codeElement.file;
-  sessionStorage.setItem('role', codeElement.role);
-  sessionStorage.setItem('solver', codeElement.solver);
-  sessionStorage.setItem('allowedComment', codeElement.allowedComment);
+  const codeElementData = document.getElementById('code-view').dataset;
+  window.solutionId = codeElementData.id;
+  window.fileId = codeElementData.file;
+  sessionStorage.setItem('role', codeElementData.role);
+  sessionStorage.setItem('solver', codeElementData.solver);
+  sessionStorage.setItem('allowedComment', codeElementData.allowedComment);
   addLineSpansToPre(document.getElementsByTagName('code'));
   pullComments(window.fileId, treatComments);
 });

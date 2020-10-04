@@ -105,14 +105,48 @@ function trackReadAllNotificationsButton(button) {
   });
 }
 
+function getPostUploadMessage() {
+  const myDropzone = Dropzone.forElement('#demo-upload');
+  const feedbacks = document.getElementById('upload-feedbacks');
+  const matchesSpan = document.getElementById('upload-matches');
+  const missesSpan = document.getElementById('upload-misses');
+  myDropzone.on('success', function() {
+    const uploadStatus = Array.from(arguments).slice(1)[0];
+    postUploadMessageUpdate(feedbacks, uploadStatus, matchesSpan, missesSpan);
+  });
+}
+
+function postUploadMessageUpdate(feedbacks, uploadStatus, matchesSpan, missesSpan) {
+  const matches = uploadStatus['exercise_matches'];
+  const misses = uploadStatus['exercise_misses'];
+  if (!feedbacks.classList.contains('feedback-hidden')) {
+    feedbacks.classList.add('feedback-hidden');
+  }
+  matchesSpan.innerText += matches.length ? `${matches},` : '';
+  missesSpan.innerText += misses.length ? `${misses},` : '';
+  feedbacks.classList.add('feedback-transition');
+  feedbacks.clientWidth;  // Forces layout to ensure the transition
+  feedbacks.classList.remove('feedback-hidden');
+  feedbacks.addEventListener('transitionend', function() {
+    feedbacks.classList.remove('feedback-transition');
+  });
+}
+
 window.escapeUnicode = escapeUnicode;
 
 window.addEventListener('load', () => {
-  const codeElement = document.getElementById('code-view').dataset;
-  const solutionId = codeElement.id;
   updateNotificationsBadge();
   trackReadAllNotificationsButton(document.getElementById('read-notifications'));
-  trackCopyButton(document.getElementById('copy-button'), document.getElementById('user-code').textContent);
-  trackShareSolution(solutionId, document.getElementById('share-action'));
-  trackDisableShareButton(solutionId, document.getElementById('cancel-share'));
+  const codeElement = document.getElementById('code-view')
+  if (codeElement !== null) {
+    const codeElementData = codeElement.dataset;
+    const solutionId = codeElementData.id;
+    const userCode = document.getElementById('user-code').textContent;
+    trackCopyButton(document.getElementById('copy-button'), userCode);
+    trackShareSolution(solutionId, document.getElementById('share-action'));
+    trackDisableShareButton(solutionId, document.getElementById('cancel-share'));
+  }
+  if (document.getElementById('demo-upload') !== null) {
+    getPostUploadMessage();
+  }
 });
