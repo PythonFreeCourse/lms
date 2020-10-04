@@ -521,10 +521,10 @@ button#share-action:active {
   top: 3em;
   right: 0.5em;
   z-index: 10;
-  padding: 0.25em;
   border: 1px solid lightgray;
   background: white;
   border-radius: 5px;
+  padding: 0.5rem;
 }
 
 #share-box * {
