@@ -162,7 +162,6 @@ a {
 
 #share-solution {
   display: flex;
-  margin-bottom: 1em;
 }
 
 button#share-action {
@@ -188,11 +187,6 @@ button#share-action:active {
 #share-text {
   display: flex;
   font-weight: bold;
-}
-
-#share-box {
-  display: flex;
-  direction: rtl;
 }
 
 #copy-link,
@@ -319,16 +313,16 @@ button#share-action:active {
   margin: 0.4em;
 }
 
+.share-button > i.fa {
+  margin-left: 0;
+}
+
 .rtl #share-action i.fa {
   margin-right: 0.4em;
 }
 
 .ltr #share-action i.fa {
   margin-left: 0.4em;
-}
-
-.share-button > i.fa {
-  margin-left: 0;
 }
 
 #filetree {
@@ -484,6 +478,7 @@ button#share-action:active {
   flex-direction: row;
   margin-bottom: -0.5em;
   padding: 0.5em;
+  height: 3rem;
 }
 
 .glowing button:hover {
@@ -496,9 +491,8 @@ button#share-action:active {
 
 .code-toolbar-button {
   padding: 0 0.8em;
-  margin-left: 0.2em;
+  margin: 0 0.2em;
   color: rgba(0, 0, 0, 0.5);
-  cursor: pointer;
 }
 
 #code-toolbar button {
