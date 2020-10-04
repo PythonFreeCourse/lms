@@ -1,4 +1,3 @@
-import os
 from functools import wraps
 from typing import Optional
 from urllib.parse import urljoin, urlparse
