@@ -183,6 +183,7 @@ function registerNewCommentPopover(element) {
     trackTextArea(lineNumber);
     focusTextArea(lineNumber);
   });
+  return popover;
 }
 
 function addNewCommentButtons(elements) {

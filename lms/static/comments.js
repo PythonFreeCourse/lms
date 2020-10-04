@@ -62,6 +62,8 @@ function addCommentToLine(line, commentData) {
     markLine(commentElement, DEFAULT_COMMENTED_LINE_COLOR);
     commentElement.dataset.marked = true;
   }
+
+  return existingPopover;
 }
 
 function treatComments(comments) {
