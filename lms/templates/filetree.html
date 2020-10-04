@@ -2,15 +2,14 @@
   <ol id="files">
     {%- for file in files %}
     <li class="file" data-id="{{ file.id }}">
-      <span class="indent" style="padding-left: {{ file.indent }}em"></span>
-      {%- if not shared_url %}
-        <div class="file-comments-count">
-          <span style="margin-left: {{ file.indent }}em"
-                class="badge bg-{%- if comments[file.id] -%}danger{%- else -%}success{%- endif -%}">
-            {{ comments[file.id] }}
-          </span>
-        </div>
+      <span class="indent" style="margin-left: {{ file.indent * 1.5 }}em"></span>
+      <div class="file-comments-count">
+      {%- if not shared_url and not file.is_folder %}
+        <span class="badge bg-{%- if comments[file.id] -%}danger{%- else -%}success{%- endif -%}">
+          {{ comments[file.id] }}
+        </span>
       {% endif -%}
+      </div>
       <span class="
       {%- if file.is_folder -%}
       icon hawcons-icon-folder">

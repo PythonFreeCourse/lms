@@ -271,6 +271,15 @@ button#share-action:hover {
   overflow-x: unset;
 }
 
+.file-comments-count {
+  width: 1em;
+  height: 1.5em;
+  display: flex;
+  align-self: center;
+  justify-self: center;
+  margin: 0 0.25em;
+}
+
 #files {
   list-style-type: none;
   text-align: left;
