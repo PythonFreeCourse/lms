@@ -24,6 +24,7 @@
             </div>
           </div>
           <input class="form-control form-control-lg" type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token() }}" required>
+          <input class="form-control form-control-lg" type="hidden" name="next" id="next" value="{{ request.args.get('next', '') }}">
           <button class="btn btn-primary btn-lg btn-block">{{ _('התחבר') }}</button>
         </form>
       </div>
