@@ -18,13 +18,13 @@
     <p id="solver"><strong>{{ _('מגיש') }}:</strong> <a href="/user/{{ solution['solver']['id'] }}">{{ solution['solver']['fullname'] | e }}</a></p>
     {% endif %}
     {% if not shared_url %}
-    <nav id="versions" aria-label="{{ _('ניווט בגרסאות ההגשה') }}">
+    <nav id="versions" class="{{ direction }}-language" aria-label="{{ _('ניווט בגרסאות ההגשה') }}">
       <ul class="pagination">
       {%- for version in versions %}
         {% set current = version['id'] == solution['id'] %}
         <li class="page-item version{% if current %} active{% endif %}"{% if current %} aria-current="page"{% endif %}>
           <a href="{{ url_for('view', solution_id=version['id']) }}" class="version page-link">{{ loop.index }}</a>
-          {%- if current %}<span class="sr-only">(current)</span>{% endif -%}
+        {%- if current %}<span class="visually-hidden">{{ _("העמוד הנוכחי") }}</span>{% endif -%}
         </li>
       {% endfor -%}
       </ul>
@@ -114,7 +114,7 @@
       </div>
       <div id="grader-buttons" class="{{ direction }}">
         <button id="save-check" class="btn btn-success">{{ _('סיימתי לבדוק!') }}</button>
-        <a id="ninja" href="#" class="badge badge-dark" style="display: none;">Ninja Mode</a>
+        <a id="ninja" href="#" class="badge bg-dark" style="display: none;">Ninja Mode</a>
       </div>
     </div>
     {% endif %}

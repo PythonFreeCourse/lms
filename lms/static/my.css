@@ -2,6 +2,12 @@ html {
   border: #f3f3f3;
 }
 
+html,
+body,
+body > .container {
+  height: 100%;
+}
+
 .rtl {
   direction: rtl;
   text-align: right;
@@ -18,6 +24,10 @@ pre,
 div#code-view {
   direction: ltr;
   text-align: left;
+}
+
+a {
+  text-decoration: none;
 }
 
 .rtl-language > ::-webkit-input-placeholder {
@@ -37,9 +47,10 @@ div#code-view {
 }
 
 #login-container {
+  height: 100%;
   align-items: center;
   display: flex;
-  min-height: calc(100vh - 4rem);
+  align-self: center;
 }
 
 #login {
@@ -101,6 +112,7 @@ div#code-view {
 .right-side,
 .left-side {
   display: flex;
+  align-items: stretch;
 }
 
 .left-side {
@@ -198,6 +210,11 @@ button#share-action:active {
   border-radius: 0;
 }
 
+#cancel-share {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
 #copy-link:hover,
 #cancel-share:hover {
   color: rgba(0, 0, 0, 0.7);
@@ -206,11 +223,6 @@ button#share-action:active {
 #copy-link:active,
 #cancel-share:active {
   color: #007bff;
-}
-
-#cancel-share {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
 }
 
 #link-input {
@@ -276,11 +288,14 @@ button#share-action:active {
 
 .our-button {
   border-radius: 8px;
-  display: block;
+  display: flex;
   margin-right: 0.5em;
   outline: none;
   padding: 0.55rem 1rem;
   white-space: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  height: 3em;
   width: 8em;
 }
 
@@ -288,19 +303,11 @@ button#share-action:active {
   text-decoration: none;
 }
 
-.our-button-small {
+.our-button-narrow {
   width: 2em;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-i.fa {
-  margin-left: 0.3em;
-}
-
-.our-button-small > i.fa {
-  margin-left: 0;
 }
 
 .button-copy i.fa {
@@ -311,14 +318,6 @@ i.fa {
   margin-left: 0;
 }
 
-.rtl #share-action i.fa {
-  margin-right: 0.4em;
-}
-
-.ltr #share-action i.fa {
-  margin-left: 0.4em;
-}
-
 #copy-link i.fa {
   margin: 0.4em;
 }
@@ -327,9 +326,17 @@ i.fa {
   margin: 0.4em;
 }
 
+.rtl #share-action i.fa {
+  margin-right: 0.4em;
+}
+
+.ltr #share-action i.fa {
+  margin-left: 0.4em;
+}
+
 #filetree {
   display: flex;
-  overflow-x: none;
+  overflow-x: unset;
 }
 
 #files {
@@ -340,6 +347,27 @@ i.fa {
   white-space: nowrap;
   padding: 0.2rem;
   line-height: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+#files .file {
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  flex-wrap: nowrap;
+}
+
+#files span.icon {
+  display: flex;
+  font-size: 1.25rem;
+  margin: 0 0.25em;
+  align-self: center;
+}
+
+#files a.filename {
+  display: flex;
+  align-self: center;
 }
 
 /* Upload */
@@ -417,35 +445,19 @@ i.fa {
 }
 
 /* RTL Fix for pagination */
-.pagination .page-item:first-child .page-link {
+.rtl-language .pagination .page-item:first-child .page-link {
   border-top-right-radius: 0.25rem;
   border-bottom-right-radius: 0.25rem;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
-.pagination .page-item:last-child .page-link {
+.rtl-language .pagination .page-item:last-child .page-link {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
   border-top-left-radius: 0.25rem;
   border-bottom-left-radius: 0.25rem;
 }
-
-/*
-  background: #dfdfdf;
-  border-radius: 4px;
-  border: 1px solid #afafaf;
-  direction: rtl;
-  display: flex;
-  flex-direction: column;
-  margin-right: 3rem;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  text-align: right;
-  width: 30vw;
-}
-
-#grader-comments p {
-  margin-bottom: 0;
-}
-*/
 
 .code-view-container {
   position: relative;
@@ -615,13 +627,9 @@ code > code:last-of-type{
 
 .grader-add {
   background-attachment: fixed;
-  position: absolute;
-  display: block;
-  z-index: 100;
-  left: -0.88em;
-  right: -0.88em;
+  display: inline-flex;
   width: 1rem;
-  height: 1.5em;
+  height: 1em;
   line-height: 1em;
   cursor: pointer;
   color: #0366d6;
@@ -684,23 +692,15 @@ code .grader-add .fa {
 
 .which-notebook {
   align-self: center;
-  margin-left: 0.5em;
-  padding: 0.55rem 1rem;
+  margin: 0 1rem;
 }
 
 .comments-count {
+  display: flex;
   align-self: center;
+  align-items: center;
   font-size: 1.25rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  margin-top: -0.25em;
-}
-
-.file-comments-count {
-  position: absolute;
-  margin-left: -0.8em;
-  margin-top: -1.5em;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 1.25rem;
 }
 
 #notification-icon {
@@ -709,6 +709,7 @@ code .grader-add .fa {
 
 .notification {
   flex-direction: column;
+  text-align: start;
 }
 
 .notification[data-read="true"] .icon::before {

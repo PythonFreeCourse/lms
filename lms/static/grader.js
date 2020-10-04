@@ -56,7 +56,10 @@ function visuallyRemoveComment(commentId) {
   if (hr === null) {
     lineElement.dataset.marked = false;
     window.markLine(lineElement, 'none');
-    $(lineElement).popover('dispose');
+    const popover = bootstrap.Popover.getInstance(lineElement);
+    if (popover !== null) {
+      popover.dispose();
+    }
   } else {
     hr.parentNode.removeChild(hr);
     commentElement.parentNode.removeChild(commentElement);
@@ -152,28 +155,31 @@ function focusTextArea(lineNumber) {
 
 function trackTextArea(lineNumber) {
   const target = `textarea[data-line='${lineNumber}']`;
-  const popoverElement = `.grader-add[data-line='${lineNumber}']`;
-  $(target).keydown((ev) => {
+  const popoverElement = document.querySelector(`.grader-add[data-line='${lineNumber}']`);
+  document.querySelector(target).addEventListener('keydown', (ev) => {
     if ((ev.which === 10 || ev.which === 13) && ev.ctrlKey) { // CTRL + ENTER
       sendNewComment(window.fileId, lineNumber, ev.target.value);
-      $(popoverElement).popover('hide');
     } else if (ev.key === 'Escape') {
       ev.preventDefault();
-      $(popoverElement).popover('hide');
+    } else {
+      return;
     }
+
+    const popover = bootstrap.Popover.getInstance(popoverElement);
+    if (popover !== null) { popover.hide(); }
   });
 }
 
 function registerNewCommentPopover(element) {
   const lineNumber = element.dataset.line;
   const addCommentString = 'הערה חדשה לשורה';
-  $(element).popover({
+  const popover = new bootstrap.Popover(element, {
     html: true,
     title: `${addCommentString} ${lineNumber}`,
     sanitize: false,
     content: `<textarea data-line='${lineNumber}'></textarea>`,
   });
-  $(element).on('inserted.bs.popover', () => {
+  element.addEventListener('inserted.bs.popover', () => {
     trackTextArea(lineNumber);
     focusTextArea(lineNumber);
   });
@@ -188,7 +194,6 @@ function addNewCommentButtons(elements) {
     item.parentNode.insertBefore(newNode, item);
     registerNewCommentPopover(newNode);
   });
-  $('[data-toggle=popover]').popover();
 }
 
 window.deleteComment = deleteComment;
