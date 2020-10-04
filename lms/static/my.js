@@ -124,6 +124,12 @@ function postUploadMessageUpdate(feedbacks, uploadStatus, matchesSpan, missesSpa
   }
   matchesSpan.innerText += matches.length ? `${matches},` : '';
   missesSpan.innerText += misses.length ? `${misses},` : '';
+  if (matches.length && matchesSpan.classList.contains('feedback-hidden')) {
+    matchesSpan.classList.remove('feedback-hidden');
+  }
+  if (misses.length && missesSpan.classList.contains('feedback-hidden')) {
+    missesSpan.classList.remove('feedback-hidden');
+  }
   feedbacks.classList.add('feedback-transition');
   feedbacks.clientWidth;  // Forces layout to ensure the transition
   feedbacks.classList.remove('feedback-hidden');
