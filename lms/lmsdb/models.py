@@ -335,7 +335,10 @@ class Solution(BaseModel):
         return (
             cls
             .select()
-            .where(cls.solver == user, cls.exercise == exercise)
+            .where(
+                cls.solver == user,
+                cls.exercise == exercise,
+            )
         ).exists()
 
     @classmethod
@@ -343,10 +346,10 @@ class Solution(BaseModel):
             cls, content: Union[str, bytes], user: User, exercise: Exercise,
             *, already_hashed: bool = False,
     ) -> bool:
-        
+
         if not cls._is_previous_submission_exists(user, exercise):
             return False
-        
+
         hash_ = cls.create_hash(content) if not already_hashed else content
 
         return (
