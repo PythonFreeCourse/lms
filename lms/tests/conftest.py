@@ -155,11 +155,11 @@ def create_notification(
     )
 
 
-def create_exercise(index: int = 0) -> Exercise:
+def create_exercise(index: int = 0, is_archived: bool = False) -> Exercise:
     return Exercise.create(
         subject=f'python {index}',
         date=datetime.datetime.now(),
-        is_archived=False,
+        is_archived=is_archived,
     )
 
 

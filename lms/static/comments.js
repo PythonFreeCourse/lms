@@ -43,15 +43,15 @@ function formatCommentData(commentData) {
 }
 
 function addCommentToLine(line, commentData) {
-  const commentElement = $(`.line[data-line="${line}"]`);
-  const existingPopover = $(commentElement).data('bs.popover');
+  const commentElement = document.querySelector(`.line[data-line="${line}"]`);
   const formattedComment = formatCommentData(commentData);
   const commentText = `<span class="comment" data-line="${line}" data-commentid="${commentData.id}">${formattedComment}</span>`;
-  if (existingPopover !== undefined) {
+  let existingPopover = bootstrap.Popover.getInstance(commentElement);
+  if (existingPopover !== null) {
     const existingContent = `${existingPopover.config.content} <hr>`;
     existingPopover.config.content = existingContent + commentText;
   } else {
-    commentElement.popover({
+    existingPopover = new bootstrap.Popover(commentElement, {
       html: true,
       title: `שורה ${line}`,
       content: commentText,
@@ -59,14 +59,17 @@ function addCommentToLine(line, commentData) {
       boundary: 'viewport',
       placement: 'auto',
     });
-    $(commentElement).popover();
   }
+
+  commentElement.dataset.comment = 'true';
   if (commentData.is_auto) {
-    markLine(commentElement[0], FLAKE_COMMENTED_LINE_COLOR);
+    markLine(commentElement, FLAKE_COMMENTED_LINE_COLOR);
   } else {
-    markLine(commentElement[0], DEFAULT_COMMENTED_LINE_COLOR);
-    commentElement[0].dataset.marked = true;
+    markLine(commentElement, DEFAULT_COMMENTED_LINE_COLOR);
+    commentElement.dataset.marked = true;
   }
+
+  return existingPopover;
 }
 
 function treatComments(comments) {
