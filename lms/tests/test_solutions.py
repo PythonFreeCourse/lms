@@ -192,11 +192,21 @@ class TestSolutionBridge:
     def test_user_comments(
         exercise: Exercise,
         student_user: User,
+        staff_user: User,
     ):
         solution = conftest.create_solution(exercise, student_user)
 
         client = conftest.get_logged_user(student_user.username)
-        # Creating a comment
+        # Creating a comment before solution checked
+        comment_response = client.post('/comments', data=json.dumps(dict(
+            fileId=solution.files[0].id, act='create', kind='text',
+            comment='hey', line=1,
+        )), content_type='application/json')
+        assert comment_response.status_code == 403
+
+        solutions.mark_as_checked(solution.id, staff_user.id)
+
+        # Creating a comment after solution checked
         comment_response = client.post('/comments', data=json.dumps(dict(
             fileId=solution.files[0].id, act='create', kind='text',
             comment='hey', line=1,
