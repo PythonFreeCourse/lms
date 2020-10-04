@@ -3,29 +3,31 @@
 {% block page_content %}
   <div class="container">
     <div id="login-container">
-        <div id="login" class="text-center">
-            <img id="login-logo" src="{{ url_for('static', filename='avatar.jpg') }}" alt="{{ _('תמונת הפרופיל של קורס פייתון') }}" width="72" height="72">
-            <h1 id="main-title" class="h3 font-weight-normal">{{ _('התחברות') }}</h1>
-            <p>
-                {{ _('ברוכים הבאים למערכת התרגילים!') }}<br>
-                {{ _('הזינו את שם המשתמש והסיסמה שלכם:') }}
-            </p>
-            <form method="post" action="/login" class="mb-6">
-                <div class="form-group {{ direction }}-language">
-                    <input class="form-control form-control-lg" type="text" name="username" id="username" placeholder="{{ _('שם משתמש') }}" required autofocus>
-                </div>
-                <div class="form-group {{ direction }}-language">
-                    <input class="form-control form-control-lg" type="password" name="password" id="password" placeholder="{{ _('סיסמה') }}" required>
-                </div>
-                <div class="form-group">
-                    <input class="form-control form-control-lg" type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token() }}" required>
-                </div>
-                <div class="form-group">
-                  <input class="form-control form-control-lg" type="hidden" name="next" id="next" value="{{ request.args.get('next', '') }}">
-                </div>
-                <button class="btn btn-primary btn-lg btn-block">{{ _('התחבר') }}</button>
-            </form>
-        </div>
+      <div id="login" class="text-center">
+        <img id="login-logo" src="{{ url_for('static', filename='avatar.jpg') }}" alt="{{ _('תמונת הפרופיל של קורס פייתון') }}" width="72" height="72">
+        <h1 id="main-title" class="h3 font-weight-normal">{{ _('התחברות') }}</h1>
+        <p>
+          {{ _('ברוכים הבאים למערכת התרגילים!') }}<br>
+          {{ _('הזינו את שם המשתמש והסיסמה שלכם:') }}
+        </p>
+        <form class="align-items-center" method="post" action="/login">
+          <div class="row mb-3 {{ direction }}-language">
+            <label for="username" class="visually-hidden">{{ _('שם משתמש') }}</label>
+            <div>
+              <input id="username" class="form-control form-control-lg" type="text" name="username" placeholder="{{ _('שם משתמש') }}" required autofocus>
+            </div>
+          </div>
+          <div class="row mb-3 {{ direction }}-language">
+            <label for="password" class="visually-hidden">{{ _('סיסמה') }}</label>
+            <div>
+              <input id="password" class="form-control form-control-lg" type="password" name="password" placeholder="{{ _('סיסמה') }}" required>
+            </div>
+          </div>
+          <input class="form-control form-control-lg" type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token() }}" required>
+          <input class="form-control form-control-lg" type="hidden" name="next" id="next" value="{{ request.args.get('next', '') }}">
+          <button class="btn btn-primary btn-lg btn-block">{{ _('התחבר') }}</button>
+        </form>
+      </div>
     </div>
   </div>
 {% endblock %}

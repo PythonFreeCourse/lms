@@ -1,7 +1,8 @@
 from io import BytesIO
+from lms.extractors.base import File
 from operator import itemgetter
 import os
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from zipfile import ZipFile
 
 from flask_babel import gettext as _
@@ -96,7 +97,9 @@ def start_checking(solution: Optional[Solution]) -> bool:
     return False
 
 
-def create_zip_from_solution(files: Iterable[SolutionFile]) -> bytes:
+def create_zip_from_solution(
+    files: Iterable[Union[SolutionFile, File]],
+) -> bytes:
     with BytesIO() as memory_file:
         with ZipFile(memory_file, 'w') as archive:
             for file in files:

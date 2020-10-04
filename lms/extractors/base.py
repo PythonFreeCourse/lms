@@ -5,6 +5,7 @@ from typing import Any, Iterator, List, Sequence, Tuple, Union, cast
 
 from werkzeug.datastructures import FileStorage
 
+from lms.utils import hashing
 from lms.utils.log import log
 
 
@@ -76,10 +77,12 @@ class Extractor:
     def can_extract(self) -> bool:
         raise NotImplementedError()
 
-    def __iter__(self) -> Iterator[Tuple[int, List[File]]]:
+    def __iter__(self) -> Iterator[Tuple[int, List[File], str]]:
         for cls in self.__class__.__subclasses__():
             log.debug(f'Trying extractor: {cls.__name__}')
             extractor = cls(to_extract=self.to_extract)
             if extractor.can_extract():
-                for solution_id, files in extractor.get_exercises():
-                    yield (solution_id, files)
+                yield from (
+                    (solution_id, files, hashing.by_content(str(files)))
+                    for solution_id, files in extractor.get_exercises()
+                )
