@@ -128,7 +128,7 @@ def logout():
 @webapp.route('/favicon.ico')
 def favicon():
     return send_from_directory(
-        os.path.join(webapp.static_folder),
+        webapp.static_folder,
         'favicon.ico',
         mimetype='image/vnd.microsoft.icon',
     )
@@ -136,9 +136,7 @@ def favicon():
 
 @webapp.route('/manifest.json')
 def manifest():
-    return jsonify(
-        MANIFEST,
-    )
+    return jsonify(MANIFEST)
 
 
 @webapp.route('/sw.js')
