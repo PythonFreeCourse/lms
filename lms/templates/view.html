@@ -44,8 +44,8 @@
         <div id="number-of-lines">{{ current_file.code.splitlines() | length }} lines</div>
         <div id="code-toolbar-buttons">
           {% if config.SHAREABLE_SOLUTIONS and not shared_url %}
-          <div id="share-solution" class="share-function">
-            <div id="share-text" class="code-toolbar-button glowing">
+          <div id="share-solution" class="code-toolbar-button glowing">
+            <div id="share-text">
               <button id="share-action" title="Share solution"><i class="fa fa-share-alt"></i></button>
             </div>
             <div id="share-box" class="glowing d-none">

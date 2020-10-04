@@ -160,15 +160,15 @@ a {
   align-items: left;
 }
 
-#share-solution {
-  display: flex;
-}
-
+#cancel-share,
 button#share-action {
+  position: relative;
   display: flex;
-  color: rgba(0, 0, 0, 0.5);
-  border: none;
   background: inherit;
+  color: rgba(0, 0, 0, 0.5);
+  border-color: rgba(27, 31, 35, 0.15);
+  border: 1px solid;
+  border-radius: 0.25em;
   align-self: center;
   align-content: center;
   justify-content: center;
@@ -176,47 +176,16 @@ button#share-action {
   outline: none;
 }
 
-button#share-action:hover {
-  color: rgba(0, 0, 0, 0.7);
-}
-
+#copy-link:active,
+#cancel-share:active,
 button#share-action:active {
   color: #007bff;
 }
 
-#share-text {
-  display: flex;
-  font-weight: bold;
-}
-
-#copy-link,
-#cancel-share {
-  position: relative;
-  display: table-cell;
-  background-color: #fafbfc;
-  color: rgba(0, 0, 0, 0.5);
-  border: 1px solid;
-  border-radius: 0.25em;
-  border-color: rgba(27, 31, 35, 0.15);
-}
-
-#copy-link {
-  border-radius: 0;
-}
-
-#cancel-share {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
 #copy-link:hover,
-#cancel-share:hover {
+#cancel-share:hover,
+button#share-action:hover {
   color: rgba(0, 0, 0, 0.7);
-}
-
-#copy-link:active,
-#cancel-share:active {
-  color: #007bff;
 }
 
 #link-input {
@@ -295,34 +264,6 @@ button#share-action:active {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.button-copy i.fa {
-  margin-left: 0;
-}
-
-.btn i.fa {
-  margin-left: 0;
-}
-
-#copy-link i.fa {
-  margin: 0.4em;
-}
-
-#cancel-share i.fa {
-  margin: 0.4em;
-}
-
-.share-button > i.fa {
-  margin-left: 0;
-}
-
-.rtl #share-action i.fa {
-  margin-right: 0.4em;
-}
-
-.ltr #share-action i.fa {
-  margin-left: 0.4em;
 }
 
 #filetree {
@@ -477,8 +418,11 @@ button#share-action:active {
   align-items: center;
   flex-direction: row;
   margin-bottom: -0.5em;
-  padding: 0.5em;
-  height: 3rem;
+  padding: 0.6em;
+}
+
+.glowing button {
+  color: rgba(0, 0, 0, 0.5) !important;
 }
 
 .glowing button:hover {
@@ -489,10 +433,21 @@ button#share-action:active {
   color: rgb(0, 123, 195) !important;
 }
 
-.code-toolbar-button {
-  padding: 0 0.8em;
-  margin: 0 0.2em;
-  color: rgba(0, 0, 0, 0.5);
+.code-toolbar-button,
+#share-text,
+#share-box button {
+  padding: 0.4rem;
+  margin: 0 0.2rem;
+  border-radius: 0;
+  outline: none;
+}
+
+#share-box > button {
+  padding: 0.7rem;
+}
+
+#shareable-link {
+  margin-right: 0.7rem;
 }
 
 #code-toolbar button {
@@ -506,6 +461,7 @@ button#share-action:active {
   font-size: 0.875rem;
   color: rgba(0, 0, 0, 0.5);
   flex: auto;
+  margin-left: 1rem;
 }
 
 #code-toolbar-buttons {
@@ -524,31 +480,13 @@ button#share-action:active {
   border: 1px solid lightgray;
   background: white;
   border-radius: 5px;
-  padding: 0.5rem;
+  padding: 0.4rem;
 }
 
 #share-box * {
   position: relative;
   display: flex;
   line-height: unset;
-}
-
-#share-box button {
-  color: rgba(0, 0, 0, 0.5);
-  border: 1px solid lightgray;
-  border-radius: 0;
-}
-
-#share-box #cancel-share {
-  border-top-right-radius: 0.25em;
-  border-bottom-right-radius: 0.25em;
-}
-
-#share-box input {
-  border: 1px solid lightgray;
-  border-radius: 0.25em;
-  border-bottom-right-radius: 0;
-  border-top-right-radius: 0;
 }
 
 pre {
