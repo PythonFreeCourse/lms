@@ -1,29 +1,35 @@
+import os
 from functools import wraps
 from typing import Optional
 from urllib.parse import urljoin, urlparse
 
 import arrow  # type: ignore
-from flask import (jsonify, make_response, render_template, request,
-                   send_from_directory, url_for)
+from flask import (
+    jsonify, make_response, render_template,
+    request, send_from_directory, url_for,
+)
 from flask_admin import Admin, AdminIndexView  # type: ignore
 from flask_admin.contrib.peewee import ModelView  # type: ignore
-from flask_login import (LoginManager, current_user,  # type: ignore
-                         login_required, login_user, logout_user)
-from lms.lmsdb.models import (ALL_MODELS, Comment, CommentText, Exercise, Role,
-                              RoleOptions, SharedSolution, Solution,
-                              SolutionFile, User, database)
+from flask_login import (  # type: ignore
+    LoginManager, current_user, login_required, login_user, logout_user,
+)
+from peewee import fn  # type: ignore
+from playhouse.shortcuts import model_to_dict  # type: ignore
+from werkzeug.datastructures import FileStorage
+from werkzeug.utils import redirect
+
+from lms.lmsdb.models import (
+    ALL_MODELS, Comment, CommentText, Exercise, Role, RoleOptions,
+    SharedSolution, Solution, SolutionFile, User, database,
+)
 from lms.lmsweb import babel, routes, webapp
 from lms.lmsweb.config import LANGUAGES, LOCALE
-from lms.lmsweb.manifest import MANIFEST
 from lms.models import notifications, share_link, solutions, upload
 from lms.models.errors import LmsError, UploadError, fail
 from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import get_language_name_by_extension
 from lms.utils.log import log
-from peewee import fn  # type: ignore
-from playhouse.shortcuts import model_to_dict  # type: ignore
-from werkzeug.datastructures import FileStorage
-from werkzeug.utils import redirect
+
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
