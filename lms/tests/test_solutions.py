@@ -53,14 +53,15 @@ class TestSolutionDb:
         fourth_solution = conftest.create_solution(
             exercise, student_user, code='1234',
         )
-        assert Solution.is_duplicate(
-            fourth_solution.hashed, student_user, exercise,
-            already_hashed=True,
-        )
         assert not Solution.is_duplicate(
             third_solution.hashed, student_user, exercise,
             already_hashed=True,
         )
+        assert Solution.is_duplicate(
+            fourth_solution.hashed, student_user, exercise,
+            already_hashed=True,
+        )
+
 
     def test_next_exercise_with_cleanest_code(
             self,

@@ -329,22 +329,36 @@ class Solution(BaseModel):
         return hashing.by_content(content, *args, **kwargs)
 
     @classmethod
+    def _is_previous_submission_exists(
+        cls, user: User, exercise: Exercise,
+    ) -> bool:
+        return (
+            cls
+            .select()
+            .where(cls.solver == user, cls.exercise == exercise)
+        ).exists()
+
+    @classmethod
     def is_duplicate(
             cls, content: Union[str, bytes], user: User, exercise: Exercise,
             *, already_hashed: bool = False,
     ) -> bool:
-
+        
+        if not cls._is_previous_submission_exists(user, exercise):
+            return False
+        
         hash_ = cls.create_hash(content) if not already_hashed else content
 
-        last_submission = cls.select(fn.MAX(cls.submission_timestamp)).where(
-            cls.solver == user,
-            cls.exercise == exercise,
-        )
-
-        return cls.select().where(
-            cls.hashed == hash_,
-            cls.solver == user,
-            cls.submission_timestamp == last_submission,
+        return (
+            cls
+            .select()
+            .group_by(cls.solver, cls.exercise)
+            .having(
+                cls.submission_timestamp == fn.MAX(cls.submission_timestamp),
+                cls.solver == user,
+                cls.exercise == exercise,
+                cls.hashed == hash_,
+            )
         ).exists()
 
     def start_checking(self) -> bool:
@@ -414,11 +428,9 @@ class Solution(BaseModel):
         if len(files) == 1:
             hash_ = cls.create_hash(files[0].code)
 
-        if hash_ and cls.is_duplicate(
-            hash_,
-            solver,
-            exercise,
-            already_hashed=True,
+        if (
+            hash_
+            and cls.is_duplicate(hash_, solver, exercise, already_hashed=True)
         ):
             raise AlreadyExists('This solution already exists.')
 
