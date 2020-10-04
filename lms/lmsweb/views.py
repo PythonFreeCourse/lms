@@ -206,7 +206,7 @@ def _create_comment(
         # should never happend, kind was checked before
         return fail(400, 'Invalid kind.')
 
-    solutions.send_notification_after_check(user, file.solution)
+    solutions.notify_comment_after_check(user, file.solution)
 
     comment_ = Comment.create(
         commenter=user,

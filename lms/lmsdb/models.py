@@ -401,6 +401,10 @@ class Solution(BaseModel):
         ).where(SolutionFile.solution == self)
 
     @property
+    def ordered_comments(self):
+        return self.comments.order_by(Comment.timestamp.desc())
+
+    @property
     def staff_comments(self):
         return self.comments.switch(Comment).join(User).join(Role).where(
             (Comment.commenter.role == Role.get_staff_role().id)

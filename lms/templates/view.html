@@ -137,7 +137,7 @@
 <script src="{{ url_for('static', filename='prism.js') }}"></script>
 {% if not shared_url %}
 <script src="{{ url_for('static', filename='comments.js') }}"></script>
-{%- if is_manager or config.USERS_COMMENTS %}
+{%- if is_manager or config.USERS_COMMENTS and solution['checker'] %}
 <script src="{{ url_for('static', filename='grader.js') }}"></script>
 {% endif -%}
 {%- if is_manager %}
