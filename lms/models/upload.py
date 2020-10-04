@@ -58,7 +58,7 @@ def new(user: User, file: FileStorage) -> Tuple[List[int], List[int]]:
     for exercise_id, files in Extractor(file):
         try:
             solution = _upload_to_db(exercise_id, user, files, solution_hash)
-            _run_auto_checks(solution)
+            #_run_auto_checks(solution)
         except (UploadError, AlreadyExists) as e:
             log.debug(e)
             misses.append(exercise_id)

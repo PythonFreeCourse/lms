@@ -112,23 +112,23 @@ function getPostUploadMessage() {
   const missesSpan = document.getElementById('upload-misses');
   myDropzone.on('success', function() {
     const uploadStatus = Array.from(arguments).slice(1)[0];
-    const matches = uploadStatus['exercise_matches'];
-    const misses = uploadStatus['exercise_misses'];
-    if (!feedbacks.classList.contains('feedback-hidden')) {
-      feedbacks.classList.add('feedback-hidden');
-    }
-    if (matches.length) {
-      matchesSpan.innerText += matches + ',';
-    }
-    if (misses.length) {
-      missesSpan.innerText += misses + ',';
-    }
-    feedbacks.classList.add('feedback-transition');
-    feedbacks.clientWidth;
-    feedbacks.classList.remove('feedback-hidden');
-    feedbacks.addEventListener('transitionend', function() {
-      feedbacks.classList.remove('feedback-transition');
-    });
+    postUploadMessageUpdate(feedbacks, uploadStatus, matchesSpan, missesSpan);
+  });
+}
+
+function postUploadMessageUpdate(feedbacks, uploadStatus, matchesSpan, missesSpan) {
+  const matches = uploadStatus['exercise_matches'];
+  const misses = uploadStatus['exercise_misses'];
+  if (!feedbacks.classList.contains('feedback-hidden')) {
+    feedbacks.classList.add('feedback-hidden');
+  }
+  matchesSpan.innerText += matches.length ? `${matches},` : '';
+  missesSpan.innerText += misses.length ? `${misses},` : '';
+  feedbacks.classList.add('feedback-transition');
+  feedbacks.clientWidth;
+  feedbacks.classList.remove('feedback-hidden');
+  feedbacks.addEventListener('transitionend', function() {
+    feedbacks.classList.remove('feedback-transition');
   });
 }
 
