@@ -2,6 +2,12 @@ html {
   border: #f3f3f3;
 }
 
+html,
+body,
+body > .container {
+  height: 100%;
+}
+
 .rtl {
   direction: rtl;
   text-align: right;
@@ -18,6 +24,10 @@ pre,
 div#code-view {
   direction: ltr;
   text-align: left;
+}
+
+a {
+  text-decoration: none;
 }
 
 .rtl-language > ::-webkit-input-placeholder {
@@ -37,9 +47,10 @@ div#code-view {
 }
 
 #login-container {
+  height: 100%;
   align-items: center;
   display: flex;
-  min-height: calc(100vh - 4rem);
+  align-self: center;
 }
 
 #login {
@@ -101,6 +112,7 @@ div#code-view {
 .right-side,
 .left-side {
   display: flex;
+  align-items: stretch;
 }
 
 .left-side {
@@ -148,6 +160,47 @@ div#code-view {
   align-items: left;
 }
 
+#cancel-share,
+button#share-action {
+  position: relative;
+  display: flex;
+  background: inherit;
+  color: rgba(0, 0, 0, 0.5);
+  border-color: rgba(27, 31, 35, 0.15);
+  border: 1px solid;
+  border-radius: 0.25em;
+  align-self: center;
+  align-content: center;
+  justify-content: center;
+  padding: 0;
+  outline: none;
+}
+
+#copy-link:active,
+#cancel-share:active,
+button#share-action:active {
+  color: #007bff;
+}
+
+#copy-link:hover,
+#cancel-share:hover,
+button#share-action:hover {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+#link-input {
+  position: relative;
+  display: table-cell;
+  background-color: #fafbfc;
+  color: #24292e;
+  min-height: 2em;
+  border: 1px solid;
+  border-radius: 0.25em;
+  border-color: rgba(27, 31, 35, 0.15);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
 .go-send {
   background: #247ba0;
   color: #ebf3f6;
@@ -191,11 +244,14 @@ div#code-view {
 
 .our-button {
   border-radius: 8px;
-  display: block;
+  display: flex;
   margin-right: 0.5em;
   outline: none;
   padding: 0.55rem 1rem;
   white-space: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  height: 3em;
   width: 8em;
 }
 
@@ -203,28 +259,16 @@ div#code-view {
   text-decoration: none;
 }
 
-.our-button-small {
+.our-button-narrow {
   width: 2em;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-i.fa {
-  margin-left: 0.3em;
-}
-
-.our-button-small > i.fa {
-  margin-left: 0;
-}
-
-.share-button > i.fa {
-  margin-left: 0;
-}
-
 #filetree {
   display: flex;
-  overflow-x: none;
+  overflow-x: unset;
 }
 
 #files {
@@ -235,6 +279,27 @@ i.fa {
   white-space: nowrap;
   padding: 0.2rem;
   line-height: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+#files .file {
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  flex-wrap: nowrap;
+}
+
+#files span.icon {
+  display: flex;
+  font-size: 1.25rem;
+  margin: 0 0.25em;
+  align-self: center;
+}
+
+#files a.filename {
+  display: flex;
+  align-self: center;
 }
 
 /* Upload */
@@ -312,35 +377,19 @@ i.fa {
 }
 
 /* RTL Fix for pagination */
-.pagination .page-item:first-child .page-link {
+.rtl-language .pagination .page-item:first-child .page-link {
   border-top-right-radius: 0.25rem;
   border-bottom-right-radius: 0.25rem;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
-.pagination .page-item:last-child .page-link {
+.rtl-language .pagination .page-item:last-child .page-link {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
   border-top-left-radius: 0.25rem;
   border-bottom-left-radius: 0.25rem;
 }
-
-/*
-  background: #dfdfdf;
-  border-radius: 4px;
-  border: 1px solid #afafaf;
-  direction: rtl;
-  display: flex;
-  flex-direction: column;
-  margin-right: 3rem;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  text-align: right;
-  width: 30vw;
-}
-
-#grader-comments p {
-  margin-bottom: 0;
-}
-*/
 
 .code-view-container {
   position: relative;
@@ -369,7 +418,11 @@ i.fa {
   align-items: center;
   flex-direction: row;
   margin-bottom: -0.5em;
-  padding: 0.5em;
+  padding: 0.6em;
+}
+
+.glowing button {
+  color: rgba(0, 0, 0, 0.5) !important;
 }
 
 .glowing button:hover {
@@ -380,11 +433,20 @@ i.fa {
   color: rgb(0, 123, 195) !important;
 }
 
-.code-toolbar-button {
-  padding: 0 0.8em;
-  margin-left: 0.2em;
-  color: rgba(0, 0, 0, 0.5);
-  cursor: pointer;
+.code-toolbar-button,
+#share-text {
+  padding: 0.4rem;
+  margin: 0 0.2rem;
+  border-radius: 0;
+  outline: none;
+}
+
+#share-box > button {
+  padding: 0 0.7rem;
+}
+
+#shareable-link {
+  margin-right: 0.7rem;
 }
 
 #code-toolbar button {
@@ -398,6 +460,7 @@ i.fa {
   font-size: 0.875rem;
   color: rgba(0, 0, 0, 0.5);
   flex: auto;
+  margin-left: 1rem;
 }
 
 #code-toolbar-buttons {
@@ -413,34 +476,16 @@ i.fa {
   top: 3em;
   right: 0.5em;
   z-index: 10;
-  padding: 0.25em;
   border: 1px solid lightgray;
   background: white;
   border-radius: 5px;
+  padding: 0.4rem;
 }
 
 #share-box * {
   position: relative;
   display: flex;
   line-height: unset;
-}
-
-#share-box button {
-  color: rgba(0, 0, 0, 0.5);
-  border: 1px solid lightgray;
-  border-radius: 0;
-}
-
-#share-box #cancel-share {
-  border-top-right-radius: 0.25em;
-  border-bottom-right-radius: 0.25em;
-}
-
-#share-box input {
-  border: 1px solid lightgray;
-  border-radius: 0.25em;
-  border-bottom-right-radius: 0;
-  border-top-right-radius: 0;
 }
 
 pre {
@@ -532,7 +577,7 @@ span.line {
   direction: ltr;
   display: inline-block;
   text-align: left;
-  width: 100%;
+  width: calc(100% - 1.4em);
   margin-left: 0.3em;
 }
 
@@ -572,13 +617,9 @@ code > code:last-of-type{
 
 .grader-add {
   background-attachment: fixed;
-  position: absolute;
-  display: block;
-  z-index: 100;
-  left: -0.88em;
-  right: -0.88em;
+  display: inline-flex;
   width: 1rem;
-  height: 1.5em;
+  height: 1em;
   line-height: 1em;
   cursor: pointer;
   color: #0366d6;
@@ -641,23 +682,15 @@ code .grader-add .fa {
 
 .which-notebook {
   align-self: center;
-  margin-left: 0.5em;
-  padding: 0.55rem 1rem;
+  margin: 0 1rem;
 }
 
 .comments-count {
+  display: flex;
   align-self: center;
+  align-items: center;
   font-size: 1.25rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  margin-top: -0.25em;
-}
-
-.file-comments-count {
-  position: absolute;
-  margin-left: -0.8em;
-  margin-top: -1.5em;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 1.25rem;
 }
 
 #notification-icon {
@@ -666,6 +699,7 @@ code .grader-add .fa {
 
 .notification {
   flex-direction: column;
+  text-align: start;
 }
 
 .notification[data-read="true"] .icon::before {

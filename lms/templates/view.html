@@ -18,13 +18,13 @@
     <p id="solver"><strong>{{ _('מגיש') }}:</strong> <a href="/user/{{ solution['solver']['id'] }}">{{ solution['solver']['fullname'] | e }}</a></p>
     {% endif %}
     {% if not shared_url %}
-    <nav id="versions" aria-label="{{ _('ניווט בגרסאות ההגשה') }}">
+    <nav id="versions" class="{{ direction }}-language" aria-label="{{ _('ניווט בגרסאות ההגשה') }}">
       <ul class="pagination">
       {%- for version in versions %}
         {% set current = version['id'] == solution['id'] %}
         <li class="page-item version{% if current %} active{% endif %}"{% if current %} aria-current="page"{% endif %}>
           <a href="{{ url_for('view', solution_id=version['id']) }}" class="version page-link">{{ loop.index }}</a>
-          {%- if current %}<span class="sr-only">(current)</span>{% endif -%}
+        {%- if current %}<span class="visually-hidden">{{ _("העמוד הנוכחי") }}</span>{% endif -%}
         </li>
       {% endfor -%}
       </ul>
@@ -44,14 +44,14 @@
         <div id="number-of-lines">{{ current_file.code.splitlines() | length }} lines</div>
         <div id="code-toolbar-buttons">
           {% if config.SHAREABLE_SOLUTIONS and not shared_url %}
-          <div id="share-solution" class="share-function">
-            <div id="share-text" class="code-toolbar-button glowing">
+          <div id="share-solution" class="code-toolbar-button glowing">
+            <div id="share-text">
               <button id="share-action" title="Share solution"><i class="fa fa-share-alt"></i></button>
             </div>
             <div id="share-box" class="glowing d-none">
               <button id="cancel-share" class="share-button" title="Disable share solution"><i class="fa fa-trash"></i></button>
               <button id="copy-link" class="share-button" title="Copy shared link"><i class="fa fa-copy"></i></button>
-              <input id="shareable-link" type="text" readonly>
+              <input id="shareable-link" class="form-control" type="text" readonly>
             </div>
           </div>
           {% endif -%}
@@ -125,7 +125,7 @@
       </div>
       <div id="grader-buttons" class="{{ direction }}">
         <button id="save-check" class="btn btn-success">{{ _('סיימתי לבדוק!') }}</button>
-        <a id="ninja" href="#" class="badge badge-dark" style="display: none;">Ninja Mode</a>
+        <a id="ninja" href="#" class="badge bg-dark" style="display: none;">Ninja Mode</a>
       </div>
     </div>
     {% endif %}
