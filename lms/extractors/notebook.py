@@ -1,5 +1,6 @@
 import itertools
 import json
+import re
 from typing import Any, Dict, Iterator, List, Tuple
 
 from lms.extractors.base import Extractor, File
@@ -13,6 +14,8 @@ class Notebook(Extractor):
     POSSIBLE_JSON_EXCEPTIONS = (
         json.JSONDecodeError, KeyError, StopIteration, UnicodeDecodeError,
     )
+    TYPE_LINE_PREFIX = re.compile(r'#\s+type:\s+(\w+)', re.IGNORECASE)
+    DEFAULT_FILE_TYPE = 'py'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -41,10 +44,29 @@ class Notebook(Extractor):
         cells = notebook['cells']
         yield from filter(self._is_code_cell, cells)
 
+    def _get_file_type(self, code_text: str) -> Tuple[str, str]:
+        if code_text:
+            first_line_end = code_text.find('\n')
+            if first_line_end == -1:
+                first_line_end = len(code_text)
+
+            first_line = code_text[:first_line_end]
+            file_type_match = self.TYPE_LINE_PREFIX.fullmatch(first_line)
+
+            if file_type_match:
+                file_type = file_type_match.group(1)
+                code_lines = code_text[first_line_end:].strip()
+            else:
+                file_type = self.DEFAULT_FILE_TYPE
+                code_lines = code_text
+            return code_lines, file_type
+        return '', ''
+
     def get_exercise(self, to_extract: Cell) -> Tuple[int, List[File]]:
         code: List[str] = to_extract.get('source', [])
         exercise_id, clean_code = self._clean(code)
-        return (exercise_id, [File('/main.py', clean_code)])
+        clean_code, ext = self._get_file_type(clean_code)
+        return (exercise_id, [File(f'/main.{ext}', clean_code)])
 
     def get_exercises(self) -> Iterator[Tuple[int, List[File]]]:
         """Yield exercise ID and code from notebook."""
