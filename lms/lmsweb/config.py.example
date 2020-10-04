@@ -29,6 +29,9 @@ ERRORS_CSV = 'errors.csv'
 # Shareable option
 SHAREABLE_SOLUTIONS = True
 
+# Users comments option
+USERS_COMMENTS = True
+
 # Babel config
 LANGUAGES = {
     'he': 'Hebrew',

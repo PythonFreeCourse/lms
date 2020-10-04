@@ -96,7 +96,7 @@ services:
 
   http:
     image: lms:latest
-    command: gunicorn --bind 0.0.0.0:8080 --workers 5 lms.lmsweb
+    command: gunicorn --reload --bind 0.0.0.0:8080 --workers 5 lms.lmsweb
     volumes:
       - ../lms:/app_dir/lms
       - ../../notebooks-tests:/app_dir/notebooks-tests
