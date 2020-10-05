@@ -1,24 +1,24 @@
 console.log('Hello from sw.js');
 
 importScripts(
-  'https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js'
+  'https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js',
 );
 
 if (workbox) {
-  console.log(`Yay! Workbox is loaded 🎉`);
+  console.log('Yay! Workbox is loaded 🎉');
 
   workbox.precaching.precacheAndRoute([
     {
       url: '/',
-      revision: '1'
-    }
+      revision: '1',
+    },
   ]);
 
   workbox.routing.registerRoute(
     /\.(?:js|css)$/,
     new workbox.strategies.StaleWhileRevalidate({
-      cacheName: 'static-resources'
-    })
+      cacheName: 'static-resources',
+    }),
   );
 
   workbox.routing.registerRoute(
@@ -28,10 +28,10 @@ if (workbox) {
       plugins: [
         new workbox.expiration.ExpirationPlugin({
           maxEntries: 60,
-          maxAgeSeconds: 30 * 24 * 60 * 60 // 30 Days
-        })
-      ]
-    })
+          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+        }),
+      ],
+    }),
   );
 
   workbox.loadModule('workbox-cacheable-response');
@@ -42,11 +42,11 @@ if (workbox) {
       cacheName: 'googleapis',
       plugins: [
         new workbox.expiration.ExpirationPlugin({
-          maxEntries: 30
-        })
-      ]
-    })
+          maxEntries: 30,
+        }),
+      ],
+    }),
   );
 } else {
-  console.log(`Boo! Workbox didn't load 😬`);
+  console.log("Boo! Workbox didn't load 😬");
 }
