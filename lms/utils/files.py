@@ -1,7 +1,9 @@
 LANGUAGE_EXTENSIONS_TO_NAMES = {
     'bat': 'batch',
+    'css': 'css',
     'h': 'c',
     'htm': 'html',
+    'html': 'html',
     'js': 'javascript',
     'md': 'markup',
     'ps1': 'powershell',
@@ -14,7 +16,7 @@ LANGUAGE_EXTENSIONS_TO_NAMES = {
     'yml': 'yaml',
 }
 
-ALLOWED_EXTENSIONS = {'css', 'html', 'js', 'py', 'sql'}
+ALLOWED_EXTENSIONS = set(LANGUAGE_EXTENSIONS_TO_NAMES)
 
 
 def get_language_name_by_extension(ext: str) -> str:
