@@ -2,15 +2,14 @@
   <ol id="files">
     {%- for file in files %}
     <li class="file" data-id="{{ file.id }}">
-      <span class="indent" style="padding-left: {{ file.indent }}em"></span>
-      {%- if not shared_url %}
-        <div class="file-comments-count">
-          <span style="margin-left: {{ file.indent }}em"
-                class="badge bg-{%- if comments[file.id] -%}danger{%- else -%}success{%- endif -%}">
-            {{ comments[file.id] }}
-          </span>
-        </div>
+      <div class="file-comments-count">
+      {%- if not shared_url and not file.is_folder %}
+        <span class="badge bg-{%- if comments[file.id] -%}danger{%- else -%}success{%- endif -%}">
+          {{ comments[file.id] }}
+        </span>
       {% endif -%}
+      </div>
+      <span class="indent" style="margin-left: {{ file.indent * 1.5 }}em"></span>
       <span class="
       {%- if file.is_folder -%}
       icon hawcons-icon-folder">
@@ -18,7 +17,23 @@
       icon hawcons-icon-document-text hawcons-icon-file-{{ file.path.rsplit('.')[-1] | e }} file-icon">
       {%- endif -%}
       </span>
-      <a {% if not file.is_folder %}href="/{%- if not shared_url %}view/{{ solution.id }}{%- else %}shared/{{ shared_url }}{% endif -%}/{{ file.id }}"{% endif %} class="filename link" title="{{ file.path | e }}">{{ file.path | truncate(25, killwords=True) | e }}</a>
+      {% if not file.is_folder -%}
+        <a href="/
+        {%- if not shared_url -%}
+          view/{{ solution.id }}
+        {%- else -%}
+          shared/{{ shared_url }}
+        {%- endif -%}
+        /{{ file.id }}" 
+      {% else -%}
+      <span
+      {% endif -%}
+      class="filename link" title="{{ file.path | e }}">{{ file.path | truncate(25, killwords=True) | e }}
+      {%- if not file.is_folder -%}
+        </a>
+      {%- else -%}
+        </span>
+      {%- endif -%}
     </li>
     {% endfor -%}
   </ol>

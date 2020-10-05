@@ -283,6 +283,14 @@ button#share-action:hover {
   flex-direction: column;
 }
 
+.file-comments-count {
+  height: 1.5em;
+  display: inline-flex;
+  align-self: center;
+  margin: 0 0.25em;
+  width: 1em;
+}
+
 #files .file {
   display: flex;
   flex-direction: row;
