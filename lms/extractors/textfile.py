@@ -2,13 +2,13 @@ from typing import Iterator, List, Tuple
 
 from lms.extractors.base import Extractor, File
 from lms.models.errors import BadUploadFile
+from lms.utils.files import ALLOWED_EXTENSIONS
 
 
 TEXTCHARS = set(bytes(
     {7, 8, 9, 10, 12, 13, 27}
     | set(range(0x20, 0x100)) - {0x7f},
 ))
-ALLOWED_EXTENSIONS = {'css', 'html', 'js', 'py', 'sql'}
 
 
 class Textfile(Extractor):

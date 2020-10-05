@@ -14,6 +14,8 @@ LANGUAGE_EXTENSIONS_TO_NAMES = {
     'yml': 'yaml',
 }
 
+ALLOWED_EXTENSIONS = {'css', 'html', 'js', 'py', 'sql'}
+
 
 def get_language_name_by_extension(ext: str) -> str:
     return LANGUAGE_EXTENSIONS_TO_NAMES.get(ext, ext)

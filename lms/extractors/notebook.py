@@ -4,7 +4,7 @@ import re
 from typing import Any, Dict, Iterator, List, Tuple
 
 from lms.extractors.base import Extractor, File
-from lms.extractors.textfile import ALLOWED_EXTENSIONS
+from lms.utils.files import ALLOWED_EXTENSIONS
 from lms.utils.log import log
 
 
