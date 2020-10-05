@@ -305,13 +305,6 @@ def comment():
     ):
         return fail(403, "You aren't allowed to access this page.")
 
-    if (
-        webapp.config.get('USERS_COMMENTS', False)
-        and not file.solution.is_checked
-        and not current_user.role.is_manager
-    ):
-        return fail(403, "You aren't allowed to access this page.")
-
     if act == 'delete':
         comment_id = int(request.args.get('commentId'))
         comment_ = Comment.get_or_none(Comment.id == comment_id)
