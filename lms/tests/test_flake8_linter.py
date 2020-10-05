@@ -2,7 +2,7 @@ import os
 import shutil
 import tempfile
 
-from lms.lmsdb import models
+from lms.lmsdb.models import Comment, Solution
 from lms.lmstests.public.linters import tasks
 from lms.models import notifications
 
@@ -30,23 +30,23 @@ class TestFlake8Linter:
         if cls.test_directory is not None:
             shutil.rmtree(cls.test_directory)
 
-    def test_pyflake_wont_execute_code(self, solution: models.Solution):
+    def test_pyflake_wont_execute_code(self, solution: Solution):
         solution_file = solution.solution_files.get()
         solution_file.code = self.execute_script
         solution_file.save()
         tasks.run_linter_on_solution(solution.id)
-        comments = tuple(models.Comment.by_solution(solution))
+        comments = tuple(Comment.by_solution(solution))
         assert not os.listdir(self.test_directory)
         assert len(comments) == 2
         exec(compile(self.execute_script, '', 'exec'))  # noqa S102
         assert os.listdir(self.test_directory) == ['some-file']
 
-    def test_invalid_solution(self, solution: models.Solution):
+    def test_invalid_solution(self, solution: Solution):
         solution_file = solution.solution_files.get()
         solution_file.code = INVALID_CODE
         solution_file.save()
         tasks.run_linter_on_solution(solution.id)
-        comments = tuple(models.Comment.by_solution(solution))
+        comments = tuple(Comment.by_solution(solution))
         assert comments
         assert len(comments) == 1
         comment = comments[0].comment
@@ -59,10 +59,10 @@ class TestFlake8Linter:
         assert solution.exercise.subject in subject
         assert '1' in subject
 
-    def test_valid_solution(self, solution: models.Solution):
+    def test_valid_solution(self, solution: Solution):
         solution_file = solution.solution_files.get()
         solution_file.code = VALID_CODE
         solution_file.save()
         tasks.run_linter_on_solution(solution.id)
-        comments = tuple(models.Comment.by_solution(solution))
+        comments = tuple(Comment.by_solution(solution))
         assert not comments

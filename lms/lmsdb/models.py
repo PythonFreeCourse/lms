@@ -1,5 +1,6 @@
 from collections import Counter
 import enum
+import html
 import secrets
 import string
 from datetime import datetime
@@ -708,7 +709,7 @@ class CommentText(BaseModel):
         cls, text: str, flake_key: Optional[str] = None,
     ) -> 'CommentText':
         instance, _ = CommentText.get_or_create(
-            **{CommentText.text.name: text},
+            **{CommentText.text.name: html.escape(text)},
             defaults={CommentText.flake8_key.name: flake_key},
         )
         return instance
