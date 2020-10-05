@@ -3,7 +3,7 @@ from lms.lmstests.public.linters import tasks
 
 
 INVALID_CODE = 's1\n'
-INVALID_CODE_MESSAGE = "Found unparsable section: 's1'"
+INVALID_CODE_MESSAGE = 'Found unparsable section: &#x27;s1&#x27;'  # Escape
 
 VALID_CODE = 'SELECT 1\n'
 
