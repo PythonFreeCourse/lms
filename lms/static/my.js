@@ -129,12 +129,12 @@ function postUploadMessageUpdate(feedbacks, uploadStatus, matchesSpan, missesSpa
   });
 }
 
-function getPostUploadMessage(...args) {
+function getPostUploadMessage() {
   const myDropzone = Dropzone.forElement('#demo-upload');
   const feedbacks = document.getElementById('upload-feedbacks');
   const matchesSpan = document.getElementById('upload-matches');
   const missesSpan = document.getElementById('upload-misses');
-  myDropzone.on('success', () => {
+  myDropzone.on('success', (...args) => {
     const uploadStatus = Array.from(args).slice(1)[0];
     if (uploadStatus !== null) {
       postUploadMessageUpdate(feedbacks, uploadStatus, matchesSpan, missesSpan);
