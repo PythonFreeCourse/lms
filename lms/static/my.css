@@ -330,6 +330,30 @@ button#share-action:hover {
   min-height: 30vh !important;
 }
 
+.upload-feedback {
+  display: flex;
+  margin-top: 1em;
+  justify-content: center;
+}
+
+.feedback-message {
+  display: block;
+  opacity: 1;
+}
+
+.feedback-hidden {
+  display: none;
+}
+
+.feedback-transition.feedback-hidden {
+  display: block;
+  opacity: 0;
+}
+
+.feedback-transition {
+  transition: opacity 0.5s ease;
+}
+
 /* Check/see exercise view */
 #page-view {
   direction: rtl;

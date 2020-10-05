@@ -18,7 +18,7 @@ def notify_comment_after_check(user: User, solution: Solution) -> bool:
     is_checked = solution.is_checked
     if is_checked:
         msg, addressee = get_message_and_addressee(user, solution)
-        if check_notify_after_comment(user, solution):
+        if is_last_to_reply(user, solution):
             notifications.send(
                 kind=notifications.NotificationKind.USER_RESPONSE,
                 user=addressee,
@@ -30,7 +30,7 @@ def notify_comment_after_check(user: User, solution: Solution) -> bool:
     return False
 
 
-def check_notify_after_comment(user: User, solution: Solution) -> bool:
+def is_last_to_reply(user: User, solution: Solution) -> bool:
     return (
         not solution.comments
         or (

@@ -196,6 +196,14 @@ msgstr "Drag here the notebook file or click and choose it from your computer."
 msgid "חזרו לרשימת התרגילים"
 msgstr "Back to Exercises List"
 
+#: templates/upload.html:17
+msgid "הועלו"
+msgstr "Matches"
+
+#: templates/upload.html:18
+msgid "נכשלו"
+msgstr "Misses"
+
 #: templates/user.html:9
 msgid "פרטי משתמש:"
 msgstr "User details:"
