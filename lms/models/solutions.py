@@ -34,7 +34,7 @@ def is_last_to_reply(user: User, solution: Solution) -> bool:
         not solution.comments
         or (
             solution.comments
-            and not solution.ordered_comments[0].commenter == user
+            and solution.ordered_comments[0].commenter != user
         )
     )
 

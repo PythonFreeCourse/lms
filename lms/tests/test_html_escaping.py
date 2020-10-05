@@ -1,6 +1,7 @@
 from flask import json
 
 from lms.lmsdb.models import Solution, User
+from lms.models import solutions
 from lms.tests import conftest
 
 
@@ -13,9 +14,14 @@ USER_COMMENT_AFTER_ESCAPING = (
 
 class TestHtmlEscaping:
     @staticmethod
-    def test_comment_text_escaping(student_user: User, solution: Solution):
+    def test_comment_text_escaping(
+        student_user: User, 
+        staff_user: User,
+        solution: Solution,
+    ):
         client = conftest.get_logged_user(student_user.username)
 
+        solutions.mark_as_checked(solution.id, staff_user.id)
         # Creating a comment
         comment_response = client.post('/comments', data=json.dumps(dict(
             fileId=solution.files[0].id, act='create', kind='text',
