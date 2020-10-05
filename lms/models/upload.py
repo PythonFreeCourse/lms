@@ -28,7 +28,8 @@ def _upload_to_db(
     elif not exercise.open_for_new_solutions():
         raise UploadError(
             f'Exercise {exercise_id} is closed for new solutions.')
-    if _is_uploaded_before(user, solution_hash):
+
+    if solution_hash and _is_uploaded_before(user, solution_hash):
         raise AlreadyExists('You try to reupload an old solution.')
     elif not files:
         raise UploadError(f'There are no files to upload for {exercise_id}.')
