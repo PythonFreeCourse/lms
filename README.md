@@ -62,12 +62,11 @@ Steps to do:
 ```bash
 git clone https://github.com/PythonFreeCourse/lms
 cd lms
-mv lms/lmsweb/config.py.example lms/lmsweb/config.py
+cp lms/lmsweb/config.py.example lms/lmsweb/config.py
 echo "SECRET_KEY = \"$(python -c 'import os;print(os.urandom(32).hex())')\"" >> lms/lmsweb/config.py
 
-./devops/build.sh
-./devops/start.sh
-./devops/bootstrap.sh
+cd devops
+. ./build.sh && . ./start.sh && . ./bootstrap.sh
 ```
 
 In case you want to add the stub data to PostgreSQL DB, run:

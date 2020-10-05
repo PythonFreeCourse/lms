@@ -22,7 +22,6 @@ function trackFinished(exerciseId, solutionId, element) {
   });
 }
 
-
 function sendComment(kind, fileId, line, commentData) {
   const xhr = new XMLHttpRequest();
   xhr.open('POST', '/comments');
@@ -53,17 +52,29 @@ function sendComment(kind, fileId, line, commentData) {
 function visuallyRemoveComment(commentId) {
   const commentElement = document.querySelector(`.grader-delete[data-commentid="${commentId}"]`).closest('.comment');
   const lineElement = document.querySelector(`.line[data-line="${commentElement.dataset.line}"]`);
+  const existingPopover = bootstrap.Popover.getInstance(lineElement);
   const hr = commentElement.nextElementSibling || commentElement.previousElementSibling;
   if (hr === null) {
     lineElement.dataset.marked = false;
-    window.markLine(lineElement, "none");
-    $(lineElement).popover('dispose');
+    window.markLine(lineElement, 'none');
+    const popover = bootstrap.Popover.getInstance(lineElement);
+    if (popover !== null) {
+      popover.dispose();
+    }
   } else {
+    let removeContent = `<hr>${commentElement.outerHTML}`;
+    if (!existingPopover.config.content.includes(removeContent)) {
+      removeContent = `${commentElement.outerHTML} <hr>`;
+    }
+    existingPopover.config.content = existingPopover.config.content.replace(removeContent, '');
+    const commentParent = commentElement.parentNode;
     hr.parentNode.removeChild(hr);
-    commentElement.parentNode.removeChild(commentElement);
+    commentParent.removeChild(commentElement);
+    const lastAuthorRole = commentParent.lastChild.previousElementSibling.dataset.authorRole;
+    const newLineColor = window.getLineColorByRole(lastAuthorRole);
+    window.markLine(lineElement, newLineColor, true);
   }
 }
-
 
 function deleteComment(fileId, commentId) {
   const xhr = new XMLHttpRequest();
@@ -88,11 +99,9 @@ function sendNewComment(...commentData) {
   return sendComment('text', ...commentData);
 }
 
-
 function sendExistsComment(...commentData) {
   return sendComment('id', ...commentData);
 }
-
 
 function trackDragAreas(lineItems, addCommentItems) {
   function findElementsToMark(e) {
@@ -141,7 +150,6 @@ function trackDragAreas(lineItems, addCommentItems) {
   });
 }
 
-
 function trackDraggables(elements) {
   Array.from(elements).forEach((item) => {
     item.addEventListener('dragstart', (e) => {
@@ -150,43 +158,43 @@ function trackDraggables(elements) {
   });
 }
 
-
 function focusTextArea(lineNumber) {
   const target = document.querySelector(`textarea[data-line='${lineNumber}']`);
-  target.focus({preventScroll: true});
+  target.focus({ preventScroll: true });
 }
-
 
 function trackTextArea(lineNumber) {
   const target = `textarea[data-line='${lineNumber}']`;
-  const popoverElement = `.grader-add[data-line='${lineNumber}']`;
-  $(target).keydown((ev) => {
-    if ((ev.which == 10 || ev.which == 13) && ev.ctrlKey) {  // CTRL + ENTER
+  const popoverElement = document.querySelector(`.grader-add[data-line='${lineNumber}']`);
+  document.querySelector(target).addEventListener('keydown', (ev) => {
+    if ((ev.which === 10 || ev.which === 13) && ev.ctrlKey) { // CTRL + ENTER
       sendNewComment(window.fileId, lineNumber, ev.target.value);
-      $(popoverElement).popover('hide');
-    } else if (ev.key == 'Escape') {
+    } else if (ev.key === 'Escape') {
       ev.preventDefault();
-      $(popoverElement).popover('hide');
+    } else {
+      return;
     }
+
+    const popover = bootstrap.Popover.getInstance(popoverElement);
+    if (popover !== null) { popover.hide(); }
   });
 }
-
 
 function registerNewCommentPopover(element) {
   const lineNumber = element.dataset.line;
   const addCommentString = 'הערה חדשה לשורה';
-  $(element).popover({
+  const popover = new bootstrap.Popover(element, {
     html: true,
     title: `${addCommentString} ${lineNumber}`,
     sanitize: false,
     content: `<textarea data-line='${lineNumber}'></textarea>`,
   });
-  $(element).on('inserted.bs.popover', () => {
+  element.addEventListener('inserted.bs.popover', () => {
     trackTextArea(lineNumber);
     focusTextArea(lineNumber);
   });
+  return popover;
 }
-
 
 function addNewCommentButtons(elements) {
   Array.from(elements).forEach((item) => {
@@ -197,9 +205,7 @@ function addNewCommentButtons(elements) {
     item.parentNode.insertBefore(newNode, item);
     registerNewCommentPopover(newNode);
   });
-  $('[data-toggle=popover]').popover();
 }
-
 
 window.deleteComment = deleteComment;
 window.sendExistsComment = sendExistsComment;

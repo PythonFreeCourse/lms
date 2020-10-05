@@ -5,7 +5,7 @@ from flask import Flask
 from flask_babel import Babel
 from flask_wtf.csrf import CSRFProtect  # type: ignore
 
-from lms.utils import config_migrator
+from lms.utils import config_migrator, debug
 
 project_dir = pathlib.Path(__file__).resolve().parent.parent
 web_dir = project_dir / 'lmsweb'
@@ -13,6 +13,10 @@ template_dir = project_dir / 'templates'
 static_dir = project_dir / 'static'
 config_file = web_dir / 'config.py'
 config_example_file = web_dir / 'config.py.example'
+
+
+if debug.is_enabled():
+    debug.start()
 
 
 webapp = Flask(

@@ -1,20 +1,21 @@
 import datetime
+import os
 import random
 import string
-import os
 from typing import Optional
 
-import pytest
+from flask.testing import FlaskClient
 from peewee import SqliteDatabase
+import pytest
 
 from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Exercise, Notification, Role,
-    RoleOptions, Solution, User,
+    RoleOptions, SharedSolution, Solution, User,
 )
 from lms.extractors.base import File
 from lms.lmstests.public import celery_app as public_app
 from lms.lmstests.sandbox import celery_app as sandbox_app
-from lms.lmsweb import routes
+from lms.lmsweb import routes, webapp
 from lms.models import notifications
 
 
@@ -50,6 +51,44 @@ def db(db_in_memory):
 def celery_eager():
     public_app.conf.update(task_always_eager=True)
     sandbox_app.conf.update(task_always_eager=True)
+
+
+@pytest.fixture(autouse=True, scope='session')
+def webapp_configurations():
+    webapp.config['SHAREABLE_SOLUTIONS'] = True
+    webapp.config['USERS_COMMENTS'] = True
+    webapp.secret_key = ''.join(
+        random.choices(string.ascii_letters + string.digits, k=64),
+    )
+
+
+def disable_shareable_solutions():
+    webapp.config['SHAREABLE_SOLUTIONS'] = False
+
+
+def disable_users_comments():
+    webapp.config['USERS_COMMENTS'] = False
+
+
+def enable_users_comments():
+    webapp.config['USERS_COMMENTS'] = True
+
+
+def get_logged_user(username: str) -> FlaskClient:
+    client = webapp.test_client()
+    client.post(
+        '/login',
+        data=dict(  # noqa: S106
+            username=username,
+            password='fake pass',
+        ),
+        follow_redirects=True,
+    )
+    return client
+
+
+def logout_user(client: FlaskClient) -> None:
+    client.post('/logout', follow_redirects=True)
 
 
 def create_user(
@@ -116,12 +155,16 @@ def create_notification(
     )
 
 
-def create_exercise(index: int = 0) -> Exercise:
+def create_exercise(index: int = 0, is_archived: bool = False) -> Exercise:
     return Exercise.create(
         subject=f'python {index}',
         date=datetime.datetime.now(),
-        is_archived=False,
+        is_archived=is_archived,
     )
+
+
+def create_shared_solution(solution: Solution) -> str:
+    return SharedSolution.create_shared_solution(solution=solution)
 
 
 @pytest.fixture()

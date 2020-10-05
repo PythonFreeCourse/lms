@@ -15,7 +15,7 @@ class TestUser:
         staff_user.save()
         self.assert_password(staff_user, new_password)
 
-    def test_password_hashed_on_mmultiple_saves(self, staff_user: User):
+    def test_password_hashed_on_multiple_saves(self, staff_user: User):
         new_password = 'woop2'  # noqa S105
         staff_user.password = new_password
         staff_user.save()

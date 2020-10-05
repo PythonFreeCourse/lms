@@ -1,22 +1,24 @@
 const DEFAULT_COMMENTED_LINE_COLOR = '#fab3b0';
+const STUDENT_COMMENTED_LINE_COLOR = '#a9f6f9';
 const FLAKE_COMMENTED_LINE_COLOR = '#fac4c3';
 const HOVER_LINE_STYLE = '1px solid #0d0d0f';
 
-
-function markLine(target, color) {
-  if (target.dataset && target.dataset.marked === 'true') { return; }
-  if (target.dataset && target.dataset.vimbackground === 'true') { return; }
+function markLine(target, color, deletion = false) {
+  if (target.dataset && target.dataset.marked === 'true' && !deletion) { return; }
+  if (target.dataset && target.dataset.vimbackground === 'true' && !deletion) { return; }
   target.style.background = color;
 }
 
 function hoverLine(targets, hover) {
   const [lineTarget, addCommentTarget] = targets;
   if (lineTarget.dataset && lineTarget.dataset.vimbackground === 'true') { return; }
-  let parsedColor = (
-    (hover === true) ? HOVER_LINE_STYLE :
-      (hover === false ? 'none' : hover)
-  )
-  let commentOpacity = (hover === true) ? '1' : '0';
+  const commentOpacity = (hover === true) ? '1' : '0';
+  let parsedColor = hover;
+  if (hover === true) {
+    parsedColor = HOVER_LINE_STYLE;
+  } else if (hover === false) {
+    parsedColor = 'none';
+  }
   lineTarget.style.border = parsedColor;
   addCommentTarget.style.opacity = commentOpacity;
 }
@@ -26,10 +28,15 @@ function isUserGrader() {
   return ['staff', 'administrator'].includes(sessionStorage.getItem('role'));
 }
 
+function isSolverComment(commentData) {
+  const authorIsSolver = commentData.author_name === sessionStorage.getItem('solver');
+  const allowedComment = sessionStorage.getItem('allowedComment') === 'true';
+  return (authorIsSolver && allowedComment);
+}
+
 function formatCommentData(commentData) {
-  let changedCommentText = commentData.text;
-  changedCommentText = `<span class="comment-author">${commentData.author_name}:</span> ${commentData.text}`
-  if (isUserGrader()) {
+  let changedCommentText = `<span class="comment-author">${commentData.author_name}:</span> ${commentData.text}`;
+  if (isUserGrader() || isSolverComment(commentData)) {
     const deleteButton = `<i class="fa fa-trash grader-delete" aria-hidden="true" data-commentid="${commentData.id}" onclick="deleteComment(${window.fileId}, ${commentData.id});"></i>`;
     changedCommentText = `${deleteButton} ${changedCommentText}`;
   }
@@ -37,15 +44,15 @@ function formatCommentData(commentData) {
 }
 
 function addCommentToLine(line, commentData) {
-  const commentElement = $(`.line[data-line="${line}"]`);
-  const existingPopover = $(commentElement).data('bs.popover');
+  const commentElement = document.querySelector(`.line[data-line="${line}"]`);
   const formattedComment = formatCommentData(commentData);
-  const commentText = `<span class="comment" data-line="${line}" data-commentid="${commentData.id}">${formattedComment}</span>`;
-  if (existingPopover !== undefined) {
+  const commentText = `<span class="comment" data-line="${line}" data-commentid="${commentData.id}" data-author-role="${commentData.author_role}">${formattedComment}</span>`;
+  let existingPopover = bootstrap.Popover.getInstance(commentElement);
+  if (existingPopover !== null) {
     const existingContent = `${existingPopover.config.content} <hr>`;
     existingPopover.config.content = existingContent + commentText;
   } else {
-    commentElement.popover({
+    existingPopover = new bootstrap.Popover(commentElement, {
       html: true,
       title: `שורה ${line}`,
       content: commentText,
@@ -53,14 +60,22 @@ function addCommentToLine(line, commentData) {
       boundary: 'viewport',
       placement: 'auto',
     });
-    $(commentElement).popover();
   }
+
+  commentElement.dataset.comment = 'true';
   if (commentData.is_auto) {
-      markLine(commentElement[0], FLAKE_COMMENTED_LINE_COLOR);
+    markLine(commentElement, FLAKE_COMMENTED_LINE_COLOR);
   } else {
-    markLine(commentElement[0], DEFAULT_COMMENTED_LINE_COLOR);
-    commentElement[0].dataset.marked = true;
+    const lineColor = window.getLineColorByRole(commentData.author_role);
+    markLine(commentElement, lineColor, true);
+    commentElement.dataset.marked = true;
   }
+
+  return existingPopover;
+}
+
+function getLineColorByRole(authorRole) {
+  return authorRole === 1 ? STUDENT_COMMENTED_LINE_COLOR : DEFAULT_COMMENTED_LINE_COLOR;
 }
 
 function treatComments(comments) {
@@ -72,7 +87,6 @@ function treatComments(comments) {
     addCommentToLine(entry.line_number, entry);
   });
 }
-
 
 function pullComments(fileId, callback) {
   const url = `/comments?act=fetch&fileId=${fileId}`;
@@ -88,7 +102,6 @@ function pullComments(fileId, callback) {
   xhr.send('');
 }
 
-
 function updateOpenedSpans(currentSpans, line) {
   /* Because we have each line wrapped in it's own span, we must close
    * all the opened spans in this specific line and re-open them in the next
@@ -96,7 +109,8 @@ function updateOpenedSpans(currentSpans, line) {
    */
   let isCatching = false;
   let phrase = '';
-  for (const c of line) {
+  for (let i = 0; i < line.length; i += 1) {
+    const c = line.length[i];
     if (c === '>') {
       isCatching = false;
       phrase = `<${phrase}>`;
@@ -114,9 +128,8 @@ function updateOpenedSpans(currentSpans, line) {
   }
 }
 
-
 function addLineSpansToPre(items) {
-  let openSpans = [];
+  const openSpans = [];
   Array.from(items).forEach((item) => {
     const code = item.innerHTML.trim().split('\n');
     item.innerHTML = code.map(
@@ -126,22 +139,24 @@ function addLineSpansToPre(items) {
         lineContent += '</span>'.repeat(openSpans.length);
         const wrappedLine = `<span data-line="${i + 1}" class="line">${lineContent}</span>`;
         return wrappedLine;
-      }
+      },
     ).join('\n');
   });
   window.dispatchEvent(new Event('lines-numbered'));
 }
 
-
 window.markLink = markLine;
 window.hoverLine = hoverLine;
 window.addCommentToLine = addCommentToLine;
 window.isUserGrader = isUserGrader;
+window.getLineColorByRole = getLineColorByRole;
 window.addEventListener('load', () => {
-  const codeElement = document.getElementById('code-view').dataset;
-  window.solutionId = codeElement.id;
-  window.fileId = codeElement.file;
-  sessionStorage.setItem('role', codeElement.role);
+  const codeElementData = document.getElementById('code-view').dataset;
+  window.solutionId = codeElementData.id;
+  window.fileId = codeElementData.file;
+  sessionStorage.setItem('role', codeElementData.role);
+  sessionStorage.setItem('solver', codeElementData.solver);
+  sessionStorage.setItem('allowedComment', codeElementData.allowedComment);
   addLineSpansToPre(document.getElementsByTagName('code'));
   pullComments(window.fileId, treatComments);
 });

@@ -1,14 +1,11 @@
 from dataclasses import dataclass
 import re
-from re import IGNORECASE
 import string
-from typing import (
-    Any, ClassVar, Iterator, List,
-    Pattern, Sequence, Tuple, Union, cast,
-)
+from typing import Any, Iterator, List, Sequence, Tuple, Union, cast
 
 from werkzeug.datastructures import FileStorage
 
+from lms.utils import hashing
 from lms.utils.log import log
 
 
@@ -23,7 +20,7 @@ class File:
 
 
 class Extractor:
-    UPLOAD_TITLE: ClassVar[Pattern] = re.compile(r'Upload\s+(\d+)', IGNORECASE)
+    UPLOAD_TITLE = re.compile(r'Upload\s+(\d+)', re.IGNORECASE)
 
     def __init__(self, to_extract: FileStorage):
         self.to_extract = to_extract
@@ -57,18 +54,18 @@ class Extractor:
         first_line = clean_text[:first_line_end].strip().replace('_', ' ')
         code_lines = clean_text[first_line_end:].strip()
 
-        log.debug(f'Upload title: {first_line}')
         return first_line, code_lines
 
     @classmethod
-    def _clean(cls, code: Union[Sequence, str]) -> Tuple[int, str]:
+    def _clean(cls, code: CodeFile) -> Tuple[int, str]:
         first_line, code_text = cls._split_header(code)
+        log.debug(f'Upload title: {first_line}.')
         upload_title = cls.UPLOAD_TITLE.fullmatch(first_line)
         if upload_title:
             exercise_id = int(upload_title.group(1))
             return exercise_id, code_text
 
-        log.debug(f'Unmatched title: {first_line}')
+        log.debug(f'Unmatched title: {first_line}.')
         return 0, ''
 
     def get_exercise(self, to_extract: Any) -> Tuple[int, List[File]]:
@@ -80,10 +77,12 @@ class Extractor:
     def can_extract(self) -> bool:
         raise NotImplementedError()
 
-    def __iter__(self) -> Iterator[Tuple[int, List[File]]]:
+    def __iter__(self) -> Iterator[Tuple[int, List[File], str]]:
         for cls in self.__class__.__subclasses__():
             log.debug(f'Trying extractor: {cls.__name__}')
             extractor = cls(to_extract=self.to_extract)
             if extractor.can_extract():
-                for solution_id, files in extractor.get_exercises():
-                    yield (solution_id, files)
+                yield from (
+                    (solution_id, files, hashing.by_content(str(files)))
+                    for solution_id, files in extractor.get_exercises()
+                )

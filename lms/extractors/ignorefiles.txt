@@ -102,6 +102,9 @@
 # mypy
 *.mypy_cache/*
 
+# git and github
+*.git
+*.github
 
 # pycharm
 *.idea/*

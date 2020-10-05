@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 from werkzeug.datastructures import FileStorage
 
@@ -9,7 +9,6 @@ from lms.lmstests.public.linters import tasks as linters_tasks
 from lms.lmstests.public.unittests import tasks as unittests_tasks
 from lms.models.errors import AlreadyExists, UploadError
 from lms.lmsweb import config
-from lms.utils import hashing
 from lms.utils.log import log
 
 
@@ -33,6 +32,9 @@ def _upload_to_db(
     elif not exercise.open_for_new_solutions():
         raise UploadError(
             f'Exercise {exercise_id} is closed for new solutions.')
+
+    if solution_hash and _is_uploaded_before(user, solution_hash):
+        raise AlreadyExists('You try to reupload an old solution.')
     elif not files:
         raise UploadError(f'There are no files to upload for {exercise_id}.')
 
@@ -57,18 +59,24 @@ def new(user: User, file: FileStorage) -> Tuple[List[int], List[int]]:
 
     matches: List[int] = []
     misses: List[int] = []
+    errors: List[Union[UploadError, AlreadyExists]] = []
 
-    for exercise_id, files in Extractor(file):
+    for exercise_id, files, solution_hash in Extractor(file):
         exercise: Exercise = Exercise.get_or_none(exercise_id)
         if _is_uploaded_before(user, exercise, solution_hash):
             raise AlreadyExists('You try to reupload an old solution.')
+
         try:
             solution = _upload_to_db(exercise_id, user, files, solution_hash)
             _run_auto_checks(solution)
         except (UploadError, AlreadyExists) as e:
             log.debug(e)
+            errors.append(e)
             misses.append(exercise_id)
         else:
             matches.append(exercise_id)
+
+    if not matches and errors:
+        raise UploadError(errors)
 
     return matches, misses
