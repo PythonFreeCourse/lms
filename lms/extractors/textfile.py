@@ -2,6 +2,7 @@ from typing import Iterator, List, Tuple
 
 from lms.extractors.base import Extractor, File
 from lms.models.errors import BadUploadFile
+from lms.utils.files import ALLOWED_EXTENSIONS
 
 
 TEXTCHARS = set(bytes(
@@ -11,14 +12,12 @@ TEXTCHARS = set(bytes(
 
 
 class Textfile(Extractor):
-    ALLOWED_EXTENSIONS = {'css', 'html', 'js', 'py', 'sql'}
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.filename_no_ext, _, self.ext = self.filename.rpartition('.')
 
     def can_extract(self) -> bool:
-        if self.ext not in self.ALLOWED_EXTENSIONS:
+        if self.ext not in ALLOWED_EXTENSIONS:
             return False
         if isinstance(self.file_content, str):
             return True
@@ -30,7 +29,7 @@ class Textfile(Extractor):
             exercise_id, _ = self._clean(self.filename_no_ext)
             content = to_extract
         if not exercise_id:
-            raise BadUploadFile("Can't resolve exercise id", self.filename)
+            raise BadUploadFile("Can't resolve exercise id.", self.filename)
 
         return (exercise_id, [File(f'/main.{self.ext}', content)])
 

@@ -1,8 +1,7 @@
 from io import BytesIO
 from lms.extractors.base import File
-from operator import itemgetter
 import os
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from zipfile import ZipFile
 
 from flask_babel import gettext as _
@@ -63,19 +62,26 @@ def create_zip_from_solution(
         return memory_file.read()
 
 
+def order_files(file: Dict[str, Any]) -> Tuple[str, bool]:
+    return (
+        os.path.split(file['fullpath'])[0],
+        not file['is_folder'],  # folders should be before the files
+    )
+
+
 def get_files_tree(files: Iterable[SolutionFile]) -> List[Dict[str, Any]]:
     file_details = [
         {
-            'id': file.id,
+            'id': file.id,  # type: ignore
             'fullpath': file.path,
-            'path': file.path.strip('/').rpartition('/')[2],
-            'indent': file.path.strip('/').count('/'),
+            'path': os.path.split(file.path.strip('/'))[1],  # type: ignore
+            'indent': file.path.strip('/').count('/'),  # type: ignore
             'is_folder': file.path.endswith('/'),
             'code': file.code,
         }
         for file in files
     ]
-    file_details.sort(key=itemgetter('fullpath'))
+    file_details.sort(key=order_files)
     for file in file_details:
         del file['fullpath']
     return file_details
