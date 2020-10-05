@@ -8,17 +8,16 @@ TEXTCHARS = set(bytes(
     {7, 8, 9, 10, 12, 13, 27}
     | set(range(0x20, 0x100)) - {0x7f},
 ))
+ALLOWED_EXTENSIONS = {'css', 'html', 'js', 'py', 'sql'}
 
 
 class Textfile(Extractor):
-    ALLOWED_EXTENSIONS = {'css', 'html', 'js', 'py', 'sql'}
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.filename_no_ext, _, self.ext = self.filename.rpartition('.')
 
     def can_extract(self) -> bool:
-        if self.ext not in self.ALLOWED_EXTENSIONS:
+        if self.ext not in ALLOWED_EXTENSIONS:
             return False
         if isinstance(self.file_content, str):
             return True
@@ -30,7 +29,7 @@ class Textfile(Extractor):
             exercise_id, _ = self._clean(self.filename_no_ext)
             content = to_extract
         if not exercise_id:
-            raise BadUploadFile("Can't resolve exercise id", self.filename)
+            raise BadUploadFile("Can't resolve exercise id.", self.filename)
 
         return (exercise_id, [File(f'/main.{self.ext}', content)])
 

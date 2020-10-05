@@ -4,6 +4,8 @@ import re
 from typing import Any, Dict, Iterator, List, Tuple
 
 from lms.extractors.base import Extractor, File
+from lms.extractors.textfile import ALLOWED_EXTENSIONS
+from lms.utils.log import log
 
 
 NotebookJson = Dict[str, Any]
@@ -14,7 +16,7 @@ class Notebook(Extractor):
     POSSIBLE_JSON_EXCEPTIONS = (
         json.JSONDecodeError, KeyError, StopIteration, UnicodeDecodeError,
     )
-    TYPE_LINE_PREFIX = re.compile(r'#\s+type:\s+(\w+)', re.IGNORECASE)
+    TYPE_LINE_PREFIX = re.compile(r'type:\s+(\w+)', re.IGNORECASE)
     DEFAULT_FILE_TYPE = 'py'
 
     def __init__(self, **kwargs):
@@ -44,23 +46,19 @@ class Notebook(Extractor):
         cells = notebook['cells']
         yield from filter(self._is_code_cell, cells)
 
-    def _get_file_type(self, code_text: str) -> Tuple[str, str]:
-        if code_text:
-            first_line_end = code_text.find('\n')
-            if first_line_end == -1:
-                first_line_end = len(code_text)
+    def _get_file_type(self, code: str) -> Tuple[str, str]:
+        type_line, code_lines = self._split_header(code)
+        file_type_match = self.TYPE_LINE_PREFIX.fullmatch(type_line)
 
-            first_line = code_text[:first_line_end]
-            file_type_match = self.TYPE_LINE_PREFIX.fullmatch(first_line)
-
-            if file_type_match:
-                file_type = file_type_match.group(1)
-                code_lines = code_text[first_line_end:].strip()
-            else:
+        if file_type_match:
+            file_type = file_type_match.group(1)
+            if file_type not in ALLOWED_EXTENSIONS:
                 file_type = self.DEFAULT_FILE_TYPE
-                code_lines = code_text
+            log.debug(f'File type: {file_type}.')
             return code_lines, file_type
-        return '', ''
+
+        log.debug('No file type defined.')
+        return code, self.DEFAULT_FILE_TYPE
 
     def get_exercise(self, to_extract: Cell) -> Tuple[int, List[File]]:
         code: List[str] = to_extract.get('source', [])

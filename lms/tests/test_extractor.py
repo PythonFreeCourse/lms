@@ -73,9 +73,12 @@ class TestExtractor:
 
     def test_notebook(self):
         results = list(extractor.Extractor(self.ipynb_storage))
-        assert len(results) == 2
+        assert len(results) == 5
         assert results[0][0] == 3141
         assert results[1][0] == 2
+        assert results[2][1][0].path.endswith('.py')
+        assert results[3][1][0].path.endswith('.html')
+        assert results[4][1][0].path.endswith('.py')
         solution = extractor.Extractor(self.pyfiles_storage[1]).file_content
         solution = solution.replace('# Upload 3141', '')
         assert results[0][1][0].code == solution.strip()
