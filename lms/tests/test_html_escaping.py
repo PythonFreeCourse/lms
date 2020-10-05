@@ -15,7 +15,7 @@ USER_COMMENT_AFTER_ESCAPING = (
 class TestHtmlEscaping:
     @staticmethod
     def test_comment_text_escaping(
-        student_user: User, 
+        student_user: User,
         staff_user: User,
         solution: Solution,
     ):
