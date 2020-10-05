@@ -1,10 +1,11 @@
 const DEFAULT_COMMENTED_LINE_COLOR = '#fab3b0';
+const STUDENT_COMMENTED_LINE_COLOR = '#a9f6f9';
 const FLAKE_COMMENTED_LINE_COLOR = '#fac4c3';
 const HOVER_LINE_STYLE = '1px solid #0d0d0f';
 
-function markLine(target, color) {
-  if (target.dataset && target.dataset.marked === 'true') { return; }
-  if (target.dataset && target.dataset.vimbackground === 'true') { return; }
+function markLine(target, color, deletion = false) {
+  if (target.dataset && target.dataset.marked === 'true' && !deletion) { return; }
+  if (target.dataset && target.dataset.vimbackground === 'true' && !deletion) { return; }
   target.style.background = color;
 }
 
@@ -45,7 +46,7 @@ function formatCommentData(commentData) {
 function addCommentToLine(line, commentData) {
   const commentElement = document.querySelector(`.line[data-line="${line}"]`);
   const formattedComment = formatCommentData(commentData);
-  const commentText = `<span class="comment" data-line="${line}" data-commentid="${commentData.id}">${formattedComment}</span>`;
+  const commentText = `<span class="comment" data-line="${line}" data-commentid="${commentData.id}" data-author-role="${commentData.author_role}">${formattedComment}</span>`;
   let existingPopover = bootstrap.Popover.getInstance(commentElement);
   if (existingPopover !== null) {
     const existingContent = `${existingPopover.config.content} <hr>`;
@@ -65,11 +66,16 @@ function addCommentToLine(line, commentData) {
   if (commentData.is_auto) {
     markLine(commentElement, FLAKE_COMMENTED_LINE_COLOR);
   } else {
-    markLine(commentElement, DEFAULT_COMMENTED_LINE_COLOR);
+    const lineColor = window.getLineColorByRole(commentData.author_role);
+    markLine(commentElement, lineColor, true);
     commentElement.dataset.marked = true;
   }
 
   return existingPopover;
+}
+
+function getLineColorByRole(authorRole) {
+  return authorRole === 1 ? STUDENT_COMMENTED_LINE_COLOR : DEFAULT_COMMENTED_LINE_COLOR;
 }
 
 function treatComments(comments) {
@@ -143,6 +149,7 @@ window.markLink = markLine;
 window.hoverLine = hoverLine;
 window.addCommentToLine = addCommentToLine;
 window.isUserGrader = isUserGrader;
+window.getLineColorByRole = getLineColorByRole;
 window.addEventListener('load', () => {
   const codeElementData = document.getElementById('code-view').dataset;
   window.solutionId = codeElementData.id;

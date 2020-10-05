@@ -5,6 +5,7 @@ module.exports = {
   },
   globals: {
     bootstrap: true,
+    Dropzone: true,
   },
   extends: [
     'airbnb-base',

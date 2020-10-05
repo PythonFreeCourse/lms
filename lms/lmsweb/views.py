@@ -1,4 +1,3 @@
-import os
 from functools import wraps
 from typing import Optional
 from urllib.parse import urljoin, urlparse
@@ -24,11 +23,13 @@ from lms.lmsdb.models import (
 )
 from lms.lmsweb import babel, routes, webapp
 from lms.lmsweb.config import LANGUAGES, LOCALE
+from lms.lmsweb.manifest import MANIFEST
 from lms.models import notifications, share_link, solutions, upload
 from lms.models.errors import LmsError, UploadError, fail
 from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import get_language_name_by_extension
 from lms.utils.log import log
+
 
 login_manager = LoginManager()
 login_manager.init_app(webapp)
@@ -132,10 +133,25 @@ def logout():
 @webapp.route('/favicon.ico')
 def favicon():
     return send_from_directory(
-        os.path.join(webapp.root_path, 'static'),
+        webapp.static_folder,
         'favicon.ico',
         mimetype='image/vnd.microsoft.icon',
     )
+
+
+@webapp.route('/manifest.json')
+def manifest():
+    return jsonify(MANIFEST)
+
+
+@webapp.route('/sw.js')
+def serviceWorker():
+    response = make_response(send_from_directory(
+        webapp.static_folder,
+        'sw.js',
+    ))
+    response.headers['Cache-Control'] = 'no-cache'
+    return response
 
 
 @webapp.before_request

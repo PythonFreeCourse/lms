@@ -54,18 +54,18 @@ class Extractor:
         first_line = clean_text[:first_line_end].strip().replace('_', ' ')
         code_lines = clean_text[first_line_end:].strip()
 
-        log.debug(f'Upload title: {first_line}')
         return first_line, code_lines
 
     @classmethod
-    def _clean(cls, code: Union[Sequence, str]) -> Tuple[int, str]:
+    def _clean(cls, code: CodeFile) -> Tuple[int, str]:
         first_line, code_text = cls._split_header(code)
+        log.debug(f'Upload title: {first_line}.')
         upload_title = cls.UPLOAD_TITLE.fullmatch(first_line)
         if upload_title:
             exercise_id = int(upload_title.group(1))
             return exercise_id, code_text
 
-        log.debug(f'Unmatched title: {first_line}')
+        log.debug(f'Unmatched title: {first_line}.')
         return 0, ''
 
     def get_exercise(self, to_extract: Any) -> Tuple[int, List[File]]:
