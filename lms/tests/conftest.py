@@ -15,7 +15,7 @@ from lms.lmsdb.models import (
 from lms.extractors.base import File
 from lms.lmstests.public import celery_app as public_app
 from lms.lmstests.sandbox import celery_app as sandbox_app
-from lms.lmsweb import routes, webapp
+from lms.lmsweb import limiter, routes, webapp
 from lms.models import notifications
 
 
@@ -60,6 +60,7 @@ def webapp_configurations():
     webapp.secret_key = ''.join(
         random.choices(string.ascii_letters + string.digits, k=64),
     )
+    limiter.enabled = False
 
 
 def disable_shareable_solutions():
