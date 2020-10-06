@@ -9,6 +9,7 @@ from flask import (
 )
 from flask_admin import Admin, AdminIndexView  # type: ignore
 from flask_admin.contrib.peewee import ModelView  # type: ignore
+from flask_limiter.util import get_remote_address  # type: ignore
 from flask_login import (  # type: ignore
     LoginManager, current_user, login_required, login_user, logout_user,
 )
@@ -104,8 +105,19 @@ def get_next_url(url_next_param: Optional[str]):
     return redirect(next_url or url_for('main'))
 
 
+@webapp.errorhandler(429)
+def ratelimit_handler(e):
+    log.info(f'IP Address: {get_remote_address()}: {e}')
+    return make_response(
+        jsonify(error='ratelimit exceeded %s' % e.description), 429,
+    )
+
+
 @webapp.route('/login', methods=['GET', 'POST'])
-@limiter.limit('10/minute;50/hour')
+@limiter.limit(
+    '5/minute;50/hour',
+    deduct_when=lambda response: response.status_code != 200,
+)
 def login():
     if current_user.is_authenticated:
         return get_next_url(request.args.get('next'))
