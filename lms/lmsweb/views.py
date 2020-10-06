@@ -21,7 +21,7 @@ from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Exercise, Role, RoleOptions,
     SharedSolution, Solution, SolutionFile, User, database,
 )
-from lms.lmsweb import babel, routes, webapp
+from lms.lmsweb import babel, limiter, routes, webapp
 from lms.lmsweb.config import LANGUAGES, LOCALE
 from lms.lmsweb.manifest import MANIFEST
 from lms.models import notifications, share_link, solutions, upload
@@ -105,6 +105,7 @@ def get_next_url(url_next_param: Optional[str]):
 
 
 @webapp.route('/login', methods=['GET', 'POST'])
+@limiter.limit('10/minute;50/hour')
 def login():
     if current_user.is_authenticated:
         return get_next_url(request.args.get('next'))
