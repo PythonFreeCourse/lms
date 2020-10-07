@@ -179,14 +179,14 @@ class TestNotification:
         solution = Solution.get_by_id(solution.id)
 
         # Sending comments after solution checked
-        comment_response = client.post('/comments', data=json.dumps(dict(
-            fileId=solution.files[0].id, act='create', kind='text',
-            comment='new one', line=1,
-        )), content_type='application/json')
-        new_comment_response = client.post('/comments', data=json.dumps(dict(
-            fileId=solution.files[0].id, act='create', kind='text',
-            comment='another one', line=2,
-        )), content_type='application/json')
+        comment_response = client.post('/comments', data=json.dumps({
+            'fileId': solution.files[0].id, 'act': 'create', 'kind': 'text',
+            'comment': 'new one', 'line': 1,
+        }), content_type='application/json')
+        new_comment_response = client.post('/comments', data=json.dumps({
+            'fileId': solution.files[0].id, 'act': 'create', 'kind': 'text',
+            'comment': 'another one', 'line': 2,
+        }), content_type='application/json')
         assert comment_response.status_code == 200
         assert new_comment_response.status_code == 200
         assert len(list(notifications.get(staff_user))) == 1
@@ -196,10 +196,10 @@ class TestNotification:
 
         # Sending a comment after student user commented
         staff_comment_response = client2.post(
-            '/comments', data=json.dumps(dict(
-                fileId=solution.files[0].id, act='create', kind='text',
-                comment='FINE', line=1,
-            )), content_type='application/json',
+            '/comments', data=json.dumps({
+                'fileId': solution.files[0].id, 'act': 'create',
+                'kind': 'text', 'comment': 'FINE', 'line': 1,
+            }), content_type='application/json',
         )
         assert staff_comment_response.status_code == 200
         assert len(list(notifications.get(student_user))) == 2
@@ -209,10 +209,10 @@ class TestNotification:
 
         # User student comments again
         another_comment_response = client.post(
-            '/comments', data=json.dumps(dict(
-                fileId=solution.files[0].id, act='create', kind='text',
-                comment='OK', line=3,
-            )), content_type='application/json',
+            '/comments', data=json.dumps({
+                'fileId': solution.files[0].id, 'act': 'create',
+                'kind': 'text', 'comment': 'OK', 'line': 3,
+            }), content_type='application/json',
         )
         assert another_comment_response.status_code == 200
         assert len(list(notifications.get(staff_user))) == 2
