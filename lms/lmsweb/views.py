@@ -25,7 +25,7 @@ from lms.lmsweb import babel, routes, webapp
 from lms.lmsweb.config import LANGUAGES, LOCALE
 from lms.lmsweb.manifest import MANIFEST
 from lms.models import notifications, share_link, solutions, upload
-from lms.models.errors import LmsError, UploadError, fail
+from lms.models.errors import FileSizeError, LmsError, UploadError, fail
 from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import get_language_name_by_extension
 from lms.utils.log import log
@@ -374,7 +374,7 @@ def upload_page():
         return fail(404, 'User not found.')
     if request.content_length > MAX_REQUEST_SIZE:
         return fail(
-            413, f'File is too big. {MAX_REQUEST_SIZE // 1000000}MB allowed',
+            413, f'File is too big. {MAX_REQUEST_SIZE // 1000000}MB allowed.',
         )
 
     file: Optional[FileStorage] = request.files.get('file')
@@ -386,6 +386,9 @@ def upload_page():
     except UploadError as e:
         log.debug(e)
         return fail(400, str(e))
+    except FileSizeError as e:
+        log.debug(e)
+        return fail(413, str(e))
 
     return jsonify({
         'exercise_matches': matches,

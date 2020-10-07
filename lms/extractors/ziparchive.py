@@ -5,6 +5,7 @@ from typing import Iterator, List, Set, Text, Tuple
 from zipfile import BadZipFile, ZipFile
 
 from lms.extractors.base import Extractor, File
+from lms.utils.consts import MAX_ZIP_FILES_SIZE
 from lms.utils.log import log
 
 
@@ -28,6 +29,11 @@ class Ziparchive(Extractor):
 
     def can_extract(self) -> bool:
         return self.is_zipfile
+
+    def check_files_size(self) -> bool:
+        return sum(
+            f.file_size for f in self.archive.infolist()
+        ) <= MAX_ZIP_FILES_SIZE
 
     @staticmethod
     def _extract(archive: ZipFile, filename: str, dirname: str = '') -> File:
@@ -57,7 +63,7 @@ class Ziparchive(Extractor):
     ) -> Iterator[Tuple[int, List[File]]]:
         for dirname in filenames:
             if len(dirname.strip(os.path.sep).split(os.path.sep)) == 1:
-                # Checking if the dirname is in the first dir in the zipfile
+                # Checking if the dirname is in the first dir of the zipfile
                 parent_name, _ = os.path.split(dirname)
                 exercise_id, _ = self._clean(parent_name)
                 if exercise_id:
