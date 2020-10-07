@@ -30,19 +30,19 @@ a {
   text-decoration: none;
 }
 
-.rtl-language > ::-webkit-input-placeholder {
+.rtl-language ::-webkit-input-placeholder {
   text-align: right;
 }
 
-.rtl-language > ::-moz-placeholder {
+.rtl-language ::-moz-placeholder {
   text-align: right;
 }
 
-.rtl-language > :-moz-placeholder {
+.rtl-language :-moz-placeholder {
   text-align: right;
 }
 
-.rtl-language > :-ms-input-placeholder {
+.rtl-language :-ms-input-placeholder {
   text-align: right;
 }
 
@@ -786,4 +786,9 @@ code .grader-add .fa {
 
 #user .user-details {
   margin-bottom: 5em;
+}
+
+.add-note {
+  width: max-content;
+  margin: auto;
 }

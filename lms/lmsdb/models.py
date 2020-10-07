@@ -143,6 +143,15 @@ class User(UserMixin, BaseModel):
     def get_notifications(self) -> Iterable['Notification']:
         return Notification.fetch(self)
 
+    @property
+    def notes(self) -> Iterable[Dict[str, Any]]:
+        notes = list(Note.select().where(Note.user == self).dicts())
+
+        for note in notes:
+            note['creator'] = User.get_by_id(note['creator']).fullname
+            note['note'] = CommentText.get_by_id(note['note']).text
+        return tuple(notes)
+
     def __str__(self):
         return f'{self.username} - {self.fullname}'
 
@@ -713,6 +722,26 @@ class CommentText(BaseModel):
             defaults={CommentText.flake8_key.name: flake_key},
         )
         return instance
+
+
+class Note(BaseModel):
+    creator = ForeignKeyField(User)
+    user = ForeignKeyField(User)
+    timestamp = DateTimeField(default=datetime.now())
+    note = ForeignKeyField(CommentText)
+
+    @classmethod
+    def create_note(
+        cls,
+        creator: User,
+        user: User,
+        note_text: CommentText,
+    ) -> 'Note':
+        return cls.get_or_create(
+            creator=creator,
+            user=user,
+            note=note_text,
+        )
 
 
 class Comment(BaseModel):
