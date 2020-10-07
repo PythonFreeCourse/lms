@@ -1,10 +1,11 @@
 import random
 import string
 
+from flask import json
 import pytest  # type: ignore
 
 from lms.lmsdb.models import Exercise, Notification, Solution, User
-from lms.models import notifications
+from lms.models import notifications, solutions
 from lms.tests import conftest
 
 
@@ -164,3 +165,54 @@ class TestNotification:
         actual = Notification.select().order_by(
             Notification.created.desc()).get().id
         assert expected == actual
+
+    @staticmethod
+    def test_user_commented_after_check(
+        solution: Solution,
+        student_user: User,
+        staff_user: User,
+    ):
+        client = conftest.get_logged_user(student_user.username)
+
+        # Marking the solution as checked
+        solutions.mark_as_checked(solution.id, staff_user.id)
+        solution = Solution.get_by_id(solution.id)
+
+        # Sending comments after solution checked
+        comment_response = client.post('/comments', data=json.dumps({
+            'fileId': solution.files[0].id, 'act': 'create', 'kind': 'text',
+            'comment': 'new one', 'line': 1,
+        }), content_type='application/json')
+        new_comment_response = client.post('/comments', data=json.dumps({
+            'fileId': solution.files[0].id, 'act': 'create', 'kind': 'text',
+            'comment': 'another one', 'line': 2,
+        }), content_type='application/json')
+        assert comment_response.status_code == 200
+        assert new_comment_response.status_code == 200
+        assert len(list(notifications.get(staff_user))) == 1
+
+        conftest.logout_user(client)
+        client2 = conftest.get_logged_user(staff_user.username)
+
+        # Sending a comment after student user commented
+        staff_comment_response = client2.post(
+            '/comments', data=json.dumps({
+                'fileId': solution.files[0].id, 'act': 'create',
+                'kind': 'text', 'comment': 'FINE', 'line': 1,
+            }), content_type='application/json',
+        )
+        assert staff_comment_response.status_code == 200
+        assert len(list(notifications.get(student_user))) == 2
+
+        conftest.logout_user(client2)
+        client = conftest.get_logged_user(student_user.username)
+
+        # User student comments again
+        another_comment_response = client.post(
+            '/comments', data=json.dumps({
+                'fileId': solution.files[0].id, 'act': 'create',
+                'kind': 'text', 'comment': 'OK', 'line': 3,
+            }), content_type='application/json',
+        )
+        assert another_comment_response.status_code == 200
+        assert len(list(notifications.get(staff_user))) == 2

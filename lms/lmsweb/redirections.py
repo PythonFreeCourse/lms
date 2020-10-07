@@ -20,8 +20,6 @@ PERMISSIVE_CORS = {
     'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE',
 }
 
-MAX_REQUEST_SIZE = 2_000_000  # 2MB (in bytes)
-
 
 def is_safe_url(target):
     ref_url = urlparse(request.host_url)

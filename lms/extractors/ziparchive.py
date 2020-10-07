@@ -5,8 +5,8 @@ from typing import Iterator, List, Set, Text, Tuple
 from zipfile import BadZipFile, ZipFile
 
 from lms.extractors.base import Extractor, File
+from lms.lmsweb.config import MAX_ZIP_CONTENT_SIZE
 from lms.models.errors import FileSizeError
-from lms.utils.consts import MAX_ZIP_CONTENT_SIZE
 from lms.utils.log import log
 
 

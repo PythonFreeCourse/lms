@@ -20,10 +20,10 @@ from lms.lmsweb import babel, routes, webapp
 from lms.lmsweb.admin import (
     AdminModelView, SPECIAL_MAPPING, admin, managers_only,
 )
-from lms.lmsweb.config import LANGUAGES, LOCALE
+from lms.lmsweb.config import LANGUAGES, LOCALE, MAX_UPLOAD_SIZE
 from lms.lmsweb.manifest import MANIFEST
 from lms.lmsweb.redirections import (
-    MAX_REQUEST_SIZE, PERMISSIVE_CORS, get_next_url, login_manager,
+    PERMISSIVE_CORS, get_next_url, login_manager,
 )
 from lms.models import comments, notifications, share_link, solutions, upload
 from lms.models.errors import FileSizeError, LmsError, UploadError, fail
@@ -290,9 +290,9 @@ def upload_page():
     user = User.get_or_none(User.id == user_id)  # should never happen
     if user is None:
         return fail(404, 'User not found.')
-    if request.content_length > MAX_REQUEST_SIZE:
+    if request.content_length > MAX_UPLOAD_SIZE:
         return fail(
-            413, f'File is too big. {MAX_REQUEST_SIZE // 1000000}MB allowed.',
+            413, f'File is too big. {MAX_UPLOAD_SIZE // 1000000}MB allowed.',
         )
 
     file: Optional[FileStorage] = request.files.get('file')
