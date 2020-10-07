@@ -74,19 +74,25 @@ def login(login_error=None):
     username = request.form.get('username')
     password = request.form.get('password')
     next_page = request.form.get('next')
-    login_error=request.args.get('login_error')
+    login_error = request.args.get('login_error')
     user = User.get_or_none(username=username)
 
-    if request.method == "POST":
+    if request.method == 'POST':
         if user is not None and user.is_password_valid(password):
             login_user(user)
             return get_next_url(next_page)
         elif user is not None and user.is_password_valid(password) is False:
             login_error = 'Wrong password'
-            return redirect(url_for('login', **{'next': next_page, 'login_error':login_error}))
+            return redirect(
+                url_for('login', **{'next': next_page,
+                        'login_error': login_error}),
+            )
         elif user is None:
             login_error = 'Username does not exist, please register first'
-            return redirect(url_for('login', **{'next': next_page, 'login_error':login_error}))
+            return redirect(
+                url_for('login', **{'next': next_page,
+                        'login_error': login_error}),
+            )
 
     return render_template('login.html', login_error=login_error)
 
