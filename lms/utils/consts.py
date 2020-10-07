@@ -4,4 +4,4 @@ RTL_LANGUAGES = {
 }
 
 
-MAX_ZIP_FILES_SIZE = 5_000_000  # 5MB (in bytes)
+MAX_ZIP_CONTENT_SIZE = 5_000_000  # 5MB (in bytes)

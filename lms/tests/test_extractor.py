@@ -152,7 +152,7 @@ class TestExtractor:
         client = conftest.get_logged_user(username=student_user.username)
 
         # Trying to upload a zipbomb file
-        upload_response = client.post('/upload', data=dict(
-            file=self.zipbomb_bytes_io,
-        ))
+        upload_response = client.post('/upload', data={
+            'file': self.zipbomb_bytes_io,
+        })
         assert upload_response.status_code == 413

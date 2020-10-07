@@ -5,9 +5,7 @@ from typing import Any, Iterator, List, Sequence, Tuple, Union, cast
 
 from werkzeug.datastructures import FileStorage
 
-from lms.models.errors import FileSizeError
 from lms.utils import hashing
-from lms.utils.consts import MAX_ZIP_FILES_SIZE
 from lms.utils.log import log
 
 
@@ -84,14 +82,6 @@ class Extractor:
             log.debug(f'Trying extractor: {cls.__name__}')
             extractor = cls(to_extract=self.to_extract)
             if extractor.can_extract():
-                if (
-                    cls.__name__ == 'Ziparchive'
-                    and not extractor.check_files_size()
-                ):
-                    raise FileSizeError(
-                        'File content is too big. '
-                        f'{MAX_ZIP_FILES_SIZE // 1000000}MB allowwed.',
-                    )
                 yield from (
                     (solution_id, files, hashing.by_content(str(files)))
                     for solution_id, files in extractor.get_exercises()
