@@ -5,6 +5,8 @@ from typing import Iterator, List, Set, Text, Tuple
 from zipfile import BadZipFile, ZipFile
 
 from lms.extractors.base import Extractor, File
+from lms.models.errors import FileSizeError
+from lms.utils.consts import MAX_ZIP_CONTENT_SIZE
 from lms.utils.log import log
 
 
@@ -28,6 +30,11 @@ class Ziparchive(Extractor):
 
     def can_extract(self) -> bool:
         return self.is_zipfile
+
+    def check_files_size(self) -> bool:
+        return sum(
+            f.file_size for f in self.archive.infolist()
+        ) <= MAX_ZIP_CONTENT_SIZE
 
     @staticmethod
     def _extract(archive: ZipFile, filename: str, dirname: str = '') -> File:
@@ -57,7 +64,7 @@ class Ziparchive(Extractor):
     ) -> Iterator[Tuple[int, List[File]]]:
         for dirname in filenames:
             if len(dirname.strip(os.path.sep).split(os.path.sep)) == 1:
-                # Checking if the dirname is in the first dir in the zipfile
+                # Checking if the dirname is in the first dir of the zipfile
                 parent_name, _ = os.path.split(dirname)
                 exercise_id, _ = self._clean(parent_name)
                 if exercise_id:
@@ -79,6 +86,11 @@ class Ziparchive(Extractor):
                 yield from self.get_exercises_by_dirs(archive, filenames)
 
     def get_exercises(self) -> Iterator[Tuple[int, List[File]]]:
+        if not self.check_files_size():
+            raise FileSizeError(
+                'File content is too big. '
+                f'{MAX_ZIP_CONTENT_SIZE // 1000000}MB allowed.',
+            )
         for exercise_id, files in self.get_exercise(self.archive):
             if exercise_id and files and any(file.code for file in files):
                 yield (exercise_id, files)
