@@ -3,6 +3,8 @@ import shutil
 
 from flask import Flask
 from flask_babel import Babel
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from flask_wtf.csrf import CSRFProtect  # type: ignore
 
 from lms.utils import config_migrator, debug
@@ -24,6 +26,8 @@ webapp = Flask(
     template_folder=str(template_dir),
     static_folder=str(static_dir),
 )
+
+limiter = Limiter(webapp, key_func=get_remote_address)
 
 
 if not config_file.exists():

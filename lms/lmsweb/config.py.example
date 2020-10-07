@@ -42,3 +42,7 @@ LANGUAGES = {
     'en': 'English',
 }
 LOCALE = 'en'
+
+# Limiter settings
+LIMITS_PER_MINUTE = 5
+LIMITS_PER_HOUR = 50

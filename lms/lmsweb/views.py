@@ -5,6 +5,7 @@ from flask import (
     jsonify, make_response, render_template,
     request, send_from_directory, url_for,
 )
+from flask_limiter.util import get_remote_address  # type: ignore
 from flask_login import (  # type: ignore
     current_user, login_required, login_user, logout_user,
 )
@@ -16,11 +17,13 @@ from lms.lmsdb.models import (
     ALL_MODELS, Comment, RoleOptions, SharedSolution,
     Solution, SolutionFile, User, database,
 )
-from lms.lmsweb import babel, routes, webapp
+from lms.lmsweb import babel, limiter, routes, webapp
 from lms.lmsweb.admin import (
     AdminModelView, SPECIAL_MAPPING, admin, managers_only,
 )
-from lms.lmsweb.config import LANGUAGES, LOCALE, MAX_UPLOAD_SIZE
+from lms.lmsweb.config import (
+    LANGUAGES, LIMITS_PER_HOUR, LIMITS_PER_MINUTE, LOCALE, MAX_UPLOAD_SIZE,
+)
 from lms.lmsweb.manifest import MANIFEST
 from lms.lmsweb.redirections import (
     PERMISSIVE_CORS, get_next_url, login_manager,
@@ -65,7 +68,19 @@ def load_user(user_id):
     return User.get_or_none(id=user_id)
 
 
+@webapp.errorhandler(429)
+def ratelimit_handler(e):
+    log.info(f'IP Address: {get_remote_address()}: {e}')
+    return make_response(
+        jsonify(error='ratelimit exceeded %s' % e.description), 429,
+    )
+
+
 @webapp.route('/login', methods=['GET', 'POST'])
+@limiter.limit(
+    f'{LIMITS_PER_MINUTE}/minute;{LIMITS_PER_HOUR}/hour',
+    deduct_when=lambda response: response.status_code != 200,
+)
 def login():
     if current_user.is_authenticated:
         return get_next_url(request.args.get('next'))
