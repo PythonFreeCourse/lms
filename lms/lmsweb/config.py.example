@@ -38,3 +38,5 @@ LANGUAGES = {
     'en': 'English',
 }
 LOCALE = 'en'
+
+SENTRY_DSN = ""

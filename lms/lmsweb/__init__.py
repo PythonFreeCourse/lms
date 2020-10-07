@@ -1,6 +1,8 @@
 import pathlib
 import shutil
+import sentry_sdk
 
+from sentry_sdk.integrations.flask import FlaskIntegration
 from flask import Flask
 from flask_babel import Babel
 from flask_wtf.csrf import CSRFProtect  # type: ignore
@@ -18,6 +20,11 @@ config_example_file = web_dir / 'config.py.example'
 if debug.is_enabled():
     debug.start()
 
+
+sentry_sdk.init(
+    dsn=config.SENTRY_DSN,
+    integrations=[FlaskIntegration()]
+)
 
 webapp = Flask(
     __name__,

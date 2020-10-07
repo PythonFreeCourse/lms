@@ -20,6 +20,23 @@ services:
     networks:
       - lms
 
+  redis:
+    image: redis
+
+  sentry:
+    image: sentry
+    links:
+      - db
+      - redis
+    environment:
+      SENTRY_SECRET_KEY: 'Secret Key'
+      SENTRY_POSTGRES_HOST: postgres
+      SENTRY_DB_USER: ${DB_USERNAME:-postgres}
+      SENTRY_DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      SENTRY_REDIS_HOST: redis
+    ports:
+      - 9000:9000
+  
   rabbitmq:
     image: rabbitmq:3.7-management-alpine
     hostname: celery-mq

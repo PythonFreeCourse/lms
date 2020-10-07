@@ -129,6 +129,9 @@ def logout():
     logout_user()
     return redirect('login')
 
+@webapp.route('/debug-sentry')
+def trigger_error():
+    division_by_zero = 1/0
 
 @webapp.route('/favicon.ico')
 def favicon():

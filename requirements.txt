@@ -117,3 +117,4 @@ Werkzeug==1.0.1
 wtf-peewee==3.0.2
 WTForms==2.3.3
 zipp==3.2.0
+sentry-sdk[flask]
