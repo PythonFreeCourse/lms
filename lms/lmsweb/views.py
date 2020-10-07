@@ -1,49 +1,38 @@
-from functools import wraps
 from typing import Optional
-from urllib.parse import urljoin, urlparse
 
 import arrow  # type: ignore
 from flask import (
     jsonify, make_response, render_template,
     request, send_from_directory, url_for,
 )
-from flask_admin import Admin, AdminIndexView  # type: ignore
-from flask_admin.contrib.peewee import ModelView  # type: ignore
 from flask_login import (  # type: ignore
-    LoginManager, current_user, login_required, login_user, logout_user,
+    current_user, login_required, login_user, logout_user,
 )
-from peewee import fn  # type: ignore
 from playhouse.shortcuts import model_to_dict  # type: ignore
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, CommentText, Exercise, Role, RoleOptions,
-    SharedSolution, Solution, SolutionFile, User, database,
+    ALL_MODELS, Comment, RoleOptions, SharedSolution,
+    Solution, SolutionFile, User, database,
 )
 from lms.lmsweb import babel, routes, webapp
+from lms.lmsweb.admin import (
+    AdminModelView, SPECIAL_MAPPING, admin, managers_only,
+)
 from lms.lmsweb.config import LANGUAGES, LOCALE
 from lms.lmsweb.manifest import MANIFEST
-from lms.models import notifications, share_link, solutions, upload
+from lms.lmsweb.redirections import (
+    MAX_REQUEST_SIZE, PERMISSIVE_CORS, get_next_url, login_manager,
+)
+from lms.models import comments, notifications, share_link, solutions, upload
 from lms.models.errors import LmsError, UploadError, fail
 from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import get_language_name_by_extension
 from lms.utils.log import log
 
 
-login_manager = LoginManager()
-login_manager.init_app(webapp)
-login_manager.session_protection = 'strong'
-login_manager.login_view = 'login'
-
-PERMISSIVE_CORS = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-    'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE',
-}
-
 HIGH_ROLES = {str(RoleOptions.STAFF), str(RoleOptions.ADMINISTRATOR)}
-MAX_REQUEST_SIZE = 2_000_000  # 2MB (in bytes)
 
 
 @babel.localeselector
@@ -74,34 +63,6 @@ def _db_close(exc):
 @login_manager.user_loader
 def load_user(user_id):
     return User.get_or_none(id=user_id)
-
-
-def managers_only(func):
-    # Must have @wraps to work with endpoints.
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        if not current_user.role.is_manager:
-            return fail(403, 'This user has no permissions to view this page.')
-        else:
-            return func(*args, **kwargs)
-
-    return wrapper
-
-
-def is_safe_url(target):
-    ref_url = urlparse(request.host_url)
-    test_url = urlparse(urljoin(request.host_url, target))
-    return (
-        test_url.scheme in ('http', 'https')
-        and ref_url.netloc == test_url.netloc
-    )
-
-
-def get_next_url(url_next_param: Optional[str]):
-    next_url = url_next_param if url_next_param else None
-    if not is_safe_url(next_url):
-        return fail(400, "The URL isn't safe.")
-    return redirect(next_url or url_for('main'))
 
 
 @webapp.route('/login', methods=['GET', 'POST'])
@@ -190,49 +151,6 @@ def exercises_page():
         is_manager=is_manager,
         fetch_archived=fetch_archived,
     )
-
-
-def _create_comment(
-    user_id: int,
-    file: SolutionFile,
-    kind: str,
-    line_number: int,
-    comment_text: Optional[str] = None,  # set when kind == text
-    comment_id: Optional[int] = None,  # set when kind == id
-):
-    user = User.get_or_none(User.id == user_id)
-    if user is None:
-        # should never happen, we checked session_id == solver_id
-        return fail(404, 'No such user.')
-
-    if (not kind) or (kind not in ('id', 'text')):
-        return fail(400, 'Invalid kind.')
-
-    if line_number <= 0:
-        return fail(422, f'Invalid line number: {line_number}.')
-
-    if kind == 'id':
-        new_comment_id = comment_id
-    elif kind == 'text':
-        if not comment_text:
-            return fail(422, 'Empty comments are not allowed.')
-        new_comment_id = CommentText.create_comment(text=comment_text).id
-    else:
-        # should never happend, kind was checked before
-        return fail(400, 'Invalid kind.')
-
-    comment_ = Comment.create(
-        commenter=user,
-        line_number=line_number,
-        comment=new_comment_id,
-        file=file,
-    )
-
-    return jsonify({
-        'success': 'true', 'text': comment_.comment.text,
-        'author_name': user.fullname, 'author_role': user.role.id,
-        'is_auto': False, 'id': comment_.id, 'line_number': line_number,
-    })
 
 
 @webapp.route('/notifications')
@@ -325,7 +243,7 @@ def comment():
             comment_id = int(request.json.get('comment', 0))
         if kind.lower() == 'text':
             comment_text = request.json.get('comment', '')
-        return _create_comment(
+        return comments._create_comment(
             current_user.id,
             file,
             kind,
@@ -476,11 +394,11 @@ def view(
         view_params = {
             **view_params,
             'exercise_common_comments':
-                _common_comments(exercise_id=solution.exercise),
+                comments._common_comments(exercise_id=solution.exercise),
             'all_common_comments':
-                _common_comments(),
+                comments._common_comments(),
             'user_comments':
-                _common_comments(user_id=current_user.id),
+                comments._common_comments(user_id=current_user.id),
             'left': Solution.left_in_exercise(solution.exercise),
         }
 
@@ -529,54 +447,12 @@ def start_checking(exercise_id):
     return redirect(routes.STATUS)
 
 
-def _common_comments(exercise_id=None, user_id=None):
-    """
-    Most common comments throughout all exercises.
-    Filter by exercise id when specified.
-    """
-    is_moderator_comments = (
-        (Comment.commenter.role == Role.get_staff_role().id)
-        | (Comment.commenter.role == Role.get_admin_role().id),
-    )
-    query = (
-        CommentText.select(CommentText.id, CommentText.text)
-        .join(Comment).join(User).join(Role).where(
-            CommentText.flake8_key.is_null(True),
-            is_moderator_comments,
-        ).switch(Comment)
-    )
-
-    if exercise_id is not None:
-        query = (
-            query
-            .join(SolutionFile)
-            .join(Solution)
-            .join(Exercise)
-            .where(Exercise.id == exercise_id)
-        )
-
-    if user_id is not None:
-        query = (
-            query
-            .filter(Comment.commenter == user_id)
-        )
-
-    query = (
-        query
-        .group_by(CommentText.id)
-        .order_by(fn.Count(CommentText.id).desc())
-        .limit(5)
-    )
-
-    return tuple(query.dicts())
-
-
 @webapp.route('/common_comments')
 @webapp.route('/common_comments/<exercise_id>')
 @login_required
 @managers_only
 def common_comments(exercise_id=None):
-    return jsonify(_common_comments(exercise_id=exercise_id))
+    return jsonify(comments._common_comments(exercise_id=exercise_id))
 
 
 @webapp.template_filter('date_humanize')
@@ -598,59 +474,8 @@ def _jinja2_inject_direction():
     return dict(direction=DIRECTION)
 
 
-class AccessibleByAdminMixin:
-    def is_accessible(self):
-        return (
-            current_user.is_authenticated
-            and current_user.role.is_administrator
-        )
-
-
-class MyAdminIndexView(AccessibleByAdminMixin, AdminIndexView):
-    pass
-
-
-class AdminModelView(AccessibleByAdminMixin, ModelView):
-    pass
-
-
-class AdminSolutionView(AdminModelView):
-    column_filters = (
-        Solution.state.name,
-    )
-    column_choices = {
-        Solution.state.name: Solution.STATES.to_choices(),
-    }
-
-
-class AdminCommentView(AdminModelView):
-    column_filters = (
-        Comment.timestamp.name,
-        Comment.is_auto.name,
-    )
-
-
-class AdminCommentTextView(AdminModelView):
-    column_filters = (
-        CommentText.text.name,
-        CommentText.flake8_key.name,
-    )
-
-
 DIRECTION = 'rtl' if get_locale() in RTL_LANGUAGES else 'ltr'
 
-SPECIAL_MAPPING = {
-    Solution: AdminSolutionView,
-    Comment: AdminCommentView,
-    CommentText: AdminCommentTextView,
-}
-
-admin = Admin(
-    webapp,
-    name='LMS',
-    template_mode='bootstrap3',
-    index_view=MyAdminIndexView(),  # NOQA
-)
 
 for m in ALL_MODELS:
     admin.add_view(SPECIAL_MAPPING.get(m, AdminModelView)(m))
