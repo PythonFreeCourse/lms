@@ -75,16 +75,20 @@ def enable_users_comments():
     webapp.config['USERS_COMMENTS'] = True
 
 
+def enable_limiter():
+    limiter.enabled = True
+
+
+def disable_limiter():
+    limiter.enabled = False
+
+
 def get_logged_user(username: str) -> FlaskClient:
     client = webapp.test_client()
-    client.post(
-        '/login',
-        data=dict(  # noqa: S106
-            username=username,
-            password='fake pass',
-        ),
-        follow_redirects=True,
-    )
+    client.post('/login', data={  # noqa: S106
+        'username': username,
+        'password': 'fake pass',
+    }, follow_redirects=True)
     return client
 
 
