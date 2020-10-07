@@ -6,6 +6,7 @@ from peewee import fn  # type: ignore
 from lms.lmsdb.models import (
     Comment, CommentText, Exercise, Role, Solution, SolutionFile, User,
 )
+from lms.models import solutions
 from lms.models.errors import fail
 
 
@@ -37,6 +38,8 @@ def _create_comment(
     else:
         # should never happend, kind was checked before
         return fail(400, 'Invalid kind.')
+
+    solutions.notify_comment_after_check(user, file.solution)
 
     comment_ = Comment.create(
         commenter=user,
