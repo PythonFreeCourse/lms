@@ -3,6 +3,11 @@ module.exports = {
     browser: true,
     es2021: true,
   },
+  globals: {
+    bootstrap: true,
+    Dropzone: true,
+    workbox: true,
+  },
   extends: [
     'airbnb-base',
   ],
@@ -12,5 +17,6 @@ module.exports = {
   },
   rules: {
     'no-param-reassign': [2, { props: false }],
+    'no-console': 'off',
   },
 };

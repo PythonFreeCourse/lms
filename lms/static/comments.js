@@ -1,10 +1,11 @@
 const DEFAULT_COMMENTED_LINE_COLOR = '#fab3b0';
+const STUDENT_COMMENTED_LINE_COLOR = '#a9f6f9';
 const FLAKE_COMMENTED_LINE_COLOR = '#fac4c3';
 const HOVER_LINE_STYLE = '1px solid #0d0d0f';
 
-function markLine(target, color) {
-  if (target.dataset && target.dataset.marked === 'true') { return; }
-  if (target.dataset && target.dataset.vimbackground === 'true') { return; }
+function markLine(target, color, deletion = false) {
+  if (target.dataset && target.dataset.marked === 'true' && !deletion) { return; }
+  if (target.dataset && target.dataset.vimbackground === 'true' && !deletion) { return; }
   target.style.background = color;
 }
 
@@ -43,15 +44,15 @@ function formatCommentData(commentData) {
 }
 
 function addCommentToLine(line, commentData) {
-  const commentElement = $(`.line[data-line="${line}"]`);
-  const existingPopover = $(commentElement).data('bs.popover');
+  const commentElement = document.querySelector(`.line[data-line="${line}"]`);
   const formattedComment = formatCommentData(commentData);
-  const commentText = `<span class="comment" data-line="${line}" data-commentid="${commentData.id}">${formattedComment}</span>`;
-  if (existingPopover !== undefined) {
+  const commentText = `<span class="comment" data-line="${line}" data-commentid="${commentData.id}" data-author-role="${commentData.author_role}">${formattedComment}</span>`;
+  let existingPopover = bootstrap.Popover.getInstance(commentElement);
+  if (existingPopover !== null) {
     const existingContent = `${existingPopover.config.content} <hr>`;
     existingPopover.config.content = existingContent + commentText;
   } else {
-    commentElement.popover({
+    existingPopover = new bootstrap.Popover(commentElement, {
       html: true,
       title: `שורה ${line}`,
       content: commentText,
@@ -59,14 +60,22 @@ function addCommentToLine(line, commentData) {
       boundary: 'viewport',
       placement: 'auto',
     });
-    $(commentElement).popover();
   }
+
+  commentElement.dataset.comment = 'true';
   if (commentData.is_auto) {
-    markLine(commentElement[0], FLAKE_COMMENTED_LINE_COLOR);
+    markLine(commentElement, FLAKE_COMMENTED_LINE_COLOR);
   } else {
-    markLine(commentElement[0], DEFAULT_COMMENTED_LINE_COLOR);
-    commentElement[0].dataset.marked = true;
+    const lineColor = window.getLineColorByRole(commentData.author_role);
+    markLine(commentElement, lineColor, true);
+    commentElement.dataset.marked = true;
   }
+
+  return existingPopover;
+}
+
+function getLineColorByRole(authorRole) {
+  return authorRole === 1 ? STUDENT_COMMENTED_LINE_COLOR : DEFAULT_COMMENTED_LINE_COLOR;
 }
 
 function treatComments(comments) {
@@ -140,13 +149,14 @@ window.markLink = markLine;
 window.hoverLine = hoverLine;
 window.addCommentToLine = addCommentToLine;
 window.isUserGrader = isUserGrader;
+window.getLineColorByRole = getLineColorByRole;
 window.addEventListener('load', () => {
-  const codeElement = document.getElementById('code-view').dataset;
-  window.solutionId = codeElement.id;
-  window.fileId = codeElement.file;
-  sessionStorage.setItem('role', codeElement.role);
-  sessionStorage.setItem('solver', codeElement.solver);
-  sessionStorage.setItem('allowedComment', codeElement.allowedComment);
+  const codeElementData = document.getElementById('code-view').dataset;
+  window.solutionId = codeElementData.id;
+  window.fileId = codeElementData.file;
+  sessionStorage.setItem('role', codeElementData.role);
+  sessionStorage.setItem('solver', codeElementData.solver);
+  sessionStorage.setItem('allowedComment', codeElementData.allowedComment);
   addLineSpansToPre(document.getElementsByTagName('code'));
   pullComments(window.fileId, treatComments);
 });

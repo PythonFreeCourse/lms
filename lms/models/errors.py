@@ -17,6 +17,10 @@ class BadUploadFile(LmsError):
     pass
 
 
+class FileSizeError(LmsError):
+    pass
+
+
 def fail(status_code: int, error_msg: str):
     data = {
         'status': 'failed',

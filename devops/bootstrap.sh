@@ -11,7 +11,7 @@ docker exec -i lms_rabbitmq_1 rabbitmqctl set_permissions -p lmstests-sandbox ra
 docker exec -i lms_http_1 python lmsdb/bootstrap.py
 
 # build the image for docker inside a docker!
-docker exec lms_checks-docker-engine_1 mkdir /home/lms
+docker exec lms_checks-docker-engine_1 mkdir -p /home/lms
 docker cp "${MAIN_FOLDER}"/lmstests/public/unittests/image/requirements.txt lms_checks-docker-engine_1:/home/lms/.
 docker cp "${MAIN_FOLDER}"/lmstests/public/unittests/image/Dockerfile lms_checks-docker-engine_1:/home/lms/.
 docker exec lms_checks-docker-engine_1  sh -c "cd /home/lms && docker build -t lms ."

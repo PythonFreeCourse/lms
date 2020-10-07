@@ -81,6 +81,10 @@ function trackDisableShareButton(solutionId, button) {
 function updateNotificationsBadge() {
   const dropdown = document.getElementById('navbarNavDropdown');
   const container = document.getElementById('notifications-list');
+  if (dropdown === null || container === null) {
+    return;
+  }
+
   const unread = container.querySelectorAll('.dropdown-item[data-read="false"]');
   const counter = dropdown.querySelector('#notification-count');
   const bgColor = (unread.length > 0) ? badColor : naturalColor;
@@ -95,6 +99,10 @@ function sendReadAllNotificationsRequest() {
 }
 
 function trackReadAllNotificationsButton(button) {
+  if (button === null) {
+    return;
+  }
+
   button.addEventListener('click', () => {
     sendReadAllNotificationsRequest();
     const notifications = document.querySelectorAll('.dropdown-item[data-read="false"]');
@@ -105,14 +113,70 @@ function trackReadAllNotificationsButton(button) {
   });
 }
 
+function postUploadMessageUpdate(feedbacks, uploadStatus, matchesSpan, missesSpan) {
+  const matches = uploadStatus.exercise_matches;
+  const misses = uploadStatus.exercise_misses;
+  if (!feedbacks.classList.contains('feedback-hidden')) {
+    feedbacks.classList.add('feedback-hidden');
+  }
+  matchesSpan.innerText += matches.length ? `${matches},` : '';
+  missesSpan.innerText += misses.length ? `${misses},` : '';
+  if (matches.length && matchesSpan.classList.contains('feedback-hidden')) {
+    matchesSpan.classList.remove('feedback-hidden');
+  }
+  if (misses.length && missesSpan.classList.contains('feedback-hidden')) {
+    missesSpan.classList.remove('feedback-hidden');
+  }
+  feedbacks.classList.add('feedback-transition');
+  feedbacks.clientWidth; // Forces layout to ensure the transition
+  feedbacks.classList.remove('feedback-hidden');
+  feedbacks.addEventListener('transitionend', () => {
+    feedbacks.classList.remove('feedback-transition');
+  });
+}
+
+function getPostUploadMessage() {
+  const myDropzone = Dropzone.forElement('#demo-upload');
+  const feedbacks = document.getElementById('upload-feedbacks');
+  const matchesSpan = document.getElementById('upload-matches');
+  const missesSpan = document.getElementById('upload-misses');
+  myDropzone.on('success', (...args) => {
+    const uploadStatus = Array.from(args).slice(1)[0];
+    if (uploadStatus !== null) {
+      postUploadMessageUpdate(feedbacks, uploadStatus, matchesSpan, missesSpan);
+    }
+  });
+}
+
 window.escapeUnicode = escapeUnicode;
 
 window.addEventListener('load', () => {
-  const codeElement = document.getElementById('code-view').dataset;
-  const solutionId = codeElement.id;
   updateNotificationsBadge();
   trackReadAllNotificationsButton(document.getElementById('read-notifications'));
-  trackCopyButton(document.getElementById('copy-button'), document.getElementById('user-code').textContent);
-  trackShareSolution(solutionId, document.getElementById('share-action'));
-  trackDisableShareButton(solutionId, document.getElementById('cancel-share'));
+  const codeElement = document.getElementById('code-view');
+  if (codeElement !== null) {
+    const codeElementData = codeElement.dataset;
+    const solutionId = codeElementData.id;
+    const userCode = document.getElementById('user-code').textContent;
+    trackCopyButton(document.getElementById('copy-button'), userCode);
+    trackShareSolution(solutionId, document.getElementById('share-action'));
+    trackDisableShareButton(solutionId, document.getElementById('cancel-share'));
+  }
+  if (document.getElementById('demo-upload') !== null) {
+    getPostUploadMessage();
+  }
 });
+
+/*
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker
+    .register('./sw.js')
+    .then(function (registration) {
+      console.log('Service Worker Registered!');
+      return registration;
+    })
+    .catch(function (err) {
+      console.error('Unable to register service worker.', err);
+    });
+}
+*/
