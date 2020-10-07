@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  lmsweb-1.0\n"
 "Report-Msgid-Bugs-To: bugs@mesicka.com\n"
-"POT-Creation-Date: 2020-10-02 17:31+0300\n"
+"POT-Creation-Date: 2020-10-04 10:37+0300\n"
 "PO-Revision-Date: 2020-09-16 18:29+0300\n"
 "Last-Translator: Or Ronai\n"
 "Language: en\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.8.0\n"
 
-#: lmsdb/models.py:616
+#: lmsdb/models.py:631
 msgid "כישלון חמור"
 msgstr "Fatal error"
 
@@ -49,7 +49,17 @@ msgstr "Bro, did you check your code?"
 msgid "מערכת הגשת התרגילים"
 msgstr "Exercuse submission system"
 
-#: models/solutions.py:19
+#: models/solutions.py:46
+#, python-format
+msgid "%(solver)s הגיב לך על בדיקת תרגיל \"%(subject)s\"."
+msgstr "%(solver)s has replied for your \"%(subject)s\" check."
+
+#: models/solutions.py:53
+#, python-format
+msgid "%(checker)s הגיב לך על תרגיל \"%(subject)s\"."
+msgstr "%(checker)s replied for \"%(subject)s\"."
+
+#: models/solutions.py:65
 #, python-format
 msgid "הפתרון שלך לתרגיל \"%(subject)s\" נבדק."
 msgstr "Your solution for the \"%(subject)s\" exercise has been checked."
@@ -110,7 +120,7 @@ msgstr "Username"
 msgid "סיסמה"
 msgstr "Password"
 
-#: templates/login.html:23
+#: templates/login.html:26
 msgid "התחבר"
 msgstr "Login"
 
@@ -274,38 +284,34 @@ msgstr "Presenter"
 msgid "ניווט בגרסאות ההגשה"
 msgstr "Navigate in solution versions"
 
-#: templates/view.html:48
+#: templates/view.html:35
 msgid "לסיום בדיקה"
 msgstr "Finish Checking"
 
-#: templates/view.html:64
+#: templates/view.html:75
 msgid "בדיקות אוטומטיות"
 msgstr "Automatic Checking"
 
-#: templates/view.html:71
+#: templates/view.html:82
 msgid "שגיאה:"
 msgstr "Error:"
 
-#: templates/view.html:76
+#: templates/view.html:87
 msgid "שגיאת סגל:"
 msgstr "Staff Error:"
 
-#: templates/view.html:90
+#: templates/view.html:101
 msgid "הערות על התרגיל"
 msgstr "Comments for the exercise"
 
-#: templates/view.html:98
+#: templates/view.html:109
 msgid "הערות כלליות"
 msgstr "General comments"
 
-#: templates/view.html:106
+#: templates/view.html:117
 msgid "הערות בודק"
 msgstr "Checker comments"
 
-#: templates/view.html:116
+#: templates/view.html:127
 msgid "סיימתי לבדוק!"
 msgstr "Done Checking!"
-
-#: templates/view.html:127
-msgid "הורד פתרון"
-msgstr "Download Solution"
