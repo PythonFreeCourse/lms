@@ -89,7 +89,7 @@ class Ziparchive(Extractor):
         if not self.check_files_size():
             raise FileSizeError(
                 'File content is too big. '
-                f'{MAX_ZIP_CONTENT_SIZE // 1000000}MB allowwed.',
+                f'{MAX_ZIP_CONTENT_SIZE // 1000000}MB allowed.',
             )
         for exercise_id, files in self.get_exercise(self.archive):
             if exercise_id and files and any(file.code for file in files):
