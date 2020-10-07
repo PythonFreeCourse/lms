@@ -1,6 +1,6 @@
 from io import BufferedReader, BytesIO
 from tempfile import SpooledTemporaryFile
-from typing import Iterator, Tuple
+from typing import Iterator, List, Tuple
 from zipfile import ZipFile
 
 from flask import json
@@ -18,6 +18,7 @@ class TestExtractor:
     IGNORE_FILES_ZIP_NAME = 'Upload_123.zip'
     PY_NAMES = ('code1.py', 'code2.py')
     ZIP_FILES = ('Upload_1.zip', 'zipfiletest.zip')
+    ZIP_BOMB_FILE = 'zipbomb.zip'
 
     def setup(self):
         self.ipynb_file = self.ipynb_file()
@@ -32,11 +33,18 @@ class TestExtractor:
             self.zipfile_file, self.IGNORE_FILES_ZIP_NAME,
         )
         self.zipfiles_extractor_files = list(self.zip_files(self.ZIP_FILES))
-        self.zipfiles_extractors_bytes_io = list(self.get_bytes_io_zip_files())
+        self.zipfiles_extractors_bytes_io = list(self.get_bytes_io_zip_files(
+            self.zipfiles_extractor_files, self.ZIP_FILES,
+        ))
+        self.zipbomb_file_list = list(self.zip_files((self.ZIP_BOMB_FILE,)))
+        self.zipbomb_bytes_io = next(self.get_bytes_io_zip_files(
+            self.zipbomb_file_list, (self.ZIP_BOMB_FILE,),
+        ))
 
     def teardown(self):
         self.ipynb_file.close()
         self.zipfile_file.close()
+        self.zipbomb_file_list[0].close()
         for py_file in self.pyfiles_files:
             py_file.close()
         for zip_file in self.zipfiles_extractor_files:
@@ -66,6 +74,13 @@ class TestExtractor:
         zip_file_storage.filename = filename
         opened_file.seek(0)
         return zip_file_storage
+
+    @staticmethod
+    def get_bytes_io_zip_files(
+        files: List[BufferedReader], filesnames: Tuple[str, ...],
+    ) -> Iterator[Tuple[BytesIO, str]]:
+        for file, name in zip(files, filesnames):
+            yield BytesIO(file.read()), name
 
     def get_zip_filenames(self):
         the_zip = ZipFile(f'{SAMPLES_DIR}/{self.IGNORE_FILES_ZIP_NAME}')
@@ -106,10 +121,6 @@ class TestExtractor:
             for filename in original_zip_filenames
         )
 
-    def get_bytes_io_zip_files(self) -> Iterator[Tuple[BytesIO, str]]:
-        for file, name in zip(self.zipfiles_extractor_files, self.ZIP_FILES):
-            yield BytesIO(file.read()), name
-
     def test_zip(self, student_user: User):
         conftest.create_exercise()
         conftest.create_exercise()
@@ -134,3 +145,14 @@ class TestExtractor:
             file=self.zipfiles_extractors_bytes_io[0],
         ))
         assert second_upload_response.status_code == 400
+
+    def test_zip_bomb(self, student_user: User):
+        conftest.create_exercise()
+
+        client = conftest.get_logged_user(username=student_user.username)
+
+        # Trying to upload a zipbomb file
+        upload_response = client.post('/upload', data={
+            'file': self.zipbomb_bytes_io,
+        })
+        assert upload_response.status_code == 413
