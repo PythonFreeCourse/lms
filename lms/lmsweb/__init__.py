@@ -1,7 +1,7 @@
 import pathlib
 import shutil
-import sentry_sdk
 
+import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 from flask import Flask
 from flask_babel import Babel
@@ -21,11 +21,6 @@ if debug.is_enabled():
     debug.start()
 
 
-sentry_sdk.init(
-    dsn=config.SENTRY_DSN,
-    integrations=[FlaskIntegration()]
-)
-
 webapp = Flask(
     __name__,
     template_folder=str(template_dir),
@@ -43,6 +38,13 @@ csrf = CSRFProtect(webapp)
 
 # Localizing configurations
 babel = Babel(webapp)
+
+# Initialize Sentry
+sentry_sdk.init(
+    dsn=config.SENTRY_DSN,
+    integrations=[FlaskIntegration()],
+)
+
 
 # Must import files after app's creation
 from lms.lmsdb import models  # NOQA: F401, E402, I202
