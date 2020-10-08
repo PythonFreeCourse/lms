@@ -41,7 +41,7 @@ babel = Babel(webapp)
 
 # Initialize Sentry
 sentry_sdk.init(
-    dsn=webapp.config["SENTRY_DSN"],
+    dsn=webapp.config['SENTRY_DSN'],
     integrations=[FlaskIntegration()],
 )
 
