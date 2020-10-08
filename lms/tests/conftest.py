@@ -1,4 +1,5 @@
 import datetime
+from functools import wraps
 import os
 import random
 import string
@@ -75,13 +76,14 @@ def enable_users_comments():
     webapp.config['USERS_COMMENTS'] = True
 
 
-def enable_limiter():
-    limiter.reset()
-    limiter.enabled = True
-
-
-def disable_limiter():
-    limiter.enabled = False
+def use_limiter(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        limiter.reset()
+        limiter.enabled = True
+        func(*args, **kwargs)
+        limiter.enabled = False
+    return wrapper
 
 
 def get_logged_user(username: str) -> FlaskClient:
