@@ -22,11 +22,11 @@ from lms.lmsweb.admin import (
     AdminModelView, SPECIAL_MAPPING, admin, managers_only,
 )
 from lms.lmsweb.config import (
-    LANGUAGES, LIMITS_PER_HOUR, LIMITS_PER_MINUTE, LOCALE,
+    LANGUAGES, LIMITS_PER_HOUR, LIMITS_PER_MINUTE, LOCALE, MAX_UPLOAD_SIZE,
 )
 from lms.lmsweb.manifest import MANIFEST
 from lms.lmsweb.redirections import (
-    MAX_UPLOAD_SIZE, PERMISSIVE_CORS, get_next_url, login_manager,
+    PERMISSIVE_CORS, get_next_url, login_manager,
 )
 from lms.models import comments, notifications, share_link, solutions, upload
 from lms.models.errors import FileSizeError, LmsError, UploadError, fail

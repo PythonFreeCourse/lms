@@ -6,11 +6,57 @@ from zipfile import ZipFile
 
 from flask_babel import gettext as _
 
-from lms.lmsdb.models import Solution, SolutionFile
+from lms.lmsdb.models import Solution, SolutionFile, User
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmsweb import config, routes
 from lms.models import notifications
+
+
+def notify_comment_after_check(user: User, solution: Solution) -> bool:
+    is_checked = solution.is_checked
+    if is_checked:
+        msg, addressee = get_message_and_addressee(user, solution)
+        if is_last_to_reply(user, solution):
+            notifications.send(
+                kind=notifications.NotificationKind.USER_RESPONSE,
+                user=addressee,
+                related_id=solution.id,
+                message=msg,
+                action_url=f'{routes.SOLUTIONS}/{solution.id}',
+            )
+            return True
+    return False
+
+
+def is_last_to_reply(user: User, solution: Solution) -> bool:
+    return (
+        not solution.comments
+        or (
+            solution.comments
+            and solution.ordered_comments[0].commenter != user
+        )
+    )
+
+
+def get_message_and_addressee(
+    user: User, solution: Solution,
+) -> Tuple[str, User]:
+    if solution.solver == user:
+        msg = _(
+            '%(solver)s הגיב לך על בדיקת תרגיל "%(subject)s".',
+            solver=solution.solver.fullname,
+            subject=solution.exercise.subject,
+        )
+        addressee = solution.checker
+    else:  # solution.checker == user
+        msg = _(
+            '%(checker)s הגיב לך על תרגיל "%(subject)s".',
+            checker=solution.checker.fullname,
+            subject=solution.exercise.subject,
+        )
+        addressee = solution.solver
+    return msg, addressee
 
 
 def mark_as_checked(solution_id: int, checker_id: int) -> bool:

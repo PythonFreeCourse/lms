@@ -130,9 +130,9 @@ class TestExtractor:
         client = conftest.get_logged_user(username=student_user.username)
 
         # Uploading a multiple zip solutions file
-        upload_response = client.post('/upload', data=dict(
-            file=self.zipfiles_extractors_bytes_io[1],
-        ))
+        upload_response = client.post('/upload', data={
+            'file': self.zipfiles_extractors_bytes_io[1],
+        })
         json_response_upload = json.loads(
             upload_response.get_data(as_text=True),
         )
@@ -141,9 +141,9 @@ class TestExtractor:
         assert upload_response.status_code == 200
 
         # Uploading a zip file with a same solution exists in the previous zip
-        second_upload_response = client.post('/upload', data=dict(
-            file=self.zipfiles_extractors_bytes_io[0],
-        ))
+        second_upload_response = client.post('/upload', data={
+            'file': self.zipfiles_extractors_bytes_io[0],
+        })
         assert second_upload_response.status_code == 400
 
     def test_zip_bomb(self, student_user: User):

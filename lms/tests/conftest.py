@@ -76,6 +76,7 @@ def enable_users_comments():
 
 
 def enable_limiter():
+    limiter.reset()
     limiter.enabled = True
 
 
