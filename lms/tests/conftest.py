@@ -1,4 +1,5 @@
 import datetime
+from functools import wraps
 import os
 import random
 import string
@@ -15,7 +16,7 @@ from lms.lmsdb.models import (
 from lms.extractors.base import File
 from lms.lmstests.public import celery_app as public_app
 from lms.lmstests.sandbox import celery_app as sandbox_app
-from lms.lmsweb import routes, webapp
+from lms.lmsweb import limiter, routes, webapp
 from lms.models import notifications
 
 
@@ -60,6 +61,7 @@ def webapp_configurations():
     webapp.secret_key = ''.join(
         random.choices(string.ascii_letters + string.digits, k=64),
     )
+    limiter.enabled = False
 
 
 def disable_shareable_solutions():
@@ -74,16 +76,22 @@ def enable_users_comments():
     webapp.config['USERS_COMMENTS'] = True
 
 
+def use_limiter(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        limiter.reset()
+        limiter.enabled = True
+        func(*args, **kwargs)
+        limiter.enabled = False
+    return wrapper
+
+
 def get_logged_user(username: str) -> FlaskClient:
     client = webapp.test_client()
-    client.post(
-        '/login',
-        data=dict(  # noqa: S106
-            username=username,
-            password='fake pass',
-        ),
-        follow_redirects=True,
-    )
+    client.post('/login', data={  # noqa: S106
+        'username': username,
+        'password': 'fake pass',
+    }, follow_redirects=True)
     return client
 
 

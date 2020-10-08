@@ -74,7 +74,8 @@ class UserRegistrationCreator:
             except Exception:
                 log.exception(
                     'Failed to create user %s, continue to next user',
-                    user.email)
+                    user.email,
+                )
                 self._failed_users.append(user)
 
     @staticmethod
@@ -111,7 +112,8 @@ class UserRegistrationCreator:
             log.exception(
                 'Failed to create user %s. response: %s',
                 user.email,
-                response.content)
+                response.content,
+            )
             raise
 
     @staticmethod

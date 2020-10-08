@@ -390,7 +390,7 @@ class Solution(BaseModel):
             if exercise.get('solution_id') is None:
                 exercise['solution_id'] = solution.id
                 exercise['is_checked'] = solution.is_checked
-                exercise['comments_num'] = len(solution.comments)
+                exercise['comments_num'] = len(solution.staff_comments)
                 if solution.is_checked and solution.checker:
                     exercise['checker'] = solution.checker.fullname
         return tuple(exercises.values())
@@ -402,8 +402,19 @@ class Solution(BaseModel):
         ).where(SolutionFile.solution == self)
 
     @property
+    def ordered_comments(self):
+        return self.comments.order_by(Comment.timestamp.desc())
+
+    @property
+    def staff_comments(self):
+        return self.comments.switch(Comment).join(User).join(Role).where(
+            (Comment.commenter.role == Role.get_staff_role().id)
+            | (Comment.commenter.role == Role.get_admin_role().id),
+        )
+
+    @property
     def comments_per_file(self):
-        return Counter(c.file.id for c in self.comments)
+        return Counter(c.file.id for c in self.staff_comments)
 
     @classmethod
     def create_solution(
