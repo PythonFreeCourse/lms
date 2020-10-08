@@ -43,7 +43,7 @@ csrf = CSRFProtect(webapp)
 babel = Babel(webapp)
 
 # Compiling the babel each run
-os.system('pybabel compile -d lms/lmsweb/translations')
+os.system('pybabel compile -d lms/lmsweb/translations')  # NOQA: S605, S607
 
 # Must import files after app's creation
 from lms.lmsdb import models  # NOQA: F401, E402, I202
