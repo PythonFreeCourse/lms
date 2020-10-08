@@ -1,3 +1,4 @@
+import os
 import pathlib
 import shutil
 
@@ -40,6 +41,9 @@ csrf = CSRFProtect(webapp)
 
 # Localizing configurations
 babel = Babel(webapp)
+
+# Compiling the babel each run
+os.system('pybabel compile -d lms/lmsweb/translations')
 
 # Must import files after app's creation
 from lms.lmsdb import models  # NOQA: F401, E402, I202
