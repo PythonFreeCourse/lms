@@ -6,3 +6,6 @@ MAIN_FOLDER="${SCRIPT_FOLDER}/.."
 
 echo "Running build on folder ${MAIN_FOLDER}"
 ( cd "${MAIN_FOLDER}" && docker build -t lms . )
+
+echo "Compiling Flask Babel"
+pybabel compile -d "${MAIN_FOLDER}/lms/lmsweb/translations"
