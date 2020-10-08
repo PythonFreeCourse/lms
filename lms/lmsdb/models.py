@@ -343,7 +343,6 @@ class Solution(BaseModel):
             cls, content: Union[str, bytes], user: User, exercise: Exercise,
             *, already_hashed: bool = False,
     ) -> bool:
-
         hash_ = cls.create_hash(content) if not already_hashed else content
 
         return (
