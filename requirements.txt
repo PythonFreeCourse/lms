@@ -2,6 +2,7 @@ amqp==5.0.1
 arrow==0.16.0
 atomicwrites==1.4.0
 attrs==20.2.0
+Babel==2.8.0
 backcall==0.2.0
 bandit==1.6.2
 bench-it==1.0.1
