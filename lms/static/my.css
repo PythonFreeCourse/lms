@@ -92,6 +92,11 @@ a {
   display: flex;
 }
 
+#exercises {
+  display: flex;
+  flex-direction: column;
+}
+
 .exercise {
   align-items: center;
   background: #f8f8f8;
@@ -103,6 +108,7 @@ a {
   margin-bottom: 0.5rem;
   padding: 1rem;
   text-align: center;
+  overflow: auto;
 }
 
 .centered {
@@ -681,7 +687,7 @@ code .grader-add .fa {
 }
 
 .grader-delete {
-  cursor: pointer;  /* Very bad semantically, think of another UI solution */
+  cursor: pointer; /* Very bad semantically, think of another UI solution */
 }
 
 /* Status page */
@@ -731,7 +737,7 @@ code .grader-add .fa {
   align-self: center;
   align-items: center;
   font-size: 1.25rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 #notification-icon {
@@ -745,7 +751,7 @@ code .grader-add .fa {
 
 .notification[data-read="true"] .icon::before {
   font: normal normal normal 14px/1 FontAwesome;
-  content: "\f2b6";  /* envelope-open */
+  content: "\f2b6"; /* envelope-open */
 }
 
 .notification[data-read="false"] {
@@ -754,7 +760,7 @@ code .grader-add .fa {
 
 .notification[data-read="false"] .icon::before {
   font: normal normal normal 14px/1 FontAwesome;
-  content: "\f0e0";  /* envelope (closed) */
+  content: "\f0e0"; /* envelope (closed) */
 }
 
 .notification-ok {

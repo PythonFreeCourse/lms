@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  lmsweb-1.0\n"
 "Report-Msgid-Bugs-To: bugs@mesicka.com\n"
-"POT-Creation-Date: 2020-10-08 12:56+0300\n"
+"POT-Creation-Date: 2020-10-09 09:15+0300\n"
 "PO-Revision-Date: 2020-09-16 18:29+0300\n"
 "Last-Translator: Or Ronai\n"
 "Language: en\n"
@@ -152,11 +152,15 @@ msgstr "Exercises List"
 msgid "ארכיון התרגילים"
 msgstr "Exercises Archive"
 
-#: templates/navbar.html:74
+#: templates/navbar.html:65
+msgid "המשתמש שלי"
+msgstr "My User"
+
+#: templates/navbar.html:80
 msgid "בדוק תרגילים"
 msgstr "Check Exercises"
 
-#: templates/navbar.html:81
+#: templates/navbar.html:87
 msgid "התנתקות"
 msgstr "Logout"
 
