@@ -93,3 +93,5 @@ pip install -r requirements.txt
 pip install -r dev_requirements.txt
 py.test -vvv
 ```
+### Contribution convention
+Follow the [commit messages specification](https://www.conventionalcommits.org/en/v1.0.0/)
