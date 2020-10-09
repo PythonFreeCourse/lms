@@ -59,6 +59,12 @@
           </a>
         </li>
         {% endif -%}
+        <li class="nav-item">
+          <a href="/user/{{ current_user.id }}" class="nav-link">
+            <i class="fa fa-user" aria-hidden="true"></i>
+            {{ _('המשתמש שלי') }}
+          </a>
+        </li>
       </ul>
       <ul class="navbar-nav 
       {%- if direction == 'rtl' %}
