@@ -788,9 +788,29 @@ code .grader-add .fa {
   margin-bottom: 5em;
 }
 
+.user-notes {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
+}
+
+.note {
+  background-color: #fff170;
+  width: 18%;
+}
+
 .note-exercise-select {
   display: flex;
   flex-flow: row;
+  align-items: center;
+}
+
+.rtl-language #note-exercise {
+  margin-right: 1em;
+}
+
+.ltr-language #note-exercise {
+  margin-left: 1em;
 }
 
 .auto-width {
@@ -807,7 +827,11 @@ code .grader-add .fa {
 .note-privacy-input-range {
   display: flex;
   flex-flow: column;
-  align-items: center;;
+  align-items: center;
+}
+
+.form-range[value="0"] > .note-privacy-icon {
+  content: 'abc';
 }
 
 .add-note {
