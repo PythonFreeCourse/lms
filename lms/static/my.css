@@ -1,3 +1,18 @@
+@media screen and (max-width: 30em) {
+  .exercise-id {
+    display: none !important;
+  }
+  .which-notebook {
+    display: none !important;
+  }
+  .badge {
+    display: none !important;
+  }
+  .ex-title {
+    font-size: 16px !important;
+  }
+}
+
 html {
   border: #f3f3f3;
 }
