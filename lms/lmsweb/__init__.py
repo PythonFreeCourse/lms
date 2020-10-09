@@ -41,6 +41,7 @@ csrf = CSRFProtect(webapp)
 # Localizing configurations
 babel = Babel(webapp)
 
+
 # Must import files after app's creation
 from lms.lmsdb import models  # NOQA: F401, E402, I202
 from lms.lmsweb import views  # NOQA: F401, E402

@@ -17,5 +17,6 @@ upgrade () {
   source ./build.sh
   sudo systemctl restart lms
   sudo systemctl start nginx
+  source ./i18n.sh
   source ./bootstrap.sh
 }
