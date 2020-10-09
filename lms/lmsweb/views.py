@@ -66,7 +66,7 @@ def load_user(user_id):
 
 
 @webapp.route('/login', methods=['GET', 'POST'])
-def login(login_error=None):
+def login(login_error :str=None):
 
     if current_user.is_authenticated:
         return get_next_url(request.args.get('next'))
@@ -88,7 +88,7 @@ def login(login_error=None):
                         'login_error': login_error}),
             )
         elif user is None:
-            login_error = 'Username does not exist, please register first'
+            login_error = 6#'Username does not exist, please register first'
             return redirect(
                 url_for('login', **{'next': next_page,
                         'login_error': login_error}),
