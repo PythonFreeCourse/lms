@@ -788,7 +788,30 @@ code .grader-add .fa {
   margin-bottom: 5em;
 }
 
+.note-exercise-select {
+  display: flex;
+  flex-flow: row;
+}
+
+.auto-width {
+  width: auto;
+}
+
+.note-privacy-select {
+  width: fit-content;
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+}
+
+.note-privacy-input-range {
+  display: flex;
+  flex-flow: column;
+  align-items: center;;
+}
+
 .add-note {
   width: max-content;
   margin: auto;
+  margin-bottom: 1em;
 }

@@ -1,3 +1,12 @@
+function getPrivacyLevel(inputRange) {
+  const options = window.notesOptions.split(',');
+  const privacyText = document.getElementById('privacy-text');
+  privacyText.innerText = options[inputRange.value];
+  inputRange.addEventListener('change', () => {
+    privacyText.innerText = options[inputRange.value];
+  });
+}
+
 function visuallyRemoveNote(noteId) {
   const noteElement = document.querySelector(`.grader-delete[data-noteid="${noteId}"]`).closest('.note');
   const notesElement = document.getElementById('notes-user');
@@ -40,5 +49,7 @@ window.addEventListener('load', () => {
   const userData = document.getElementById('page-user').dataset;
   window.userId = userData.user;
   sessionStorage.setItem('role', userData.role);
+  window.notesOptions = userData.notesOptions;
   trackDeleteNotes(document.querySelectorAll('.grader-delete'));
+  getPrivacyLevel(document.getElementById('note-privacy'));
 });

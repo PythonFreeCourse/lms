@@ -43,6 +43,16 @@ class RoleOptions(enum.Enum):
         return self.value
 
 
+class NoteOptions(enum.Enum):
+    PRIVATE = 'Private'
+    STAFF = 'Staff'
+    SOLVER = 'Solver'
+    PUBLIC = 'Public'
+
+    def __str__(self):
+        return self.value
+
+
 class BaseModel(Model):
     class Meta:
         database = database
@@ -150,6 +160,9 @@ class User(UserMixin, BaseModel):
         for note in notes:
             note['creator'] = User.get_by_id(note['creator']).fullname
             note['note'] = CommentText.get_by_id(note['note']).text
+            note['timestamp'] = note['timestamp'].strftime('%d/%m/%Y')
+            if note['exercise']:
+                note['exercise'] = Exercise.get_by_id(note['exercise']).subject
         return tuple(notes)
 
     def __str__(self):
@@ -399,7 +412,7 @@ class Solution(BaseModel):
             if exercise.get('solution_id') is None:
                 exercise['solution_id'] = solution.id
                 exercise['is_checked'] = solution.is_checked
-                exercise['comments_num'] = len(solution.comments)
+                exercise['comments_num'] = len(solution.staff_comments)
                 if solution.is_checked and solution.checker:
                     exercise['checker'] = solution.checker.fullname
         return tuple(exercises.values())
@@ -411,8 +424,19 @@ class Solution(BaseModel):
         ).where(SolutionFile.solution == self)
 
     @property
+    def ordered_comments(self):
+        return self.comments.order_by(Comment.timestamp.desc())
+
+    @property
+    def staff_comments(self):
+        return self.comments.switch(Comment).join(User).join(Role).where(
+            (Comment.commenter.role == Role.get_staff_role().id)
+            | (Comment.commenter.role == Role.get_admin_role().id),
+        )
+
+    @property
     def comments_per_file(self):
-        return Counter(c.file.id for c in self.comments)
+        return Counter(c.file.id for c in self.staff_comments)
 
     @classmethod
     def create_solution(
@@ -729,6 +753,13 @@ class Note(BaseModel):
     user = ForeignKeyField(User)
     timestamp = DateTimeField(default=datetime.now())
     note = ForeignKeyField(CommentText)
+    exercise = ForeignKeyField(Exercise, null=True)
+    privacy = CharField(choices=(
+        (NoteOptions.PRIVATE.value, NoteOptions.PRIVATE.value),
+        (NoteOptions.STAFF.value, NoteOptions.STAFF.value),
+        (NoteOptions.SOLVER.value, NoteOptions.SOLVER.value),
+        (NoteOptions.PUBLIC.value, NoteOptions.PUBLIC.value),
+    ))
 
     @classmethod
     def create_note(
@@ -736,12 +767,24 @@ class Note(BaseModel):
         creator: User,
         user: User,
         note_text: CommentText,
+        exercise: Exercise,
+        privacy: NoteOptions,
     ) -> 'Note':
         return cls.get_or_create(
             creator=creator,
             user=user,
             note=note_text,
+            exercise=exercise,
+            privacy=privacy,
         )
+
+    @staticmethod
+    def get_note_options():
+        return ','.join(option.value for option in NoteOptions)
+
+    @staticmethod
+    def get_privacy_level(level: int) -> NoteOptions:
+        return list(NoteOptions)[level].value
 
 
 class Comment(BaseModel):

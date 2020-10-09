@@ -26,6 +26,10 @@ MAIL_WELCOME_MESSAGE = 'welcome-email'
 USERS_CSV = 'users.csv'
 ERRORS_CSV = 'errors.csv'
 
+# Files limits sizes
+MAX_UPLOAD_SIZE = 2_000_000  # 2MB (in bytes)
+MAX_ZIP_CONTENT_SIZE = 5_000_000  # 5MB (in bytes)
+
 # Shareable option
 SHAREABLE_SOLUTIONS = True
 
@@ -38,3 +42,7 @@ LANGUAGES = {
     'en': 'English',
 }
 LOCALE = 'en'
+
+# Limiter settings
+LIMITS_PER_MINUTE = 5
+LIMITS_PER_HOUR = 50

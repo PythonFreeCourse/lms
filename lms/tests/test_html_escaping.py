@@ -16,10 +16,9 @@ class TestHtmlEscaping:
     def test_comment_text_escaping(student_user: User, solution: Solution):
         client = conftest.get_logged_user(student_user.username)
 
-        # Creating a comment
-        comment_response = client.post('/comments', data=json.dumps(dict(
-            fileId=solution.files[0].id, act='create', kind='text',
-            comment=USER_COMMENT_BEFORE_ESCAPING, line=1,
-        )), content_type='application/json')
+        comment_response = client.post('/comments', data=json.dumps({
+            'fileId': solution.files[0].id, 'act': 'create', 'kind': 'text',
+            'comment': USER_COMMENT_BEFORE_ESCAPING, 'line': 1,
+        }), content_type='application/json')
         assert comment_response.status_code == 200
         assert solution.comments[0].comment.text == USER_COMMENT_AFTER_ESCAPING
