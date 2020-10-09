@@ -241,7 +241,7 @@ def note():
             return fail(422, 'Empty notes are not allowed.')
         new_note_id = CommentText.create_comment(text=note_text).id
 
-        note_ = Note.create(
+        Note.create(
             creator=User.get_or_none(User.id == current_user.id),
             user=user,
             note=new_note_id,
