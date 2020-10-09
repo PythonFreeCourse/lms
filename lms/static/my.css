@@ -1,18 +1,3 @@
-@media screen and (max-width: 30em) {
-  .exercise-id {
-    display: none !important;
-  }
-  .which-notebook {
-    display: none !important;
-  }
-  .comments-count {
-    display: none !important;
-  }
-  .ex-title {
-    font-size: 1rem;
-  }
-}
-
 html {
   border: #f3f3f3;
 }
@@ -807,4 +792,19 @@ code .grader-add .fa {
 
 #user .user-details {
   margin-bottom: 5em;
+}
+
+@media screen and (max-width: 768px) {
+  .exercise-id {
+    display: none;
+  }
+  .which-notebook {
+    display: none;
+  }
+  .comments-count {
+    display: none;
+  }
+  .ex-title {
+    font-size: 1rem;
+  }
 }
