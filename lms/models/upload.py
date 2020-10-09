@@ -12,8 +12,12 @@ from lms.lmsweb import config
 from lms.utils.log import log
 
 
-def _is_uploaded_before(user: User, file_hash: str) -> bool:
-    return Solution.is_duplicate(file_hash, user, already_hashed=True)
+def _is_uploaded_before(
+    user: User, exercise: Exercise, file_hash: str,
+) -> bool:
+    return Solution.is_duplicate(
+        file_hash, user, exercise, already_hashed=True,
+    )
 
 
 def _upload_to_db(
@@ -29,7 +33,7 @@ def _upload_to_db(
         raise UploadError(
             f'Exercise {exercise_id} is closed for new solutions.')
 
-    if solution_hash and _is_uploaded_before(user, solution_hash):
+    if solution_hash and _is_uploaded_before(user, exercise, solution_hash):
         raise AlreadyExists('You try to reupload an old solution.')
     elif not files:
         raise UploadError(f'There are no files to upload for {exercise_id}.')
@@ -54,6 +58,7 @@ def new(user: User, file: FileStorage) -> Tuple[List[int], List[int]]:
     matches: List[int] = []
     misses: List[int] = []
     errors: List[Union[UploadError, AlreadyExists]] = []
+
     for exercise_id, files, solution_hash in Extractor(file):
         try:
             solution = _upload_to_db(exercise_id, user, files, solution_hash)

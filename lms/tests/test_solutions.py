@@ -50,6 +50,20 @@ class TestSolutionDb:
         assert next_unchecked.id == second_solution.id
         assert next_unchecked_by_id.id == second_solution.id
 
+        third_solution = conftest.create_solution(
+            exercise, student_user, code='123',
+        )
+        fourth_solution = conftest.create_solution(
+            exercise, student_user, code='1234',
+        )
+        assert not Solution.is_duplicate(
+            third_solution.hashed, student_user, exercise, already_hashed=True,
+        )
+        assert Solution.is_duplicate(
+            fourth_solution.hashed, student_user, exercise,
+            already_hashed=True,
+        )
+
     def test_next_exercise_with_cleanest_code(
             self,
             comment: Comment,
