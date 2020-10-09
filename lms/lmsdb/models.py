@@ -10,7 +10,7 @@ from typing import (
 )
 
 from flask_babel import gettext as _
-from flask_login import UserMixin  # type: ignore
+from flask_login import UserMixin, current_user  # type: ignore
 from peewee import (  # type: ignore
     BooleanField, Case, CharField, Check, DateTimeField, ForeignKeyField,
     IntegerField, JOIN, ManyToManyField, TextField, fn,
@@ -46,7 +46,7 @@ class RoleOptions(enum.Enum):
 class NoteOptions(enum.Enum):
     PRIVATE = 'Private'
     STAFF = 'Staff'
-    SOLVER = 'Solver'
+    USER = 'User'
     PUBLIC = 'Public'
 
     def __str__(self):
@@ -153,9 +153,35 @@ class User(UserMixin, BaseModel):
     def get_notifications(self) -> Iterable['Notification']:
         return Notification.fetch(self)
 
+    def notes_to_show(self) -> List[Dict[str, Any]]:
+        staff_roles = (
+            (current_user.role == Role.get_staff_role())
+            | (current_user.role == Role.get_admin_role())
+        )
+        private_notes = (
+            (Note.privacy == NoteOptions.PRIVATE.value)
+            & (Note.creator == current_user.id)
+        )
+        staff_notes = (Note.privacy == NoteOptions.STAFF.value) & (staff_roles)
+        user_notes = (
+            (Note.privacy == NoteOptions.USER.value)
+            & ((Note.user == current_user.id) | (staff_roles))
+        )
+        public_notes = Note.privacy == NoteOptions.PUBLIC.value
+
+        return list(Note.select().where(
+            (Note.user == self)
+            & (
+                (private_notes)
+                | (staff_notes)
+                | (user_notes)
+                | (public_notes)
+            ),
+        ).dicts())
+
     @property
     def notes(self) -> Iterable[Dict[str, Any]]:
-        notes = list(Note.select().where(Note.user == self).dicts())
+        notes = self.notes_to_show()
 
         for note in notes:
             note['creator'] = User.get_by_id(note['creator']).fullname
@@ -768,7 +794,7 @@ class Note(BaseModel):
     privacy = CharField(choices=(
         (NoteOptions.PRIVATE.value, NoteOptions.PRIVATE.value),
         (NoteOptions.STAFF.value, NoteOptions.STAFF.value),
-        (NoteOptions.SOLVER.value, NoteOptions.SOLVER.value),
+        (NoteOptions.USER.value, NoteOptions.USER.value),
         (NoteOptions.PUBLIC.value, NoteOptions.PUBLIC.value),
     ))
 
@@ -788,6 +814,22 @@ class Note(BaseModel):
             exercise=exercise,
             privacy=privacy,
         )
+
+    @property
+    def is_private(self) -> bool:
+        return self.privacy == NoteOptions.PRIVATE.value
+
+    @property
+    def is_staff(self) -> bool:
+        return self.privacy == NoteOptions.STAFF.value
+
+    @property
+    def is_solver(self) -> bool:
+        return self.privacy == NoteOptions.USER.value
+
+    @property
+    def is_public(self) -> bool:
+        return self.privacy == NoteOptions.PUBLIC.value
 
     @staticmethod
     def get_note_options():

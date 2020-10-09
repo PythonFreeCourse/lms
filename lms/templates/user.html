@@ -39,49 +39,52 @@
           </tbody>
         </table>
       </div>
-      <div class="{{ direction }}">
-        <h2>{{ _('פתקיות:') }}</h2>
-        <div class="user-notes {{ direction }}" id="notes-user">
-          {%- for note in user.notes %}
-            <div class="note card mb-3" data-noteid="{{ note.id }}" data-author-role="{{ note.creator }}">
-              <div class="card-header">{% if is_manager %}
-                <i class="fa fa-trash grader-delete" aria-hidden="true" data-noteid="{{ note.id }}"></i>
-                {% endif %}{{ note.timestamp }}{% if note.exercise %} - {{ note.exercise }}{% endif %}</div>
-              <div class="card-body">
-                <h5 class="card-title">{{ note.creator }}</h5>
-                <p class="card-text">{{ note.note | safe }}</p>
+      {% if user.notes %}
+        <div class="{{ direction }}">
+          <h2>{{ _('פתקיות:') }}</h2>
+          <div class="user-notes {{ direction }}" id="notes-user">
+            {%- for note in user.notes %}
+              <div class="note card" data-noteid="{{ note.id }}" data-author-role="{{ note.creator }}">
+                <div class="card-header">
+                  {% if is_manager %}
+                    <i class="fa fa-trash grader-delete" aria-hidden="true" data-noteid="{{ note.id }}"></i>
+                  {% endif %}{{ note.timestamp }}{% if note.exercise %} - {{ note.exercise }}{% endif %}</div>
+                <div class="card-body">
+                  <h5 class="card-title">{{ note.creator }}</h5>
+                  <p class="card-text">{{ note.note | safe }}</p>
+                </div>
               </div>
-            </div>
-          {% endfor -%}
+            {% endfor -%}
+          </div>
+          {%- if is_manager %}
+            <form class="align-items-center" id="notes-form" method="post" action="/notes?act=create&userId={{ user.id }}">
+              <div class="row mb-3 {{ direction }}-language">
+                <label for="note-text" class="visually-hidden">{{ _('פתקית חדשה') }}</label>
+                <div>
+                  <input id="note-text" class="form-control form-control-lg {{ direction }}" type="text" name="note" placeholder="{{ _('פתקית חדשה') }}" required autofocus>
+                </div>
+              </div>
+              <div class="mb-3 {{ direction }}-language note-exercise-select">
+                <label class="form-label auto-width" for="note-exercise">{{ _('תרגיל משויך:') }}</label>
+                <input class="form-control auto-width" list="note-exercises" id="note-exercise" name="exercise">
+                <datalist id="note-exercises">
+                  {% for solution in solutions %}
+                    <option value="{{ solution.exercise_name }}">
+                  {% endfor %}
+                </datalist>
+              </div>
+              <div class="row mb-3 {{ direction }}-language note-privacy-select">
+                <label class="form-label auto-width" for="note-privacy">{{ _('רמת פרטיות:') }}</label>
+                <div class="note-privacy-input-range">
+                  <input type="range" class="form-range" min="0" max="{{ notes_options.split(',') | length - 1 }}" value="0" id="note-privacy" name="privacy">
+                  <span class="note-privacy-text" id="privacy-text"></span>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-sm btn-block add-note">{{ _('הוסף פתקית') }}</button>
+            </form>
+          {% endif -%}
         </div>
-        {%- if is_manager %}
-          <form class="align-items-center" id="notes-form" method="post" action="/notes?act=create&userId={{ user.id }}">
-            <div class="row mb-3 {{ direction }}-language">
-              <label for="note-text" class="visually-hidden">{{ _('פתקית חדשה') }}</label>
-              <div>
-                <input id="note-text" class="form-control form-control-lg {{ direction }}" type="text" name="note" placeholder="{{ _('פתקית חדשה') }}" required autofocus>
-              </div>
-            </div>
-            <div class="mb-3 {{ direction }}-language note-exercise-select">
-              <label class="form-label auto-width" for="note-exercise">{{ _('תרגיל משויך:') }}</label>
-              <input class="form-control auto-width" list="note-exercises" id="note-exercise" name="exercise">
-              <datalist id="note-exercises">
-                {% for solution in solutions %}
-                  <option value="{{ solution.exercise_name }}">
-                {% endfor %}
-              </datalist>
-            </div>
-            <div class="row mb-3 {{ direction }}-language note-privacy-select">
-              <label class="form-label auto-width" for="note-privacy">{{ _('רמת פרטיות:') }}</label>
-              <div class="note-privacy-input-range">
-                <input type="range" class="form-range" min="0" max="{{ notes_options.split(',') | length - 1 }}" value="0" id="note-privacy" name="privacy">
-                <span class="note-privacy-text" id="privacy-text"></span>
-              </div>
-            </div>
-            <button class="btn btn-primary btn-sm btn-block add-note">{{ _('הוסף פתקית') }}</button>
-          </form>
-        {% endif -%}
-      </div>
+      {% endif %}
     </div>
   </div>
 </div>

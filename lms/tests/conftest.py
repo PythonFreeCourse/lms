@@ -10,7 +10,7 @@ from peewee import SqliteDatabase
 import pytest
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, CommentText, Exercise, Notification, Role,
+    ALL_MODELS, Comment, CommentText, Exercise, Note, Notification, Role,
     RoleOptions, SharedSolution, Solution, User,
 )
 from lms.extractors.base import File
@@ -173,6 +173,23 @@ def create_exercise(index: int = 0, is_archived: bool = False) -> Exercise:
 
 def create_shared_solution(solution: Solution) -> str:
     return SharedSolution.create_shared_solution(solution=solution)
+
+
+def create_note(
+    creator: User,
+    user: User,
+    note_text: CommentText,
+    privacy: int,
+):
+    new_note_id = CommentText.create_comment(text=note_text).id
+    privacy_level = Note.get_privacy_level(privacy)
+    return Note.create_note(
+        creator=creator,
+        user=user,
+        note_text=new_note_id,
+        exercise=None,
+        privacy=privacy_level,
+    )
 
 
 @pytest.fixture()

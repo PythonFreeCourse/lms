@@ -211,26 +211,22 @@ def share():
 @webapp.route('/notes', methods=['GET', 'POST'])
 @login_required
 def note():
-    act = request.args.get('act') or request.json.get('act')
+    if not current_user.role.is_manager:
+        return fail(403, "You aren't allowed to access this page.")
 
-    if request.method == 'POST':
-        user_id = request.args.get('userId')
-    else:  # it's a GET
-        user_id = request.args.get('userId')
+    act = request.args.get('act') or request.json.get('act')
+    user_id = request.args.get('userId')
 
     user = User.get_or_none(User.id == user_id)
     if user is None:
         return fail(404, f'No such user {user_id}.')
-
-    if not current_user.role.is_manager:
-        return fail(403, "You aren't allowed to access this page.")
 
     if act == 'delete':
         note_id = int(request.args.get('noteId'))
         note_ = Note.get_or_none(Note.id == note_id)
         if (
             note_.creator.id != current_user.id
-            and not current_user.role.is_manager
+            and note_.is_private
         ):
             return fail(403, "You aren't allowed to access this page.")
         if note_ is not None:
