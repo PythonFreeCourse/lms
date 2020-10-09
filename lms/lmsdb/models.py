@@ -340,21 +340,13 @@ class Solution(BaseModel):
 
     @classmethod
     def is_duplicate(
-            cls, content: Union[str, bytes], user: User, exercise: Exercise,
-            *, already_hashed: bool = False,
+            cls, content: Union[str, bytes], user: User, *,
+            already_hashed: bool = False,
     ) -> bool:
         hash_ = cls.create_hash(content) if not already_hashed else content
-
-        return (
-            cls
-            .select()
-            .group_by(cls.solver, cls.exercise)
-            .having(
-                cls.submission_timestamp == fn.MAX(cls.submission_timestamp),
-                cls.solver == user,
-                cls.exercise == exercise,
-                cls.hashed == hash_,
-            )
+        return cls.select().where(
+            cls.hashed == hash_,
+            cls.solver == user,
         ).exists()
 
     def start_checking(self) -> bool:
@@ -435,10 +427,7 @@ class Solution(BaseModel):
         if len(files) == 1:
             hash_ = cls.create_hash(files[0].code)
 
-        if (
-            hash_
-            and cls.is_duplicate(hash_, solver, exercise, already_hashed=True)
-        ):
+        if hash_ and cls.is_duplicate(hash_, solver, already_hashed=True):
             raise AlreadyExists('This solution already exists.')
 
         instance = cls.create(**{

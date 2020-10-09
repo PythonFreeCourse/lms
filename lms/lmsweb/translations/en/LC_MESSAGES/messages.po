@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  lmsweb-1.0\n"
 "Report-Msgid-Bugs-To: bugs@mesicka.com\n"
-"POT-Creation-Date: 2020-10-04 10:37+0300\n"
+"POT-Creation-Date: 2020-10-09 09:15+0300\n"
 "PO-Revision-Date: 2020-09-16 18:29+0300\n"
 "Last-Translator: Or Ronai\n"
 "Language: en\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.8.0\n"
 
-#: lmsdb/models.py:631
+#: lmsdb/models.py:632
 msgid "כישלון חמור"
 msgstr "Fatal error"
 
@@ -45,7 +45,7 @@ msgstr "The automatic checker couldn't run your code."
 msgid "אחי, בדקת את הקוד שלך?"
 msgstr "Bro, did you check your code?"
 
-#: lmsweb/tools/registration.py:104
+#: lmsweb/tools/registration.py:105
 msgid "מערכת הגשת התרגילים"
 msgstr "Exercuse submission system"
 
@@ -84,6 +84,10 @@ msgstr "Exercise submission system for the Python Course"
 msgid "תרגילים"
 msgstr "Exercises"
 
+#: templates/exercises.html:21
+msgid "הערות על התרגיל"
+msgstr "Comments for the solution"
+
 #: templates/exercises.html:30
 msgid "שלח"
 msgstr "Send"
@@ -96,7 +100,7 @@ msgstr "View"
 msgid "לבדיקה"
 msgstr "Check"
 
-#: templates/exercises.html:54
+#: templates/exercises.html:53
 msgid "לכל התרגילים"
 msgstr "All Exercises"
 
@@ -112,47 +116,51 @@ msgstr "Welcome to the exercise system!"
 msgid "הזינו את שם המשתמש והסיסמה שלכם:"
 msgstr "Insert your username and password:"
 
-#: templates/login.html:15
+#: templates/login.html:15 templates/login.html:17
 msgid "שם משתמש"
 msgstr "Username"
 
-#: templates/login.html:18
+#: templates/login.html:21 templates/login.html:23
 msgid "סיסמה"
 msgstr "Password"
 
-#: templates/login.html:26
+#: templates/login.html:28
 msgid "התחבר"
 msgstr "Login"
 
-#: templates/navbar.html:7
+#: templates/navbar.html:8
 msgid "הלוגו של פרויקט לומדים פייתון: נחש צהוב על רקע עיגול בצבע תכלת, ומתחתיו כתוב - לומדים פייתון."
 msgstr "The logo of the Learning Python project: yellow snake on light blue circle background and behind of it written - Learning Python"
 
-#: templates/navbar.html:14
+#: templates/navbar.html:15
 msgid "הודעות"
 msgstr "Messages"
 
-#: templates/navbar.html:35
+#: templates/navbar.html:36
 msgid "סמן הכל כנקרא"
 msgstr "Mark all as read"
 
-#: templates/navbar.html:42
+#: templates/navbar.html:43
 msgid "העלאת תרגילים"
 msgstr "Upload Exercises"
 
-#: templates/navbar.html:49
+#: templates/navbar.html:50
 msgid "רשימת התרגילים"
 msgstr "Exercises List"
 
-#: templates/navbar.html:57
+#: templates/navbar.html:58
 msgid "ארכיון התרגילים"
 msgstr "Exercises Archive"
 
-#: templates/navbar.html:73
+#: templates/navbar.html:65
+msgid "המשתמש שלי"
+msgstr "My User"
+
+#: templates/navbar.html:80
 msgid "בדוק תרגילים"
 msgstr "Check Exercises"
 
-#: templates/navbar.html:80
+#: templates/navbar.html:87
 msgid "התנתקות"
 msgstr "Logout"
 
@@ -283,6 +291,10 @@ msgstr "Presenter"
 #: templates/view.html:21
 msgid "ניווט בגרסאות ההגשה"
 msgstr "Navigate in solution versions"
+
+#: templates/view.html:27
+msgid "העמוד הנוכחי"
+msgstr "Current page"
 
 #: templates/view.html:35
 msgid "לסיום בדיקה"
