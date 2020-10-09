@@ -81,14 +81,8 @@ def login(login_error :str=None):
         if user is not None and user.is_password_valid(password):
             login_user(user)
             return get_next_url(next_page)
-        elif user is not None and user.is_password_valid(password) is False:
-            login_error = 'Wrong password'
-            return redirect(
-                url_for('login', **{'next': next_page,
-                        'login_error': login_error}),
-            )
-        elif user is None:
-            login_error = 6#'Username does not exist, please register first'
+        elif user is None or user.is_password_valid(password) is False:
+            login_error = 'Invalid username or password'
             return redirect(
                 url_for('login', **{'next': next_page,
                         'login_error': login_error}),
