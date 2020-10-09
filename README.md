@@ -66,7 +66,7 @@ cp lms/lmsweb/config.py.example lms/lmsweb/config.py
 echo "SECRET_KEY = \"$(python -c 'import os;print(os.urandom(32).hex())')\"" >> lms/lmsweb/config.py
 
 cd devops
-. ./build.sh && . ./start.sh && . ./bootstrap.sh
+. ./build.sh && . ./i18n.sh && . ./start.sh && . ./bootstrap.sh
 ```
 
 In case you want to add the stub data to PostgreSQL DB, run:
