@@ -488,8 +488,8 @@ def _jinja2_filter_path_to_language_name(filename: str) -> str:
 
 
 @webapp.context_processor
-def _jinja2_inject_direction():
-    return dict(direction=DIRECTION)
+def _jinja2_inject_parameters():
+    return dict(direction=DIRECTION, user_id=current_user.id)
 
 
 DIRECTION = 'rtl' if get_locale() in RTL_LANGUAGES else 'ltr'
