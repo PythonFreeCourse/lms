@@ -7,6 +7,26 @@ function getPrivacyLevel(inputRange) {
   });
 }
 
+function trackAddNote(formElement) {
+  formElement.addEventListener('submit', () => {
+    const serializeData = $('#notes-form').serialize();
+    const xhr = new XMLHttpRequest();
+    const url = `/notes/${window.userId}?act=create&${serializeData}`;
+    xhr.open('POST', url);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.responseType = 'json';
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === 4) {
+        if (xhr.status !== 200) {
+          console.log(xhr.status);
+        }
+      }
+    };
+
+    xhr.send('');
+  });
+}
+
 function visuallyRemoveNote(noteId) {
   const noteElement = document.querySelector(`.grader-delete[data-noteid="${noteId}"]`).closest('.note');
   const notesElement = document.getElementById('notes-user');
@@ -17,7 +37,7 @@ function visuallyRemoveNote(noteId) {
 
 function deleteNote(userId, noteId) {
   const xhr = new XMLHttpRequest();
-  const url = `/notes?act=delete&userId=${userId}&noteId=${noteId}`;
+  const url = `/notes/${userId}?act=delete&noteId=${noteId}`;
   xhr.open('GET', url, true);
   xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.responseType = 'json';
@@ -50,6 +70,7 @@ window.addEventListener('load', () => {
   window.userId = userData.user;
   sessionStorage.setItem('role', userData.role);
   window.notesOptions = userData.notesOptions;
+  trackAddNote(document.getElementById('notes-form'));
   trackDeleteNotes(document.querySelectorAll('.grader-delete'));
   getPrivacyLevel(document.getElementById('note-privacy'));
 });

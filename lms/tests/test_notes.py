@@ -39,15 +39,21 @@ class TestNotes:
 
         client = conftest.get_logged_user(staff_user2.username)
         # Trying to remove a private note of another staff client
-        private_note_response = client.get('/notes', query_string={
-            'userId': student_user.id, 'noteId': private_note.id,
-        }, data=json.dumps({'act': 'delete'}), content_type='application/json')
+        private_note_response = client.get(
+            f'/notes/{student_user.id}',
+            query_string={'noteId': private_note.id},
+            data=json.dumps({'act': 'delete'}),
+            content_type='application/json',
+        )
         assert private_note_response.status_code == 403
 
         # Removing a staff note of another staff user
-        staff_note_response = client.get('/notes', query_string={
-            'userId': student_user.id, 'noteId': staff_note.id,
-        }, data=json.dumps({'act': 'delete'}), content_type='application/json')
+        staff_note_response = client.get(
+            f'/notes/{student_user.id}',
+            query_string={'noteId': staff_note.id},
+            data=json.dumps({'act': 'delete'}),
+            content_type='application/json',
+        )
         assert staff_note_response.status_code == 200
 
         # Another staff user can see only the remaining user and public comment
@@ -61,13 +67,18 @@ class TestNotes:
         assert user_page.get_data(as_text=True).count('note card') == 2
 
         # Trying to remove a public note
-        public_note_response = client2.get('/notes', query_string={
-            'userId': student_user.id, 'noteId': public_note.id,
-        }, data=json.dumps({'act': 'delete'}), content_type='application/json')
+        public_note_response = client2.get(
+            f'/notes/{student_user.id}',
+            query_string={'noteId': public_note.id},
+            data=json.dumps({'act': 'delete'}),
+            content_type='application/json',
+        )
         assert public_note_response.status_code == 403
 
         # User trying to create a note, doesn't matter what
-        new_note_response = client2.post('/notes', data=json.dumps(
-            {'act': 'create'},
-        ), content_type='application/json')
+        new_note_response = client2.post(
+            f'/notes/{student_user.id}',
+            data=json.dumps({'act': 'create'}),
+            content_type='application/json',
+        )
         assert new_note_response.status_code == 403

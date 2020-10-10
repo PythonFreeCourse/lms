@@ -208,14 +208,13 @@ def share():
     return fail(400, f'Unknown or unset act value "{act}".')
 
 
-@webapp.route('/notes', methods=['GET', 'POST'])
+@webapp.route('/notes/<int:user_id>', methods=['GET', 'POST'])
 @login_required
-def note():
+def note(user_id: int):
     if not current_user.role.is_manager:
         return fail(403, "You aren't allowed to access this page.")
 
     act = request.args.get('act') or request.json.get('act')
-    user_id = request.args.get('userId')
 
     user = User.get_or_none(User.id == user_id)
     if user is None:
@@ -234,9 +233,9 @@ def note():
         return jsonify({'success': 'true'})
 
     if act == 'create':
-        note_text = request.form.get('note', '')
-        note_exercise = request.form.get('exercise', '')
-        privacy = request.form.get('privacy')
+        note_text = request.args.get('note', '')
+        note_exercise = request.args.get('exercise', '')
+        privacy = request.args.get('privacy')
         if not note_text:
             return fail(422, 'Empty notes are not allowed.')
         new_note_id = CommentText.create_comment(text=note_text).id
@@ -336,7 +335,6 @@ def user(user_id):
         'user.html',
         solutions=Solution.of_user(target_user.id, with_archived=True),
         user=target_user,
-        role=current_user.role.name.lower(),
         is_manager=is_manager,
         notes_options=Note.get_note_options(),
     )

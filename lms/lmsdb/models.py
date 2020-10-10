@@ -43,7 +43,7 @@ class RoleOptions(enum.Enum):
         return self.value
 
 
-class NoteOptions(enum.Enum):
+class NotePublicity(enum.Enum):
     PRIVATE = 'Private'
     STAFF = 'Staff'
     USER = 'User'
@@ -153,21 +153,23 @@ class User(UserMixin, BaseModel):
     def get_notifications(self) -> Iterable['Notification']:
         return Notification.fetch(self)
 
-    def notes_to_show(self) -> List[Dict[str, Any]]:
+    def select_notes_of_user(self) -> List[Dict[str, Any]]:
         staff_roles = (
             (current_user.role == Role.get_staff_role())
             | (current_user.role == Role.get_admin_role())
         )
         private_notes = (
-            (Note.privacy == NoteOptions.PRIVATE.value)
+            (Note.privacy == NotePublicity.PRIVATE.value)
             & (Note.creator == current_user.id)
         )
-        staff_notes = (Note.privacy == NoteOptions.STAFF.value) & (staff_roles)
+        staff_notes = (
+            (Note.privacy == NotePublicity.STAFF.value) & (staff_roles)
+        )
         user_notes = (
-            (Note.privacy == NoteOptions.USER.value)
+            (Note.privacy == NotePublicity.USER.value)
             & ((Note.user == current_user.id) | (staff_roles))
         )
-        public_notes = Note.privacy == NoteOptions.PUBLIC.value
+        public_notes = Note.privacy == NotePublicity.PUBLIC.value
 
         return list(Note.select().where(
             (Note.user == self)
@@ -181,7 +183,7 @@ class User(UserMixin, BaseModel):
 
     @property
     def notes(self) -> Iterable[Dict[str, Any]]:
-        notes = self.notes_to_show()
+        notes = self.select_notes_of_user()
 
         for note in notes:
             note['creator'] = User.get_by_id(note['creator']).fullname
@@ -781,10 +783,10 @@ class Note(BaseModel):
     note = ForeignKeyField(CommentText)
     exercise = ForeignKeyField(Exercise, null=True)
     privacy = CharField(choices=(
-        (NoteOptions.PRIVATE.value, NoteOptions.PRIVATE.value),
-        (NoteOptions.STAFF.value, NoteOptions.STAFF.value),
-        (NoteOptions.USER.value, NoteOptions.USER.value),
-        (NoteOptions.PUBLIC.value, NoteOptions.PUBLIC.value),
+        (NotePublicity.PRIVATE.value, NotePublicity.PRIVATE.value),
+        (NotePublicity.STAFF.value, NotePublicity.STAFF.value),
+        (NotePublicity.USER.value, NotePublicity.USER.value),
+        (NotePublicity.PUBLIC.value, NotePublicity.PUBLIC.value),
     ))
 
     @classmethod
@@ -793,8 +795,8 @@ class Note(BaseModel):
         creator: User,
         user: User,
         note_text: CommentText,
-        exercise: Exercise,
-        privacy: NoteOptions,
+        privacy: NotePublicity,
+        exercise: Optional[Exercise] = None,
     ) -> 'Note':
         return cls.get_or_create(
             creator=creator,
@@ -806,27 +808,27 @@ class Note(BaseModel):
 
     @property
     def is_private(self) -> bool:
-        return self.privacy == NoteOptions.PRIVATE.value
+        return self.privacy == NotePublicity.PRIVATE.value
 
     @property
     def is_staff(self) -> bool:
-        return self.privacy == NoteOptions.STAFF.value
+        return self.privacy == NotePublicity.STAFF.value
 
     @property
     def is_solver(self) -> bool:
-        return self.privacy == NoteOptions.USER.value
+        return self.privacy == NotePublicity.USER.value
 
     @property
     def is_public(self) -> bool:
-        return self.privacy == NoteOptions.PUBLIC.value
+        return self.privacy == NotePublicity.PUBLIC.value
 
     @staticmethod
     def get_note_options():
-        return ','.join(option.value for option in NoteOptions)
+        return ','.join(option.value for option in NotePublicity)
 
     @staticmethod
-    def get_privacy_level(level: int) -> NoteOptions:
-        return list(NoteOptions)[level].value
+    def get_privacy_level(level: int) -> NotePublicity:
+        return list(NotePublicity)[level].value
 
 
 class Comment(BaseModel):

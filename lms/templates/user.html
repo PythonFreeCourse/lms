@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block page_content %}
-<div id="page-user" data-user="{{ user.id }}" data-role="{{ role }}" data-notes-options="{{ notes_options }}">
+<div id="page-user" data-user="{{ user.id }}" data-role="{{ current_user.role | lower }}" data-notes-options="{{ notes_options }}">
   <div id="user" class="{{ direction }}">
     <h1>{{ user.fullname | e }}</h1>
     <div class="body">
@@ -57,7 +57,7 @@
             {% endfor -%}
           </div>
           {%- if is_manager %}
-            <form class="align-items-center" id="notes-form" method="post" action="/notes?act=create&userId={{ user.id }}">
+            <form class="align-items-center" id="notes-form">
               <div class="row mb-3 {{ direction }}-language">
                 <label for="note-text" class="visually-hidden">{{ _('פתקית חדשה') }}</label>
                 <div>
@@ -90,5 +90,6 @@
 </div>
 {%- if is_manager %}
 <script src="{{ url_for('static', filename='notes.js') }}"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
 {% endif -%}
 {% endblock %}
