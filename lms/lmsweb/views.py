@@ -66,7 +66,7 @@ def load_user(user_id):
 
 
 @webapp.route('/login', methods=['GET', 'POST'])
-def login(login_error :str=None):
+def login(login_error: str = None):
 
     if current_user.is_authenticated:
         return get_next_url(request.args.get('next'))
@@ -84,8 +84,8 @@ def login(login_error :str=None):
         elif user is None or user.is_password_valid(password) is False:
             login_error = 'Invalid username or password'
             return redirect(
-                url_for('login', **{'next': next_page,
-                        'login_error': login_error}),
+                url_for(
+                    'login', **{'next': next_page, 'login_error': login_error}),
             )
 
     return render_template('login.html', login_error=login_error)
