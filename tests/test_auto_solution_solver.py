@@ -3,7 +3,7 @@ import typing
 from lms.lmsdb import models
 from lms.lmstests.public.identical_tests import tasks
 from lms.models import notifications
-from lms.tests import conftest
+from tests import conftest
 
 
 SOME_CODE = "print('Hello Word')"

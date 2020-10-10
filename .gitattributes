@@ -269,7 +269,7 @@ Procfile          text
 # Ignore files (like .npmignore or .gitignore)
 *.*ignore         text
 
-lms/tests/samples/* text=false 
+tests/samples/* text=false 
 
 #
 # Exclude files from exporting
