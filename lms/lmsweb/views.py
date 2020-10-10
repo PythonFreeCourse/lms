@@ -100,7 +100,8 @@ def login(login_error: str = None):
             login_error = 'Invalid username or password'
             return redirect(
                 url_for(
-                    'login', **{'next': next_page, 'login_error': login_error}),
+                    'login', **{'next': next_page,
+                                'login_error': login_error}),
             )
 
     return render_template('login.html', login_error=login_error)
