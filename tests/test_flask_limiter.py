@@ -1,6 +1,6 @@
-from lms.tests import conftest
 from lms.lmsdb.models import User
 from lms.lmsweb import webapp
+from tests import conftest
 
 
 class TestLimiter:

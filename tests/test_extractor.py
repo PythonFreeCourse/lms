@@ -9,8 +9,8 @@ from werkzeug.datastructures import FileStorage
 import lms.extractors.base as extractor
 import lms.extractors.ziparchive as zipfilearchive
 from lms.lmsdb.models import User
-from lms.tests import conftest
-from lms.tests.conftest import SAMPLES_DIR
+from tests import conftest
+from tests.conftest import SAMPLES_DIR
 
 
 class TestExtractor:

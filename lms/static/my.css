@@ -854,3 +854,18 @@ code .grader-add .fa {
   margin: auto;
   margin-bottom: 1em;
 }
+
+@media screen and (max-width: 768px) {
+  .exercise-id {
+    display: none;
+  }
+  .which-notebook {
+    display: none;
+  }
+  .comments-count {
+    display: none;
+  }
+  .ex-title {
+    font-size: 1rem;
+  }
+}

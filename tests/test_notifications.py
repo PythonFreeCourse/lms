@@ -6,7 +6,7 @@ import pytest  # type: ignore
 
 from lms.lmsdb.models import Exercise, Notification, Solution, User
 from lms.models import notifications, solutions
-from lms.tests import conftest
+from tests import conftest
 
 
 class TestNotification:
