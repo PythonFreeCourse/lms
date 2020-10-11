@@ -39,23 +39,10 @@
           </tbody>
         </table>
       </div>
-      {% if user.notes %}
+      {% if user.notes or is_manager %}
         <div class="{{ direction }}">
           <h2>{{ _('פתקיות:') }}</h2>
-          <div class="user-notes {{ direction }}" id="notes-user">
-            {%- for note in user.notes %}
-              <div class="note card" data-noteid="{{ note.id }}" data-author-role="{{ note.creator }}">
-                <div class="card-header">
-                  {% if is_manager %}
-                    <i class="fa fa-trash grader-delete" aria-hidden="true" data-noteid="{{ note.id }}"></i>
-                  {% endif %}{{ note.timestamp }}{% if note.exercise %} - {{ note.exercise }}{% endif %}</div>
-                <div class="card-body">
-                  <h5 class="card-title">{{ note.creator }}</h5>
-                  <p class="card-text">{{ note.note | safe }}</p>
-                </div>
-              </div>
-            {% endfor -%}
-          </div>
+          <div class="user-notes {{ direction }}" id="notes-user"></div>
           {%- if is_manager %}
             <form class="align-items-center" id="notes-form">
               <div class="row mb-3 {{ direction }}-language">
@@ -88,8 +75,5 @@
     </div>
   </div>
 </div>
-{%- if is_manager %}
 <script src="{{ url_for('static', filename='notes.js') }}"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-{% endif -%}
 {% endblock %}

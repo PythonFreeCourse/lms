@@ -43,11 +43,11 @@ class RoleOptions(enum.Enum):
         return self.value
 
 
-class NotePublicity(enum.Enum):
-    PRIVATE = 'Private'
-    STAFF = 'Staff'
-    USER = 'User'
-    PUBLIC = 'Public'
+class NotePrivacy(enum.IntEnum):
+    PRIVATE = 40
+    STAFF = 30
+    USER = 20
+    PUBLIC = 10
 
     def __str__(self):
         return self.value
@@ -153,45 +153,28 @@ class User(UserMixin, BaseModel):
     def get_notifications(self) -> Iterable['Notification']:
         return Notification.fetch(self)
 
-    def select_notes_of_user(self) -> List[Dict[str, Any]]:
-        staff_roles = (
-            (current_user.role == Role.get_staff_role())
-            | (current_user.role == Role.get_admin_role())
+    def notes(self) -> Iterable['Note']:
+        fields = [
+            Note.id, Note.creator.fullname, CommentText.text, Note.timestamp,
+        ]
+        public_or_mine = (
+            (Note.privacy != NotePrivacy.PRIVATE.value)
+            | (Note.creator == current_user.id)
         )
-        private_notes = (
-            (Note.privacy == NotePublicity.PRIVATE.value)
-            & (Note.creator == current_user.id)
-        )
-        staff_notes = (
-            (Note.privacy == NotePublicity.STAFF.value) & (staff_roles)
-        )
-        user_notes = (
-            (Note.privacy == NotePublicity.USER.value)
-            & ((Note.user == current_user.id) | (staff_roles))
-        )
-        public_notes = Note.privacy == NotePublicity.PUBLIC.value
 
-        return list(Note.select().where(
-            (Note.user == self)
-            & (
-                (private_notes)
-                | (staff_notes)
-                | (user_notes)
-                | (public_notes)
-            ),
-        ).dicts())
+        notes = (
+            Note
+            .select(*fields)
+            .join(User)
+            .switch()
+            .join(CommentText)
+            .switch()
+            .where((Note.user == self) & (public_or_mine))
+        )
+        if not current_user.role.is_manager:
+            notes = notes.where(Note.privacy <= NotePrivacy.USER.value)
 
-    @property
-    def notes(self) -> Iterable[Dict[str, Any]]:
-        notes = self.select_notes_of_user()
-
-        for note in notes:
-            note['creator'] = User.get_by_id(note['creator']).fullname
-            note['note'] = CommentText.get_by_id(note['note']).text
-            note['timestamp'] = note['timestamp'].strftime('%d/%m/%Y')
-            if note['exercise']:
-                note['exercise'] = Exercise.get_by_id(note['exercise']).subject
-        return tuple(notes)
+        return notes
 
     def __str__(self):
         return f'{self.username} - {self.fullname}'
@@ -782,53 +765,36 @@ class Note(BaseModel):
     timestamp = DateTimeField(default=datetime.now())
     note = ForeignKeyField(CommentText)
     exercise = ForeignKeyField(Exercise, null=True)
-    privacy = CharField(choices=(
-        (NotePublicity.PRIVATE.value, NotePublicity.PRIVATE.value),
-        (NotePublicity.STAFF.value, NotePublicity.STAFF.value),
-        (NotePublicity.USER.value, NotePublicity.USER.value),
-        (NotePublicity.PUBLIC.value, NotePublicity.PUBLIC.value),
+    privacy = IntegerField(choices=(
+        (NotePrivacy.PRIVATE.value, NotePrivacy.PRIVATE.value),
+        (NotePrivacy.STAFF.value, NotePrivacy.STAFF.value),
+        (NotePrivacy.USER.value, NotePrivacy.USER.value),
+        (NotePrivacy.PUBLIC.value, NotePrivacy.PUBLIC.value),
     ))
-
-    @classmethod
-    def create_note(
-        cls,
-        creator: User,
-        user: User,
-        note_text: CommentText,
-        privacy: NotePublicity,
-        exercise: Optional[Exercise] = None,
-    ) -> 'Note':
-        return cls.get_or_create(
-            creator=creator,
-            user=user,
-            note=note_text,
-            exercise=exercise,
-            privacy=privacy,
-        )
 
     @property
     def is_private(self) -> bool:
-        return self.privacy == NotePublicity.PRIVATE.value
+        return self.privacy == NotePrivacy.PRIVATE.value
 
     @property
     def is_staff(self) -> bool:
-        return self.privacy == NotePublicity.STAFF.value
+        return self.privacy == NotePrivacy.STAFF.value
 
     @property
     def is_solver(self) -> bool:
-        return self.privacy == NotePublicity.USER.value
+        return self.privacy == NotePrivacy.USER.value
 
     @property
     def is_public(self) -> bool:
-        return self.privacy == NotePublicity.PUBLIC.value
+        return self.privacy == NotePrivacy.PUBLIC.value
 
     @staticmethod
     def get_note_options():
-        return ','.join(option.value for option in NotePublicity)
+        return ','.join(option.name.capitalize() for option in NotePrivacy)
 
     @staticmethod
-    def get_privacy_level(level: int) -> NotePublicity:
-        return list(NotePublicity)[level].value
+    def get_privacy_level(level: int) -> NotePrivacy:
+        return list(NotePrivacy)[level].value
 
 
 class Comment(BaseModel):

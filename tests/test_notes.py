@@ -1,7 +1,7 @@
 from flask import json
 
 from lms.lmsdb.models import User
-from lms.tests import conftest
+from tests import conftest
 
 
 class TestNotes:
@@ -57,14 +57,26 @@ class TestNotes:
         assert staff_note_response.status_code == 200
 
         # Another staff user can see only the remaining user and public comment
-        user_page = client.get(f'user/{student_user.id}')
-        assert user_page.get_data(as_text=True).count('note card') == 2
+        user_page_notes = client.get(
+            f'notes/{student_user.id}', query_string={'act': 'fetch'},
+            content_type='application/json',
+        )
+        json_user_page_notes = json.loads(
+            user_page_notes.get_data(as_text=True),
+        )
+        assert len(json_user_page_notes) == 2
 
         conftest.logout_user(client)
         client2 = conftest.get_logged_user(student_user.username)
         # User can see only the remaining user and public comment
-        user_page = client2.get(f'user/{student_user.id}')
-        assert user_page.get_data(as_text=True).count('note card') == 2
+        user_page_notes = client2.get(
+            f'notes/{student_user.id}', query_string={'act': 'fetch'},
+            content_type='application/json',
+        )
+        json_user_page_notes = json.loads(
+            user_page_notes.get_data(as_text=True),
+        )
+        assert len(json_user_page_notes) == 2
 
         # Trying to remove a public note
         public_note_response = client2.get(

@@ -1,5 +1,6 @@
 import datetime
 from functools import wraps
+from lms.models import notes
 import os
 import random
 import string
@@ -183,7 +184,7 @@ def create_note(
 ):
     new_note_id = CommentText.create_comment(text=note_text).id
     privacy_level = Note.get_privacy_level(privacy)
-    return Note.create_note(
+    return notes.create_note_instance(
         creator=creator,
         user=user,
         note_text=new_note_id,

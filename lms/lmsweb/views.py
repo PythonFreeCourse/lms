@@ -14,8 +14,8 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, CommentText, Exercise, Note, RoleOptions,
-    SharedSolution, Solution, SolutionFile, User, database,
+    ALL_MODELS, Comment, Note, RoleOptions, SharedSolution,
+    Solution, SolutionFile, User, database,
 )
 from lms.lmsweb import babel, limiter, routes, webapp
 from lms.lmsweb.admin import (
@@ -28,7 +28,9 @@ from lms.lmsweb.manifest import MANIFEST
 from lms.lmsweb.redirections import (
     PERMISSIVE_CORS, get_next_url, login_manager,
 )
-from lms.models import comments, notifications, share_link, solutions, upload
+from lms.models import (
+    comments, notes, notifications, share_link, solutions, upload,
+)
 from lms.models.errors import FileSizeError, LmsError, UploadError, fail
 from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import get_language_name_by_extension
@@ -211,43 +213,23 @@ def share():
 @webapp.route('/notes/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 def note(user_id: int):
-    if not current_user.role.is_manager:
-        return fail(403, "You aren't allowed to access this page.")
-
     act = request.args.get('act') or request.json.get('act')
 
     user = User.get_or_none(User.id == user_id)
     if user is None:
         return fail(404, f'No such user {user_id}.')
 
+    if act == 'fetch':
+        return jsonify(tuple(user.notes().dicts()))
+
+    if not current_user.role.is_manager:
+        return fail(403, "You aren't allowed to access this page.")
+
     if act == 'delete':
-        note_id = int(request.args.get('noteId'))
-        note_ = Note.get_or_none(Note.id == note_id)
-        if (
-            note_.creator.id != current_user.id
-            and note_.is_private
-        ):
-            return fail(403, "You aren't allowed to access this page.")
-        if note_ is not None:
-            note_.delete_instance()
-        return jsonify({'success': 'true'})
+        return notes.delete_note()
 
     if act == 'create':
-        note_text = request.args.get('note', '')
-        note_exercise = request.args.get('exercise', '')
-        privacy = request.args.get('privacy')
-        if not note_text:
-            return fail(422, 'Empty notes are not allowed.')
-        new_note_id = CommentText.create_comment(text=note_text).id
-
-        Note.create(
-            creator=User.get_or_none(User.id == current_user.id),
-            user=user,
-            note=new_note_id,
-            exercise=Exercise.get_or_none(Exercise.subject == note_exercise),
-            privacy=Note.get_privacy_level(int(privacy)),
-        )
-        return redirect(url_for('user', user_id=user_id))
+        return notes.create_note(user=user, user_id=user_id)
 
     return fail(400, f'Unknown or unset act value "{act}".')
 
