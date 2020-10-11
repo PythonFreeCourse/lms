@@ -93,3 +93,5 @@ pip install -r requirements.txt
 pip install -r dev_requirements.txt
 py.test -vvv
 ```
+### Contributing
+View [contributing guidelines](https://github.com/PythonFreeCourse/lms/blob/master/CONTRIBUING.md).
