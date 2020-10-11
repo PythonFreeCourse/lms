@@ -6,7 +6,7 @@ from lms.lmsdb.models import Comment, Exercise, SharedSolution, Solution, User
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmsweb import routes
 from lms.models import notifications, solutions
-from lms.tests import conftest
+from tests import conftest
 
 
 celery_async = (

@@ -9,8 +9,8 @@ from werkzeug.datastructures import FileStorage
 from lms.extractors.base import File
 from lms.lmsdb.models import Exercise, User
 from lms.lmsweb import routes
-from lms.tests import conftest
 from lms.utils import hashing
+from tests import conftest
 
 
 DOWNLOAD_FILE = os.path.join(conftest.SAMPLES_DIR, 'download_test.zip')
