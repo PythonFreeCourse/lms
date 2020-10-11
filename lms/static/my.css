@@ -793,3 +793,18 @@ code .grader-add .fa {
 #user .user-details {
   margin-bottom: 5em;
 }
+
+@media screen and (max-width: 768px) {
+  .exercise-id {
+    display: none;
+  }
+  .which-notebook {
+    display: none;
+  }
+  .comments-count {
+    display: none;
+  }
+  .ex-title {
+    font-size: 1rem;
+  }
+}
