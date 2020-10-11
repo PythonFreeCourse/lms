@@ -1,9 +1,9 @@
 [flake8]
 per-file-ignores =
   lms/lmstests/sandbox/linters/defines.py:E501
-  lms/tests/test_exercise_unit_tests.py:Q001
-  lms/tests/test_html_linter.py:Q001,E501
-  lms/tests/test_css_linter.py:Q001,E501
-  lms/tests/test_extractor.py:W293
-  lms/tests/samples/code2.py:E999,W293,W391,E227,E225,E228
+  tests/test_exercise_unit_tests.py:Q001
+  tests/test_html_linter.py:Q001,E501
+  tests/test_css_linter.py:Q001,E501
+  tests/test_extractor.py:W293
+  tests/samples/code2.py:E999,W293,W391,E227,E225,E228
 ignore=I100,S101,I201,W503

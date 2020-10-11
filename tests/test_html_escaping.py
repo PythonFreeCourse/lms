@@ -1,7 +1,7 @@
 from flask import json
 
 from lms.lmsdb.models import Solution, User
-from lms.tests import conftest
+from tests import conftest
 
 
 USER_COMMENT_BEFORE_ESCAPING = '<html><body><p>Welcome "LMS"</p></body></html>'

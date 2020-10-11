@@ -3,7 +3,7 @@ import pathlib
 import shutil
 
 from lms.utils import config_migrator
-from lms.tests import conftest
+from tests import conftest
 
 
 CONFIG_EXAMPLE_FILE = pathlib.Path(conftest.SAMPLES_DIR) / 'config.py.example'
