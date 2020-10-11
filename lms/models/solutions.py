@@ -1,16 +1,19 @@
 from io import BytesIO
-from lms.extractors.base import File
 import os
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple, Union
 from zipfile import ZipFile
 
-from flask_babel import gettext as _
+from flask_babel import gettext as _  # type: ignore
+from flask_login import current_user  # type: ignore
+from playhouse.shortcuts import model_to_dict  # type: ignore
 
-from lms.lmsdb.models import Solution, SolutionFile, User
+from lms.extractors.base import File
+from lms.lmsdb.models import SharedSolution, Solution, SolutionFile, User
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmsweb import config, routes
-from lms.models import notifications
+from lms.models import comments, notifications
+from lms.models.errors import ForbiddenPermission, ResourceNotFound
 
 
 def notify_comment_after_check(user: User, solution: Solution) -> bool:
@@ -94,6 +97,75 @@ def start_checking(solution: Optional[Solution]) -> bool:
         )
         return True
     return False
+
+
+def get_view_parameters(
+    solution: Solution, file_id: Optional[int], shared_url: str,
+    is_manager: bool, solution_files: Tuple[SolutionFile, ...],
+    viewer_is_solver: bool,
+) -> Dict[str, Any]:
+    versions = solution.ordered_versions()
+    test_results = solution.test_results()
+    files = get_files_tree(solution.files)
+    file_id = file_id or (files[0]['id'] if files else None)
+    file_to_show = next((f for f in solution_files if f.id == file_id), None)
+    if file_to_show is None:
+        raise ResourceNotFound('File does not exist.', 404)
+
+    view_params = {
+        'solution': model_to_dict(solution),
+        'files': files,
+        'comments': solution.comments_per_file,
+        'current_file': file_to_show,
+        'is_manager': is_manager,
+        'role': current_user.role.name.lower(),
+        'versions': versions,
+        'test_results': test_results,
+        'shared_url': shared_url,
+    }
+
+    if is_manager:
+        view_params = {
+            **view_params,
+            'exercise_common_comments':
+                comments._common_comments(exercise_id=solution.exercise),
+            'all_common_comments':
+                comments._common_comments(),
+            'user_comments':
+                comments._common_comments(user_id=current_user.id),
+            'left': Solution.left_in_exercise(solution.exercise),
+        }
+
+    if viewer_is_solver:
+        notifications.read_related(solution.id, current_user.id)
+
+    return view_params
+
+
+def get_download_data(
+    download_id: str,
+) -> Tuple[Iterator[SolutionFile], str]:
+    solution = Solution.get_or_none(Solution.id == download_id)
+    shared_solution = SharedSolution.get_or_none(
+        SharedSolution.shared_url == download_id,
+    )
+    if solution is None and shared_solution is None:
+        raise ResourceNotFound('Solution does not exist.', 404)
+
+    if shared_solution is None:
+        viewer_is_solver = solution.solver.id == current_user.id
+        has_viewer_access = current_user.role.is_viewer
+        if not viewer_is_solver and not has_viewer_access:
+            raise ForbiddenPermission(
+                'This user has no permissions to view this page.', 403,
+            )
+        files = solution.files
+        filename = solution.exercise.subject
+    else:
+        files = shared_solution.solution.files
+        filename = shared_solution.solution.exercise.subject
+
+    return files, filename
 
 
 def create_zip_from_solution(

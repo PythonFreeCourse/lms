@@ -9,7 +9,7 @@ from typing import (
     Type, Union, cast,
 )
 
-from flask_babel import gettext as _
+from flask_babel import gettext as _  # type: ignore
 from flask_login import UserMixin  # type: ignore
 from peewee import (  # type: ignore
     BooleanField, Case, CharField, Check, DateTimeField, ForeignKeyField,
@@ -520,13 +520,13 @@ class Solution(BaseModel):
         one_if_is_checked = Case(
             Solution.state, ((Solution.STATES.DONE.name, 1),), 0,
         )
-        fields = [
+        fields = (
             Exercise.id,
             Exercise.subject.alias('name'),
             Exercise.is_archived.alias('is_archived'),
             fn.Count(Solution.id).alias('submitted'),
             fn.Sum(one_if_is_checked).alias('checked'),
-        ]
+        )
         join_by_exercise = (Solution.exercise == Exercise.id)
         active_solutions = Solution.state.in_(
             Solution.STATES.active_solutions(),
@@ -766,13 +766,13 @@ class Comment(BaseModel):
 
     @classmethod
     def _by_file(cls, file_id: int):
-        fields = [
+        fields = (
             cls.id, cls.line_number, cls.is_auto,
             CommentText.id.alias('comment_id'), CommentText.text,
             SolutionFile.id.alias('file_id'),
             User.fullname.alias('author_name'),
             User.role.alias('author_role'),
-        ]
+        )
         return (
             cls
             .select(*fields)

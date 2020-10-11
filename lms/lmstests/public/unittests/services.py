@@ -1,7 +1,7 @@
 import logging
 from typing import Optional, Tuple
 
-from flask_babel import gettext as _
+from flask_babel import gettext as _  # type: ignore
 import junitparser
 
 from lms.lmsdb import models

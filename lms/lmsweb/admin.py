@@ -2,7 +2,7 @@ from functools import wraps
 
 from flask_admin import Admin, AdminIndexView  # type: ignore
 from flask_admin.contrib.peewee import ModelView  # type: ignore
-from flask_login import current_user
+from flask_login import current_user  # type: ignore
 
 from lms.lmsdb.models import Comment, CommentText, Solution
 from lms.lmsweb import webapp

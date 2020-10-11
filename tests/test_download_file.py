@@ -4,11 +4,13 @@ from tempfile import SpooledTemporaryFile
 from typing import Iterator
 from zipfile import ZipFile
 
+import pytest
 from werkzeug.datastructures import FileStorage
 
 from lms.extractors.base import File
 from lms.lmsdb.models import Exercise, User
 from lms.lmsweb import routes
+from lms.models import errors
 from lms.utils import hashing
 from tests import conftest
 
@@ -40,6 +42,11 @@ class TestDownloadSolution:
         zip_file_storage = FileStorage(spooled)
         zip_file_storage.filename = DOWNLOAD_FILE.rpartition(os.path.sep)[-1]
         return zip_file_storage
+
+    def test_bad_download_id(self, student_user: User):
+        client = conftest.get_logged_user(str(student_user.username))
+        download_response = client.get(f'{routes.DOWNLOADS}/{50 ** 10}')
+        assert download_response.status_code == 404
 
     def test_download_solution(
             self,
