@@ -270,6 +270,24 @@ class TestSolutionBridge:
         )
         assert another_comment_response.status_code == 200
 
+        # Unknown act comment
+        unknown_comment_response = client.post(
+            '/comments', data=json.dumps({
+                'fileId': solution.files[0].id, 'act': 'unknown',
+                'kind': 'text', 'comment': 'hey', 'line': 1,
+            }), content_type='application/json',
+        )
+        assert unknown_comment_response.status_code == 400
+
+        # Not existing fileId comment
+        file_id_comment_response = client.post(
+            '/comments', data=json.dumps({
+                'fileId': 99, 'act': 'create',
+                'kind': 'text', 'comment': 'hey', 'line': 1,
+            }), content_type='application/json',
+        )
+        assert file_id_comment_response.status_code == 404
+
         # Removing the second comment
         json_response_another_comment = json.loads(
             another_comment_response.get_data(as_text=True),
@@ -329,6 +347,12 @@ class TestSolutionBridge:
         }), content_type='application/json')
         assert shared_response.status_code == 200
 
+        # Unknown act of share
+        unknown_shared_response = client2.post('/share', data=json.dumps({
+            'solutionId': solution.id, 'act': 'unknown',
+        }), content_type='application/json')
+        assert unknown_shared_response.status_code == 400
+
         # Entering another student solution
         shared_url = SharedSolution.get_or_none(
             SharedSolution.solution == solution,
@@ -378,17 +402,28 @@ class TestSolutionBridge:
 
     @staticmethod
     def test_share_with_disabled_shareable_solutions(
-        exercise: Exercise,
+        solution: Solution,
         student_user: User,
     ):
-        solution = conftest.create_solution(exercise, student_user)
-
         client = conftest.get_logged_user(student_user.username)
         conftest.disable_shareable_solutions()
         shared_response = client.post('/share', data=json.dumps({
             'solutionId': solution.id, 'act': 'get',
         }), content_type='application/json')
         assert shared_response.status_code == 403
+
+    @staticmethod
+    def test_shared_url_with_disabled_shared_solutions(
+        solution: Solution,
+        student_user: User,
+    ):
+        client = conftest.get_logged_user(student_user.username)
+        shared_solution = conftest.create_shared_solution(solution)
+        conftest.disable_shareable_solutions()
+        not_shared_solution_response = client.get(
+            f'{routes.SHARED}/{shared_solution}',
+        )
+        assert not_shared_solution_response.status_code == 404
 
     @staticmethod
     def test_view_page(
@@ -444,7 +479,6 @@ class TestSolutionBridge:
 
     @staticmethod
     def test_manager_can_see_solutions(
-        exercise: Exercise,
         solution: Solution,
         staff_user: User,
     ):

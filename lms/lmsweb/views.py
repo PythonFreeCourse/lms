@@ -424,6 +424,7 @@ def view(
 @webapp.route(f'{routes.SHARED}/<string:shared_url>')
 @webapp.route(f'{routes.SHARED}/<string:shared_url>/<int:file_id>')
 @login_required
+@limiter.limit(f'{LIMITS_PER_MINUTE}/minute')
 def shared_solution(shared_url: str, file_id: Optional[int] = None):
     if not webapp.config.get('SHAREABLE_SOLUTIONS', False):
         return fail(404, 'Solutions are not shareable.')

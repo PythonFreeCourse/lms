@@ -18,6 +18,8 @@ from tests.conftest import SAMPLES_DIR
 class TestExtractor:
     IPYNB_NAME = 'upload-1-2.ipynb'
     IGNORE_FILES_ZIP_NAME = 'Upload_123.zip'
+    IMAGE_NAME = 'Upload 3.jpg'
+    IMAGE_NO_EXERCISE = 'bird.jpg'
     PY_NAMES = ('code1.py', 'code2.py', 'Upload 3141.py')
     PY_NO_EXERCISE = 'noexercise.py'
     ZIP_FILES = ('Upload_1.zip', 'zipfiletest.zip')
@@ -25,12 +27,20 @@ class TestExtractor:
 
     def setup(self):
         self.ipynb_file = self.ipynb_file()
+        self.image_file = next(self.zip_files((self.IMAGE_NAME,)))
+        self.image_no_exercise_file = next(self.zip_files(
+            (self.IMAGE_NO_EXERCISE,),
+        ))
         self.pyfiles_files = list(self.py_files(self.PY_NAMES))
         self.pyfile_no_exercise_file = next(self.py_files(
             (self.PY_NO_EXERCISE,),
         ))
         self.zipfile_file = next(self.zip_files((self.IGNORE_FILES_ZIP_NAME,)))
         self.ipynb_storage = FileStorage(self.ipynb_file)
+        self.image_storage = FileStorage(self.image_file)
+        self.image_no_exercise_storage = FileStorage(
+            self.image_no_exercise_file,
+        )
         self.pyfiles_storage = [
             FileStorage(pyfile)
             for pyfile in self.pyfiles_files
@@ -52,6 +62,9 @@ class TestExtractor:
 
     def teardown(self):
         self.ipynb_file.close()
+        self.image_file.close()
+        self.image_no_exercise_file.close()
+        self.pyfile_no_exercise_file.close()
         self.zipfile_file.close()
         self.zipbomb_file_list[0].close()
         for py_file in self.pyfiles_files:
@@ -108,6 +121,16 @@ class TestExtractor:
         solution = solution.replace('# Upload 3141', '')
         assert results[0][1][0].code == solution.strip()
 
+    def test_image(self):
+        results = list(extractor.Extractor(self.image_storage))
+        assert len(results) == 1
+        assert results[0][0] == 3
+
+        with pytest.raises(BadUploadFile) as e_info:
+            list(extractor.Extractor(self.image_no_exercise_storage))
+        assert e_info.type is BadUploadFile
+        assert e_info.value.args[0] == "Can't resolve exercise id."
+
     def test_py(self):
         for file in self.pyfiles_storage:
             solutions = list(extractor.Extractor(file))
@@ -123,7 +146,7 @@ class TestExtractor:
         result = zipfilearchive.Ziparchive(to_extract=self.zipfile_storage)
         exercises = list(result.get_exercises())[0][1]
         exercises_paths = [exercise.path for exercise in exercises]
-        assert len(exercises) == 8
+        assert len(exercises) == 9
         original_zip_filenames = self.get_zip_filenames()
 
         assert all(
@@ -134,6 +157,11 @@ class TestExtractor:
         assert any(
             '__pycache__/foo.py' in filename
             for filename in original_zip_filenames
+        )
+
+        assert any(
+            'bird.jpg' in exercise_path
+            for exercise_path in exercises_paths
         )
 
     def test_zip(self, student_user: User):

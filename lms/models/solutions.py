@@ -14,6 +14,7 @@ from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmsweb import config, routes
 from lms.models import comments, notifications
 from lms.models.errors import ForbiddenPermission, ResourceNotFound
+from lms.utils.files import ALLOWED_IMAGES_EXTENSIONS
 
 
 def notify_comment_after_check(user: User, solution: Solution) -> bool:
@@ -122,6 +123,7 @@ def get_view_parameters(
         'versions': versions,
         'test_results': test_results,
         'shared_url': shared_url,
+        'image_extensions': ALLOWED_IMAGES_EXTENSIONS,
     }
 
     if is_manager:

@@ -18,6 +18,8 @@ LANGUAGE_EXTENSIONS_TO_NAMES = {
 
 ALLOWED_EXTENSIONS = set(LANGUAGE_EXTENSIONS_TO_NAMES)
 
+ALLOWED_IMAGES_EXTENSIONS = {'png', 'jpeg', 'jpg', 'svg', 'tiff', 'bmp', 'ico'}
+
 
 def get_language_name_by_extension(ext: str) -> str:
     return LANGUAGE_EXTENSIONS_TO_NAMES.get(ext, ext)
