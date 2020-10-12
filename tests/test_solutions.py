@@ -130,9 +130,9 @@ class TestSolutionBridge:
 
     @staticmethod
     def test_get_next_unchecked(
-            student_user: User,
-            exercise: Exercise,
-            staff_user: User,
+        student_user: User,
+        exercise: Exercise,
+        staff_user: User,
     ):
         student_user2 = conftest.create_student_user(index=1)
         exercise2 = conftest.create_exercise(3)
@@ -169,10 +169,7 @@ class TestSolutionBridge:
         assert unchecked is None
 
     @staticmethod
-    def test_start_checking(
-        exercise: Exercise,
-        student_user: User,
-    ):
+    def test_start_checking(exercise: Exercise, student_user: User):
         student_user2 = conftest.create_student_user(index=1)
         exercise2 = conftest.create_exercise(1)
         solution1 = conftest.create_solution(exercise, student_user)
