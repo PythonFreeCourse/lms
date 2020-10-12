@@ -12,6 +12,11 @@ function escapeUnicode(str) {
   });
 }
 
+function isUserGrader() {
+  // Obviously should not be trusted security-wise
+  return ['staff', 'administrator'].includes(sessionStorage.getItem('role'));
+}
+
 function sendShareRequest(act, solutionId, callback) {
   const xhr = new XMLHttpRequest();
   xhr.open('POST', '/share');
@@ -149,7 +154,7 @@ function getPostUploadMessage() {
 }
 
 window.escapeUnicode = escapeUnicode;
-
+window.isUserGrader = isUserGrader;
 window.addEventListener('load', () => {
   updateNotificationsBadge();
   trackReadAllNotificationsButton(document.getElementById('read-notifications'));

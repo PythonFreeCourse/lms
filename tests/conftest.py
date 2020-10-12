@@ -1,5 +1,6 @@
 import datetime
 from functools import wraps
+from lms.models import notes
 import os
 import random
 import string
@@ -10,7 +11,7 @@ from peewee import SqliteDatabase
 import pytest
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, CommentText, Exercise, Notification, Role,
+    ALL_MODELS, Comment, CommentText, Exercise, Note, Notification, Role,
     RoleOptions, SharedSolution, Solution, User,
 )
 from lms.extractors.base import File
@@ -96,7 +97,7 @@ def get_logged_user(username: str) -> FlaskClient:
 
 
 def logout_user(client: FlaskClient) -> None:
-    client.post('/logout', follow_redirects=True)
+    client.get('/logout', follow_redirects=True)
 
 
 def create_user(
@@ -113,6 +114,10 @@ def create_user(
     )
 
 
+def create_banned_user(index: int = 0) -> User:
+    return create_user(RoleOptions.BANNED.value, index)
+
+
 def create_student_user(index: int = 0) -> User:
     return create_user(RoleOptions.STUDENT.value, index)
 
@@ -124,6 +129,11 @@ def create_staff_user(index: int = 0) -> User:
 @pytest.fixture()
 def staff_password():
     return 'fake pass'
+
+
+@pytest.fixture
+def banned_user():
+    return create_banned_user()
 
 
 @pytest.fixture()
@@ -173,6 +183,23 @@ def create_exercise(index: int = 0, is_archived: bool = False) -> Exercise:
 
 def create_shared_solution(solution: Solution) -> str:
     return SharedSolution.create_shared_solution(solution=solution)
+
+
+def create_note(
+    creator: User,
+    user: User,
+    note_text: CommentText,
+    privacy: int,
+):
+    new_note_id = CommentText.create_comment(text=note_text).id
+    privacy_level = Note.get_privacy_level(privacy)
+    return Note.get_or_create(
+        creator=creator,
+        user=user,
+        note=new_note_id,
+        exercise=None,
+        privacy=privacy_level,
+    )
 
 
 @pytest.fixture()

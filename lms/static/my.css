@@ -30,19 +30,19 @@ a {
   text-decoration: none;
 }
 
-.rtl-language > ::-webkit-input-placeholder {
+.rtl-language ::-webkit-input-placeholder {
   text-align: right;
 }
 
-.rtl-language > ::-moz-placeholder {
+.rtl-language ::-moz-placeholder {
   text-align: right;
 }
 
-.rtl-language > :-moz-placeholder {
+.rtl-language :-moz-placeholder {
   text-align: right;
 }
 
-.rtl-language > :-ms-input-placeholder {
+.rtl-language :-ms-input-placeholder {
   text-align: right;
 }
 
@@ -792,6 +792,67 @@ code .grader-add .fa {
 
 #user .user-details {
   margin-bottom: 5em;
+}
+
+.user-notes {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
+}
+
+.rtl .user-notes {
+  justify-content: right;
+}
+
+.ltr .user-notes {
+  justify-content: left;
+}
+
+.note {
+  background-color: #fff170;
+  width: 18%;
+  margin: 0.5em;
+}
+
+.note-exercise-select {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+}
+
+.rtl-language #note-exercise {
+  margin-right: 1em;
+}
+
+.ltr-language #note-exercise {
+  margin-left: 1em;
+}
+
+.auto-width {
+  width: auto;
+}
+
+.note-privacy-select {
+  width: fit-content;
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+}
+
+.note-privacy-input-range {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
+
+.form-range[value="0"] > .note-privacy-icon {
+  content: 'abc';
+}
+
+.add-note {
+  width: max-content;
+  margin: auto;
+  margin-bottom: 1em;
 }
 
 @media screen and (max-width: 768px) {
