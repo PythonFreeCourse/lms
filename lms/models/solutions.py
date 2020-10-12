@@ -107,7 +107,7 @@ def get_view_parameters(
     versions = solution.ordered_versions()
     test_results = solution.test_results()
     files = get_files_tree(solution.files)
-    file_id = file_id or files[0]['id']
+    file_id = file_id or (files[0]['id'] if files else None)
     file_to_show = next((f for f in solution_files if f.id == file_id), None)
     if file_to_show is None:
         raise ResourceNotFound('File does not exist.', 404)

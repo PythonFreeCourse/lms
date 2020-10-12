@@ -1,6 +1,9 @@
+from lms.models.errors import ResourceNotFound
+from lms.models.solutions import get_view_parameters
 from unittest import mock
 
 from flask import json
+import pytest
 
 from lms.lmsdb.models import Comment, Exercise, SharedSolution, Solution, User
 from lms.lmstests.public.general import tasks as general_tasks
@@ -22,9 +25,9 @@ class TestSolutionDb:
     created_state = Solution.STATES.CREATED.name
 
     def test_new_solution_override_old_solutions(
-            self,
-            exercise: Exercise,
-            student_user: User,
+        self,
+        exercise: Exercise,
+        student_user: User,
     ):
         first_solution = conftest.create_solution(exercise, student_user)
         second_solution = conftest.create_solution(exercise, student_user)
@@ -50,10 +53,10 @@ class TestSolutionDb:
         assert next_unchecked.id == second_solution.id
         assert next_unchecked_by_id.id == second_solution.id
 
+    @staticmethod
     def test_next_exercise_with_cleanest_code(
-            self,
-            comment: Comment,
-            staff_user: User,
+        comment: Comment,
+        staff_user: User,
     ):
         student_user: User = conftest.create_student_user(index=1)
         first_solution = comment.solution
@@ -100,10 +103,10 @@ class TestSolutionDb:
 class TestSolutionBridge:
     @staticmethod
     def test_mark_as_checked(
-            exercise: Exercise,
-            student_user: User,
-            staff_user: User,
-            solution: Solution,
+        exercise: Exercise,
+        student_user: User,
+        staff_user: User,
+        solution: Solution,
     ):
         # Basic functionality
         assert solution.state == Solution.STATES.CREATED.name
@@ -167,8 +170,8 @@ class TestSolutionBridge:
 
     @staticmethod
     def test_start_checking(
-            exercise: Exercise,
-            student_user: User,
+        exercise: Exercise,
+        student_user: User,
     ):
         student_user2 = conftest.create_student_user(index=1)
         exercise2 = conftest.create_exercise(1)
@@ -413,17 +416,39 @@ class TestSolutionBridge:
         student_user: User,
         staff_user: User,
     ):
-        bad_solution = conftest.create_solution(
+        solution = conftest.create_solution(
             exercise, student_user, files=[], hash_='koko',
         )
 
         staff_client = conftest.get_logged_user(staff_user.username)
-        view_response = staff_client.get(f'/view/{bad_solution.id}')
+        view_response = staff_client.get(f'{routes.SOLUTIONS}/{solution.id}')
         assert view_response.status_code == 200
-        solution = Solution.get_by_id(bad_solution.id)
+        solution = Solution.get_by_id(solution.id)
         assert solution.state == Solution.STATES.DONE.name
+
+        to_show_in_view = {
+            'solution': solution,
+            'file_id': None,
+            'shared_url': '',
+            'is_manager': False,
+            'solution_files': (),
+            'viewer_is_solver': True,
+        }
+
+        with pytest.raises(ResourceNotFound):
+            assert get_view_parameters(**to_show_in_view)
 
         user_client = conftest.get_logged_user(student_user.username)
         assert len(list(notifications.get(student_user))) == 1
-        view_response = user_client.get(f'/view/{bad_solution.id}')
+        view_response = user_client.get(f'{routes.SOLUTIONS}/{solution.id}')
         assert view_response.status_code == 404
+
+    @staticmethod
+    def test_manager_can_see_solutions(
+        exercise: Exercise,
+        solution: Solution,
+        staff_user: User,
+    ):
+        staff_client = conftest.get_logged_user(staff_user.username)
+        view_response = staff_client.get(f'{routes.SOLUTIONS}/{solution.id}')
+        assert view_response.status_code == 200
