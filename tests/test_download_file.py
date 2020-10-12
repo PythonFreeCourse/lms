@@ -46,7 +46,7 @@ class TestDownloadSolution:
     def test_bad_download_id(self, student_user: User):
         client = conftest.get_logged_user(str(student_user.username))
         download_response = client.get(f'{routes.DOWNLOADS}/{50 ** 10}')
-        download_response.status_code == 404
+        assert download_response.status_code == 404
 
     def test_download_solution(
             self,
