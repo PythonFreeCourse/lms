@@ -13,7 +13,7 @@ from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmsweb import config, routes
 from lms.models import comments, notifications
-from lms.models.errors import ForbiddenPermission, NotFoundRequest
+from lms.models.errors import ForbiddenPermission, ResourceNotFound
 
 
 def notify_comment_after_check(user: User, solution: Solution) -> bool:
@@ -99,7 +99,7 @@ def start_checking(solution: Optional[Solution]) -> bool:
     return False
 
 
-def view_parameters(
+def get_view_parameters(
     solution: Solution, file_id: Optional[int], shared_url: str,
     is_manager: bool, solution_files: Tuple[SolutionFile, ...],
     viewer_is_solver: bool,
@@ -110,7 +110,7 @@ def view_parameters(
     file_id = file_id or files[0]['id']
     file_to_show = next((f for f in solution_files if f.id == file_id), None)
     if file_to_show is None:
-        raise NotFoundRequest('File does not exist.', 404)
+        raise ResourceNotFound('File does not exist.', 404)
 
     view_params = {
         'solution': model_to_dict(solution),
@@ -150,7 +150,7 @@ def get_download_data(
         SharedSolution.shared_url == download_id,
     )
     if solution is None and shared_solution is None:
-        raise NotFoundRequest('Solution does not exist.', 404)
+        raise ResourceNotFound('Solution does not exist.', 404)
 
     if shared_solution is None:
         viewer_is_solver = solution.solver.id == current_user.id

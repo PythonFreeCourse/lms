@@ -370,7 +370,7 @@ def view(
         return done_checking(solution.exercise.id, solution.id)
 
     try:
-        view_params = solutions.view_parameters(
+        view_params = solutions.get_view_parameters(
             solution, file_id, shared_url, is_manager,
             solution_files, viewer_is_solver,
         )

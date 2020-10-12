@@ -2,7 +2,7 @@ from flask_login import current_user
 
 from lms.lmsdb.models import SharedSolution, Solution
 from lms.lmsweb import webapp
-from lms.models.errors import ForbiddenPermission, NotFoundRequest
+from lms.models.errors import ForbiddenPermission, ResourceNotFound
 
 
 def get(solution_id: int) -> SharedSolution:
@@ -11,7 +11,7 @@ def get(solution_id: int) -> SharedSolution:
 
     solution = Solution.get_or_none(solution_id)
     if solution is None:
-        raise NotFoundRequest(f'No such solution {solution_id}', 404)
+        raise ResourceNotFound(f'No such solution {solution_id}', 404)
 
     solver_id = solution.solver.id
     if solver_id != current_user.id and not current_user.role.is_manager:

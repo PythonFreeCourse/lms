@@ -9,8 +9,8 @@ from lms.lmsdb.models import (
 )
 from lms.models import solutions
 from lms.models.errors import (
-    ForbiddenPermission, NotFoundRequest,
-    NotValidRequest, UnprocessableRequest,
+    ForbiddenPermission, NotValidRequest, ResourceNotFound,
+    UnprocessableRequest,
 )
 
 
@@ -24,7 +24,7 @@ def _create_comment(
 ):
     if user is None:
         # should never happen, we checked session_id == solver_id
-        raise NotFoundRequest('No such user.', 404)
+        raise ResourceNotFound('No such user.', 404)
 
     if (not kind) or (kind not in ('id', 'text')):
         raise NotValidRequest('Invalid kind.', 400)

@@ -169,7 +169,6 @@ class TestSolutionBridge:
     def test_start_checking(
             exercise: Exercise,
             student_user: User,
-            staff_user: User,
     ):
         student_user2 = conftest.create_student_user(index=1)
         exercise2 = conftest.create_exercise(1)
@@ -409,23 +408,22 @@ class TestSolutionBridge:
         assert not_exist_solution_response.status_code == 404
 
     @staticmethod
-    def test_view_page(
+    def test_strange_solution_with_no_files(
+        exercise: Exercise,
         student_user: User,
         staff_user: User,
     ):
-        student_user2 = conftest.create_student_user(index=1)
+        bad_solution = conftest.create_solution(
+            exercise, student_user, files=[], hash_='koko',
+        )
 
-        client = conftest.get_logged_user(student_user.username)
-        user_response = client.get(f'/user/{student_user.id}')
-        assert user_response.status_code == 200
+        staff_client = conftest.get_logged_user(staff_user.username)
+        view_response = staff_client.get(f'/view/{bad_solution.id}')
+        assert view_response.status_code == 200
+        solution = Solution.get_by_id(bad_solution.id)
+        assert solution.state == Solution.STATES.DONE.name
 
-        another_user_response = client.get(f'/user/{student_user2.id}')
-        assert another_user_response.status_code == 403
-
-        conftest.logout_user(client)
-        client2 = conftest.get_logged_user(staff_user.username)
-        not_exist_user_response = client2.get('/user/99')
-        assert not_exist_user_response.status_code == 404
-
-        another_user_response = client2.get(f'/user/{student_user2.id}')
-        assert another_user_response.status_code == 200
+        user_client = conftest.get_logged_user(student_user.username)
+        assert len(list(notifications.get(student_user))) == 1
+        view_response = user_client.get(f'/view/{bad_solution.id}')
+        assert view_response.status_code == 404

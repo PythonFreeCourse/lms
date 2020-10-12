@@ -29,7 +29,7 @@ class ForbiddenPermission(LmsError):  # Error 403
     pass
 
 
-class NotFoundRequest(LmsError):  # Error 404
+class ResourceNotFound(LmsError):  # Error 404
     pass
 
 
