@@ -8,7 +8,10 @@ from lms.lmsdb.models import (
     Comment, CommentText, Exercise, Role, Solution, SolutionFile, User,
 )
 from lms.models import solutions
-from lms.models.errors import LmsError
+from lms.models.errors import (
+    ForbiddenPermission, NotFoundRequest,
+    NotValidRequest, UnprocessableRequest,
+)
 
 
 def _create_comment(
@@ -21,23 +24,23 @@ def _create_comment(
 ):
     if user is None:
         # should never happen, we checked session_id == solver_id
-        raise LmsError('No such user.', 404)
+        raise NotFoundRequest('No such user.', 404)
 
     if (not kind) or (kind not in ('id', 'text')):
-        raise LmsError('Invalid kind.', 400)
+        raise NotValidRequest('Invalid kind.', 400)
 
     if line_number <= 0:
-        raise LmsError(f'Invalid line number: {line_number}.', 422)
+        raise UnprocessableRequest(f'Invalid line number: {line_number}.', 422)
 
     if kind == 'id':
         new_comment_id = comment_id
     elif kind == 'text':
         if not comment_text:
-            raise LmsError('Empty comments are not allowed.', 422)
+            raise UnprocessableRequest('Empty comments are not allowed.', 422)
         new_comment_id = CommentText.create_comment(text=comment_text).id
     else:
         # should never happend, kind was checked before
-        raise LmsError('Invalid kind.', 400)
+        raise NotValidRequest('Invalid kind.', 400)
 
     solutions.notify_comment_after_check(user, file.solution)
 
@@ -56,7 +59,9 @@ def delete():
         comment_.commenter.id != current_user.id
         and not current_user.role.is_manager
     ):
-        raise LmsError("You aren't allowed to access this page.", 403)
+        raise ForbiddenPermission(
+            "You aren't allowed to access this page.", 403,
+        )
     if comment_ is not None:
         comment_.delete_instance()
 
