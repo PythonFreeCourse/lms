@@ -155,7 +155,8 @@ class User(UserMixin, BaseModel):
 
     def notes(self) -> Iterable['Note']:
         fields = (
-            Note.id, Note.creator.fullname, CommentText.text, Note.timestamp,
+            Note.id, Note.creator.fullname, CommentText.text,
+            Note.timestamp, Note.exercise.subject, Note.privacy,
         )
         public_or_mine = (
             (Note.privacy != NotePrivacy.PRIVATE.value)
@@ -165,7 +166,9 @@ class User(UserMixin, BaseModel):
         notes = (
             Note
             .select(*fields)
-            .join(User)
+            .join(User, on=(Note.creator == User.id))
+            .switch()
+            .join(Exercise, join_type=JOIN.LEFT_OUTER)
             .switch()
             .join(CommentText)
             .switch()

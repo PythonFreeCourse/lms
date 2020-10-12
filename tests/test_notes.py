@@ -1,6 +1,6 @@
 from flask import json
 
-from lms.lmsdb.models import User
+from lms.lmsdb.models import Exercise, User
 from tests import conftest
 
 
@@ -113,3 +113,51 @@ class TestNotes:
             content_type='application/json',
         )
         assert not_exist_user_note_response.status_code == 404
+
+    @staticmethod
+    def test_create_note(
+        student_user: User,
+        staff_user: User,
+        exercise: Exercise
+    ):
+        client = conftest.get_logged_user(staff_user.username)
+        # Trying to create note with no text
+        new_note_response = client.post(
+            f'/notes/{student_user.id}',
+            data=json.dumps({'act': 'create'}),
+            query_string={'note': ''},
+            content_type='application/json',
+        )
+        assert new_note_response.status_code == 422
+
+        # Creating a staff note
+        staff_note_response = client.post(
+            f'/notes/{student_user.id}',
+            data=json.dumps({'act': 'create'}),
+            query_string={'note': 'staff note', 'privacy': '1'},
+            content_type='application/json',
+        )
+        assert staff_note_response.status_code == 200
+
+        # Creating a private note
+        private_note_response = client.post(
+            f'/notes/{student_user.id}',
+            data=json.dumps({'act': 'create'}),
+            query_string={'note': 'private note', 'exercise': exercise.subject},
+            content_type='application/json',
+        )
+        assert private_note_response.status_code == 200
+
+        # Fetching notes
+        user_page_notes = client.get(
+            f'notes/{student_user.id}', query_string={'act': 'fetch'},
+            content_type='application/json',
+        )
+        json_user_page_notes = json.loads(
+            user_page_notes.get_data(as_text=True),
+        )
+        staff_note, private_note = json_user_page_notes
+        assert staff_note.get('privacy') == 30
+        assert private_note.get('privacy') == 40
+        assert private_note.get('subject') == exercise.subject
+        assert staff_note.get('fullname') == staff_user.fullname

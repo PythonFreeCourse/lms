@@ -21,7 +21,9 @@ function formatNoteHeader(noteData) {
 }
 
 function formatNoteBody(noteData) {
-  return `<div class="card-body"><h5 class="card-title">${noteData.fullname}</h5><p class="card-text">${noteData.text}</p></div>`;
+  let title = `${noteData.fullname}`;
+  title += (noteData.subject) ? ` - ${noteData.subject}` : '';
+  return `<div class="card-body"><h5 class="card-title">${title}</h5><p class="card-text">${noteData.text}</p></div>`;
 }
 
 function addNoteToPage(noteData, notesElement) {

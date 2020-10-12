@@ -19,12 +19,12 @@ def delete():
 def create(user: User) -> Note:
     note_text = request.args.get('note', '')
     note_exercise = request.args.get('exercise', '')
-    privacy = request.args.get('privacy')
+    privacy = request.args.get('privacy', '0')
     if not note_text:
         raise UnprocessableRequest('Empty notes are not allowed.', 422)
     new_note_id = CommentText.create_comment(text=note_text).id
 
-    return Note.create(
+    Note.create(
         creator=User.get_or_none(User.id == current_user.id),
         user=user,
         note=new_note_id,
