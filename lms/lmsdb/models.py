@@ -9,7 +9,7 @@ from typing import (
     Type, Union, cast,
 )
 
-from flask_babel import gettext as _
+from flask_babel import gettext as _  # type: ignore
 from flask_login import UserMixin  # type: ignore
 from peewee import (  # type: ignore
     BooleanField, Case, CharField, Check, DateTimeField, ForeignKeyField,

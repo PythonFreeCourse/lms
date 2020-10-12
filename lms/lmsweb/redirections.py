@@ -2,7 +2,7 @@ from typing import Optional
 from urllib.parse import urljoin, urlparse
 
 from flask import request, url_for
-from flask_login import LoginManager
+from flask_login import LoginManager  # type: ignore
 from werkzeug.utils import redirect
 
 from lms.lmsweb import webapp

@@ -3,8 +3,8 @@ import os
 from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple, Union
 from zipfile import ZipFile
 
-from flask_babel import gettext as _
-from flask_login import current_user
+from flask_babel import gettext as _  # type: ignore
+from flask_login import current_user  # type: ignore
 from playhouse.shortcuts import model_to_dict  # type: ignore
 
 from lms.extractors.base import File

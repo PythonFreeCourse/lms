@@ -2,7 +2,7 @@ import csv
 import os
 import typing
 
-from flask_babel import gettext as _
+from flask_babel import gettext as _  # type: ignore
 
 from lms.lmsdb import models
 from lms.lmsweb import config

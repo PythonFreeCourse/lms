@@ -2,7 +2,7 @@ import logging
 import typing
 
 from celery.result import allow_join_result
-from flask_babel import gettext as _
+from flask_babel import gettext as _  # type: ignore
 
 from lms.lmsdb import models
 from lms.lmstests.sandbox import linters
