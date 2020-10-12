@@ -2,7 +2,7 @@ import collections
 import logging
 import typing
 
-from flask_babel import gettext as _
+from flask_babel import gettext as _  # type: ignore
 
 from lms.lmsdb import models
 from lms.models import notifications

@@ -2,9 +2,9 @@ import pathlib
 import shutil
 
 from flask import Flask
-from flask_babel import Babel
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+from flask_babel import Babel  # type: ignore
+from flask_limiter import Limiter  # type: ignore
+from flask_limiter.util import get_remote_address  # type: ignore
 from flask_wtf.csrf import CSRFProtect  # type: ignore
 
 from lms.utils import config_migrator, debug
