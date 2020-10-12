@@ -81,7 +81,7 @@ def ratelimit_handler(e):
     f'{LIMITS_PER_MINUTE}/minute;{LIMITS_PER_HOUR}/hour',
     deduct_when=lambda response: response.status_code != 200,
 )
-def login(login_error: str = None):
+def login(login_error: Optional[str] = None):
 
     if current_user.is_authenticated:
         return get_next_url(request.args.get('next'))
@@ -97,12 +97,9 @@ def login(login_error: str = None):
             login_user(user)
             return get_next_url(next_page)
         elif user is None or user.is_password_valid(password) is False:
-            login_error = 'Invalid username or password'
-            return redirect(
-                url_for(
-                    'login', **{'next': next_page,
-                                'login_error': login_error}),
-            )
+            login_error = 'Invalid username or passwordd'
+            error_details = {'next': next_page, 'login_error': login_error}
+            return redirect(url_for('login', **error_details))
 
     return render_template('login.html', login_error=login_error)
 
