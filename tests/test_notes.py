@@ -66,6 +66,14 @@ class TestNotes:
         )
         assert len(json_user_page_notes) == 2
 
+        # Staff trying unknown act
+        unknown_act_note_response = client.post(
+            f'/notes/{student_user.id}',
+            data=json.dumps({'act': 'unknown'}),
+            content_type='application/json',
+        )
+        assert unknown_act_note_response.status_code == 400
+
         conftest.logout_user(client)
         client2 = conftest.get_logged_user(student_user.username)
         # User can see only the remaining user and public comment
@@ -94,3 +102,10 @@ class TestNotes:
             content_type='application/json',
         )
         assert new_note_response.status_code == 403
+
+        # Trying to reach not exist user
+        not_exist_user_note_response = client2.get(
+            '/notes/99', data=json.dumps({'act': 'fetch'}),
+            content_type='application/json',
+        )
+        assert not_exist_user_note_response.status_code == 404

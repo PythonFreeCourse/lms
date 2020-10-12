@@ -4,7 +4,7 @@ from lms.models import notes
 import os
 import random
 import string
-from typing import Optional
+from typing import List, Optional
 
 from flask.testing import FlaskClient
 from peewee import SqliteDatabase
@@ -202,7 +202,7 @@ def create_solution(
         exercise: Exercise,
         student_user: User,
         code: Optional[str] = None,
-        files: Optional[File] = None,
+        files: Optional[List[File]] = None,
         hash_: Optional[str] = None,
 ) -> Solution:
     if code is None:
