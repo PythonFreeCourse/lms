@@ -388,3 +388,22 @@ class TestSolutionBridge:
             'solutionId': solution.id, 'act': 'get',
         }), content_type='application/json')
         assert shared_response.status_code == 403
+
+    @staticmethod
+    def test_view_page(
+        exercise: Exercise,
+        student_user: User,
+    ):
+        student_user2 = conftest.create_student_user(index=1)
+        solution = conftest.create_solution(exercise, student_user)
+        solution2 = conftest.create_solution(exercise, student_user2)
+
+        client = conftest.get_logged_user(student_user.username)
+        view_response = client.get(f'/view/{solution.id}')
+        assert view_response.status_code == 200
+
+        another_user_solution_response = client.get(f'/view/{solution2.id}')
+        assert another_user_solution_response.status_code == 403
+
+        not_exist_solution_response = client.get('/view/0')
+        assert not_exist_solution_response.status_code == 404
