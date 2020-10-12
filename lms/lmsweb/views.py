@@ -236,36 +236,10 @@ def comment():
         return fail(403, "You aren't allowed to access this page.")
 
     if act == 'delete':
-        comment_id = int(request.args.get('commentId'))
-        comment_ = Comment.get_or_none(Comment.id == comment_id)
-        if (
-            comment_.commenter.id != current_user.id
-            and not current_user.role.is_manager
-        ):
-            return fail(403, "You aren't allowed to access this page.")
-        if comment_ is not None:
-            comment_.delete_instance()
-        return jsonify({'success': 'true'})
+        return comments.delete()
 
     if act == 'create':
-        kind = request.json.get('kind', '')
-        comment_id, comment_text = None, None
-        try:
-            line_number = int(request.json.get('line', 0))
-        except ValueError:
-            line_number = 0
-        if kind.lower() == 'id':
-            comment_id = int(request.json.get('comment', 0))
-        if kind.lower() == 'text':
-            comment_text = request.json.get('comment', '')
-        return comments._create_comment(
-            current_user.id,
-            file,
-            kind,
-            line_number,
-            comment_text,
-            comment_id,
-        )
+        return comments.create(file=file)
 
     return fail(400, f'Unknown or unset act value "{act}".')
 

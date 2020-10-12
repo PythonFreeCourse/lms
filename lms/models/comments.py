@@ -1,6 +1,7 @@
 from typing import Optional
 
-from flask import jsonify
+from flask import jsonify, request
+from flask_login import current_user
 from peewee import fn  # type: ignore
 
 from lms.lmsdb.models import (
@@ -53,6 +54,40 @@ def _create_comment(
         'author_name': user.fullname, 'author_role': user.role.id,
         'is_auto': False, 'id': comment_.id, 'line_number': line_number,
     })
+
+
+def delete():
+    comment_id = int(request.args.get('commentId'))
+    comment_ = Comment.get_or_none(Comment.id == comment_id)
+    if (
+        comment_.commenter.id != current_user.id
+        and not current_user.role.is_manager
+    ):
+        return fail(403, "You aren't allowed to access this page.")
+    if comment_ is not None:
+        comment_.delete_instance()
+    return jsonify({'success': 'true'})
+
+
+def create(file: SolutionFile):
+    kind = request.json.get('kind', '')
+    comment_id, comment_text = None, None
+    try:
+        line_number = int(request.json.get('line', 0))
+    except ValueError:
+        line_number = 0
+    if kind.lower() == 'id':
+        comment_id = int(request.json.get('comment', 0))
+    if kind.lower() == 'text':
+        comment_text = request.json.get('comment', '')
+    return _create_comment(
+        current_user.id,
+        file,
+        kind,
+        line_number,
+        comment_text,
+        comment_id,
+    )
 
 
 def _common_comments(exercise_id=None, user_id=None):
