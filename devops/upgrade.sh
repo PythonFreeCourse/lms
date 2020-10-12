@@ -13,7 +13,7 @@ upgrade () {
   USED=$(df . | awk 'NR==2{print $4}')
   MINIMUM_MB=200
   MINIMUM_KB=$((MINIMUM_MB * 1024))
-  if [ ${USED%?} -le ${MINIMUM_KB%?} ]; then
+  if [ ${USED} -le ${MINIMUM_KB} ]; then
       echo "There are less than ${MINIMUM_MB}MB space left in your disk. Exiting code."; return;
   fi
 
