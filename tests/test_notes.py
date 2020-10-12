@@ -76,6 +76,7 @@ class TestNotes:
 
         conftest.logout_user(client)
         client2 = conftest.get_logged_user(student_user.username)
+
         # User can see only the remaining user and public comment
         user_page_notes = client2.get(
             f'notes/{student_user.id}', query_string={'act': 'fetch'},
@@ -95,8 +96,11 @@ class TestNotes:
         )
         assert public_note_response.status_code == 403
 
+    @staticmethod
+    def test_user_notes(student_user: User):
+        client = conftest.get_logged_user(student_user.username)
         # User trying to create a note, doesn't matter what
-        new_note_response = client2.post(
+        new_note_response = client.post(
             f'/notes/{student_user.id}',
             data=json.dumps({'act': 'create'}),
             content_type='application/json',
@@ -104,7 +108,7 @@ class TestNotes:
         assert new_note_response.status_code == 403
 
         # Trying to reach not exist user
-        not_exist_user_note_response = client2.get(
+        not_exist_user_note_response = client.get(
             '/notes/99', data=json.dumps({'act': 'fetch'}),
             content_type='application/json',
         )
