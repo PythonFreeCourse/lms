@@ -7,14 +7,9 @@ function getPrivacyLevel(inputRange) {
   });
 }
 
-function isUserGrader() {
-  // Obviously should not be trusted security-wise
-  return ['staff', 'administrator'].includes(sessionStorage.getItem('role'));
-}
-
 function formatNoteHeader(noteData) {
   let noteHeader = '<div class="card-header">';
-  if (isUserGrader()) {
+  if (window.isUserGrader()) {
     const deleteButton = `<i class="fa fa-trash grader-delete" aria-hidden="true" data-noteid="${noteData.id}"></i>`;
     noteHeader += `${deleteButton}`;
   }
@@ -46,8 +41,7 @@ function treatNotes(notes, notesElement) {
 }
 
 function trackAddNote(formElement) {
-  formElement.addEventListener('submit', (e) => {
-    e.preventDefault();
+  formElement.addEventListener('submit', () => {
     const serializeData = new URLSearchParams(Array.from(new FormData(formElement))).toString();
     const xhr = new XMLHttpRequest();
     const url = `/notes/${window.userId}?act=create&${serializeData}`;
@@ -56,18 +50,13 @@ function trackAddNote(formElement) {
     xhr.responseType = 'json';
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
-        if (xhr.status === 200) {
-          const response = JSON.parse(window.escapeUnicode(xhr.response));
-          addNoteToPage(response, window.notesElement);
-          window.trackDeleteNotes(document.querySelectorAll('.grader-delete'));
-        } else {
+        if (xhr.status !== 200) {
           console.log(xhr.status);
         }
       }
     };
 
     xhr.send('');
-    formElement.reset();
   });
 }
 

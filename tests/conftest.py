@@ -184,10 +184,10 @@ def create_note(
 ):
     new_note_id = CommentText.create_comment(text=note_text).id
     privacy_level = Note.get_privacy_level(privacy)
-    return notes.create_note_instance(
+    return Note.get_or_create(
         creator=creator,
         user=user,
-        note_text=new_note_id,
+        note=new_note_id,
         exercise=None,
         privacy=privacy_level,
     )

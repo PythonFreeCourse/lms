@@ -154,9 +154,9 @@ class User(UserMixin, BaseModel):
         return Notification.fetch(self)
 
     def notes(self) -> Iterable['Note']:
-        fields = [
+        fields = (
             Note.id, Note.creator.fullname, CommentText.text, Note.timestamp,
-        ]
+        )
         public_or_mine = (
             (Note.privacy != NotePrivacy.PRIVATE.value)
             | (Note.creator == current_user.id)

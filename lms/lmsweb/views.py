@@ -226,10 +226,11 @@ def note(user_id: int):
         return fail(403, "You aren't allowed to access this page.")
 
     if act == 'delete':
-        return notes.delete_note()
+        return notes.delete()
 
     if act == 'create':
-        return notes.create_note(user=user, user_id=user_id)
+        notes.create(user=user)
+        return redirect(url_for('user', user_id=user_id))
 
     return fail(400, f'Unknown or unset act value "{act}".')
 
