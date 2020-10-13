@@ -82,22 +82,27 @@ def ratelimit_handler(e):
     f'{LIMITS_PER_MINUTE}/minute;{LIMITS_PER_HOUR}/hour',
     deduct_when=lambda response: response.status_code != 200,
 )
-def login():
+def login(login_error: Optional[str] = None):
+
     if current_user.is_authenticated:
         return get_next_url(request.args.get('next'))
 
     username = request.form.get('username')
     password = request.form.get('password')
     next_page = request.form.get('next')
+    login_error = request.args.get('login_error')
     user = User.get_or_none(username=username)
 
-    if user is not None and user.is_password_valid(password):
-        login_user(user)
-        return get_next_url(next_page)
-    elif user is not None:
-        return redirect(url_for('login', **{'next': next_page}))
+    if request.method == 'POST':
+        if user is not None and user.is_password_valid(password):
+            login_user(user)
+            return get_next_url(next_page)
+        elif user is None or not user.is_password_valid(password):
+            login_error = 'Invalid username or password'
+            error_details = {'next': next_page, 'login_error': login_error}
+            return redirect(url_for('login', **error_details))
 
-    return render_template('login.html')
+    return render_template('login.html', login_error=login_error)
 
 
 @webapp.route('/logout')
