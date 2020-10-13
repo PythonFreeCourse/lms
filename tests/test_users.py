@@ -1,4 +1,5 @@
 from lms.lmsdb.models import User
+from lms.lmsweb import webapp
 from tests import conftest
 
 
@@ -52,3 +53,18 @@ class TestUser:
 
         another_user_response = client2.get(f'/user/{student_user2.id}')
         assert another_user_response.status_code == 200
+
+    @staticmethod
+    def test_logout(student_user: User):
+        client = conftest.get_logged_user(student_user.username)
+        logout_response = client.get('/logout', follow_redirects=True)
+        assert logout_response.status_code == 200
+
+    @staticmethod
+    def test_banned_user(banned_user: User):
+        client = client = webapp.test_client()
+        login_response = client.post('/login', data={
+            'username': banned_user.username,
+            'password': 'fake pass',
+        }, follow_redirects=True)
+        assert 'banned' in login_response.get_data(as_text=True)

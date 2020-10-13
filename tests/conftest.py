@@ -96,7 +96,7 @@ def get_logged_user(username: str) -> FlaskClient:
 
 
 def logout_user(client: FlaskClient) -> None:
-    client.post('/logout', follow_redirects=True)
+    client.get('/logout', follow_redirects=True)
 
 
 def create_user(
@@ -113,6 +113,10 @@ def create_user(
     )
 
 
+def create_banned_user(index: int = 0) -> User:
+    return create_user(RoleOptions.BANNED.value, index)
+
+
 def create_student_user(index: int = 0) -> User:
     return create_user(RoleOptions.STUDENT.value, index)
 
@@ -124,6 +128,11 @@ def create_staff_user(index: int = 0) -> User:
 @pytest.fixture()
 def staff_password():
     return 'fake pass'
+
+
+@pytest.fixture
+def banned_user():
+    return create_banned_user()
 
 
 @pytest.fixture()
