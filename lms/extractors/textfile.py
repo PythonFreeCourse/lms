@@ -1,3 +1,4 @@
+import os
 from typing import Iterator, List, Tuple
 
 from lms.extractors.base import Extractor, File
@@ -14,7 +15,9 @@ TEXTCHARS = set(bytes(
 class Textfile(Extractor):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.filename_no_ext, _, self.ext = self.filename.rpartition('.')
+        self.filename_no_ext, _, self.ext = (
+            os.path.basename(self.filename).rpartition('.')
+        )
 
     def can_extract(self) -> bool:
         if self.ext not in ALLOWED_EXTENSIONS:
