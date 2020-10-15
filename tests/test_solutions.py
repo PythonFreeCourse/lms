@@ -333,10 +333,12 @@ class TestSolutionBridge:
         shared_url = SharedSolution.get_or_none(
             SharedSolution.solution == solution,
         )
+        assert len(shared_url.entries) == 0
         conftest.logout_user(client2)
         client = conftest.get_logged_user(student_user.username)
         shared_response = client.get(f'{routes.SHARED}/{shared_url}')
         assert shared_response.status_code == 200
+        assert len(shared_url.entries) == 1
 
         # Downloading another student solution by solution.id
         solution_id_download_response = client.get(
