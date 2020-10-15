@@ -30,7 +30,7 @@ def get(solution_id: int) -> SharedSolution:
     return shared_solution
 
 
-def new_entry(shared_solution: SharedSolution) -> None:
+def new(shared_solution: SharedSolution) -> None:
     SharedSolutionEntry.create(
         referrer=request.referrer,
         user=current_user.id,

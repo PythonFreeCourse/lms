@@ -609,7 +609,7 @@ class SharedSolution(BaseModel):
 class SharedSolutionEntry(BaseModel):
     referrer = TextField(null=True)
     time = DateTimeField(default=datetime.now())
-    user = ForeignKeyField(User)
+    user = ForeignKeyField(User, backref='entries')
     shared_solution = ForeignKeyField(SharedSolution, backref='entries')
 
 
