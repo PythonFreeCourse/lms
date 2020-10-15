@@ -1,12 +1,10 @@
-from flask import request
 from flask_login import current_user
 
 from lms.lmsdb.models import CommentText, Exercise, Note, User
 from lms.models.errors import ForbiddenPermission, UnprocessableRequest
 
 
-def delete():
-    note_id = int(request.args.get('noteId'))
+def delete(note_id: int):
     note_ = Note.get_or_none(Note.id == note_id)
     if note_.creator.id != current_user.id and note_.is_private:
         raise ForbiddenPermission(
@@ -16,10 +14,9 @@ def delete():
         note_.delete_instance()
 
 
-def create(user: User) -> Note:
-    note_text = request.args.get('note', '')
-    note_exercise = request.args.get('exercise', '')
-    privacy = request.args.get('privacy', '0')
+def create(
+    user: User, note_text: str, note_exercise: str, privacy: str,
+) -> None:
     if not note_text:
         raise UnprocessableRequest('Empty notes are not allowed.', 422)
     new_note_id = CommentText.create_comment(text=note_text).id

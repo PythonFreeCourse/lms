@@ -234,10 +234,20 @@ def note(user_id: int):
         return fail(403, "You aren't allowed to access this page.")
 
     if act == 'delete':
-        return try_or_fail(notes.delete)
+        note_id = int(request.args.get('noteId'))
+        return try_or_fail(notes.delete, note_id=note_id)
 
     if act == 'create':
-        return try_or_fail(notes.create, user=user)
+        note_text = request.args.get('note', '')
+        note_exercise = request.args.get('exercise', '')
+        privacy = request.args.get('privacy', '0')
+        return try_or_fail(
+            notes.create,
+            user=user,
+            note_text=note_text,
+            note_exercise=note_exercise,
+            privacy=privacy,
+        )
 
     return fail(400, f'Unknown or unset act value "{act}".')
 
