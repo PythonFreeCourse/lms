@@ -13,7 +13,7 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, RoleOptions, SharedSolution,
+    ALL_MODELS, Comment, Note, RoleOptions, SharedSolution,
     Solution, SolutionFile, User, database,
 )
 from lms.lmsweb import babel, limiter, routes, webapp
@@ -27,7 +27,9 @@ from lms.lmsweb.manifest import MANIFEST
 from lms.lmsweb.redirections import (
     PERMISSIVE_CORS, get_next_url, login_manager,
 )
-from lms.models import comments, notifications, share_link, solutions, upload
+from lms.models import (
+    comments, notes, notifications, share_link, solutions, upload,
+)
 from lms.models.errors import FileSizeError, LmsError, UploadError, fail
 from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import get_language_name_by_extension
@@ -216,6 +218,40 @@ def share():
     return fail(400, f'Unknown or unset act value "{act}".')
 
 
+@webapp.route('/notes/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def note(user_id: int):
+    act = request.args.get('act') or request.json.get('act')
+
+    user = User.get_or_none(User.id == user_id)
+    if user is None:
+        return fail(404, f'No such user {user_id}.')
+
+    if act == 'fetch':
+        return jsonify(tuple(user.notes().dicts()))
+
+    if not current_user.role.is_manager:
+        return fail(403, "You aren't allowed to access this page.")
+
+    if act == 'delete':
+        note_id = int(request.args.get('noteId'))
+        return try_or_fail(notes.delete, note_id=note_id)
+
+    if act == 'create':
+        note_text = request.args.get('note', '')
+        note_exercise = request.args.get('exercise', '')
+        privacy = request.args.get('privacy', '0')
+        return try_or_fail(
+            notes.create,
+            user=user,
+            note_text=note_text,
+            note_exercise=note_exercise,
+            privacy=privacy,
+        )
+
+    return fail(400, f'Unknown or unset act value "{act}".')
+
+
 @webapp.route('/comments', methods=['GET', 'POST'])
 @login_required
 def comment():
@@ -278,10 +314,14 @@ def user(user_id):
     if target_user is None:
         return fail(404, 'There is no such user.')
 
+    is_manager = current_user.role.is_manager
+
     return render_template(
         'user.html',
         solutions=Solution.of_user(target_user.id, with_archived=True),
         user=target_user,
+        is_manager=is_manager,
+        notes_options=Note.get_note_options(),
     )
 
 

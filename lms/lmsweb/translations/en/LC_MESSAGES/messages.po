@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  lmsweb-1.0\n"
 "Report-Msgid-Bugs-To: bugs@mesicka.com\n"
-"POT-Creation-Date: 2020-10-09 09:15+0300\n"
+"POT-Creation-Date: 2020-10-09 11:20+0300\n"
 "PO-Revision-Date: 2020-09-16 18:29+0300\n"
 "Last-Translator: Or Ronai\n"
 "Language: en\n"
@@ -255,6 +255,26 @@ msgstr "Submitted"
 #: templates/user.html:33
 msgid "לא הוגש"
 msgstr "Not submitted"
+
+#: templates/user.html:43
+msgid "פתקיות:"
+msgstr "Notes:"
+
+#: templates/user.html:60 templates/user.html:62
+msgid "פתקית חדשה"
+msgstr "New Note"
+
+#: templates/user.html:66
+msgid "תרגיל משויך:"
+msgstr "Exercise:"
+
+#: templates/user.html:75
+msgid "רמת פרטיות:"
+msgstr "Privacy Level:"
+
+#: templates/user.html:81
+msgid "הוסף פתקית"
+msgstr "Add Note"
 
 #: templates/view.html:6
 msgid "תצוגת תרגיל"

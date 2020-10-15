@@ -23,11 +23,6 @@ function hoverLine(targets, hover) {
   addCommentTarget.style.opacity = commentOpacity;
 }
 
-function isUserGrader() {
-  // Obviously should not be trusted security-wise
-  return ['staff', 'administrator'].includes(sessionStorage.getItem('role'));
-}
-
 function isSolverComment(commentData) {
   const authorIsSolver = commentData.author_name === sessionStorage.getItem('solver');
   const allowedComment = sessionStorage.getItem('allowedComment') === 'true';
@@ -36,7 +31,7 @@ function isSolverComment(commentData) {
 
 function formatCommentData(commentData) {
   let changedCommentText = `<span class="comment-author">${commentData.author_name}:</span> ${commentData.text}`;
-  if (isUserGrader() || isSolverComment(commentData)) {
+  if (window.isUserGrader() || isSolverComment(commentData)) {
     const deleteButton = `<i class="fa fa-trash grader-delete" aria-hidden="true" data-commentid="${commentData.id}" onclick="deleteComment(${window.fileId}, ${commentData.id});"></i>`;
     changedCommentText = `${deleteButton} ${changedCommentText}`;
   }
@@ -148,7 +143,6 @@ function addLineSpansToPre(items) {
 window.markLink = markLine;
 window.hoverLine = hoverLine;
 window.addCommentToLine = addCommentToLine;
-window.isUserGrader = isUserGrader;
 window.getLineColorByRole = getLineColorByRole;
 window.addEventListener('load', () => {
   const codeElementData = document.getElementById('code-view').dataset;

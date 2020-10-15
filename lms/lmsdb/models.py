@@ -10,7 +10,7 @@ from typing import (
 )
 
 from flask_babel import gettext as _  # type: ignore
-from flask_login import UserMixin  # type: ignore
+from flask_login import UserMixin, current_user  # type: ignore
 from peewee import (  # type: ignore
     BooleanField, Case, CharField, Check, DateTimeField, ForeignKeyField,
     IntegerField, JOIN, ManyToManyField, TextField, fn,
@@ -38,6 +38,16 @@ class RoleOptions(enum.Enum):
     STAFF = 'Staff'
     VIEWER = 'Viewer'
     ADMINISTRATOR = 'Administrator'
+
+    def __str__(self):
+        return self.value
+
+
+class NotePrivacy(enum.IntEnum):
+    PRIVATE = 40
+    STAFF = 30
+    USER = 20
+    PUBLIC = 10
 
     def __str__(self):
         return self.value
@@ -142,6 +152,32 @@ class User(UserMixin, BaseModel):
 
     def get_notifications(self) -> Iterable['Notification']:
         return Notification.fetch(self)
+
+    def notes(self) -> Iterable['Note']:
+        fields = (
+            Note.id, Note.creator.fullname, CommentText.text,
+            Note.timestamp, Note.exercise.subject, Note.privacy,
+        )
+        public_or_mine = (
+            (Note.privacy != NotePrivacy.PRIVATE.value)
+            | (Note.creator == current_user.id)
+        )
+
+        notes = (
+            Note
+            .select(*fields)
+            .join(User, on=(Note.creator == User.id))
+            .switch()
+            .join(Exercise, join_type=JOIN.LEFT_OUTER)
+            .switch()
+            .join(CommentText)
+            .switch()
+            .where((Note.user == self) & (public_or_mine))
+        )
+        if not current_user.role.is_manager:
+            notes = notes.where(Note.privacy <= NotePrivacy.USER.value)
+
+        return notes
 
     def __str__(self):
         return f'{self.username} - {self.fullname}'
@@ -731,6 +767,44 @@ class CommentText(BaseModel):
             defaults={CommentText.flake8_key.name: flake_key},
         )
         return instance
+
+
+class Note(BaseModel):
+    creator = ForeignKeyField(User)
+    user = ForeignKeyField(User)
+    timestamp = DateTimeField(default=datetime.now())
+    note = ForeignKeyField(CommentText)
+    exercise = ForeignKeyField(Exercise, null=True)
+    privacy = IntegerField(choices=(
+        (NotePrivacy.PRIVATE.value, NotePrivacy.PRIVATE.value),
+        (NotePrivacy.STAFF.value, NotePrivacy.STAFF.value),
+        (NotePrivacy.USER.value, NotePrivacy.USER.value),
+        (NotePrivacy.PUBLIC.value, NotePrivacy.PUBLIC.value),
+    ))
+
+    @property
+    def is_private(self) -> bool:
+        return self.privacy == NotePrivacy.PRIVATE.value
+
+    @property
+    def is_staff(self) -> bool:
+        return self.privacy == NotePrivacy.STAFF.value
+
+    @property
+    def is_solver(self) -> bool:
+        return self.privacy == NotePrivacy.USER.value
+
+    @property
+    def is_public(self) -> bool:
+        return self.privacy == NotePrivacy.PUBLIC.value
+
+    @staticmethod
+    def get_note_options():
+        return ','.join(option.name.capitalize() for option in NotePrivacy)
+
+    @staticmethod
+    def get_privacy_level(level: int) -> NotePrivacy:
+        return list(NotePrivacy)[level].value
 
 
 class Comment(BaseModel):
