@@ -1,6 +1,7 @@
+from flask import request
 from flask_login import current_user  # type: ignore
 
-from lms.lmsdb.models import SharedSolution, Solution
+from lms.lmsdb.models import SharedSolution, SharedSolutionEntry, Solution
 from lms.lmsweb import webapp
 from lms.models.errors import ForbiddenPermission, ResourceNotFound
 
@@ -27,3 +28,11 @@ def get(solution_id: int) -> SharedSolution:
         shared_solution = SharedSolution.create_new(solution=solution)
 
     return shared_solution
+
+
+def new(shared_solution: SharedSolution) -> None:
+    SharedSolutionEntry.create(
+        referrer=request.referrer,
+        user=current_user.id,
+        shared_solution=shared_solution,
+    )

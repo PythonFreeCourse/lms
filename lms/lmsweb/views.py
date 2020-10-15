@@ -394,6 +394,7 @@ def shared_solution(shared_url: str, file_id: Optional[int] = None):
     if shared_solution is None:
         return fail(404, 'The solution does not exist.')
 
+    share_link.new(shared_solution)
     solution_id = shared_solution.solution.id
     return view(
         solution_id=solution_id, file_id=file_id, shared_url=shared_url,

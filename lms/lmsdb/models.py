@@ -606,6 +606,13 @@ class SharedSolution(BaseModel):
         return cls.create(shared_url=new_url, solution=solution)
 
 
+class SharedSolutionEntry(BaseModel):
+    referrer = TextField(null=True)
+    time = DateTimeField(default=datetime.now())
+    user = ForeignKeyField(User, backref='entries')
+    shared_solution = ForeignKeyField(SharedSolution, backref='entries')
+
+
 class ExerciseTest(BaseModel):
     exercise = ForeignKeyField(model=Exercise, unique=True)
     code = TextField()
