@@ -347,6 +347,12 @@ class TestSolutionBridge:
         }), content_type='application/json')
         assert shared_response.status_code == 200
 
+        # Unknown act of share
+        unknown_shared_response = client2.post('/share', data=json.dumps({
+            'solutionId': solution.id, 'act': 'unknown',
+        }), content_type='application/json')
+        assert unknown_shared_response.status_code == 400
+
         # Entering another student solution
         shared_url = SharedSolution.get_or_none(
             SharedSolution.solution == solution,
