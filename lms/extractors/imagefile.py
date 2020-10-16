@@ -15,9 +15,7 @@ class Imagefile(Extractor):
         )
 
     def can_extract(self) -> bool:
-        if self.ext not in ALLOWED_IMAGES_EXTENSIONS:
-            return False
-        return True
+        return self.ext in ALLOWED_IMAGES_EXTENSIONS
 
     def get_exercise(self, to_extract: bytes) -> Tuple[int, List[File]]:
         exercise_id = 0
