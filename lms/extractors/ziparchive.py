@@ -43,14 +43,14 @@ class Ziparchive(Extractor):
         with archive.open(filename) as current_file:
             log.debug(f'Extracting from archive: {filename}')
             code = current_file.read()
-        if filename.rpartition('.')[-1] in ALLOWED_IMAGES_EXTENSIONS:
+        if filename.rpartition('.')[-1].lower() in ALLOWED_IMAGES_EXTENSIONS:
             decoded = base64.b64encode(code)
         else:
             decoded = code.decode(
                 'utf-8', errors='replace',
             ).replace('\x00', '')
         filename = filename[len(dirname):]
-        return File(path=f'/{filename}', code=decoded)
+        return File(path=f'/{filename.lower()}', code=decoded)
 
     def get_files(
         self, archive: ZipFile, filenames: List[Text], dirname: str = '',
