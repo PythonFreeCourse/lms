@@ -20,7 +20,7 @@ class Textfile(Extractor):
         )
 
     def can_extract(self) -> bool:
-        if self.ext not in ALLOWED_EXTENSIONS:
+        if self.ext.lower() not in ALLOWED_EXTENSIONS:
             return False
         if isinstance(self.file_content, str):
             return True
@@ -34,7 +34,7 @@ class Textfile(Extractor):
         if not exercise_id:
             raise BadUploadFile("Can't resolve exercise id.", self.filename)
 
-        return (exercise_id, [File(f'/main.{self.ext}', content)])
+        return (exercise_id, [File(f'/main.{self.ext.lower()}', content)])
 
     def get_exercises(self) -> Iterator[Tuple[int, List[File]]]:
         exercise_id, files = self.get_exercise(self.file_content)

@@ -15,7 +15,7 @@ class Imagefile(Extractor):
         )
 
     def can_extract(self) -> bool:
-        return self.ext in ALLOWED_IMAGES_EXTENSIONS
+        return self.ext.lower() in ALLOWED_IMAGES_EXTENSIONS
 
     def get_exercise(self, to_extract: bytes) -> Tuple[int, List[File]]:
         exercise_id = 0
@@ -25,7 +25,7 @@ class Imagefile(Extractor):
             raise BadUploadFile("Can't resolve exercise id.", self.filename)
 
         decoded = base64.b64encode(to_extract)
-        return (exercise_id, [File(f'/main.{self.ext}', decoded)])
+        return (exercise_id, [File(f'/main.{self.ext.lower()}', decoded)])
 
     def get_exercises(self) -> Iterator[Tuple[int, List[File]]]:
         exercise_id, files = self.get_exercise(self.file_content)
