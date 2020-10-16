@@ -1,3 +1,4 @@
+import base64
 import fnmatch
 import os
 import pathlib
@@ -7,6 +8,7 @@ from zipfile import BadZipFile, ZipFile
 from lms.extractors.base import Extractor, File
 from lms.lmsweb.config import MAX_ZIP_CONTENT_SIZE
 from lms.models.errors import FileSizeError
+from lms.utils.files import ALLOWED_IMAGES_EXTENSIONS
 from lms.utils.log import log
 
 
@@ -41,7 +43,12 @@ class Ziparchive(Extractor):
         with archive.open(filename) as current_file:
             log.debug(f'Extracting from archive: {filename}')
             code = current_file.read()
-        decoded = code.decode('utf-8', errors='replace').replace('\x00', '')
+        if filename.rpartition('.')[-1] in ALLOWED_IMAGES_EXTENSIONS:
+            decoded = base64.b64encode(code)
+        else:
+            decoded = code.decode(
+                'utf-8', errors='replace',
+            ).replace('\x00', '')
         filename = filename[len(dirname):]
         return File(path=f'/{filename}', code=decoded)
 
