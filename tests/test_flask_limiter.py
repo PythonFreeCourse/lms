@@ -1,4 +1,5 @@
-from lms.lmsdb.models import User
+from lms.lmsweb import routes
+from lms.lmsdb.models import Solution, User
 from lms.lmsweb import webapp
 from tests import conftest
 
@@ -44,3 +45,14 @@ class TestLimiter:
         client = conftest.get_logged_user(student_user.username)
         success_login_response = client.get('/exercises')
         assert success_login_response.status_code == 200
+
+    @staticmethod
+    @conftest.use_limiter
+    def test_limiter_shared_link(student_user: User, solution: Solution):
+        client = conftest.get_logged_user(student_user.username)
+        shared_solution = conftest.create_shared_solution(solution)
+        for _ in range(webapp.config['LIMITS_PER_MINUTE']):
+            response = client.get(f'{routes.SHARED}/{shared_solution}')
+            assert response.status_code == 200
+        response = client.get(f'{routes.SHARED}/{shared_solution}')
+        assert response.status_code == 429

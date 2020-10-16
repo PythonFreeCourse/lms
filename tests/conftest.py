@@ -181,8 +181,8 @@ def create_exercise(index: int = 0, is_archived: bool = False) -> Exercise:
     )
 
 
-def create_shared_solution(solution: Solution) -> str:
-    return SharedSolution.create_shared_solution(solution=solution)
+def create_shared_solution(solution: Solution) -> SharedSolution:
+    return SharedSolution.create_new(solution=solution)
 
 
 def create_note(
