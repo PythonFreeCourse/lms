@@ -161,3 +161,15 @@ class TestNotes:
         assert private_note.get('privacy') == 40
         assert private_note.get('subject') == exercise.subject
         assert staff_note.get('fullname') == staff_user.fullname
+
+    @staticmethod
+    def test_unknown_note_act(staff_user: User):
+        client = conftest.get_logged_user(staff_user.username)
+        # Trying to do known act
+        unknown_note_response = client.post(
+            f'/notes/{staff_user.id}',
+            data=json.dumps({'act': 'unknown'}),
+            query_string={'note': 'one day'},
+            content_type='application/json',
+        )
+        assert unknown_note_response.status_code == 400
