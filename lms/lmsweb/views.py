@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Callable, Optional
 
 import arrow  # type: ignore
 from flask import (
@@ -9,12 +9,11 @@ from flask_limiter.util import get_remote_address  # type: ignore
 from flask_login import (  # type: ignore
     current_user, login_required, login_user, logout_user,
 )
-from playhouse.shortcuts import model_to_dict  # type: ignore
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, RoleOptions, SharedSolution,
+    ALL_MODELS, Comment, Note, RoleOptions, SharedSolution,
     Solution, SolutionFile, User, database,
 )
 from lms.lmsweb import babel, limiter, routes, webapp
@@ -28,7 +27,9 @@ from lms.lmsweb.manifest import MANIFEST
 from lms.lmsweb.redirections import (
     PERMISSIVE_CORS, get_next_url, login_manager,
 )
-from lms.models import comments, notifications, share_link, solutions, upload
+from lms.models import (
+    comments, notes, notifications, share_link, solutions, upload,
+)
 from lms.models.errors import FileSizeError, LmsError, UploadError, fail
 from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import get_language_name_by_extension
@@ -143,6 +144,15 @@ def banned_page():
         return render_template('banned.html')
 
 
+def try_or_fail(callback: Callable, *args: Any, **kwargs: Any):
+    try:
+        result = callback(*args, **kwargs)
+    except LmsError as e:
+        error_message, status_code = e.args
+        return fail(status_code, error_message)
+    return result or jsonify({'success': 'true'})
+
+
 @webapp.route('/')
 @login_required
 def main():
@@ -213,6 +223,40 @@ def share():
     return fail(400, f'Unknown or unset act value "{act}".')
 
 
+@webapp.route('/notes/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def note(user_id: int):
+    act = request.args.get('act') or request.json.get('act')
+
+    user = User.get_or_none(User.id == user_id)
+    if user is None:
+        return fail(404, f'No such user {user_id}.')
+
+    if act == 'fetch':
+        return jsonify(tuple(user.notes().dicts()))
+
+    if not current_user.role.is_manager:
+        return fail(403, "You aren't allowed to access this page.")
+
+    if act == 'delete':
+        note_id = int(request.args.get('noteId'))
+        return try_or_fail(notes.delete, note_id=note_id)
+
+    if act == 'create':
+        note_text = request.args.get('note', '')
+        note_exercise = request.args.get('exercise', '')
+        privacy = request.args.get('privacy', '0')
+        return try_or_fail(
+            notes.create,
+            user=user,
+            note_text=note_text,
+            note_exercise=note_exercise,
+            privacy=privacy,
+        )
+
+    return fail(400, f'Unknown or unset act value "{act}".')
+
+
 @webapp.route('/comments', methods=['GET', 'POST'])
 @login_required
 def comment():
@@ -241,36 +285,21 @@ def comment():
         return fail(403, "You aren't allowed to access this page.")
 
     if act == 'delete':
-        comment_id = int(request.args.get('commentId'))
-        comment_ = Comment.get_or_none(Comment.id == comment_id)
-        if (
-            comment_.commenter.id != current_user.id
-            and not current_user.role.is_manager
-        ):
-            return fail(403, "You aren't allowed to access this page.")
-        if comment_ is not None:
-            comment_.delete_instance()
-        return jsonify({'success': 'true'})
+        return try_or_fail(comments.delete)
 
     if act == 'create':
-        kind = request.json.get('kind', '')
-        comment_id, comment_text = None, None
+        user = User.get_or_none(User.id == current_user.id)
         try:
-            line_number = int(request.json.get('line', 0))
-        except ValueError:
-            line_number = 0
-        if kind.lower() == 'id':
-            comment_id = int(request.json.get('comment', 0))
-        if kind.lower() == 'text':
-            comment_text = request.json.get('comment', '')
-        return comments._create_comment(
-            current_user.id,
-            file,
-            kind,
-            line_number,
-            comment_text,
-            comment_id,
-        )
+            comment_ = comments.create(file=file, user=user)
+        except LmsError as e:
+            error_message, status_code = e.args
+            return fail(status_code, error_message)
+
+        return jsonify({
+            'success': 'true', 'text': comment_.comment.text, 'is_auto': False,
+            'author_name': user.fullname, 'author_role': user.role.id,
+            'id': comment_.id, 'line_number': comment_.line_number,
+        })
 
     return fail(400, f'Unknown or unset act value "{act}".')
 
@@ -290,10 +319,14 @@ def user(user_id):
     if target_user is None:
         return fail(404, 'There is no such user.')
 
+    is_manager = current_user.role.is_manager
+
     return render_template(
         'user.html',
         solutions=Solution.of_user(target_user.id, with_archived=True),
         user=target_user,
+        is_manager=is_manager,
+        notes_options=Note.get_note_options(),
     )
 
 
@@ -343,23 +376,11 @@ def download(download_id: str):
         download_id (str): Can be on each side of
                            a solution.id and sharedsolution.shared_url.
     """
-    solution = Solution.get_or_none(Solution.id == download_id)
-    shared_solution = SharedSolution.get_or_none(
-        SharedSolution.shared_url == download_id,
-    )
-    if solution is None and shared_solution is None:
-        return fail(404, 'Solution does not exist.')
-
-    if shared_solution is None:
-        viewer_is_solver = solution.solver.id == current_user.id
-        has_viewer_access = current_user.role.is_viewer
-        if not viewer_is_solver and not has_viewer_access:
-            return fail(403, 'This user has no permissions to view this page.')
-        files = solution.files
-        filename = solution.exercise.subject
-    else:
-        files = shared_solution.solution.files
-        filename = shared_solution.solution.exercise.subject
+    try:
+        files, filename = solutions.get_download_data(download_id)
+    except LmsError as e:
+        error_message, status_code = e.args
+        return fail(status_code, error_message)
 
     response = make_response(solutions.create_zip_from_solution(files))
     response.headers.set('Content-Type', 'zip')
@@ -385,8 +406,6 @@ def view(
     if not shared_url and not viewer_is_solver and not has_viewer_access:
         return fail(403, 'This user has no permissions to view this page.')
 
-    versions = solution.ordered_versions()
-    test_results = solution.test_results()
     is_manager = current_user.role.is_manager
 
     solution_files = tuple(solution.files)
@@ -395,38 +414,14 @@ def view(
             return fail(404, 'There are no files in this solution.')
         return done_checking(solution.exercise.id, solution.id)
 
-    files = solutions.get_files_tree(solution.files)
-    file_id = file_id or files[0]['id']
-    file_to_show = next((f for f in solution_files if f.id == file_id), None)
-    if file_to_show is None:
-        return fail(404, 'File does not exist.')
-
-    view_params = {
-        'solution': model_to_dict(solution),
-        'files': files,
-        'comments': solution.comments_per_file,
-        'current_file': file_to_show,
-        'is_manager': is_manager,
-        'role': current_user.role.name.lower(),
-        'versions': versions,
-        'test_results': test_results,
-        'shared_url': shared_url,
-    }
-
-    if is_manager:
-        view_params = {
-            **view_params,
-            'exercise_common_comments':
-                comments._common_comments(exercise_id=solution.exercise),
-            'all_common_comments':
-                comments._common_comments(),
-            'user_comments':
-                comments._common_comments(user_id=current_user.id),
-            'left': Solution.left_in_exercise(solution.exercise),
-        }
-
-    if viewer_is_solver:
-        notifications.read_related(solution_id, current_user.id)
+    try:
+        view_params = solutions.get_view_parameters(
+            solution, file_id, shared_url, is_manager,
+            solution_files, viewer_is_solver,
+        )
+    except LmsError as e:
+        error_message, status_code = e.args
+        return fail(status_code, error_message)
 
     return render_template('view.html', **view_params)
 
@@ -434,6 +429,7 @@ def view(
 @webapp.route(f'{routes.SHARED}/<string:shared_url>')
 @webapp.route(f'{routes.SHARED}/<string:shared_url>/<int:file_id>')
 @login_required
+@limiter.limit(f'{LIMITS_PER_MINUTE}/minute')
 def shared_solution(shared_url: str, file_id: Optional[int] = None):
     if not webapp.config.get('SHAREABLE_SOLUTIONS', False):
         return fail(404, 'Solutions are not shareable.')
@@ -444,6 +440,7 @@ def shared_solution(shared_url: str, file_id: Optional[int] = None):
     if shared_solution is None:
         return fail(404, 'The solution does not exist.')
 
+    share_link.new(shared_solution)
     solution_id = shared_solution.solution.id
     return view(
         solution_id=solution_id, file_id=file_id, shared_url=shared_url,

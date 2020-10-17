@@ -1,12 +1,15 @@
+from lms.models.errors import ResourceNotFound
+from lms.models.solutions import get_view_parameters
 from unittest import mock
 
 from flask import json
+import pytest
 
 from lms.lmsdb.models import Comment, Exercise, SharedSolution, Solution, User
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmsweb import routes
 from lms.models import notifications, solutions
-from lms.tests import conftest
+from tests import conftest
 
 
 celery_async = (
@@ -22,9 +25,9 @@ class TestSolutionDb:
     created_state = Solution.STATES.CREATED.name
 
     def test_new_solution_override_old_solutions(
-            self,
-            exercise: Exercise,
-            student_user: User,
+        self,
+        exercise: Exercise,
+        student_user: User,
     ):
         first_solution = conftest.create_solution(exercise, student_user)
         second_solution = conftest.create_solution(exercise, student_user)
@@ -50,10 +53,10 @@ class TestSolutionDb:
         assert next_unchecked.id == second_solution.id
         assert next_unchecked_by_id.id == second_solution.id
 
+    @staticmethod
     def test_next_exercise_with_cleanest_code(
-            self,
-            comment: Comment,
-            staff_user: User,
+        comment: Comment,
+        staff_user: User,
     ):
         student_user: User = conftest.create_student_user(index=1)
         first_solution = comment.solution
@@ -100,10 +103,10 @@ class TestSolutionDb:
 class TestSolutionBridge:
     @staticmethod
     def test_mark_as_checked(
-            exercise: Exercise,
-            student_user: User,
-            staff_user: User,
-            solution: Solution,
+        exercise: Exercise,
+        student_user: User,
+        staff_user: User,
+        solution: Solution,
     ):
         # Basic functionality
         assert solution.state == Solution.STATES.CREATED.name
@@ -127,9 +130,9 @@ class TestSolutionBridge:
 
     @staticmethod
     def test_get_next_unchecked(
-            student_user: User,
-            exercise: Exercise,
-            staff_user: User,
+        student_user: User,
+        exercise: Exercise,
+        staff_user: User,
     ):
         student_user2 = conftest.create_student_user(index=1)
         exercise2 = conftest.create_exercise(3)
@@ -166,11 +169,7 @@ class TestSolutionBridge:
         assert unchecked is None
 
     @staticmethod
-    def test_start_checking(
-            exercise: Exercise,
-            student_user: User,
-            staff_user: User,
-    ):
+    def test_start_checking(exercise: Exercise, student_user: User):
         student_user2 = conftest.create_student_user(index=1)
         exercise2 = conftest.create_exercise(1)
         solution1 = conftest.create_solution(exercise, student_user)
@@ -271,6 +270,24 @@ class TestSolutionBridge:
         )
         assert another_comment_response.status_code == 200
 
+        # Unknown act comment
+        unknown_comment_response = client.post(
+            '/comments', data=json.dumps({
+                'fileId': solution.files[0].id, 'act': 'unknown',
+                'kind': 'text', 'comment': 'hey', 'line': 1,
+            }), content_type='application/json',
+        )
+        assert unknown_comment_response.status_code == 400
+
+        # Not existing fileId comment
+        file_id_comment_response = client.post(
+            '/comments', data=json.dumps({
+                'fileId': 99, 'act': 'create',
+                'kind': 'text', 'comment': 'hey', 'line': 1,
+            }), content_type='application/json',
+        )
+        assert file_id_comment_response.status_code == 404
+
         # Removing the second comment
         json_response_another_comment = json.loads(
             another_comment_response.get_data(as_text=True),
@@ -330,14 +347,22 @@ class TestSolutionBridge:
         }), content_type='application/json')
         assert shared_response.status_code == 200
 
+        # Unknown act of share
+        unknown_shared_response = client2.post('/share', data=json.dumps({
+            'solutionId': solution.id, 'act': 'unknown',
+        }), content_type='application/json')
+        assert unknown_shared_response.status_code == 400
+
         # Entering another student solution
         shared_url = SharedSolution.get_or_none(
             SharedSolution.solution == solution,
         )
+        assert len(shared_url.entries) == 0
         conftest.logout_user(client2)
         client = conftest.get_logged_user(student_user.username)
         shared_response = client.get(f'{routes.SHARED}/{shared_url}')
         assert shared_response.status_code == 200
+        assert len(shared_url.entries) == 1
 
         # Downloading another student solution by solution.id
         solution_id_download_response = client.get(
@@ -377,14 +402,86 @@ class TestSolutionBridge:
 
     @staticmethod
     def test_share_with_disabled_shareable_solutions(
-        exercise: Exercise,
+        solution: Solution,
         student_user: User,
     ):
-        solution = conftest.create_solution(exercise, student_user)
-
         client = conftest.get_logged_user(student_user.username)
         conftest.disable_shareable_solutions()
         shared_response = client.post('/share', data=json.dumps({
             'solutionId': solution.id, 'act': 'get',
         }), content_type='application/json')
         assert shared_response.status_code == 403
+
+    @staticmethod
+    def test_shared_url_with_disabled_shared_solutions(
+        solution: Solution,
+        student_user: User,
+    ):
+        client = conftest.get_logged_user(student_user.username)
+        shared_solution = conftest.create_shared_solution(solution)
+        conftest.disable_shareable_solutions()
+        not_shared_solution_response = client.get(
+            f'{routes.SHARED}/{shared_solution}',
+        )
+        assert not_shared_solution_response.status_code == 404
+
+    @staticmethod
+    def test_view_page(
+        exercise: Exercise,
+        student_user: User,
+    ):
+        student_user2 = conftest.create_student_user(index=1)
+        solution = conftest.create_solution(exercise, student_user)
+        solution2 = conftest.create_solution(exercise, student_user2)
+
+        client = conftest.get_logged_user(student_user.username)
+        view_response = client.get(f'/view/{solution.id}')
+        assert view_response.status_code == 200
+
+        another_user_solution_response = client.get(f'/view/{solution2.id}')
+        assert another_user_solution_response.status_code == 403
+
+        not_exist_solution_response = client.get('/view/0')
+        assert not_exist_solution_response.status_code == 404
+
+    @staticmethod
+    def test_strange_solution_with_no_files(
+        exercise: Exercise,
+        student_user: User,
+        staff_user: User,
+    ):
+        solution = conftest.create_solution(
+            exercise, student_user, files=[], hash_='koko',
+        )
+
+        staff_client = conftest.get_logged_user(staff_user.username)
+        view_response = staff_client.get(f'{routes.SOLUTIONS}/{solution.id}')
+        assert view_response.status_code == 200
+        solution = Solution.get_by_id(solution.id)
+        assert solution.state == Solution.STATES.DONE.name
+
+        to_show_in_view = {
+            'solution': solution,
+            'file_id': None,
+            'shared_url': '',
+            'is_manager': False,
+            'solution_files': (),
+            'viewer_is_solver': True,
+        }
+
+        with pytest.raises(ResourceNotFound):
+            assert get_view_parameters(**to_show_in_view)
+
+        user_client = conftest.get_logged_user(student_user.username)
+        assert len(list(notifications.get(student_user))) == 1
+        view_response = user_client.get(f'{routes.SOLUTIONS}/{solution.id}')
+        assert view_response.status_code == 404
+
+    @staticmethod
+    def test_manager_can_see_solutions(
+        solution: Solution,
+        staff_user: User,
+    ):
+        staff_client = conftest.get_logged_user(staff_user.username)
+        view_response = staff_client.get(f'{routes.SOLUTIONS}/{solution.id}')
+        assert view_response.status_code == 200

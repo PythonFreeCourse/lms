@@ -9,8 +9,8 @@ from typing import (
     Type, Union, cast,
 )
 
-from flask_babel import gettext as _
-from flask_login import UserMixin  # type: ignore
+from flask_babel import gettext as _  # type: ignore
+from flask_login import UserMixin, current_user  # type: ignore
 from peewee import (  # type: ignore
     BooleanField, Case, CharField, Check, DateTimeField, ForeignKeyField,
     IntegerField, JOIN, ManyToManyField, TextField, fn,
@@ -38,6 +38,16 @@ class RoleOptions(enum.Enum):
     STAFF = 'Staff'
     VIEWER = 'Viewer'
     ADMINISTRATOR = 'Administrator'
+
+    def __str__(self):
+        return self.value
+
+
+class NotePrivacy(enum.IntEnum):
+    PRIVATE = 40
+    STAFF = 30
+    USER = 20
+    PUBLIC = 10
 
     def __str__(self):
         return self.value
@@ -142,6 +152,32 @@ class User(UserMixin, BaseModel):
 
     def get_notifications(self) -> Iterable['Notification']:
         return Notification.fetch(self)
+
+    def notes(self) -> Iterable['Note']:
+        fields = (
+            Note.id, Note.creator.fullname, CommentText.text,
+            Note.timestamp, Note.exercise.subject, Note.privacy,
+        )
+        public_or_mine = (
+            (Note.privacy != NotePrivacy.PRIVATE.value)
+            | (Note.creator == current_user.id)
+        )
+
+        notes = (
+            Note
+            .select(*fields)
+            .join(User, on=(Note.creator == User.id))
+            .switch()
+            .join(Exercise, join_type=JOIN.LEFT_OUTER)
+            .switch()
+            .join(CommentText)
+            .switch()
+            .where((Note.user == self) & (public_or_mine))
+        )
+        if not current_user.role.is_manager:
+            notes = notes.where(Note.privacy <= NotePrivacy.USER.value)
+
+        return notes
 
     def __str__(self):
         return f'{self.username} - {self.fullname}'
@@ -520,13 +556,13 @@ class Solution(BaseModel):
         one_if_is_checked = Case(
             Solution.state, ((Solution.STATES.DONE.name, 1),), 0,
         )
-        fields = [
+        fields = (
             Exercise.id,
             Exercise.subject.alias('name'),
             Exercise.is_archived.alias('is_archived'),
             fn.Count(Solution.id).alias('submitted'),
             fn.Sum(one_if_is_checked).alias('checked'),
-        ]
+        )
         join_by_exercise = (Solution.exercise == Exercise.id)
         active_solutions = Solution.state.in_(
             Solution.STATES.active_solutions(),
@@ -604,6 +640,13 @@ class SharedSolution(BaseModel):
             exists = cls.get_or_none(cls.shared_url == new_url)
 
         return cls.create(shared_url=new_url, solution=solution)
+
+
+class SharedSolutionEntry(BaseModel):
+    referrer = TextField(null=True)
+    time = DateTimeField(default=datetime.now())
+    user = ForeignKeyField(User, backref='entries')
+    shared_solution = ForeignKeyField(SharedSolution, backref='entries')
 
 
 class ExerciseTest(BaseModel):
@@ -726,6 +769,44 @@ class CommentText(BaseModel):
         return instance
 
 
+class Note(BaseModel):
+    creator = ForeignKeyField(User)
+    user = ForeignKeyField(User)
+    timestamp = DateTimeField(default=datetime.now())
+    note = ForeignKeyField(CommentText)
+    exercise = ForeignKeyField(Exercise, null=True)
+    privacy = IntegerField(choices=(
+        (NotePrivacy.PRIVATE.value, NotePrivacy.PRIVATE.value),
+        (NotePrivacy.STAFF.value, NotePrivacy.STAFF.value),
+        (NotePrivacy.USER.value, NotePrivacy.USER.value),
+        (NotePrivacy.PUBLIC.value, NotePrivacy.PUBLIC.value),
+    ))
+
+    @property
+    def is_private(self) -> bool:
+        return self.privacy == NotePrivacy.PRIVATE.value
+
+    @property
+    def is_staff(self) -> bool:
+        return self.privacy == NotePrivacy.STAFF.value
+
+    @property
+    def is_solver(self) -> bool:
+        return self.privacy == NotePrivacy.USER.value
+
+    @property
+    def is_public(self) -> bool:
+        return self.privacy == NotePrivacy.PUBLIC.value
+
+    @staticmethod
+    def get_note_options():
+        return ','.join(option.name.capitalize() for option in NotePrivacy)
+
+    @staticmethod
+    def get_privacy_level(level: int) -> NotePrivacy:
+        return list(NotePrivacy)[level].value
+
+
 class Comment(BaseModel):
     commenter = ForeignKeyField(User, backref='comments')
     timestamp = DateTimeField(default=datetime.now)
@@ -766,13 +847,13 @@ class Comment(BaseModel):
 
     @classmethod
     def _by_file(cls, file_id: int):
-        fields = [
+        fields = (
             cls.id, cls.line_number, cls.is_auto,
             CommentText.id.alias('comment_id'), CommentText.text,
             SolutionFile.id.alias('file_id'),
             User.fullname.alias('author_name'),
             User.role.alias('author_role'),
-        ]
+        )
         return (
             cls
             .select(*fields)

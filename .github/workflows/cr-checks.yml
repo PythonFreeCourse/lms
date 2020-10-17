@@ -32,4 +32,8 @@ jobs:
       run: |
         export PYTHONPATH=`pwd`
         export PATH=/opt/vnu/vnu-runtime-image/bin:$PATH
-        pytest -vvv --junitxml=junit/test-results.xml
+        pytest -vvv --junitxml=junit/test-results.xml --cov-report=xml --cov=lms ./tests
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1.0.13
+      with:
+        file: coverage.xml

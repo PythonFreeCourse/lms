@@ -7,7 +7,7 @@ from lms.lmstests.public.unittests import import_tests
 from lms.lmstests.public.unittests import executers
 from lms.lmstests.public.unittests import tasks
 from lms.models import notifications
-from lms.tests import conftest
+from tests import conftest
 
 
 STUDENT_CODE = """

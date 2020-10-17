@@ -66,7 +66,7 @@ cp lms/lmsweb/config.py.example lms/lmsweb/config.py
 echo "SECRET_KEY = \"$(python -c 'import os;print(os.urandom(32).hex())')\"" >> lms/lmsweb/config.py
 
 cd devops
-. ./build.sh && . ./i18n.sh && . ./start.sh && . ./bootstrap.sh
+. ./build.sh && . ./start.sh && . ./bootstrap.sh && . ./i18n.sh
 ```
 
 In case you want to add the stub data to PostgreSQL DB, run:
@@ -93,3 +93,5 @@ pip install -r requirements.txt
 pip install -r dev_requirements.txt
 py.test -vvv
 ```
+### Contributing
+View [contributing guidelines](https://github.com/PythonFreeCourse/lms/blob/master/CONTRIBUTING.md).

@@ -21,6 +21,22 @@ class FileSizeError(LmsError):
     pass
 
 
+class NotValidRequest(LmsError):  # Error 400
+    pass
+
+
+class ForbiddenPermission(LmsError):  # Error 403
+    pass
+
+
+class ResourceNotFound(LmsError):  # Error 404
+    pass
+
+
+class UnprocessableRequest(LmsError):  # Error 422
+    pass
+
+
 def fail(status_code: int, error_msg: str):
     data = {
         'status': 'failed',
