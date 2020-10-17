@@ -96,7 +96,7 @@ def login(login_error: Optional[str] = None):
         if user is not None and user.is_password_valid(password):
             login_user(user)
             return get_next_url(next_page)
-        elif user is None or user.is_password_valid(password) is False:
+        elif user is None or not user.is_password_valid(password):
             login_error = 'Invalid username or password'
             error_details = {'next': next_page, 'login_error': login_error}
             return redirect(url_for('login', **error_details))
