@@ -17,7 +17,7 @@ class TestLogin:
     def test_login_username_fail(student_user: User):
         client = webapp.test_client()
         client.post('/login', data={
-            'username': 'wrong_usser',
+            'username': 'wrong_user',
             'password': 'fake pass',
         }, follow_redirects=True)
         fail_login_response = client.get('/exercises')
