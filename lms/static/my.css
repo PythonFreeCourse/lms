@@ -64,6 +64,11 @@ a {
   margin-bottom: 1rem;
 }
 
+#login-messege-box {
+  background: #f1c8c8;
+  color: #860606;
+}
+
 .page {
   margin: 3rem 0;
 }

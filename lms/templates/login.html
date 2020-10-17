@@ -10,6 +10,13 @@
           {{ _('ברוכים הבאים למערכת התרגילים!') }}<br>
           {{ _('הזינו את שם המשתמש והסיסמה שלכם:') }}
         </p>
+        {% if login_error %}
+        <div id="login-messege-box" class="text-center">
+            <p>
+                {{ login_error }}
+            </p>
+        </div>
+        {% endif %}
         <form class="align-items-center" method="post" action="/login">
           <div class="row mb-3 {{ direction }}-language">
             <label for="username" class="visually-hidden">{{ _('שם משתמש') }}</label>
