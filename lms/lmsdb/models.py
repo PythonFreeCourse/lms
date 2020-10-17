@@ -382,7 +382,7 @@ class Solution(BaseModel):
 
         hash_ = cls.create_hash(content) if not already_hashed else content
 
-        last_hash = (
+        last_submission_hash = (
             cls
             .select(cls.hashed)
             .where(
@@ -394,7 +394,7 @@ class Solution(BaseModel):
             .scalar()
         )
 
-        return last_hash == hash_
+        return last_submission_hash == hash_
 
     def start_checking(self) -> bool:
         return self.set_state(Solution.STATES.IN_CHECKING)

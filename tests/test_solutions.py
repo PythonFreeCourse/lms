@@ -60,8 +60,7 @@ class TestSolutionDb:
             exercise, student_user, code='1234',
         )
         assert not Solution.is_duplicate(
-            third_solution.hashed, student_user, exercise,
-            already_hashed=True,
+            third_solution.hashed, student_user, exercise, already_hashed=True,
         )
         assert Solution.is_duplicate(
             fourth_solution.hashed, student_user, exercise,
