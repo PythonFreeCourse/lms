@@ -105,7 +105,7 @@ function updateOpenedSpans(currentSpans, line) {
   let isCatching = false;
   let phrase = '';
   for (let i = 0; i < line.length; i += 1) {
-    const c = line.length[i];
+    const c = line[i];
     if (c === '>') {
       isCatching = false;
       phrase = `<${phrase}>`;
