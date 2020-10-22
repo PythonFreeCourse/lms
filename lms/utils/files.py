@@ -4,6 +4,7 @@ LANGUAGE_EXTENSIONS_TO_NAMES = {
     'h': 'c',
     'htm': 'html',
     'html': 'html',
+    'j2': 'jinja2',
     'js': 'javascript',
     'md': 'markup',
     'ps1': 'powershell',
