@@ -279,7 +279,14 @@ button#share-action:hover {
 
 #filetree {
   display: flex;
-  overflow-x: unset;
+  flex-basis: auto;
+  max-width: 20vw;
+  flex-shrink: 1;
+  align-content: start;
+  justify-content: left;
+  margin-left: 0;
+  padding-left: 0;
+  margin-right: 2rem;
 }
 
 .file-comments-count {
@@ -294,7 +301,6 @@ button#share-action:hover {
 #files {
   list-style-type: none;
   text-align: left;
-  margin: 0 1rem;
   direction: ltr;
   white-space: nowrap;
   padding: 0.2rem;
@@ -316,6 +322,7 @@ button#share-action:hover {
   flex-direction: row;
   align-content: center;
   flex-wrap: nowrap;
+  text-overflow: ellipsis;
 }
 
 #files span.icon {
@@ -449,10 +456,10 @@ button#share-action:hover {
   text-align: left;
   height: min-content;
   display: flex;
-  flex-grow: 1;
-  flex-basis: min(75vw, -moz-available);
   overflow-x: hidden;
   flex-flow: column wrap;
+  flex-basis: 70vw;
+  flex-grow: 4;
 }
 
 #code-view {
@@ -549,11 +556,6 @@ pre {
   justify-content: center;
 }
 
-.code-image {
-  max-width: 60%;
-  max-height: 60%;
-}
-
 .test-results {
   direction: rtl;
   text-align: right;
@@ -604,6 +606,9 @@ code {
   position: sticky;
   top: 2rem;
   min-width: 15vw;
+  flex-basis: auto;
+  max-width: 20vw;
+  flex-shrink: 1;
 }
 
 #popular-comments h2 {
