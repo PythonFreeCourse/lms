@@ -81,9 +81,9 @@ class Ziparchive(Extractor):
 
     def get_exercise(self, file: ZipFile) -> Iterator[Tuple[int, List[File]]]:
         assert self.filename is not None
-        exercise_id, _ = self._clean(self.filename.rpartition('.')[0])
-
         with file as archive:
+            exercise_id, _ = self._clean(self.filename.rpartition('.')[0])
+
             filenames = archive.namelist()
             if exercise_id:
                 files = list(self.get_files(archive, filenames))

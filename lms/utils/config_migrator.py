@@ -16,12 +16,11 @@ def extract_assignment(assignment: ast.Assign) -> Tuple[str, LINES_RANGE]:
 
 def get_config_assignments(config: Path) -> Dict[str, LINES_RANGE]:
     ast_nodes = ast.walk(ast.parse(config.read_text()))
-    assignments = dict(
+    return dict(
         extract_assignment(ast_node)
         for ast_node in ast_nodes
         if isinstance(ast_node, ast.Assign)
     )
-    return assignments
 
 
 def get_missing_config(file: Path, lines: Iterable[LINES_RANGE]) -> str:

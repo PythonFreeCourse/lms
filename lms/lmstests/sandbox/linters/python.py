@@ -25,12 +25,12 @@ class PythonLinter(BaseLinter):
         return file_suffix.lower() == 'py'
 
     def _get_errors_from_solution(self) -> typing.Iterable[LinterError]:
-        index_of_check = 0
         with tempfile.NamedTemporaryFile('w') as temp_file:
             temp_file.write(self._code)
             temp_file.flush()
 
             self.app.run_checks([temp_file.name])
+            index_of_check = 0
             results = self.app.file_checker_manager.checkers[
                 index_of_check].results
 

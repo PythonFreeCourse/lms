@@ -65,8 +65,7 @@ class VNULinter(BaseLinter):
                 stderr=subprocess.PIPE,
             )
             output_buffer, error_buffer = process.communicate()
-        results = json.loads(error_buffer)
-        return results
+        return json.loads(error_buffer)
 
     def _build_args(self, temp_file_path: str) -> typing.List[str]:
         args = [
