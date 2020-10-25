@@ -32,11 +32,9 @@ from lms.models import (
 )
 from lms.models.errors import FileSizeError, LmsError, UploadError, fail
 from lms.utils.consts import RTL_LANGUAGES
-from lms.utils.files import (
-    get_language_name_by_extension, get_mime_type_by_extention,
-)
+from lms.utils.files import get_language_name_by_extension
 from lms.utils.log import log
-
+import mimetypes
 
 HIGH_ROLES = {str(RoleOptions.STAFF), str(RoleOptions.ADMINISTRATOR)}
 
@@ -498,8 +496,9 @@ def _jinja2_inject_direction():
 
 @webapp.template_filter('mime_type')
 def _jinja2_filter_path_to_mime_type(filename: str) -> str:
-    ext = filename.path.rsplit('.')[-1]
-    return get_mime_type_by_extention(ext)
+    ext = '.' + filename.path.rsplit('.')[-1]
+    mimetypes.init()
+    return mimetypes.types_map[ext]
 
 
 DIRECTION = 'rtl' if get_locale() in RTL_LANGUAGES else 'ltr'
