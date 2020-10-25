@@ -1,5 +1,6 @@
 import mimetypes
 
+
 LANGUAGE_EXTENSIONS_TO_NAMES = {
     'bat': 'batch',
     'css': 'css',
