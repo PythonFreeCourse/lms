@@ -32,7 +32,9 @@ from lms.models import (
 )
 from lms.models.errors import FileSizeError, LmsError, UploadError, fail
 from lms.utils.consts import RTL_LANGUAGES
-from lms.utils.files import get_language_name_by_extension, get_mime_type_by_extention
+from lms.utils.files import (
+    get_language_name_by_extension, get_mime_type_by_extention,
+)
 from lms.utils.log import log
 
 
