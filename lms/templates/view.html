@@ -68,7 +68,7 @@
         </div>
       </div>
       <div id="code-view" data-id="{{ solution['id'] }}" data-file="{{ current_file.id }}" data-exercise="{{ solution['exercise']['id'] }}" data-role="{{ role }}" data-solver="{{ solution['solver']['fullname'] }}" data-allowed-comment="{{ config['USERS_COMMENTS'] | lower }}">
-        <pre><code id="user-code" class="language-{{ current_file | language_name }} line-numbers highlight">{% if current_file.path.rpartition('.')[-1] in image_extensions %}<div class="code-image-block"><img class="code-image" src="data:image/jpg;base64,{{ current_file.code }}"></div>{% else %}{{- current_file.code | trim(chars=' ') | e -}}{% endif %}</code></pre>
+        <pre><code id="user-code" class="language-{{ current_file | language_name }} line-numbers highlight">{% if current_file | language_name in image_extensions %}<div class="code-image-block"><img class="code-image" src="data:{{ current_file | mime_type }};base64,{{ current_file.code }}"></div>{% else %}{{- current_file.code | trim(chars=' ') | e -}}{% endif %}</code></pre>
       </div>
       {% if test_results and not shared_url %}
       <div class="test-results">

@@ -1,3 +1,6 @@
+import mimetypes
+
+
 LANGUAGE_EXTENSIONS_TO_NAMES = {
     'bat': 'batch',
     'css': 'css',
@@ -24,3 +27,8 @@ ALLOWED_IMAGES_EXTENSIONS = {'png', 'jpeg', 'jpg', 'svg', 'tiff', 'bmp', 'ico'}
 
 def get_language_name_by_extension(ext: str) -> str:
     return LANGUAGE_EXTENSIONS_TO_NAMES.get(ext, ext)
+
+
+def get_mime_type_by_extention(ext: str) -> str:
+    mimetypes.init()
+    return mimetypes.types_map[ext]
