@@ -11,7 +11,7 @@ class TestLogin:
             'password': 'wrong_pass',
         }, follow_redirects=True)
         fail_login_response = client.get('/exercises')
-        assert fail_login_response.status_code == 302
+        assert fail_login_response.status_code == 403
 
     @staticmethod
     def test_login_username_fail(student_user: User):
@@ -21,7 +21,7 @@ class TestLogin:
             'password': 'fake pass',
         }, follow_redirects=True)
         fail_login_response = client.get('/exercises')
-        assert fail_login_response.status_code == 302
+        assert fail_login_response.status_code == 403
 
     @staticmethod
     def test_login_success(student_user: User):
