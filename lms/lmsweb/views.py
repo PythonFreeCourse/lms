@@ -387,7 +387,7 @@ def download(download_id: str):
     response.headers.set('Content-Type', 'zip')
     response.headers.set(
         'Content-Disposition', 'attachment',
-        filename=f'{filename}.zip',
+        filename=f'{filename}.zip'.encode('utf-8'),
     )
     return response
 
