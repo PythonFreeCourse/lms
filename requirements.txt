@@ -90,7 +90,7 @@ pycairo==1.19.1
 pycodestyle==2.6.0
 pycparser==2.20
 pyflakes==2.2.0
-Pygments==2.7.1
+Pygments==2.7.4
 pylint==2.6.0
 pynvim==0.4.2
 pyodbc==4.0.30
