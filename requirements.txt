@@ -85,7 +85,7 @@ pluggy==0.13.1
 prompt-toolkit==3.0.7
 psycopg2-binary==2.8.6
 ptyprocess==0.6.0
-py==1.9.0
+py==1.10.0
 pycairo==1.19.1
 pycodestyle==2.6.0
 pycparser==2.20
