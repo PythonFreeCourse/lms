@@ -102,7 +102,7 @@ python-dateutil==2.8.1
 python-dotenv==0.14.0
 pytoml==0.1.21
 pytz==2020.1
-PyYAML==5.3.1
+PyYAML==5.4
 pyzmq==19.0.2
 requests==2.24.0
 six==1.15.0
