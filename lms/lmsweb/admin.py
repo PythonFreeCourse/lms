@@ -69,6 +69,6 @@ SPECIAL_MAPPING = {
 admin = Admin(
     webapp,
     name='LMS',
-    template_mode='bootstrap3',
+    template_mode='bootstrap4',
     index_view=MyAdminIndexView(),  # NOQA
 )
