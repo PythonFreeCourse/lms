@@ -13,7 +13,7 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, Note, RoleOptions, SharedSolution,
+    ALL_MODELS, Comment, Note, Role, RoleOptions, SharedSolution,
     Solution, SolutionFile, User, database,
 )
 from lms.lmsweb import babel, limiter, routes, webapp
@@ -27,6 +27,7 @@ from lms.lmsweb.manifest import MANIFEST
 from lms.lmsweb.redirections import (
     PERMISSIVE_CORS, get_next_url, login_manager,
 )
+from lms.lmsweb.tools.registration import RegisterForm
 from lms.models import (
     comments, notes, notifications, share_link, solutions, upload,
 )
@@ -83,7 +84,7 @@ def ratelimit_handler(e):
     f'{LIMITS_PER_MINUTE}/minute;{LIMITS_PER_HOUR}/hour',
     deduct_when=lambda response: response.status_code != 200,
 )
-def login(login_error: Optional[str] = None):
+def login(login_message: Optional[str] = None):
 
     if current_user.is_authenticated:
         return get_next_url(request.args.get('next'))
@@ -91,7 +92,7 @@ def login(login_error: Optional[str] = None):
     username = request.form.get('username')
     password = request.form.get('password')
     next_page = request.form.get('next')
-    login_error = request.args.get('login_error')
+    login_message = request.args.get('login_message')
     user = User.get_or_none(username=username)
 
     if request.method == 'POST':
@@ -99,11 +100,33 @@ def login(login_error: Optional[str] = None):
             login_user(user)
             return get_next_url(next_page)
         elif user is None or not user.is_password_valid(password):
-            login_error = 'Invalid username or password'
-            error_details = {'next': next_page, 'login_error': login_error}
+            login_message = 'Invalid username or password'
+            error_details = {'next': next_page, 'login_message': login_message}
             return redirect(url_for('login', **error_details))
 
-    return render_template('login.html', login_error=login_error)
+    return render_template('login.html', login_message=login_message)
+
+
+@webapp.route('/signup', methods=['GET', 'POST'])
+def signup():
+    form = RegisterForm()
+
+    if form.validate_on_submit():
+        User.get_or_create(**{
+            User.mail_address.name: form.email.data,
+            User.username.name: form.username.data,
+        }, defaults={
+            User.fullname.name: form.fullname.data,
+            User.role.name: Role.get_student_role(),
+            User.password.name: form.password.data,
+            User.api_key.name: User.random_password(),
+        })
+
+        return redirect(url_for(
+            'login', login_message='Registration Successfully',
+        ))
+
+    return render_template('signup.html', form=form)
 
 
 @webapp.route('/logout')

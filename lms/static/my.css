@@ -46,25 +46,29 @@ a {
   text-align: right;
 }
 
-#login-container {
+#login-container,
+#signup-container {
   height: 100%;
   align-items: center;
   display: flex;
   align-self: center;
 }
 
-#login {
+#login,
+#signup {
   margin: auto;
   max-width: 420px;
   padding: 15px;
   width: 100%;
 }
 
-#login-logo {
+#login-logo,
+#signup-logo {
   margin-bottom: 1rem;
 }
 
-#login-messege-box {
+#login-message-box,
+#signup-errors {
   background: #f1c8c8;
   color: #860606;
 }
