@@ -166,6 +166,7 @@ def confirm_email(token: str):
             ),
         ))
     except SignatureExpired:
+        send_confirmation_mail(email, user.fullname)
         return redirect(url_for(
             'login', login_message=(
                 _('קישור האימות פג תוקף, קישור חדש נשלח אל תיבת המייל שלך'),
