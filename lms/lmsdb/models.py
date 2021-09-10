@@ -417,8 +417,7 @@ class Solution(BaseModel):
             **{Solution.state.name: new_state.name},
             **kwargs,
         ).where(requested_solution)
-        updated = changes.execute() == 1
-        return updated
+        return changes.execute() == 1
 
     def ordered_versions(self) -> Iterable['Solution']:
         return Solution.select().where(
