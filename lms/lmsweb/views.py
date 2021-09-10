@@ -171,7 +171,7 @@ def confirm_email(token: str):
                 _('קישור האימות פג תוקף, קישור חדש נשלח אל תיבת המייל שלך'),
             ),
         ))
-    except (BadSignature, BadTimeSignature):
+    except BadSignature:
         return fail(404, 'No such signature')
 
 
