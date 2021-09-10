@@ -5,10 +5,12 @@ from flask import (
     jsonify, make_response, render_template,
     request, send_from_directory, url_for,
 )
+from flask_babel import gettext as _  # type: ignore
 from flask_limiter.util import get_remote_address  # type: ignore
 from flask_login import (  # type: ignore
     current_user, login_required, login_user, logout_user,
 )
+from itsdangerous import BadSignature, BadTimeSignature, SignatureExpired
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
@@ -27,7 +29,9 @@ from lms.lmsweb.manifest import MANIFEST
 from lms.lmsweb.redirections import (
     PERMISSIVE_CORS, get_next_url, login_manager,
 )
-from lms.lmsweb.tools.registration import RegisterForm
+from lms.lmsweb.tools.registration import (
+    RegisterForm, SERIALIZER, send_confirmation_mail,
+)
 from lms.models import (
     comments, notes, notifications, share_link, solutions, upload,
 )
@@ -96,11 +100,19 @@ def login(login_message: Optional[str] = None):
     user = User.get_or_none(username=username)
 
     if request.method == 'POST':
-        if user is not None and user.is_password_valid(password):
+        if (
+            user is not None and user.is_password_valid(password)
+            and not user.role.is_not_confirmed
+        ):
             login_user(user)
             return get_next_url(next_page)
-        elif user is None or not user.is_password_valid(password):
-            login_message = 'Invalid username or password'
+        elif (
+            user is None or not user.is_password_valid(password)
+            or user.role.is_not_confirmed
+        ):
+            login_message = _('שם המשתמש או הסיסמה שהוזנו לא תקינים')
+            if user is not None and user.role.is_not_confirmed:
+                login_message = _('עליך לאשר את המייל')
             error_details = {'next': next_page, 'login_message': login_message}
             return redirect(url_for('login', **error_details))
 
@@ -110,23 +122,57 @@ def login(login_message: Optional[str] = None):
 @webapp.route('/signup', methods=['GET', 'POST'])
 def signup():
     form = RegisterForm()
-
     if form.validate_on_submit():
         User.get_or_create(**{
             User.mail_address.name: form.email.data,
             User.username.name: form.username.data,
         }, defaults={
             User.fullname.name: form.fullname.data,
-            User.role.name: Role.get_student_role(),
+            User.role.name: Role.get_not_confirmed_role(),
             User.password.name: form.password.data,
             User.api_key.name: User.random_password(),
         })
 
+        send_confirmation_mail(form.email.data, form.fullname.data)
+
         return redirect(url_for(
-            'login', login_message='Registration Successfully',
+            'login', login_message=_('ההרשמה בוצעה בהצלחה'),
         ))
 
     return render_template('signup.html', form=form)
+
+
+@webapp.route('/confirm-email/<token>')
+def confirm_email(token: str):
+    try:
+        email = SERIALIZER.loads(
+            token, salt='email-confirmation', max_age=3600,
+        )
+        user = User.get_or_none(User.mail_address == email)
+        if user is None:
+            return fail(404, f'No such user with email {email}.')
+        if not user.role.is_not_confirmed:
+            return fail(
+                403, f'User has been already confirmed {user.username}',
+            )
+        update = User.update(
+            role=Role.get_student_role(),
+        ).where(User.username == user.username)
+        update.execute()
+
+        return redirect(url_for(
+            'login', login_message=(
+                _('המשתמש שלך אומת בהצלחה, כעת הינך יכול להתחבר למערכת'),
+            ),
+        ))
+    except SignatureExpired:
+        return redirect(url_for(
+            'login', login_message=(
+                _('קישור האימות פג תוקף, קישור חדש נשלח אל תיבת המייל שלך'),
+            ),
+        ))
+    except (BadSignature, BadTimeSignature):
+        return fail(404, 'No such signature')
 
 
 @webapp.route('/logout')

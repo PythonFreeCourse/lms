@@ -118,6 +118,10 @@ def create_banned_user(index: int = 0) -> User:
     return create_user(RoleOptions.BANNED.value, index)
 
 
+def create_not_confirmed_user(index: int = 0) -> User:
+    return create_user(RoleOptions.NOT_CONFIRMED.value, index)
+
+
 def create_student_user(index: int = 0) -> User:
     return create_user(RoleOptions.STUDENT.value, index)
 
@@ -139,6 +143,11 @@ def banned_user():
 @pytest.fixture()
 def staff_user(staff_password):
     return create_staff_user()
+
+
+@pytest.fixture()
+def not_confirmed_user():
+    return create_not_confirmed_user()
 
 
 @pytest.fixture()

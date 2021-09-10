@@ -5,16 +5,22 @@ from lms.lmsweb.tools.validators import (
 import os
 import typing
 
+from flask import url_for
 from flask_babel import gettext as _  # type: ignore
+from flask_mail import Message  # type: ignore
 from flask_wtf import FlaskForm
+from itsdangerous import URLSafeTimedSerializer
 from wtforms import PasswordField, StringField
 from wtforms.validators import Email, EqualTo, InputRequired, Length
 
 from lms.lmsdb import models
-from lms.lmsweb import config
+from lms.lmsweb import config, webmail
 from lms.utils.log import log
 
 import requests
+
+
+SERIALIZER = URLSafeTimedSerializer(config.SECRET_KEY)
 
 
 class RegisterForm(FlaskForm):
@@ -38,7 +44,7 @@ class RegisterForm(FlaskForm):
     confirm = PasswordField(
         'Password Confirmation', validators=[
             InputRequired(),
-            EqualTo('password', message=_('הסיסמה שהוקלדה אינה זהה')),
+            EqualTo('password', message=_('הסיסמאות שהוקלדו אינן זהות')),
         ],
     )
 
@@ -159,6 +165,21 @@ class UserRegistrationCreator:
         for k, v in details.items():
             msg = msg.replace(f'@@{k}@@', v)
         return msg
+
+
+def generate_confirmation_token(email: str) -> str:
+    return SERIALIZER.dumps(email, salt='email-confirmation')
+
+
+def send_confirmation_mail(email: str, fullname: str) -> None:
+    token = generate_confirmation_token(email)
+    msg = Message(
+        'Confirmation Email - Learn Python',
+        sender=f'lms@{config.MAILGUN_DOMAIN}', recipients=[email],
+    )
+    link = url_for('confirm_email', token=token, _external=True)
+    msg.body = f'Hey {fullname},\nYour confirmation link is: {link}'
+    webmail.send(msg)
 
 
 if __name__ == '__main__':

@@ -62,7 +62,7 @@ class TestUser:
 
     @staticmethod
     def test_banned_user(banned_user: User):
-        client = client = webapp.test_client()
+        client = webapp.test_client()
         login_response = client.post('/login', data={
             'username': banned_user.username,
             'password': 'fake pass',
