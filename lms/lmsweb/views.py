@@ -114,7 +114,7 @@ def login(login_message: Optional[str] = None):
             error_details = {'next': next_page, 'login_message': login_message}
             return redirect(url_for('login', **error_details))
 
-        elif user.is_unverified:
+        elif user.role.is_unverified:
             login_message = _('עליך לאשר את המייל')
             error_details = {'next': next_page, 'login_message': login_message}
             return redirect(url_for('login', **error_details))
