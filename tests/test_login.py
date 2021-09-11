@@ -24,13 +24,17 @@ class TestLogin:
         assert fail_login_response.status_code == 302
 
     @staticmethod
-    def test_login_not_confirmed_user(not_confirmed_user: User):
+    def test_login_not_confirmed_user(
+        not_confirmed_user: User, captured_templates,
+    ):
         client = webapp.test_client()
         login_response = client.post('/login', data={
             'username': not_confirmed_user.username,
             'password': 'fake pass',
         }, follow_redirects=True)
-        assert login_response.request.path == '/login'
+        template, _ = captured_templates[-1]
+        assert template.name == 'login.html'
+
         fail_login_response = client.get('/exercises')
         assert fail_login_response.status_code == 302
 

@@ -3,7 +3,7 @@ from lms.lmsdb.models import User
 from lms.lmsweb import webapp
 
 
-class TestReg:
+class TestRegistration:
     @staticmethod
     def test_invalid_username(student_user: User, captured_templates):
         client = webapp.test_client()
