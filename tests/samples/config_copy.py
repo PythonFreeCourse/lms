@@ -11,7 +11,6 @@ FEATURE_FLAG_CHECK_IDENTICAL_CODE_ON = os.getenv(
     'FEATURE_FLAG_CHECK_IDENTICAL_CODE_ON', False,
 )
 
-TESTING = True
 
 
 USERS_CSV = 'users.csv'

@@ -14,7 +14,7 @@ class TestLogin:
         assert fail_login_response.status_code == 302
 
     @staticmethod
-    def test_login_username_fail(student_user: User):
+    def test_login_username_fail():
         client = webapp.test_client()
         client.post('/login', data={
             'username': 'wrong_user',

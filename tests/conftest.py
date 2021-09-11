@@ -1,11 +1,11 @@
 import datetime
 from functools import wraps
-from lms.models import notes
 import os
 import random
 import string
 from typing import List, Optional
 
+from flask import template_rendered
 from flask.testing import FlaskClient
 from peewee import SqliteDatabase
 import pytest
@@ -50,6 +50,11 @@ def db(db_in_memory):
 
 
 @pytest.fixture(autouse=True, scope='session')
+def app():
+    return webapp
+
+
+@pytest.fixture(autouse=True, scope='session')
 def celery_eager():
     public_app.conf.update(task_always_eager=True)
     sandbox_app.conf.update(task_always_eager=True)
@@ -63,6 +68,11 @@ def webapp_configurations():
         random.choices(string.ascii_letters + string.digits, k=64),
     )
     limiter.enabled = False
+
+
+@pytest.fixture(autouse=True, scope='session')
+def disable_mail_sending():
+    webapp.config['TESTING'] = True
 
 
 def disable_shareable_solutions():
@@ -166,6 +176,20 @@ def admin_user():
         api_key='fake key',
         role=admin_role,
     )
+
+
+@pytest.fixture(autouse=True, scope='session')
+def captured_templates(app):
+    recorded = []
+
+    def record(sender, template, context, **kwargs):
+        recorded.append((template, context))
+
+    template_rendered.connect(record, app)
+    try:
+        yield recorded
+    finally:
+        template_rendered.disconnect(record, app)
 
 
 def create_notification(

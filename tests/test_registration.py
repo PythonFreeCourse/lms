@@ -3,18 +3,19 @@ from lms.lmsdb.models import User
 from lms.lmsweb import webapp
 
 
-class TestRegistration:
+class TestReg:
     @staticmethod
-    def test_invalid_username(student_user: User):
+    def test_invalid_username(student_user: User, captured_templates):
         client = webapp.test_client()
-        response = client.post('/signup', data={
+        client.post('/signup', data={
             'email': 'some_name@mail.com',
             'username': student_user.username,
             'fullname': 'some_name',
             'password': 'some_password',
             'confirm': 'some_password',
         }, follow_redirects=True)
-        assert response.request.path == '/signup'
+        template, _ = captured_templates[-1]
+        assert template.name == "signup.html"
 
         client.post('/login', data={
             'username': student_user.username,
@@ -24,16 +25,17 @@ class TestRegistration:
         assert fail_login_response.status_code == 302
 
     @staticmethod
-    def test_invalid_email(student_user: User):
+    def test_invalid_email(student_user: User, captured_templates):
         client = webapp.test_client()
-        response = client.post('/signup', data={
+        client.post('/signup', data={
             'email': student_user.mail_address,
             'username': 'some_user',
             'fullname': 'some_name',
             'password': 'some_password',
             'confirm': 'some_password',
         }, follow_redirects=True)
-        assert response.request.path == '/signup'
+        template, _ = captured_templates[-1]
+        assert template.name == 'signup.html'
 
         client.post('/login', data={
             'username': 'some_user',
@@ -43,16 +45,17 @@ class TestRegistration:
         assert fail_login_response.status_code == 302
 
     @staticmethod
-    def test_successful_registration():
+    def test_successful_registration(captured_templates):
         client = webapp.test_client()
-        response = client.post('/signup', data={
+        client.post('/signup', data={
             'email': 'some_user123@mail.com',
             'username': 'some_user',
             'fullname': 'some_name',
             'password': 'some_password',
             'confirm': 'some_password',
         }, follow_redirects=True)
-        assert response.request.path == '/login'
+        template, _ = captured_templates[-1]
+        assert template.name == 'login.html'
 
         client.post('/login', data={
             'username': 'some_user',
