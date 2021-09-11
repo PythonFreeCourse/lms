@@ -10,7 +10,7 @@ from flask_limiter.util import get_remote_address  # type: ignore
 from flask_login import (  # type: ignore
     current_user, login_required, login_user, logout_user,
 )
-from itsdangerous import BadSignature, BadTimeSignature, SignatureExpired
+from itsdangerous import BadSignature, SignatureExpired
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
