@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  lmsweb-1.0\n"
 "Report-Msgid-Bugs-To: bugs@mesicka.com\n"
-"POT-Creation-Date: 2021-09-11 09:07+0300\n"
+"POT-Creation-Date: 2021-09-11 19:16+0300\n"
 "PO-Revision-Date: 2020-09-16 18:29+0300\n"
 "Last-Translator: Or Ronai\n"
 "Language: en\n"
@@ -45,36 +45,36 @@ msgstr "The automatic checker couldn't run your code."
 msgid "אחי, בדקת את הקוד שלך?"
 msgstr "Bro, did you check your code?"
 
-#: lmsweb/views.py:113
+#: lmsweb/views.py:115
 #, fuzzy
 msgid "שם המשתמש או הסיסמה שהוזנו לא תקינים"
 msgstr "Invalid username or password"
 
-#: lmsweb/views.py:115
+#: lmsweb/views.py:120
 msgid "עליך לאשר את המייל"
 msgstr "You have to confirm your registration with the link sent to your email"
 
-#: lmsweb/views.py:139
+#: lmsweb/views.py:144
 msgid "ההרשמה בוצעה בהצלחה"
 msgstr "Registration successfully"
 
-#: lmsweb/views.py:165
+#: lmsweb/views.py:168
 msgid "המשתמש שלך אומת בהצלחה, כעת הינך יכול להתחבר למערכת"
 msgstr "Your user has been successfully confirmed, you can now login"
 
-#: lmsweb/views.py:172
+#: lmsweb/views.py:176
 msgid "קישור האימות פג תוקף, קישור חדש נשלח אל תיבת המייל שלך"
 msgstr "The confirmation link is expired, new link has been sent to your email"
 
-#: lmsweb/tools/registration.py:29
+#: lmsweb/forms/register.py:14
 msgid "אימייל לא תקין"
 msgstr "Invalid email"
 
-#: lmsweb/tools/registration.py:47
+#: lmsweb/forms/register.py:32
 msgid "הסיסמאות שהוקלדו אינן זהות"
 msgstr "The passwords are not identical"
 
-#: lmsweb/tools/registration.py:143
+#: lmsweb/tools/registration.py:105
 msgid "מערכת הגשת התרגילים"
 msgstr "Exercuse submission system"
 
@@ -85,6 +85,16 @@ msgstr "The username already in use"
 #: lmsweb/tools/validators.py:16
 msgid "האימייל כבר נמצא בשימוש"
 msgstr "The email already in use"
+
+#: models/register.py:31
+#, python-format
+msgid "מייל אימות - %(site_name)s"
+msgstr "Confirmation mail - %(site_name)s"
+
+#: models/register.py:39
+#, python-format
+msgid "שלום %(fullname)s,\n לינק האימות שלך למערכת הוא: %(link)s"
+msgstr "Hello %(fullname)s,\n Your confirmation link is: %(link)s"
 
 #: models/solutions.py:50
 #, python-format

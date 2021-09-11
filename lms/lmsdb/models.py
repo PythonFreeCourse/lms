@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 
 class RoleOptions(enum.Enum):
     BANNED = 'Banned'
-    NOT_CONFIRMED = 'Not_Confirmed'
+    UNVERIFIED = 'Unverified'
     STUDENT = 'Student'
     STAFF = 'Staff'
     VIEWER = 'Viewer'
@@ -68,7 +68,7 @@ class Role(BaseModel):
         (RoleOptions.STAFF.value, RoleOptions.STAFF.value),
         (RoleOptions.VIEWER.value, RoleOptions.VIEWER.value),
         (RoleOptions.STUDENT.value, RoleOptions.STUDENT.value),
-        (RoleOptions.NOT_CONFIRMED.value, RoleOptions.NOT_CONFIRMED.value),
+        (RoleOptions.UNVERIFIED.value, RoleOptions.UNVERIFIED.value),
         (RoleOptions.BANNED.value, RoleOptions.BANNED.value),
     ))
 
@@ -80,8 +80,8 @@ class Role(BaseModel):
         return cls.get(Role.name == RoleOptions.BANNED.value)
 
     @classmethod
-    def get_not_confirmed_role(cls) -> 'Role':
-        return cls.get(Role.name == RoleOptions.NOT_CONFIRMED.value)
+    def get_unverified_role(cls) -> 'Role':
+        return cls.get(Role.name == RoleOptions.UNVERIFIED.value)
 
     @classmethod
     def get_student_role(cls) -> 'Role':
@@ -107,8 +107,8 @@ class Role(BaseModel):
         return self.name == RoleOptions.BANNED.value
 
     @property
-    def is_not_confirmed(self) -> bool:
-        return self.name == RoleOptions.NOT_CONFIRMED.value
+    def is_unverified(self) -> bool:
+        return self.name == RoleOptions.UNVERIFIED.value
 
     @property
     def is_student(self) -> bool:

@@ -1,7 +1,7 @@
 from flask.testing import FlaskClient
 
-from lms.lmsweb.tools.registration import generate_confirmation_token
 from lms.lmsdb.models import User
+from lms.models.register import generate_confirmation_token
 
 
 class TestRegistration:
@@ -66,8 +66,9 @@ class TestRegistration:
         fail_login_response = client.get('/exercises')
         assert fail_login_response.status_code == 302
 
-        token = generate_confirmation_token('some_user123@mail.com')
-        client.get(f'/confirm-email/{token}', follow_redirects=True)
+        user = User.get_or_none(User.username == 'some_user')
+        token = generate_confirmation_token(user)
+        client.get(f'/confirm-email/{user.id}/{token}', follow_redirects=True)
         client.post('/login', data={
             'username': 'some_user',
             'password': 'some_password',
@@ -76,12 +77,18 @@ class TestRegistration:
         assert fail_login_response.status_code == 200
 
     @staticmethod
-    def test_bad_token(client: FlaskClient):
+    def test_bad_token_or_id(client: FlaskClient):
         bad_token = "fake-token43@$@"
         fail_confirm_response = client.get(
-            f'/confirm-email/{bad_token}', follow_redirects=True,
+            f'/confirm-email/1/{bad_token}', follow_redirects=True,
         )
         assert fail_confirm_response.status_code == 404
+
+        # No such 999 user id
+        another_fail_response = client.get(
+            f'/confirm-email/999/{bad_token}', follow_redirects=True,
+        )
+        assert another_fail_response.status_code == 404
 
     @staticmethod
     def test_use_token_twice(client: FlaskClient):
@@ -92,13 +99,14 @@ class TestRegistration:
             'password': 'some_password',
             'confirm': 'some_password',
         }, follow_redirects=True)
-        token = generate_confirmation_token('some_user123@mail.com')
+        user = User.get_or_none(User.username == 'some_user')
+        token = generate_confirmation_token(user)
         success_token_response = client.get(
-            f'/confirm-email/{token}', follow_redirects=True,
+            f'/confirm-email/{user.id}/{token}', follow_redirects=True,
         )
         assert success_token_response.status_code == 200
 
         fail_token_response = client.get(
-            f'/confirm-email/{token}', follow_redirects=True,
+            f'/confirm-email/{user.id}/{token}', follow_redirects=True,
         )
         assert fail_token_response.status_code == 403

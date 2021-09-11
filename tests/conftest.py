@@ -128,8 +128,8 @@ def create_banned_user(index: int = 0) -> User:
     return create_user(RoleOptions.BANNED.value, index)
 
 
-def create_not_confirmed_user(index: int = 0) -> User:
-    return create_user(RoleOptions.NOT_CONFIRMED.value, index)
+def create_unverified_user(index: int = 0) -> User:
+    return create_user(RoleOptions.UNVERIFIED.value, index)
 
 
 def create_student_user(index: int = 0) -> User:
@@ -156,8 +156,8 @@ def staff_user(staff_password):
 
 
 @pytest.fixture()
-def not_confirmed_user():
-    return create_not_confirmed_user()
+def unverified_user():
+    return create_unverified_user()
 
 
 @pytest.fixture()

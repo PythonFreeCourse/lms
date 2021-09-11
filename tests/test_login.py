@@ -23,11 +23,11 @@ class TestLogin:
         assert fail_login_response.status_code == 302
 
     @staticmethod
-    def test_login_not_confirmed_user(
-        client: FlaskClient, not_confirmed_user: User, captured_templates,
+    def test_login_unverified_user(
+        client: FlaskClient, unverified_user: User, captured_templates,
     ):
         client.post('/login', data={
-            'username': not_confirmed_user.username,
+            'username': unverified_user.username,
             'password': 'fake pass',
         }, follow_redirects=True)
         template, _ = captured_templates[-1]
