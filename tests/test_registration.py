@@ -74,3 +74,31 @@ class TestRegistration:
         }, follow_redirects=True)
         fail_login_response = client.get('/exercises')
         assert fail_login_response.status_code == 200
+
+    @staticmethod
+    def test_bad_token(client: FlaskClient):
+        bad_token = "fake-token43@$@"
+        fail_confirm_response = client.get(
+            f'/confirm-email/{bad_token}', follow_redirects=True,
+        )
+        assert fail_confirm_response.status_code == 404
+
+    @staticmethod
+    def test_use_token_twice(client: FlaskClient):
+        client.post('/signup', data={
+            'email': 'some_user123@mail.com',
+            'username': 'some_user',
+            'fullname': 'some_name',
+            'password': 'some_password',
+            'confirm': 'some_password',
+        }, follow_redirects=True)
+        token = generate_confirmation_token('some_user123@mail.com')
+        success_token_response = client.get(
+            f'/confirm-email/{token}', follow_redirects=True,
+        )
+        assert success_token_response.status_code == 200
+
+        fail_token_response = client.get(
+            f'/confirm-email/{token}', follow_redirects=True,
+        )
+        assert fail_token_response.status_code == 403
