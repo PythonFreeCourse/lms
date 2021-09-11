@@ -23,7 +23,8 @@ from lms.lmsweb.admin import (
     AdminModelView, SPECIAL_MAPPING, admin, managers_only,
 )
 from lms.lmsweb.config import (
-    LANGUAGES, LIMITS_PER_HOUR, LIMITS_PER_MINUTE, LOCALE, MAX_UPLOAD_SIZE,
+    CONFIRMATION_TIME, LANGUAGES, LIMITS_PER_HOUR,
+    LIMITS_PER_MINUTE, LOCALE, MAX_UPLOAD_SIZE,
 )
 from lms.lmsweb.forms.register import RegisterForm
 from lms.lmsweb.manifest import MANIFEST
@@ -157,7 +158,9 @@ def confirm_email(user_id: int, token: str):
                 403, f'User has been already confirmed {user.username}',
             )
 
-        SERIALIZER.loads(token, salt=retrieve_salt(user), max_age=3600)
+        SERIALIZER.loads(
+            token, salt=retrieve_salt(user), max_age=CONFIRMATION_TIME,
+        )
         update = User.update(
             role=Role.get_student_role(),
         ).where(User.username == user.username)

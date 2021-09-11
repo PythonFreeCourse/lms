@@ -10,6 +10,8 @@ MAILGUN_DOMAIN = os.getenv('MAILGUN_DOMAIN', 'mail.pythonic.guru')
 SERVER_ADDRESS = os.getenv('SERVER_ADDRESS', '127.0.0.1:5000')
 SITE_NAME = 'Learning Python'
 
+CONFIRMATION_TIME = 3600
+
 # MAIL CONFIGURATION
 MAIL_SERVER = 'smtp.gmail.com'
 MAIL_PORT = 465

@@ -1,5 +1,9 @@
+import time
+from unittest.mock import Mock, patch
+
 from flask.testing import FlaskClient
 
+from lms.lmsweb.config import CONFIRMATION_TIME
 from lms.lmsdb.models import User
 from lms.models.register import generate_confirmation_token
 
@@ -73,8 +77,8 @@ class TestRegistration:
             'username': 'some_user',
             'password': 'some_password',
         }, follow_redirects=True)
-        fail_login_response = client.get('/exercises')
-        assert fail_login_response.status_code == 200
+        success_login_response = client.get('/exercises')
+        assert success_login_response.status_code == 200
 
     @staticmethod
     def test_bad_token_or_id(client: FlaskClient):
@@ -110,3 +114,38 @@ class TestRegistration:
             f'/confirm-email/{user.id}/{token}', follow_redirects=True,
         )
         assert fail_token_response.status_code == 403
+
+    @staticmethod
+    def test_expired_token(client: FlaskClient):
+        client.post('/signup', data={
+            'email': 'some_user123@mail.com',
+            'username': 'some_user',
+            'fullname': 'some_name',
+            'password': 'some_password',
+            'confirm': 'some_password',
+        }, follow_redirects=True)
+        user = User.get_or_none(User.username == 'some_user')
+        token = generate_confirmation_token(user)
+
+        fake_time = time.time() + CONFIRMATION_TIME + 1
+        with patch('time.time', Mock(return_value=fake_time)):
+            client.get(
+                f'/confirm-email/{user.id}/{token}', follow_redirects=True,
+            )
+            client.post('/login', data={
+                'username': 'some_user',
+                'password': 'some_password',
+            }, follow_redirects=True)
+            fail_login_response = client.get('/exercises')
+            assert fail_login_response.status_code == 302
+
+            token = generate_confirmation_token(user)
+            client.get(
+                f'/confirm-email/{user.id}/{token}', follow_redirects=True,
+            )
+            client.post('/login', data={
+                'username': 'some_user',
+                'password': 'some_password',
+            }, follow_redirects=True)
+            success_login_response = client.get('/exercises')
+            assert success_login_response.status_code == 200
