@@ -1,11 +1,11 @@
+from flask.testing import FlaskClient
+
 from lms.lmsdb.models import User
-from lms.lmsweb import webapp
 
 
 class TestLogin:
     @staticmethod
-    def test_login_password_fail(student_user: User):
-        client = webapp.test_client()
+    def test_login_password_fail(client: FlaskClient, student_user: User):
         client.post('/login', data={
             'username': student_user.username,
             'password': 'wrong_pass',
@@ -14,8 +14,7 @@ class TestLogin:
         assert fail_login_response.status_code == 302
 
     @staticmethod
-    def test_login_username_fail():
-        client = webapp.test_client()
+    def test_login_username_fail(client: FlaskClient):
         client.post('/login', data={
             'username': 'wrong_user',
             'password': 'fake pass',
@@ -25,10 +24,9 @@ class TestLogin:
 
     @staticmethod
     def test_login_not_confirmed_user(
-        not_confirmed_user: User, captured_templates,
+        client: FlaskClient, not_confirmed_user: User, captured_templates,
     ):
-        client = webapp.test_client()
-        login_response = client.post('/login', data={
+        client.post('/login', data={
             'username': not_confirmed_user.username,
             'password': 'fake pass',
         }, follow_redirects=True)
@@ -39,8 +37,7 @@ class TestLogin:
         assert fail_login_response.status_code == 302
 
     @staticmethod
-    def test_login_success(student_user: User):
-        client = webapp.test_client()
+    def test_login_success(client: FlaskClient, student_user: User):
         client.post('/login', data={
             'username': student_user.username,
             'password': 'fake pass',

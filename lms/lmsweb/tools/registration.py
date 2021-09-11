@@ -14,7 +14,7 @@ from wtforms import PasswordField, StringField
 from wtforms.validators import Email, EqualTo, InputRequired, Length
 
 from lms.lmsdb import models
-from lms.lmsweb import config, webmail
+from lms.lmsweb import config, webapp, webmail
 from lms.utils.log import log
 
 import requests
@@ -179,7 +179,8 @@ def send_confirmation_mail(email: str, fullname: str) -> None:
     )
     link = url_for('confirm_email', token=token, _external=True)
     msg.body = f'Hey {fullname},\nYour confirmation link is: {link}'
-    webmail.send(msg)
+    if not webapp.config.get('TESTING'):
+        webmail.send(msg)
 
 
 if __name__ == '__main__':

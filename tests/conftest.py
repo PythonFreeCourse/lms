@@ -49,9 +49,9 @@ def db(db_in_memory):
         db_in_memory.rollback()
 
 
-@pytest.fixture(autouse=True, scope='session')
-def app():
-    return webapp
+@pytest.fixture(autouse=True, scope='function')
+def client():
+    return webapp.test_client()
 
 
 @pytest.fixture(autouse=True, scope='session')
@@ -179,17 +179,17 @@ def admin_user():
 
 
 @pytest.fixture(autouse=True, scope='session')
-def captured_templates(app):
+def captured_templates():
     recorded = []
 
     def record(sender, template, context, **kwargs):
         recorded.append((template, context))
 
-    template_rendered.connect(record, app)
+    template_rendered.connect(record, webapp)
     try:
         yield recorded
     finally:
-        template_rendered.disconnect(record, app)
+        template_rendered.disconnect(record, webapp)
 
 
 def create_notification(
