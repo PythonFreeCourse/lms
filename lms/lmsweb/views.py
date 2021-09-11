@@ -109,10 +109,7 @@ def login(login_message: Optional[str] = None):
             login_user(user)
             return get_next_url(next_page)
 
-        elif (
-            user is None or not user.is_password_valid(password)
-            or user.role.is_unverified
-        ):
+        elif user is None or not user.is_password_valid(password):
             login_message = _('שם המשתמש או הסיסמה שהוזנו לא תקינים')
             error_details = {'next': next_page, 'login_message': login_message}
             return redirect(url_for('login', **error_details))
