@@ -82,9 +82,17 @@ class TestRegistration:
 
     @staticmethod
     def test_bad_token_or_id(client: FlaskClient):
+        client.post('/signup', data={
+            'email': 'some_user123@mail.com',
+            'username': 'some_user',
+            'fullname': 'some_name',
+            'password': 'some_password',
+            'confirm': 'some_password',
+        }, follow_redirects=True)
+        user = User.get_or_none(User.username == 'some_user')
         bad_token = "fake-token43@$@"
         fail_confirm_response = client.get(
-            f'/confirm-email/1/{bad_token}', follow_redirects=True,
+            f'/confirm-email/{user.id}/{bad_token}', follow_redirects=True,
         )
         assert fail_confirm_response.status_code == 404
 
