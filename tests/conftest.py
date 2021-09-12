@@ -178,7 +178,7 @@ def admin_user():
     )
 
 
-@pytest.fixture(autouse=True, scope='session')
+@pytest.fixture(autouse=True, scope='function')
 def captured_templates():
     recorded = []
 

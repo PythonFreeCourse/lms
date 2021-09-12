@@ -8,15 +8,15 @@ from lms.models.errors import (
 )
 
 
+HASHED_PASSWORD = re.compile(r'^pbkdf2.+?\$(?P<salt>.+?)\$(?P<password>.+)')
+
+
 def retrieve_salt(user: User) -> str:
-    HASHED_PASSWORD = re.compile(
-        r'^pbkdf2.+?\$(?P<salt>.+?)\$(?P<password>.+)',
-    )
     password = HASHED_PASSWORD.match(user.password)
     try:
         return password.groupdict().get('salt')
     except AttributeError:  # should never happen
-        raise UnhashedPasswordError
+        raise UnhashedPasswordError('Password format is invalid.')
 
 
 def auth(username: str, password: str) -> User:
