@@ -11,12 +11,12 @@
           {{ _('ברוכים הבאים למערכת התרגילים!') }}<br>
           {{ _('הזינו אימייל וסיסמה לצורך רישום למערכת:') }}
         </p>
-        <form class="align-items-center" method="post" action="/signup">
-            {{ render_field(form.email, cls="form-control form-control-lg", placeholder="Email Address") }}
-            {{ render_field(form.username, cls="form-control form-control-lg", placeholder="User Name") }}
-            {{ render_field(form.fullname, cls="form-control form-control-lg", placeholder="Full Name") }}
-            {{ render_field(form.password, cls="form-control form-control-lg", placeholder="Password") }}
-            {{ render_field(form.confirm, cls="form-control form-control-lg", placeholder="Password Verification") }}
+        <form class="align-items-center {{ direction }}-language" method="post" action="/signup">
+            {{ render_field(form.email, cls="form-control form-control-lg", placeholder=_('כתובת אימייל')) }}
+            {{ render_field(form.username, cls="form-control form-control-lg", placeholder=_('שם משתמש')) }}
+            {{ render_field(form.fullname, cls="form-control form-control-lg", placeholder=_('שם מלא')) }}
+            {{ render_field(form.password, cls="form-control form-control-lg", placeholder=_('סיסמה')) }}
+            {{ render_field(form.confirm, cls="form-control form-control-lg", placeholder=_('אימות סיסמה')) }}
           <input class="form-control form-control-lg" type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token() }}" required>
           <input class="form-control form-control-lg" type="hidden" name="next" id="next" value="{{ request.args.get('next', '') }}">
           <button class="btn btn-primary btn-lg btn-block">{{ _('הירשם') }}</button>

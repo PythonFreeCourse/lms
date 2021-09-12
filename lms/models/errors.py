@@ -13,10 +13,6 @@ class BadUploadFile(LmsError):
     pass
 
 
-class EmptyPasswordError(LmsError):
-    pass
-
-
 class FileSizeError(LmsError):
     pass
 
@@ -30,6 +26,10 @@ class UploadError(LmsError):
 
 
 class NotValidRequest(LmsError):  # Error 400
+    pass
+
+
+class UnauthorizedError(LmsError):  # Error 401
     pass
 
 

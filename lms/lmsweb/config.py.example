@@ -19,6 +19,7 @@ MAIL_USE_SSL = True
 MAIL_USE_TLS = False
 MAIL_USERNAME = 'username@gmail.com'
 MAIL_PASSWORD = 'password'
+MAIL_DEFAULT_SENDER = 'username@gmail.com'
 
 # ADMIN PANEL
 FLASK_ADMIN_FLUID_LAYOUT = True

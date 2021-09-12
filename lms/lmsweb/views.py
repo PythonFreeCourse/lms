@@ -34,10 +34,12 @@ from lms.lmsweb.redirections import (
 from lms.models import (
     comments, notes, notifications, share_link, solutions, upload,
 )
-from lms.models.errors import FileSizeError, LmsError, UploadError, fail
-from lms.models.register import (
-    SERIALIZER, retrieve_salt, send_confirmation_mail,
+from lms.models.errors import (
+    FileSizeError, ForbiddenPermission, LmsError,
+    UnauthorizedError, UploadError, fail,
 )
+from lms.models.register import SERIALIZER, send_confirmation_mail
+from lms.models.users import auth, retrieve_salt
 from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import (
     get_language_name_by_extension, get_mime_type_by_extention,
@@ -91,7 +93,6 @@ def ratelimit_handler(e):
     deduct_when=lambda response: response.status_code != 200,
 )
 def login(login_message: Optional[str] = None):
-
     if current_user.is_authenticated:
         return get_next_url(request.args.get('next'))
 
@@ -99,25 +100,17 @@ def login(login_message: Optional[str] = None):
     password = request.form.get('password')
     next_page = request.form.get('next')
     login_message = request.args.get('login_message')
-    user = User.get_or_none(username=username)
 
     if request.method == 'POST':
-        if (
-            user is not None and user.is_password_valid(password)
-            and not user.role.is_unverified
-        ):
+        try:
+            user = auth(username, password)
+        except (ForbiddenPermission, UnauthorizedError) as e:
+            error_message, _ = e.args
+            error_details = {'next': next_page, 'login_message': error_message}
+            return redirect(url_for('login', **error_details))
+        else:
             login_user(user)
             return get_next_url(next_page)
-
-        elif user is None or not user.is_password_valid(password):
-            login_message = _('שם המשתמש או הסיסמה שהוזנו לא תקינים')
-            error_details = {'next': next_page, 'login_message': login_message}
-            return redirect(url_for('login', **error_details))
-
-        elif user.role.is_unverified:
-            login_message = _('עליך לאשר את המייל')
-            error_details = {'next': next_page, 'login_message': login_message}
-            return redirect(url_for('login', **error_details))
 
     return render_template('login.html', login_message=login_message)
 
@@ -128,16 +121,15 @@ def signup():
     if not form.validate_on_submit():
         return render_template('signup.html', form=form)
 
-    user = User.get_or_create(**{
+    user = User.create(**{
         User.mail_address.name: form.email.data,
         User.username.name: form.username.data,
-    }, defaults={
         User.fullname.name: form.fullname.data,
         User.role.name: Role.get_unverified_role(),
         User.password.name: form.password.data,
         User.api_key.name: User.random_password(),
     })
-    send_confirmation_mail(user[0])
+    send_confirmation_mail(user)
     return redirect(url_for(
         'login', login_message=_('ההרשמה בוצעה בהצלחה'),
     ))
@@ -145,29 +137,17 @@ def signup():
 
 @webapp.route('/confirm-email/<int:user_id>/<token>')
 def confirm_email(user_id: int, token: str):
+    user = User.get_or_none(User.id == user_id)
+    if user is None:
+        return fail(404, f'No such user with id {user_id}.')
+
+    if not user.role.is_unverified:
+        return fail(403, f'User has been already confirmed {user.username}')
+
     try:
-        user = User.get_or_none(User.id == user_id)
-        if user is None:
-            return fail(404, f'No such user with id {user_id}.')
-
-        if not user.role.is_unverified:
-            return fail(
-                403, f'User has been already confirmed {user.username}',
-            )
-
         SERIALIZER.loads(
             token, salt=retrieve_salt(user), max_age=CONFIRMATION_TIME,
         )
-        update = User.update(
-            role=Role.get_student_role(),
-        ).where(User.username == user.username)
-        update.execute()
-
-        return redirect(url_for(
-            'login', login_message=(
-                _('המשתמש שלך אומת בהצלחה, כעת הינך יכול להתחבר למערכת'),
-            ),
-        ))
 
     except SignatureExpired:
         send_confirmation_mail(user)
@@ -178,6 +158,17 @@ def confirm_email(user_id: int, token: str):
         ))
     except BadSignature:
         return fail(404, 'No such signature')
+
+    else:
+        update = User.update(
+            role=Role.get_student_role(),
+        ).where(User.username == user.username)
+        update.execute()
+        return redirect(url_for(
+            'login', login_message=(
+                _('המשתמש שלך אומת בהצלחה, כעת אתה יכול להתחבר למערכת'),
+            ),
+        ))
 
 
 @webapp.route('/logout')
