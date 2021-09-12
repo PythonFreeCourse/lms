@@ -75,6 +75,11 @@ def disable_mail_sending():
     webapp.config['TESTING'] = True
 
 
+@pytest.fixture(autouse=True, scope='session')
+def enable_registration():
+    webapp.config['REGISTRATION_OPEN'] = True
+
+
 def disable_shareable_solutions():
     webapp.config['SHAREABLE_SOLUTIONS'] = False
 
@@ -85,6 +90,10 @@ def disable_users_comments():
 
 def enable_users_comments():
     webapp.config['USERS_COMMENTS'] = True
+
+
+def disable_registration():
+    webapp.config['REGISTRATION_OPEN'] = False
 
 
 def use_limiter(func):

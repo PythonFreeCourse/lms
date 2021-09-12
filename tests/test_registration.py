@@ -6,6 +6,7 @@ from flask.testing import FlaskClient
 from lms.lmsweb.config import CONFIRMATION_TIME
 from lms.lmsdb.models import User
 from lms.models.register import generate_confirmation_token
+from tests import conftest
 
 
 class TestRegistration:
@@ -157,3 +158,21 @@ class TestRegistration:
             }, follow_redirects=True)
             success_login_response = client.get('/exercises')
             assert success_login_response.status_code == 200
+
+    @staticmethod
+    def test_registartion_closed(client: FlaskClient, captured_templates):
+        conftest.disable_registration()
+        client.post('/signup', data={
+            'email': 'some_user123@mail.com',
+            'username': 'some_user',
+            'fullname': 'some_name',
+            'password': 'some_password',
+            'confirm': 'some_password',
+        }, follow_redirects=True)
+        user = User.get_or_none(User.username == 'some_user')
+        assert user is None
+
+        response = client.get('/signup')
+        template, _ = captured_templates[-1]
+        assert template.name == 'login.html'
+        assert '/signup' not in response.get_data(as_text=True)

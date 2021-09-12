@@ -117,6 +117,11 @@ def login(login_message: Optional[str] = None):
 
 @webapp.route('/signup', methods=['GET', 'POST'])
 def signup():
+    if not webapp.config.get('REGISTRATION_OPEN', False):
+        return redirect(url_for(
+            'login', login_message=_('לא ניתן להירשם כעת'),
+        ))
+
     form = RegisterForm()
     if not form.validate_on_submit():
         return render_template('signup.html', form=form)
