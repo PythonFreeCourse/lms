@@ -157,7 +157,6 @@ def confirm_email(user_id: int, token: str):
             ),
         ))
     except BadSignature:
-        print('here')
         return fail(404, 'No such signature')
 
     else:
