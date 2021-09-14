@@ -116,6 +116,7 @@ def login(login_message: Optional[str] = None):
 
 
 @webapp.route('/signup', methods=['GET', 'POST'])
+@limiter.limit(f'{LIMITS_PER_MINUTE}/minute;{LIMITS_PER_HOUR}/hour')
 def signup():
     if not webapp.config.get('REGISTRATION_OPEN', False):
         return redirect(url_for(
@@ -141,13 +142,14 @@ def signup():
 
 
 @webapp.route('/confirm-email/<int:user_id>/<token>')
+@limiter.limit(f'{LIMITS_PER_MINUTE}/minute;{LIMITS_PER_HOUR}/hour')
 def confirm_email(user_id: int, token: str):
     user = User.get_or_none(User.id == user_id)
     if user is None:
-        return fail(404, f'No such user with id {user_id}.')
+        return fail(404, f'The authentication code is invalid.')
 
     if not user.role.is_unverified:
-        return fail(403, f'User has been already confirmed {user.username}')
+        return fail(403, f'User has been already confirmed.')
 
     try:
         SERIALIZER.loads(
@@ -162,7 +164,7 @@ def confirm_email(user_id: int, token: str):
             ),
         ))
     except BadSignature:
-        return fail(404, 'No such signature')
+        return fail(404, 'The authentication code is invalid.')
 
     else:
         update = User.update(
