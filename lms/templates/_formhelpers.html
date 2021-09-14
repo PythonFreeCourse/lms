@@ -1,0 +1,13 @@
+{% macro render_field(field, cls) %}
+    <div class="row mb-3">
+        <label for="{{ field.id }}" class="visually-hidden">{{ field.label }}</label>
+        {{ field(class=cls, **kwargs) | safe }}
+        <div id="signup-errors" class="text-center">
+        {% if field.errors %}
+            {% for error in field.errors %}
+            <span>{{ error }}</span>
+            {% endfor %}
+        {% endif %}
+        </div>
+    </div>
+{% endmacro %}

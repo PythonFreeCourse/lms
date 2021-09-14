@@ -1,11 +1,11 @@
 import datetime
 from functools import wraps
-from lms.models import notes
 import os
 import random
 import string
 from typing import List, Optional
 
+from flask import template_rendered
 from flask.testing import FlaskClient
 from peewee import SqliteDatabase
 import pytest
@@ -49,6 +49,11 @@ def db(db_in_memory):
         db_in_memory.rollback()
 
 
+@pytest.fixture(autouse=True, scope='function')
+def client():
+    return webapp.test_client()
+
+
 @pytest.fixture(autouse=True, scope='session')
 def celery_eager():
     public_app.conf.update(task_always_eager=True)
@@ -65,6 +70,16 @@ def webapp_configurations():
     limiter.enabled = False
 
 
+@pytest.fixture(autouse=True, scope='session')
+def disable_mail_sending():
+    webapp.config['TESTING'] = True
+
+
+@pytest.fixture(autouse=True, scope='session')
+def enable_registration():
+    webapp.config['REGISTRATION_OPEN'] = True
+
+
 def disable_shareable_solutions():
     webapp.config['SHAREABLE_SOLUTIONS'] = False
 
@@ -75,6 +90,10 @@ def disable_users_comments():
 
 def enable_users_comments():
     webapp.config['USERS_COMMENTS'] = True
+
+
+def disable_registration():
+    webapp.config['REGISTRATION_OPEN'] = False
 
 
 def use_limiter(func):
@@ -118,6 +137,10 @@ def create_banned_user(index: int = 0) -> User:
     return create_user(RoleOptions.BANNED.value, index)
 
 
+def create_unverified_user(index: int = 0) -> User:
+    return create_user(RoleOptions.UNVERIFIED.value, index)
+
+
 def create_student_user(index: int = 0) -> User:
     return create_user(RoleOptions.STUDENT.value, index)
 
@@ -142,6 +165,11 @@ def staff_user(staff_password):
 
 
 @pytest.fixture()
+def unverified_user():
+    return create_unverified_user()
+
+
+@pytest.fixture()
 def student_user():
     return create_student_user()
 
@@ -157,6 +185,20 @@ def admin_user():
         api_key='fake key',
         role=admin_role,
     )
+
+
+@pytest.fixture(autouse=True, scope='function')
+def captured_templates():
+    recorded = []
+
+    def record(sender, template, context, **kwargs):
+        recorded.append((template, context))
+
+    template_rendered.connect(record, webapp)
+    try:
+        yield recorded
+    finally:
+        template_rendered.disconnect(record, webapp)
 
 
 def create_notification(

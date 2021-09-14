@@ -5,15 +5,17 @@ from flask import (
     jsonify, make_response, render_template,
     request, send_from_directory, url_for,
 )
+from flask_babel import gettext as _  # type: ignore
 from flask_limiter.util import get_remote_address  # type: ignore
 from flask_login import (  # type: ignore
     current_user, login_required, login_user, logout_user,
 )
+from itsdangerous import BadSignature, SignatureExpired
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, Note, RoleOptions, SharedSolution,
+    ALL_MODELS, Comment, Note, Role, RoleOptions, SharedSolution,
     Solution, SolutionFile, User, database,
 )
 from lms.lmsweb import babel, limiter, routes, webapp
@@ -21,8 +23,10 @@ from lms.lmsweb.admin import (
     AdminModelView, SPECIAL_MAPPING, admin, managers_only,
 )
 from lms.lmsweb.config import (
-    LANGUAGES, LIMITS_PER_HOUR, LIMITS_PER_MINUTE, LOCALE, MAX_UPLOAD_SIZE,
+    CONFIRMATION_TIME, LANGUAGES, LIMITS_PER_HOUR,
+    LIMITS_PER_MINUTE, LOCALE, MAX_UPLOAD_SIZE,
 )
+from lms.lmsweb.forms.register import RegisterForm
 from lms.lmsweb.manifest import MANIFEST
 from lms.lmsweb.redirections import (
     PERMISSIVE_CORS, get_next_url, login_manager,
@@ -30,7 +34,12 @@ from lms.lmsweb.redirections import (
 from lms.models import (
     comments, notes, notifications, share_link, solutions, upload,
 )
-from lms.models.errors import FileSizeError, LmsError, UploadError, fail
+from lms.models.errors import (
+    FileSizeError, ForbiddenPermission, LmsError,
+    UnauthorizedError, UploadError, fail,
+)
+from lms.models.register import SERIALIZER, send_confirmation_mail
+from lms.models.users import auth, retrieve_salt
 from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import (
     get_language_name_by_extension, get_mime_type_by_extention,
@@ -83,27 +92,90 @@ def ratelimit_handler(e):
     f'{LIMITS_PER_MINUTE}/minute;{LIMITS_PER_HOUR}/hour',
     deduct_when=lambda response: response.status_code != 200,
 )
-def login(login_error: Optional[str] = None):
-
+def login(login_message: Optional[str] = None):
     if current_user.is_authenticated:
         return get_next_url(request.args.get('next'))
 
     username = request.form.get('username')
     password = request.form.get('password')
     next_page = request.form.get('next')
-    login_error = request.args.get('login_error')
-    user = User.get_or_none(username=username)
+    login_message = request.args.get('login_message')
 
     if request.method == 'POST':
-        if user is not None and user.is_password_valid(password):
+        try:
+            user = auth(username, password)
+        except (ForbiddenPermission, UnauthorizedError) as e:
+            error_message, _ = e.args
+            error_details = {'next': next_page, 'login_message': error_message}
+            return redirect(url_for('login', **error_details))
+        else:
             login_user(user)
             return get_next_url(next_page)
-        elif user is None or not user.is_password_valid(password):
-            login_error = 'Invalid username or password'
-            error_details = {'next': next_page, 'login_error': login_error}
-            return redirect(url_for('login', **error_details))
 
-    return render_template('login.html', login_error=login_error)
+    return render_template('login.html', login_message=login_message)
+
+
+@webapp.route('/signup', methods=['GET', 'POST'])
+@limiter.limit(f'{LIMITS_PER_MINUTE}/minute;{LIMITS_PER_HOUR}/hour')
+def signup():
+    if not webapp.config.get('REGISTRATION_OPEN', False):
+        return redirect(url_for(
+            'login', login_message=_('לא ניתן להירשם כעת'),
+        ))
+
+    form = RegisterForm()
+    if not form.validate_on_submit():
+        return render_template('signup.html', form=form)
+
+    user = User.create(**{
+        User.mail_address.name: form.email.data,
+        User.username.name: form.username.data,
+        User.fullname.name: form.fullname.data,
+        User.role.name: Role.get_unverified_role(),
+        User.password.name: form.password.data,
+        User.api_key.name: User.random_password(),
+    })
+    send_confirmation_mail(user)
+    return redirect(url_for(
+        'login', login_message=_('ההרשמה בוצעה בהצלחה'),
+    ))
+
+
+@webapp.route('/confirm-email/<int:user_id>/<token>')
+@limiter.limit(f'{LIMITS_PER_MINUTE}/minute;{LIMITS_PER_HOUR}/hour')
+def confirm_email(user_id: int, token: str):
+    user = User.get_or_none(User.id == user_id)
+    if user is None:
+        return fail(404, 'The authentication code is invalid.')
+
+    if not user.role.is_unverified:
+        return fail(403, 'User has been already confirmed.')
+
+    try:
+        SERIALIZER.loads(
+            token, salt=retrieve_salt(user), max_age=CONFIRMATION_TIME,
+        )
+
+    except SignatureExpired:
+        send_confirmation_mail(user)
+        return redirect(url_for(
+            'login', login_message=(
+                _('קישור האימות פג תוקף, קישור חדש נשלח אל תיבת המייל שלך'),
+            ),
+        ))
+    except BadSignature:
+        return fail(404, 'The authentication code is invalid.')
+
+    else:
+        update = User.update(
+            role=Role.get_student_role(),
+        ).where(User.username == user.username)
+        update.execute()
+        return redirect(url_for(
+            'login', login_message=(
+                _('המשתמש שלך אומת בהצלחה, כעת אתה יכול להתחבר למערכת'),
+            ),
+        ))
 
 
 @webapp.route('/logout')

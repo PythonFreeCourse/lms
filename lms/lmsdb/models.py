@@ -34,6 +34,7 @@ if TYPE_CHECKING:
 
 class RoleOptions(enum.Enum):
     BANNED = 'Banned'
+    UNVERIFIED = 'Unverified'
     STUDENT = 'Student'
     STAFF = 'Staff'
     VIEWER = 'Viewer'
@@ -67,6 +68,7 @@ class Role(BaseModel):
         (RoleOptions.STAFF.value, RoleOptions.STAFF.value),
         (RoleOptions.VIEWER.value, RoleOptions.VIEWER.value),
         (RoleOptions.STUDENT.value, RoleOptions.STUDENT.value),
+        (RoleOptions.UNVERIFIED.value, RoleOptions.UNVERIFIED.value),
         (RoleOptions.BANNED.value, RoleOptions.BANNED.value),
     ))
 
@@ -76,6 +78,10 @@ class Role(BaseModel):
     @classmethod
     def get_banned_role(cls) -> 'Role':
         return cls.get(Role.name == RoleOptions.BANNED.value)
+
+    @classmethod
+    def get_unverified_role(cls) -> 'Role':
+        return cls.get(Role.name == RoleOptions.UNVERIFIED.value)
 
     @classmethod
     def get_student_role(cls) -> 'Role':
@@ -99,6 +105,10 @@ class Role(BaseModel):
     @property
     def is_banned(self) -> bool:
         return self.name == RoleOptions.BANNED.value
+
+    @property
+    def is_unverified(self) -> bool:
+        return self.name == RoleOptions.UNVERIFIED.value
 
     @property
     def is_student(self) -> bool:
@@ -407,8 +417,7 @@ class Solution(BaseModel):
             **{Solution.state.name: new_state.name},
             **kwargs,
         ).where(requested_solution)
-        updated = changes.execute() == 1
-        return updated
+        return changes.execute() == 1
 
     def ordered_versions(self) -> Iterable['Solution']:
         return Solution.select().where(
