@@ -146,10 +146,10 @@ def signup():
 def confirm_email(user_id: int, token: str):
     user = User.get_or_none(User.id == user_id)
     if user is None:
-        return fail(404, f'The authentication code is invalid.')
+        return fail(404, 'The authentication code is invalid.')
 
     if not user.role.is_unverified:
-        return fail(403, f'User has been already confirmed.')
+        return fail(403, 'User has been already confirmed.')
 
     try:
         SERIALIZER.loads(
