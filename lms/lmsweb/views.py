@@ -200,7 +200,7 @@ def change_password():
     update = User.update(
         password=generate_password_hash(form.password.data),
         session_token=generate_session_token(
-            user.username, form.password.data
+            user.username, form.password.data,
         ),
     ).where(User.username == user.username)
     update.execute()
