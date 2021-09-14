@@ -91,7 +91,7 @@ class UserRegistrationCreator:
             models.User.password.name: user.password,
             models.User.session_token.name: generate_session_token(
                 user.email, user.password,
-            )
+            ),
         })
 
     def _send_user_email_registration(self, user: UserToCreate) -> None:
