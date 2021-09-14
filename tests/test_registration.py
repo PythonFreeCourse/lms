@@ -5,7 +5,7 @@ from flask.testing import FlaskClient
 
 from lms.lmsweb.config import CONFIRMATION_TIME
 from lms.lmsdb.models import User
-from lms.models.register import generate_confirmation_token
+from lms.models.users import generate_confirmation_token
 from tests import conftest
 
 

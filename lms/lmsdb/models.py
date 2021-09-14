@@ -138,6 +138,10 @@ class User(UserMixin, BaseModel):
     password = CharField()
     role = ForeignKeyField(Role, backref='users')
     api_key = CharField()
+    session_token = CharField(unique=True)
+
+    def get_id(self):
+        return str(self.session_token)
 
     def is_password_valid(self, password):
         return check_password_hash(self.password, password)
@@ -152,6 +156,7 @@ class User(UserMixin, BaseModel):
             User.role.name: Role.get_staff_role(),
             User.password.name: cls.random_password(),
             User.api_key.name: cls.random_password(),
+            User.session_token.name: 'something',
         })
         return instance
 
@@ -922,7 +927,11 @@ def create_demo_users():
         user = dict(zip(fields, entity))
         password = User.random_password()
         api_key = User.random_password(stronger=True)
-        User.create(**user, password=password, api_key=api_key)
+        session_token = generate_string()
+        User.create(
+            **user, password=password, api_key=api_key,
+            session_token=session_token,
+        )
         print(f"User: {user['username']}, Password: {password}")  # noqa: T001
 
 

@@ -12,6 +12,7 @@ from flask_login import (  # type: ignore
 )
 from itsdangerous import BadSignature, SignatureExpired
 from werkzeug.datastructures import FileStorage
+from werkzeug.security import generate_password_hash
 from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
@@ -26,6 +27,7 @@ from lms.lmsweb.config import (
     CONFIRMATION_TIME, LANGUAGES, LIMITS_PER_HOUR,
     LIMITS_PER_MINUTE, LOCALE, MAX_UPLOAD_SIZE,
 )
+from lms.lmsweb.forms.change_password import ChangePasswordForm
 from lms.lmsweb.forms.register import RegisterForm
 from lms.lmsweb.manifest import MANIFEST
 from lms.lmsweb.redirections import (
@@ -38,8 +40,10 @@ from lms.models.errors import (
     FileSizeError, ForbiddenPermission, LmsError,
     UnauthorizedError, UploadError, fail,
 )
-from lms.models.register import SERIALIZER, send_confirmation_mail
-from lms.models.users import auth, retrieve_salt
+from lms.models.users import (
+    SERIALIZER, auth, generate_session_token, retrieve_salt,
+    send_change_password_mail, send_confirmation_mail,
+)
 from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import (
     get_language_name_by_extension, get_mime_type_by_extention,
@@ -75,8 +79,8 @@ def _db_close(exc):
 
 
 @login_manager.user_loader
-def load_user(user_id):
-    return User.get_or_none(id=user_id)
+def load_user(session_token):
+    return User.get_or_none(session_token=session_token)
 
 
 @webapp.errorhandler(429)
@@ -126,6 +130,9 @@ def signup():
     if not form.validate_on_submit():
         return render_template('signup.html', form=form)
 
+    session_token = generate_session_token(
+        form.username.data, form.password.data,
+    )
     user = User.create(**{
         User.mail_address.name: form.email.data,
         User.username.name: form.username.data,
@@ -133,6 +140,7 @@ def signup():
         User.role.name: Role.get_unverified_role(),
         User.password.name: form.password.data,
         User.api_key.name: User.random_password(),
+        User.session_token.name: session_token,
     })
     send_confirmation_mail(user)
     return redirect(url_for(
@@ -174,6 +182,33 @@ def confirm_email(user_id: int, token: str):
                 _('המשתמש שלך אומת בהצלחה, כעת אתה יכול להתחבר למערכת'),
             ),
         ))
+
+
+@webapp.route('/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    user = User.get_or_none(User.id == current_user.id)
+    if user is None:
+        return fail(404, 'User not found.')
+
+    form = ChangePasswordForm(user)
+    if not form.validate_on_submit():
+        return render_template('changepassword.html', form=form)
+
+    update = User.update(
+        password=generate_password_hash(form.password.data),
+        session_token=generate_session_token(
+            user.username, form.password.data
+        ),
+    ).where(User.username == user.username)
+    update.execute()
+    logout_user()
+    send_change_password_mail(user)
+    return redirect(url_for(
+        'login', login_message=(
+            _('הסיסמה שלך שונתה בהצלחה'),
+        ),
+    ))
 
 
 @webapp.route('/logout')

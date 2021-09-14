@@ -47,7 +47,8 @@ a {
 }
 
 #login-container,
-#signup-container {
+#signup-container,
+#changepassword-container {
   height: 100%;
   align-items: center;
   display: flex;
@@ -55,7 +56,8 @@ a {
 }
 
 #login,
-#signup {
+#signup,
+#changepassword {
   margin: auto;
   max-width: 420px;
   padding: 15px;
@@ -735,6 +737,10 @@ code .grader-add .fa {
   text-align: center;
 }
 
+/* #change-password-user {
+  text-align: center;
+} /*
+
 #archive-row {
   text-align: center;
 }
@@ -814,7 +820,7 @@ code .grader-add .fa {
   width: 80vw;
 }
 
-#user .user-details {
+#user .user-actions {
   margin-bottom: 5em;
 }
 
