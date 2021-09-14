@@ -149,7 +149,7 @@ def confirm_email(user_id: int, token: str):
         return fail(404, f'The authentication code is invalid.')
 
     if not user.role.is_unverified:
-        return fail(403, f'User has been already confirmed.')
+        return fail(403, 'User has been already confirmed.')
 
     try:
         SERIALIZER.loads(
