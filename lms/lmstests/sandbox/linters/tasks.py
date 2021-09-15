@@ -23,8 +23,7 @@ def run_linters_in_sandbox(solution_file_id: str, code: str, file_suffix: str):
         )
         if checker is None:
             return []
-        else:
-            checker.initialize()
-            return checker.run_check()
+        checker.initialize()
+        return checker.run_check()
     except Exception:
         _logger.exception('Failed to check solution file %s', solution_file_id)
