@@ -254,21 +254,25 @@ def recover_password(user_id: int, token: str):
         return fail(404, 'The authentication code is invalid.')
 
     else:
-        form = RecoverPassForm()
-        if not form.validate_on_submit():
-            return render_template(
-                'recoverpassword.html', form=form, id=user.id, token=token,
-            )
-        user.password = form.password.data
-        user.session_token = generate_session_token(
-            user.username, form.password.data,
+        return recover_password_check(user, token)
+
+
+def recover_password_check(user: User, token: str):
+    form = RecoverPassForm()
+    if not form.validate_on_submit():
+        return render_template(
+            'recoverpassword.html', form=form, id=user.id, token=token,
         )
-        user.save()
-        return redirect(url_for(
-            'login', login_message=(
-                _('הסיסמה שלך שונתה בהצלחה'),
-            ),
-        ))
+    user.password = form.password.data
+    user.session_token = generate_session_token(
+        user.username, form.password.data,
+    )
+    user.save()
+    return redirect(url_for(
+        'login', login_message=(
+            _('הסיסמה שלך שונתה בהצלחה'),
+        ),
+    ))
 
 
 @webapp.route('/logout')

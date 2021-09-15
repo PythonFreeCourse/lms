@@ -26,8 +26,8 @@ class ChangePasswordForm(FlaskForm):
         self.user = user
 
     def validate_current_password(self, field):
-        if session['_invalid_tries'] == INVALID_TRIES:
-            raise ValidationError(_('הזנת סיסמה שגוייה מספר רב מידי של פעמים'))
+        if session['_invalid_tries'] >= INVALID_TRIES:
+            raise ValidationError(_('הזנת סיסמה שגויה מספר רב מדי של פעמים'))
         if not self.user.is_password_valid(field.data):
             session['_invalid_tries'] += 1
             raise ValidationError(_('הסיסמה הנוכחית שהוזנה שגויה'))

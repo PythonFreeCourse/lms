@@ -11,7 +11,7 @@
           {{ _('ברוכים הבאים למערכת התרגילים!') }}<br>
           {{ _('הזינו אימייל וסיסמה לצורך רישום למערכת:') }}
         </p>
-        <form class="align-items-center {{ direction }}-language" method="post" action="/signup">
+        <form class="align-items-center {{ direction }}-language" method="post" action="{{ url_for('signup') }}">
             {{ render_field(form.email, cls="form-control form-control-lg", placeholder=_('כתובת אימייל')) }}
             {{ render_field(form.username, cls="form-control form-control-lg", placeholder=_('שם משתמש')) }}
             {{ render_field(form.fullname, cls="form-control form-control-lg", placeholder=_('שם מלא')) }}
