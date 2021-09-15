@@ -33,9 +33,8 @@ class BaseLinter:
         raise NotImplementedError
 
     def initialize(self):
-        """
-        For special initializing code, please write it here
-        """
+        """For special initializing code, please write it here"""
+        pass
 
     @classmethod
     def get_match_linter(

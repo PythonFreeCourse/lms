@@ -564,7 +564,7 @@ def _jinja2_filter_path_to_language_name(filename: str) -> str:
 
 @webapp.context_processor
 def _jinja2_inject_direction():
-    return dict(direction=DIRECTION)
+    return {'direction': DIRECTION}
 
 
 @webapp.template_filter('mime_type')
