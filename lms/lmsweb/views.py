@@ -2,8 +2,8 @@ from typing import Any, Callable, Optional
 
 import arrow  # type: ignore
 from flask import (
-    jsonify, make_response, render_template,
-    request, send_from_directory, url_for,
+    jsonify, make_response, render_template, request,
+    send_from_directory, session, url_for,
 )
 from flask_babel import gettext as _  # type: ignore
 from flask_limiter.util import get_remote_address  # type: ignore
@@ -12,7 +12,6 @@ from flask_login import (  # type: ignore
 )
 from itsdangerous import BadSignature, SignatureExpired
 from werkzeug.datastructures import FileStorage
-from werkzeug.security import generate_password_hash
 from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
@@ -42,13 +41,13 @@ from lms.models.errors import (
 )
 from lms.models.users import (
     SERIALIZER, auth, generate_session_token, retrieve_salt,
-    send_change_password_mail, send_confirmation_mail,
 )
 from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import (
     get_language_name_by_extension, get_mime_type_by_extention,
 )
 from lms.utils.log import log
+from lms.utils.mail import send_change_password_mail, send_confirmation_mail
 
 HIGH_ROLES = {str(RoleOptions.STAFF), str(RoleOptions.ADMINISTRATOR)}
 
@@ -114,6 +113,7 @@ def login(login_message: Optional[str] = None):
             return redirect(url_for('login', **error_details))
         else:
             login_user(user)
+            session['_invalid_tries'] = 0
             return get_next_url(next_page)
 
     return render_template('login.html', login_message=login_message)
@@ -197,13 +197,11 @@ def change_password():
     if not form.validate_on_submit():
         return render_template('changepassword.html', form=form)
 
-    update = User.update(
-        password=generate_password_hash(form.password.data),
-        session_token=generate_session_token(
-            user.username, form.password.data,
-        ),
-    ).where(User.username == user.username)
-    update.execute()
+    user.password = form.password.data
+    user.session_token = generate_session_token(
+        user.username, form.password.data,
+    )
+    user.save()
     logout_user()
     send_change_password_mail(user)
     return redirect(url_for(

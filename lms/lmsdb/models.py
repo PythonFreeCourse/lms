@@ -156,7 +156,7 @@ class User(UserMixin, BaseModel):
             User.role.name: Role.get_staff_role(),
             User.password.name: cls.random_password(),
             User.api_key.name: cls.random_password(),
-            User.session_token.name: 'something',
+            User.session_token.name: cls.random_password(),
         })
         return instance
 
