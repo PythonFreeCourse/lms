@@ -1,6 +1,7 @@
 from flask.testing import FlaskClient
 
 from lms.lmsdb.models import User
+from lms.lmsweb.config import INVALID_TRIES
 from tests import conftest
 
 
@@ -73,13 +74,14 @@ class TestUser:
     def test_invalid_change_password(captured_templates):
         student_user = conftest.create_student_user(index=1)
         client = conftest.get_logged_user(student_user.username)
-        client.post('/change-password', data={
-            'current_password': 'wrong pass',
-            'password': 'some_password',
-            'confirm': 'some_password',
-        }, follow_redirects=True)
-        template, _ = captured_templates[-1]
-        assert template.name == "changepassword.html"
+        for _ in range(INVALID_TRIES):
+            client.post('/change-password', data={
+                'current_password': 'wrong pass',
+                'password': 'some_password',
+                'confirm': 'some_password',
+            }, follow_redirects=True)
+            template, _ = captured_templates[-1]
+            assert template.name == "changepassword.html"
 
     @staticmethod
     def test_valid_change_password(captured_templates):
