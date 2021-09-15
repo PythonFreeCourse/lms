@@ -74,7 +74,7 @@ class TestUser:
     def test_invalid_change_password(captured_templates):
         student_user = conftest.create_student_user(index=1)
         client = conftest.get_logged_user(student_user.username)
-        for _ in range(INVALID_TRIES + 1):
+        for _ in range(INVALID_TRIES):
             client.post('/change-password', data={
                 'current_password': 'wrong pass',
                 'password': 'some_password',
@@ -82,6 +82,14 @@ class TestUser:
             }, follow_redirects=True)
             template, _ = captured_templates[-1]
             assert template.name == "changepassword.html"
+
+        client.post('/change-password', data={
+            'current_password': 'fake pass',
+            'password': 'some_password',
+            'confirm': 'some_password',
+        }, follow_redirects=True)
+        template, _ = captured_templates[-1]
+        assert template.name == "changepassword.html"
 
     @staticmethod
     def test_valid_change_password(captured_templates):
