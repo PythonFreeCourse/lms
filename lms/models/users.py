@@ -31,7 +31,7 @@ def auth(username: str, password: str) -> User:
     return user
 
 
-def generate_confirmation_token(user: User) -> str:
+def generate_user_token(user: User) -> str:
     return SERIALIZER.dumps(user.mail_address, salt=retrieve_salt(user))
 
 

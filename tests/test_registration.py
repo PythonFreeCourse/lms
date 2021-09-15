@@ -5,7 +5,7 @@ from flask.testing import FlaskClient
 
 from lms.lmsweb.config import CONFIRMATION_TIME
 from lms.lmsdb.models import User
-from lms.models.users import generate_confirmation_token
+from lms.models.users import generate_user_token
 from tests import conftest
 
 
@@ -72,7 +72,7 @@ class TestRegistration:
         assert fail_login_response.status_code == 302
 
         user = User.get_or_none(User.username == 'some_user')
-        token = generate_confirmation_token(user)
+        token = generate_user_token(user)
         client.get(f'/confirm-email/{user.id}/{token}', follow_redirects=True)
         client.post('/login', data={
             'username': 'some_user',
@@ -113,7 +113,7 @@ class TestRegistration:
             'confirm': 'some_password',
         }, follow_redirects=True)
         user = User.get_or_none(User.username == 'some_user')
-        token = generate_confirmation_token(user)
+        token = generate_user_token(user)
         success_token_response = client.get(
             f'/confirm-email/{user.id}/{token}', follow_redirects=True,
         )
@@ -134,7 +134,7 @@ class TestRegistration:
             'confirm': 'some_password',
         }, follow_redirects=True)
         user = User.get_or_none(User.username == 'some_user')
-        token = generate_confirmation_token(user)
+        token = generate_user_token(user)
 
         fake_time = time.time() + CONFIRMATION_TIME + 1
         with patch('time.time', Mock(return_value=fake_time)):
@@ -148,7 +148,7 @@ class TestRegistration:
             fail_login_response = client.get('/exercises')
             assert fail_login_response.status_code == 302
 
-            token = generate_confirmation_token(user)
+            token = generate_user_token(user)
             client.get(
                 f'/confirm-email/{user.id}/{token}', follow_redirects=True,
             )

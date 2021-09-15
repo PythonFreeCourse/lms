@@ -1,7 +1,11 @@
+import time
+from unittest.mock import Mock, patch
+
 from flask.testing import FlaskClient
 
 from lms.lmsdb.models import User
-from lms.lmsweb.config import INVALID_TRIES
+from lms.lmsweb.config import CONFIRMATION_TIME, INVALID_TRIES
+from lms.models.users import generate_user_token
 from tests import conftest
 
 
@@ -104,3 +108,85 @@ class TestUser:
         assert template.name == "login.html"
         check_logout_response = client.get('/exercises')
         assert check_logout_response.status_code == 302
+
+    @staticmethod
+    def test_forgot_my_password(client: FlaskClient, captured_templates):
+        user = conftest.create_student_user(index=1)
+        client.post('/reset-password', data={
+            'email': 'fake-mail@mail.com',
+        }, follow_redirects=True)
+        template, _ = captured_templates[-1]
+        assert template.name == "resetpassword.html"
+
+        client.post('/reset-password', data={
+            'email': user.mail_address,
+        }, follow_redirects=True)
+        template, _ = captured_templates[-1]
+        assert template.name == "login.html"
+
+        token = generate_user_token(user)
+        client.post(f'/recover-password/{user.id}/{token}', data={
+            'password': 'wrong pass',
+            'confirm': 'different pass',
+        }, follow_redirects=True)
+        template, _ = captured_templates[-1]
+        assert template.name == "recoverpassword.html"
+
+        client.post(f'/recover-password/{user.id}/{token}', data={
+            'password': 'new pass',
+            'confirm': 'new pass',
+        }, follow_redirects=True)
+        template, _ = captured_templates[-1]
+        assert template.name == "login.html"
+
+        second_try_response = client.post(
+            f'/recover-password/{user.id}/{token}', data={
+                'password': 'new pass1',
+                'confirm': 'new pass1',
+            }, follow_redirects=True,
+        )
+        assert second_try_response.status_code == 404
+
+        client.post('/login', data={
+            'username': user.username,
+            'password': 'fake pass',
+        }, follow_redirects=True)
+        template, _ = captured_templates[-1]
+        assert template.name == 'login.html'
+
+        client.post('/login', data={
+            'username': user.username,
+            'password': 'new pass',
+        }, follow_redirects=True)
+        template, _ = captured_templates[-1]
+        assert template.name == 'exercises.html'
+
+    @staticmethod
+    def test_expired_token(client: FlaskClient):
+        user = conftest.create_student_user(index=1)
+        client.post('/reset-password', data={
+            'email': user.mail_address,
+        }, follow_redirects=True)
+        token = generate_user_token(user)
+
+        fake_time = time.time() + CONFIRMATION_TIME + 1
+        with patch('time.time', Mock(return_value=fake_time)):
+            client.post(
+                f'/recover-password/{user.id}/{token}', data={
+                    'password': 'new pass1',
+                    'confirm': 'new pass1',
+                }, follow_redirects=True,
+            )
+            client.post('/login', data={
+                'username': user.username,
+                'password': 'new pass1',
+            }, follow_redirects=True)
+            fail_login_response = client.get('/exercises')
+            assert fail_login_response.status_code == 302
+
+            client.post('/login', data={
+                'username': user.username,
+                'password': 'fake pass',
+            }, follow_redirects=True)
+            fail_login_response = client.get('/exercises')
+            assert fail_login_response.status_code == 200

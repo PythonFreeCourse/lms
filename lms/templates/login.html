@@ -33,6 +33,7 @@
           <input class="form-control form-control-lg" type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token() }}" required>
           <input class="form-control form-control-lg" type="hidden" name="next" id="next" value="{{ request.args.get('next', '') }}">
           <button class="btn btn-primary btn-lg btn-block">{{ _('התחבר') }}</button>
+          <a href="/reset-password" id="forgot-my-password-link" role="button">{{ _('שכחת את הסיסמה?') }}</a>
         </form>
         {% if config.REGISTRATION_OPEN %}
         <hr class="mt-3 mb-3">

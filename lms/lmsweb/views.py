@@ -28,6 +28,7 @@ from lms.lmsweb.config import (
 )
 from lms.lmsweb.forms.change_password import ChangePasswordForm
 from lms.lmsweb.forms.register import RegisterForm
+from lms.lmsweb.forms.reset_password import RecoverPassForm, ResetPassForm
 from lms.lmsweb.manifest import MANIFEST
 from lms.lmsweb.redirections import (
     PERMISSIVE_CORS, get_next_url, login_manager,
@@ -47,7 +48,10 @@ from lms.utils.files import (
     get_language_name_by_extension, get_mime_type_by_extention,
 )
 from lms.utils.log import log
-from lms.utils.mail import send_change_password_mail, send_confirmation_mail
+from lms.utils.mail import (
+    send_change_password_mail, send_confirmation_mail,
+    send_reset_password_mail,
+)
 
 HIGH_ROLES = {str(RoleOptions.STAFF), str(RoleOptions.ADMINISTRATOR)}
 
@@ -209,6 +213,62 @@ def change_password():
             _('הסיסמה שלך שונתה בהצלחה'),
         ),
     ))
+
+
+@webapp.route('/reset-password', methods=['GET', 'POST'])
+@limiter.limit(f'{LIMITS_PER_MINUTE}/minute;{LIMITS_PER_HOUR}/hour')
+def reset_password():
+    form = ResetPassForm()
+    if not form.validate_on_submit():
+        return render_template('resetpassword.html', form=form)
+
+    user = User.get_or_none(User.mail_address == form.email.data)
+
+    send_reset_password_mail(user)
+    return redirect(url_for(
+        'login', login_message=_('קישור לאיפוס הסיסמה נשלח בהצלחה'),
+    ))
+
+
+@webapp.route(
+    '/recover-password/<int:user_id>/<token>', methods=['GET', 'POST'],
+)
+@limiter.limit(f'{LIMITS_PER_MINUTE}/minute;{LIMITS_PER_HOUR}/hour')
+def recover_password(user_id: int, token: str):
+    user = User.get_or_none(User.id == user_id)
+    if user is None:
+        return fail(404, 'The authentication code is invalid.')
+
+    try:
+        SERIALIZER.loads(
+            token, salt=retrieve_salt(user), max_age=CONFIRMATION_TIME,
+        )
+
+    except SignatureExpired:
+        return redirect(url_for(
+            'login', login_message=(
+                _('קישור איפוס הסיסמה פג תוקף'),
+            ),
+        ))
+    except BadSignature:
+        return fail(404, 'The authentication code is invalid.')
+
+    else:
+        form = RecoverPassForm()
+        if not form.validate_on_submit():
+            return render_template(
+                'recoverpassword.html', form=form, id=user.id, token=token,
+            )
+        user.password = form.password.data
+        user.session_token = generate_session_token(
+            user.username, form.password.data,
+        )
+        user.save()
+        return redirect(url_for(
+            'login', login_message=(
+                _('הסיסמה שלך שונתה בהצלחה'),
+            ),
+        ))
 
 
 @webapp.route('/logout')

@@ -48,7 +48,8 @@ a {
 
 #login-container,
 #signup-container,
-#changepassword-container {
+#changepassword-container,
+#resetpassword-container {
   height: 100%;
   align-items: center;
   display: flex;
@@ -57,7 +58,8 @@ a {
 
 #login,
 #signup,
-#changepassword {
+#changepassword,
+#resetpassword {
   margin: auto;
   max-width: 420px;
   padding: 15px;
@@ -65,12 +67,13 @@ a {
 }
 
 #login-logo,
-#signup-logo {
+#signup-logo,
+#resetpassword-logo {
   margin-bottom: 1rem;
 }
 
 #login-message-box,
-#signup-errors {
+#form-errors {
   background: #f1c8c8;
   color: #860606;
 }
