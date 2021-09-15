@@ -74,7 +74,7 @@ class TestUser:
     def test_invalid_change_password(captured_templates):
         student_user = conftest.create_student_user(index=1)
         client = conftest.get_logged_user(student_user.username)
-        for _ in range(INVALID_TRIES):
+        for _ in range(INVALID_TRIES + 1):
             client.post('/change-password', data={
                 'current_password': 'wrong pass',
                 'password': 'some_password',
