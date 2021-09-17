@@ -1,6 +1,6 @@
 import logging
 
-from celery.exception import CeleryError, OperationalError
+from celery.exceptions import CeleryError, OperationalError
 from celery.utils.log import get_task_logger
 
 from lms.lmsdb import models
