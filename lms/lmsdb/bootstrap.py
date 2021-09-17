@@ -1,8 +1,8 @@
 from typing import Any, Callable, Optional, Tuple, Type
 
 from peewee import (
-    Entity, Expression, Field, Model, OP, OperationalError, ProgrammingError,
-    SQL,
+    Entity, Expression, Field, IntegerField, Model, OP, OperationalError,
+    ProgrammingError, SQL,
 )
 from playhouse.migrate import migrate
 
@@ -237,6 +237,18 @@ def _api_keys_migration() -> bool:
     return True
 
 
+def _fix_notes_type_migration() -> bool:
+    # Note = models.Note
+    # _alter_column_type_if_needed(Note, Note.privacy, IntegerField())
+    migrator = db_config.get_migrator_instance()
+    with db_config.database.transaction():
+        migrate(
+            migrator.alter_column_type('note', 'privacy', IntegerField()),
+        )
+        db_config.database.commit()
+    return True
+
+
 def main():
     with models.database.connection_context():
         models.database.create_tables(models.ALL_MODELS, safe=True)
@@ -247,6 +259,7 @@ def main():
             models.create_demo_users()
 
     _api_keys_migration()
+    _fix_notes_type_migration()
     text_fixer.fix_texts()
     import_tests.load_tests_from_path('/app_dir/notebooks-tests')
 

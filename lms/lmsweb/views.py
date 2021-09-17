@@ -210,10 +210,7 @@ def service_worker():
 
 @webapp.before_request
 def banned_page():
-    if (
-        current_user.is_authenticated
-        and current_user.role.is_banned
-    ):
+    if current_user.is_authenticated and current_user.role.is_banned:
         return render_template('banned.html')
 
 

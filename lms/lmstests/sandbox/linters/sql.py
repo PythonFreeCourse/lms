@@ -1,8 +1,8 @@
 import typing
 
-from sqlfluff.config import FluffConfig
-from sqlfluff.errors import SQLBaseError
-from sqlfluff.linter import Linter
+from sqlfluff.core.config import FluffConfig
+from sqlfluff.core.errors import SQLBaseError
+from sqlfluff.core.linter import Linter
 
 from lms.lmstests.sandbox.linters import defines
 from lms.lmstests.sandbox.linters.base import BaseLinter, LinterError
