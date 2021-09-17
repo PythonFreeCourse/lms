@@ -147,10 +147,10 @@ class UnitTestChecker:
                 )
                 continue
             # invalid case
-            message = ' '.join([
+            message = ' '.join(
                 elem[1].replace('\n', '')
                 for elem in result._elem.items()
-            ])
+            )
             self._logger.info('Create comment on test %s solution %s.',
                               case.name, self._solution_id)
             number_of_failures += 1
