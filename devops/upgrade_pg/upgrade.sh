@@ -1,5 +1,9 @@
 docker stop lms_db_1
-source "./../secrets.env"
+
+# Put values here if you've configured them before
+# DB_NAME=lms
+# DB_USERNAME=lmsweb
+# DB_PASSWORD=
 
 CURRENT_DATE=$(date +%d-%m-%Y_%H_%M_%S)
 MOUNT_PATH=/pg_data

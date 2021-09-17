@@ -236,13 +236,9 @@ def _api_keys_migration() -> bool:
 
 
 def _fix_notes_type_migration() -> bool:
-    # Note = models.Note
-    # _alter_column_type_if_needed(Note, Note.privacy, IntegerField())
     migrator = db_config.get_migrator_instance()
     with db_config.database.transaction():
-        migrate(
-            migrator.alter_column_type('note', 'privacy', IntegerField()),
-        )
+        migrate(migrator.alter_column_type('note', 'privacy', IntegerField()))
         db_config.database.commit()
     return True
 

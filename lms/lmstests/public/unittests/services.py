@@ -30,6 +30,11 @@ class UnitTestChecker:
         )
 
     def run_check(self) -> None:
+        if self._solution is None:
+            self._logger.error(
+                "Can't run %s as it is an empty solution", self._executor_name,
+            )
+            return
         self._logger.info('start run_check on solution %s', self._solution_id)
         if self._exercise_auto_test is None:
             self._logger.info('No UT for solution %s', self._solution_id)
@@ -56,7 +61,7 @@ class UnitTestChecker:
                         executor.get_file_path(test_output_path)),
                 )
                 junit_results = executor.get_file(file_path=test_output_path)
-        except Exception:
+        except Exception:  # NOQA: B902
             self._logger.exception('Failed to run tests on solution %s',
                                    self._solution_id)
         self._logger.info('end UT on solution %s', self._solution_id)
