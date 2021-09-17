@@ -1,9 +1,5 @@
 import logging
 from typing import Iterable, Optional, Tuple
-try:
-    from lxml import etree
-except ImportError:
-    from xml.etree import ElementTree as etree
 
 from flask_babel import gettext as _  # type: ignore
 import junitparser
@@ -87,15 +83,12 @@ class UnitTestChecker:
         try:
             parsed_string = junitparser.TestSuite.fromstring(raw_results)
             return parsed_string.testsuites()
-        except etree.ElementTree.ParseError as error:
-            self._logger.exception(
-                'Failed to parse junit result: %s, %s',
-                error.code, error.position
-            )
+        except SyntaxError:  # importing xml make the lint go arrrr
+            self._logger.exception('Failed to parse junit result')
             return
         except junitparser.JUnitXmlError as error:
             self._logger.exception(
-                'Failed to parse junit result because %s', error
+                'Failed to parse junit result because %s', error,
             )
             return
 
