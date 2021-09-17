@@ -1,5 +1,9 @@
 import logging
-from typing import Optional, Tuple
+from typing import Iterable, Optional, Tuple
+try:
+    from lxml import etree
+except ImportError:
+    from xml.etree import ElementTree as etree
 
 from flask_babel import gettext as _  # type: ignore
 import junitparser
@@ -77,11 +81,32 @@ class UnitTestChecker:
         test_code = self._exercise_auto_test.code
         return f'{test_code}\n\n{user_code}'
 
+    def _get_parsed_suites(
+            self, raw_results: str,
+    ) -> Optional[Iterable[junitparser.TestSuite]]:
+        try:
+            parsed_string = junitparser.TestSuite.fromstring(raw_results)
+            return parsed_string.testsuites()
+        except etree.ElementTree.ParseError as error:
+            self._logger.exception(
+                'Failed to parse junit result: %s, %s',
+                error.code, error.position
+            )
+            return
+        except junitparser.JUnitXmlError as error:
+            self._logger.exception(
+                'Failed to parse junit result because %s', error
+            )
+            return
+
     def _populate_junit_results(self, raw_results: str) -> None:
         assert self._solution is not None  # noqa: S101
-        suites = ()
-        if raw_results:
-            suites = junitparser.TestSuite.fromstring(raw_results).testsuites()
+        if not raw_results:
+            return
+
+        suites = self._get_parsed_suites(raw_results)
+        if not suites:
+            return
 
         tests_ran = False
         number_of_failures = 0

@@ -20,7 +20,7 @@ def run_linter_on_solution(solution_pk: str) -> None:
     try:
         checker.initialize()
     except models.Solution.DoesNotExist:
-        _logger.exception("Solution %s does not exist", solution_pk)
+        _logger.exception('Solution %s does not exist', solution_pk)
 
     try:
         checker.run_check()

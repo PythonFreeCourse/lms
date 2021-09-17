@@ -15,8 +15,4 @@ def run_tests_for_solution(solution_id: str, executor_name=None):
     _logger.info('Start run_tests_for_solution %s', solution_id)
     checker = services.UnitTestChecker(_logger, solution_id, executor_name)
     checker.initialize()
-
-    try:
-        checker.run_check()
-    except Exception:
-        _logger.exception('Failed run_tests_for_solution %s', solution_id)
+    checker.run_check()
