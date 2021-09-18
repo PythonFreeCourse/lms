@@ -1,3 +1,4 @@
+from flask.testing import FlaskClient
 from lms.models.errors import ResourceNotFound
 from lms.models.solutions import get_view_parameters
 from unittest import mock
@@ -504,3 +505,23 @@ class TestSolutionBridge:
         staff_client = conftest.get_logged_user(staff_user.username)
         view_response = staff_client.get(f'{routes.SOLUTIONS}/{solution.id}')
         assert view_response.status_code == 200
+
+    @staticmethod
+    def test_send_page(
+        student_user: User, course: Course, exercise: Exercise,
+    ):
+        course2 = conftest.create_course(2)
+        exercise2 = conftest.create_exercise(course2, 1)
+        conftest.create_usercourse(student_user, course)
+        client = conftest.get_logged_user(student_user.username)
+        success_send_response = client.get(f'send/{course.id}')
+        assert success_send_response.status_code == 200
+
+        success_send_response2 = client.get(f'send/{course.id}/{exercise.id}')
+        assert success_send_response2.status_code == 200
+
+        fail_send_response = client.get(f'send/{course2.id}')
+        assert fail_send_response.status_code == 403
+
+        fail_send_response = client.get(f'send/{course2.id}/{exercise2.id}')
+        assert fail_send_response.status_code == 403
