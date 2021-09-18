@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  lmsweb-1.0\n"
 "Report-Msgid-Bugs-To: bugs@mesicka.com\n"
-"POT-Creation-Date: 2020-10-09 11:20+0300\n"
+"POT-Creation-Date: 2021-09-12 15:10+0300\n"
 "PO-Revision-Date: 2020-09-16 18:29+0300\n"
 "Last-Translator: Or Ronai\n"
 "Language: en\n"
@@ -16,9 +16,9 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.8.0\n"
+"Generated-By: Babel 2.9.1\n"
 
-#: lmsdb/models.py:632
+#: lmsdb/models.py:698
 msgid "כישלון חמור"
 msgstr "Fatal error"
 
@@ -45,26 +45,79 @@ msgstr "The automatic checker couldn't run your code."
 msgid "אחי, בדקת את הקוד שלך?"
 msgstr "Bro, did you check your code?"
 
+#: lmsweb/views.py:122
+msgid "לא ניתן להירשם כעת"
+msgstr "Can not register now"
+
+#: lmsweb/views.py:139
+msgid "ההרשמה בוצעה בהצלחה"
+msgstr "Registration successfully"
+
+#: lmsweb/views.py:161
+msgid "קישור האימות פג תוקף, קישור חדש נשלח אל תיבת המייל שלך"
+msgstr "The confirmation link is expired, new link has been sent to your email"
+
+#: lmsweb/views.py:174
+#, fuzzy
+msgid "המשתמש שלך אומת בהצלחה, כעת אתה יכול להתחבר למערכת"
+msgstr "Your user has been successfully confirmed, you can now login"
+
+#: lmsweb/forms/register.py:14
+msgid "אימייל לא תקין"
+msgstr "Invalid email"
+
+#: lmsweb/forms/register.py:32
+msgid "הסיסמאות שהוקלדו אינן זהות"
+msgstr "The passwords are not identical"
+
 #: lmsweb/tools/registration.py:105
 msgid "מערכת הגשת התרגילים"
 msgstr "Exercuse submission system"
 
-#: models/solutions.py:46
+#: lmsweb/tools/validators.py:13
+msgid "שם המשתמש כבר נמצא בשימוש"
+msgstr "The username already in use"
+
+#: lmsweb/tools/validators.py:21
+msgid "האימייל כבר נמצא בשימוש"
+msgstr "The email already in use"
+
+#: models/register.py:20
+#, python-format
+msgid "מייל אימות - %(site_name)s"
+msgstr "Confirmation mail - %(site_name)s"
+
+#: models/register.py:25
+#, fuzzy, python-format
+msgid "שלום %(fullname)s,\nלינק האימות שלך למערכת הוא: %(link)s"
+msgstr "Hello %(fullname)s,\n Your confirmation link is: %(link)s"
+
+#: models/solutions.py:50
 #, python-format
 msgid "%(solver)s הגיב לך על בדיקת תרגיל \"%(subject)s\"."
 msgstr "%(solver)s has replied for your \"%(subject)s\" check."
 
-#: models/solutions.py:53
+#: models/solutions.py:57
 #, python-format
 msgid "%(checker)s הגיב לך על תרגיל \"%(subject)s\"."
 msgstr "%(checker)s replied for \"%(subject)s\"."
 
-#: models/solutions.py:65
+#: models/solutions.py:69
 #, python-format
 msgid "הפתרון שלך לתרגיל \"%(subject)s\" נבדק."
 msgstr "Your solution for the \"%(subject)s\" exercise has been checked."
 
-#: templates/banned.html:8 templates/login.html:7
+#: models/users.py:25
+#, fuzzy
+msgid "שם המשתמש או הסיסמה שהוזנו לא תקינים"
+msgstr "Invalid username or password"
+
+#: models/users.py:27
+#, fuzzy
+msgid "עליך לאשר את מייל האימות"
+msgstr "You have to confirm your registration with the link sent to your email"
+
+#: templates/banned.html:8 templates/login.html:7 templates/signup.html:8
 msgid "תמונת הפרופיל של קורס פייתון"
 msgstr "Profile picture of the Python Course"
 
@@ -84,7 +137,7 @@ msgstr "Exercise submission system for the Python Course"
 msgid "תרגילים"
 msgstr "Exercises"
 
-#: templates/exercises.html:21
+#: templates/exercises.html:21 templates/view.html:101
 msgid "הערות על התרגיל"
 msgstr "Comments for the solution"
 
@@ -108,7 +161,7 @@ msgstr "All Exercises"
 msgid "התחברות"
 msgstr "Login"
 
-#: templates/login.html:10
+#: templates/login.html:10 templates/signup.html:11
 msgid "ברוכים הבאים למערכת התרגילים!"
 msgstr "Welcome to the exercise system!"
 
@@ -116,17 +169,21 @@ msgstr "Welcome to the exercise system!"
 msgid "הזינו את שם המשתמש והסיסמה שלכם:"
 msgstr "Insert your username and password:"
 
-#: templates/login.html:15 templates/login.html:17
+#: templates/login.html:22 templates/login.html:24 templates/signup.html:16
 msgid "שם משתמש"
 msgstr "Username"
 
-#: templates/login.html:21 templates/login.html:23
+#: templates/login.html:28 templates/login.html:30 templates/signup.html:18
 msgid "סיסמה"
 msgstr "Password"
 
-#: templates/login.html:28
+#: templates/login.html:35
 msgid "התחבר"
 msgstr "Login"
+
+#: templates/login.html:39 templates/signup.html:22
+msgid "הירשם"
+msgstr "Register"
 
 #: templates/navbar.html:8
 msgid "הלוגו של פרויקט לומדים פייתון: נחש צהוב על רקע עיגול בצבע תכלת, ומתחתיו כתוב - לומדים פייתון."
@@ -163,6 +220,32 @@ msgstr "Check Exercises"
 #: templates/navbar.html:87
 msgid "התנתקות"
 msgstr "Logout"
+
+#: templates/signup.html:9
+#, fuzzy
+msgid "הרשמה"
+msgstr "Registration"
+
+#: templates/signup.html:12
+msgid "הזינו אימייל וסיסמה לצורך רישום למערכת:"
+msgstr "Insert your email and password for registration:"
+
+#: templates/signup.html:15
+msgid "כתובת אימייל"
+msgstr "Email Address"
+
+#: templates/signup.html:17
+msgid "שם מלא"
+msgstr "Full Name"
+
+#: templates/signup.html:19
+#, fuzzy
+msgid "אימות סיסמה"
+msgstr "Password Confirmation"
+
+#: templates/signup.html:25
+msgid "חזרה לדף ההתחברות"
+msgstr "Back to login page"
 
 #: templates/status.html:7
 msgid "חמ\"ל תרגילים"
@@ -256,23 +339,23 @@ msgstr "Submitted"
 msgid "לא הוגש"
 msgstr "Not submitted"
 
-#: templates/user.html:43
+#: templates/user.html:44
 msgid "פתקיות:"
 msgstr "Notes:"
 
-#: templates/user.html:60 templates/user.html:62
+#: templates/user.html:49 templates/user.html:51
 msgid "פתקית חדשה"
 msgstr "New Note"
 
-#: templates/user.html:66
+#: templates/user.html:55
 msgid "תרגיל משויך:"
 msgstr "Exercise:"
 
-#: templates/user.html:75
+#: templates/user.html:64
 msgid "רמת פרטיות:"
 msgstr "Privacy Level:"
 
-#: templates/user.html:81
+#: templates/user.html:70
 msgid "הוסף פתקית"
 msgstr "Add Note"
 
@@ -331,10 +414,6 @@ msgstr "Error:"
 #: templates/view.html:87
 msgid "שגיאת סגל:"
 msgstr "Staff Error:"
-
-#: templates/view.html:101
-msgid "הערות על התרגיל"
-msgstr "Comments for the exercise"
 
 #: templates/view.html:109
 msgid "הערות כלליות"

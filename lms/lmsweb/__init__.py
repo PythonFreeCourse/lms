@@ -5,6 +5,7 @@ from flask import Flask
 from flask_babel import Babel  # type: ignore
 from flask_limiter import Limiter  # type: ignore
 from flask_limiter.util import get_remote_address  # type: ignore
+from flask_mail import Mail  # type: ignore
 from flask_wtf.csrf import CSRFProtect  # type: ignore
 
 from lms.utils import config_migrator, debug
@@ -40,6 +41,8 @@ csrf = CSRFProtect(webapp)
 
 # Localizing configurations
 babel = Babel(webapp)
+
+webmail = Mail(webapp)
 
 
 # Must import files after app's creation

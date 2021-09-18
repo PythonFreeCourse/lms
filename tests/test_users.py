@@ -1,5 +1,6 @@
+from flask.testing import FlaskClient
+
 from lms.lmsdb.models import User
-from lms.lmsweb import webapp
 from tests import conftest
 
 
@@ -61,8 +62,7 @@ class TestUser:
         assert logout_response.status_code == 200
 
     @staticmethod
-    def test_banned_user(banned_user: User):
-        client = client = webapp.test_client()
+    def test_banned_user(client: FlaskClient, banned_user: User):
         login_response = client.post('/login', data={
             'username': banned_user.username,
             'password': 'fake pass',

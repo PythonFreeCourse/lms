@@ -5,10 +5,6 @@ class LmsError(Exception):
     pass
 
 
-class UploadError(LmsError):
-    pass
-
-
 class AlreadyExists(LmsError):
     pass
 
@@ -21,7 +17,19 @@ class FileSizeError(LmsError):
     pass
 
 
+class UnhashedPasswordError(LmsError):
+    pass
+
+
+class UploadError(LmsError):
+    pass
+
+
 class NotValidRequest(LmsError):  # Error 400
+    pass
+
+
+class UnauthorizedError(LmsError):  # Error 401
     pass
 
 
