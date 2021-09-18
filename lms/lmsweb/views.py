@@ -117,7 +117,7 @@ def login(login_message: Optional[str] = None):
             return redirect(url_for('login', **error_details))
         else:
             login_user(user)
-            session['_invalid_tries'] = 0
+            session['_invalid_password_tries'] = 0
             return get_next_url(next_page)
 
     return render_template('login.html', login_message=login_message)
@@ -222,7 +222,7 @@ def reset_password():
     if not form.validate_on_submit():
         return render_template('resetpassword.html', form=form)
 
-    user = User.get_or_none(User.mail_address == form.email.data)
+    user = User.get(User.mail_address == form.email.data)
 
     send_reset_password_mail(user)
     return redirect(url_for(

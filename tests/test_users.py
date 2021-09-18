@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 from flask.testing import FlaskClient
 
 from lms.lmsdb.models import User
-from lms.lmsweb.config import CONFIRMATION_TIME, INVALID_TRIES
+from lms.lmsweb.config import CONFIRMATION_TIME, MAX_INVALID_PASSWORD_TRIES
 from lms.models.users import generate_user_token
 from tests import conftest
 
@@ -78,7 +78,7 @@ class TestUser:
     def test_invalid_change_password(captured_templates):
         student_user = conftest.create_student_user(index=1)
         client = conftest.get_logged_user(student_user.username)
-        for _ in range(INVALID_TRIES):
+        for _ in range(MAX_INVALID_PASSWORD_TRIES):
             client.post('/change-password', data={
                 'current_password': 'wrong pass',
                 'password': 'some_password',
