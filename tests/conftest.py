@@ -19,7 +19,6 @@ from lms.lmstests.public import celery_app as public_app
 from lms.lmstests.sandbox import celery_app as sandbox_app
 from lms.lmsweb import limiter, routes, webapp
 from lms.models import notifications
-from lms.models.users import generate_session_token
 
 
 @pytest.fixture(autouse=True, scope='session')
@@ -126,7 +125,6 @@ def create_user(
 ) -> User:
     username = f'{role_name}-{index}'
     password = 'fake pass'
-    session_token = generate_session_token(username, password)
     return User.create(  # NOQA: S106
         username=username,
         fullname=f'A{role_name}',
@@ -134,7 +132,6 @@ def create_user(
         password=password,
         api_key='fake key',
         role=Role.by_name(role_name),
-        session_token=session_token,
     )
 
 
@@ -184,7 +181,6 @@ def admin_user():
     admin_role = Role.get(Role.name == RoleOptions.ADMINISTRATOR.value)
     username = 'Yam'
     password = 'fake pass'
-    session_token = generate_session_token(username, password)
     return User.create(  # NOQA: B106, S106
         username=username,
         fullname='Buya',
@@ -192,7 +188,6 @@ def admin_user():
         password=password,
         api_key='fake key',
         role=admin_role,
-        session_token=session_token,
     )
 
 

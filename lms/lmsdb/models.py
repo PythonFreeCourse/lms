@@ -1,13 +1,14 @@
-from collections import Counter
 import enum
 import html
 import secrets
 import string
+from collections import Counter
 from datetime import datetime
 from typing import (
     Any, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple,
     Type, Union, cast,
 )
+from uuid import uuid4
 
 from flask_babel import gettext as _  # type: ignore
 from flask_login import UserMixin, current_user  # type: ignore
@@ -138,10 +139,10 @@ class User(UserMixin, BaseModel):
     password = CharField()
     role = ForeignKeyField(Role, backref='users')
     api_key = CharField()
-    session_token = CharField(unique=True)
+    uuid = CharField(default=uuid4, unique=True)
 
     def get_id(self):
-        return str(self.session_token)
+        return str(self.uuid)
 
     def is_password_valid(self, password):
         return check_password_hash(self.password, password)
@@ -156,7 +157,6 @@ class User(UserMixin, BaseModel):
             User.role.name: Role.get_staff_role(),
             User.password.name: cls.random_password(),
             User.api_key.name: cls.random_password(),
-            User.session_token.name: cls.random_password(),
         })
         return instance
 
@@ -206,6 +206,7 @@ def on_save_handler(model_class, instance, created):
     is_password_changed = not instance.password.startswith('pbkdf2:sha256')
     if created or is_password_changed:
         instance.password = generate_password_hash(instance.password)
+        instance.uuid = uuid4()
 
     is_api_key_changed = not instance.api_key.startswith('pbkdf2:sha256')
     if created or is_api_key_changed:
@@ -927,10 +928,8 @@ def create_demo_users():
         user = dict(zip(fields, entity))
         password = User.random_password()
         api_key = User.random_password(stronger=True)
-        session_token = generate_string()
         User.create(
             **user, password=password, api_key=api_key,
-            session_token=session_token,
         )
         print(f"User: {user['username']}, Password: {password}")  # noqa: T001
 

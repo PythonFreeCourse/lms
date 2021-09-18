@@ -40,9 +40,7 @@ from lms.models.errors import (
     FileSizeError, ForbiddenPermission, LmsError,
     UnauthorizedError, UploadError, fail,
 )
-from lms.models.users import (
-    SERIALIZER, auth, generate_session_token, retrieve_salt,
-)
+from lms.models.users import SERIALIZER, auth, retrieve_salt
 from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import (
     get_language_name_by_extension, get_mime_type_by_extention,
@@ -82,8 +80,8 @@ def _db_close(exc):
 
 
 @login_manager.user_loader
-def load_user(session_token):
-    return User.get_or_none(session_token=session_token)
+def load_user(uuid):
+    return User.get_or_none(uuid=uuid)
 
 
 @webapp.errorhandler(429)
@@ -135,9 +133,6 @@ def signup():
     if not form.validate_on_submit():
         return render_template('signup.html', form=form)
 
-    session_token = generate_session_token(
-        form.username.data, form.password.data,
-    )
     user = User.create(**{
         User.mail_address.name: form.email.data,
         User.username.name: form.username.data,
@@ -145,7 +140,6 @@ def signup():
         User.role.name: Role.get_unverified_role(),
         User.password.name: form.password.data,
         User.api_key.name: User.random_password(),
-        User.session_token.name: session_token,
     })
     send_confirmation_mail(user)
     return redirect(url_for(
@@ -202,9 +196,6 @@ def change_password():
         return render_template('changepassword.html', form=form)
 
     user.password = form.password.data
-    user.session_token = generate_session_token(
-        user.username, form.password.data,
-    )
     user.save()
     logout_user()
     send_change_password_mail(user)
@@ -264,9 +255,6 @@ def recover_password_check(user: User, token: str):
             'recoverpassword.html', form=form, id=user.id, token=token,
         )
     user.password = form.password.data
-    user.session_token = generate_session_token(
-        user.username, form.password.data,
-    )
     user.save()
     return redirect(url_for(
         'login', login_message=(

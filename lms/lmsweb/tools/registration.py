@@ -6,7 +6,6 @@ from flask_babel import gettext as _  # type: ignore
 
 from lms.lmsdb import models
 from lms.lmsweb import config
-from lms.models.users import generate_session_token
 from lms.utils.log import log
 
 import requests
@@ -89,9 +88,6 @@ class UserRegistrationCreator:
             models.User.fullname.name: f'{user.name}',
             models.User.role.name: models.Role.get_student_role(),
             models.User.password.name: user.password,
-            models.User.session_token.name: generate_session_token(
-                user.email, user.password,
-            ),
         })
 
     def _send_user_email_registration(self, user: UserToCreate) -> None:

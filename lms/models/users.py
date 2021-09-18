@@ -33,7 +33,3 @@ def auth(username: str, password: str) -> User:
 
 def generate_user_token(user: User) -> str:
     return SERIALIZER.dumps(user.mail_address, salt=retrieve_salt(user))
-
-
-def generate_session_token(username: str, password: str) -> str:
-    return SERIALIZER.dumps([username, password])
