@@ -178,6 +178,7 @@ class TestExtractor:
         conftest.create_exercise(course, 2)
         conftest.create_exercise(course, 3)
         conftest.create_exercise(course, 4, is_archived=True)
+        conftest.create_usercourse(student_user, course)
 
         client = conftest.get_logged_user(username=student_user.username)
 
