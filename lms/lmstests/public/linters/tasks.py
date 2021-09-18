@@ -1,6 +1,6 @@
 import logging
 
-from celery.exceptions import CeleryError, OperationalError
+from celery.exceptions import OperationalError, TaskError
 from celery.utils.log import get_task_logger
 
 from lms.lmsdb import models
@@ -21,8 +21,9 @@ def run_linter_on_solution(solution_pk: str) -> None:
         checker.initialize()
     except models.Solution.DoesNotExist:
         _logger.exception('Solution %s does not exist', solution_pk)
+        raise
 
     try:
         checker.run_check()
-    except (CeleryError.TaskError, OperationalError):
+    except (TaskError, OperationalError):
         _logger.exception('Failed to check solution %s', solution_pk)

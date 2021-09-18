@@ -17,7 +17,8 @@ def reset_solution_state_if_needed(solution_pk: str) -> None:
     try:
         solution = models.Solution.get_by_id(solution_pk)
     except models.Solution.DoesNotExist:
-        _logger.exception('Solution %s does not exists', solution_pk)
+        _logger.exception('Solution %s does not exist', solution_pk)
+        raise
 
     if solution.state == models.Solution.STATES.IN_CHECKING.name:
         _logger.info('Reset solution %s to CREATED state', solution_pk)

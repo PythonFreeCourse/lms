@@ -30,7 +30,7 @@ class BaseLinter:
 
     @staticmethod
     def match_to_file_suffix(file_suffix: str) -> bool:
-        raise NotImplementedError
+        raise NotImplementedError('match_to_file_suffix must be implemented')
 
     def initialize(self):
         """For special initializing code, please write it here"""
@@ -52,6 +52,7 @@ class BaseLinter:
                     file_suffix=file_suffix,
                     solution_file_id=solution_file_id,
                 )
+        return None
 
     def get_error_text(self, error: LinterError) -> str:
         return error.text

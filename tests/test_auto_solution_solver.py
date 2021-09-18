@@ -1,5 +1,7 @@
 import typing
 
+import pytest
+
 from lms.lmsdb import models
 from lms.lmstests.public.identical_tests import tasks
 from lms.models import notifications
@@ -98,3 +100,29 @@ class TestAutoSolutionSolver:
             code=second_solution_code,
         )
         return first_solution, second_solution
+
+    @staticmethod
+    def test_solve_identical_code_expect_exceptions(
+            solution: models.Solution, caplog: pytest.LogCaptureFixture,
+    ):
+        test_func = tasks.solve_solution_with_identical_code
+
+        assert test_func(solution.id) is None
+        assert 'does not exist' not in caplog.text
+
+        nonexist_solution = 123456789
+        with pytest.raises(models.Solution.DoesNotExist):
+            assert test_func(nonexist_solution) is None
+        assert 'does not exist' in caplog.text
+
+    @staticmethod
+    def test_check_others_can_be_solved_expect_exceptions(
+            solution: models.Solution, caplog: pytest.LogCaptureFixture,
+    ):
+        tasks.check_if_other_solutions_can_be_solved(solution.id)
+        assert 'does not exist' not in caplog.text
+
+        nonexist_solution = 123456789
+        with pytest.raises(models.Solution.DoesNotExist):
+            tasks.check_if_other_solutions_can_be_solved(nonexist_solution)
+        assert 'does not exist' in caplog.text

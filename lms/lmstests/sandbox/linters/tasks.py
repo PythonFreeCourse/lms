@@ -13,20 +13,21 @@ _logger.setLevel(logging.INFO)
 @app.task
 def run_linters_in_sandbox(solution_file_id: str, code: str, file_suffix: str):
     _logger.info('Start running sandbox check solution %s', solution_file_id)
+    get_linter = base.BaseLinter.get_match_linter
 
     try:
-        checker = base.BaseLinter.get_match_linter(
-            logger=_logger,
-            code=code,
-            file_suffix=file_suffix,
-            solution_file_id=solution_file_id,
-        )
-    except NotImplemented:
-        _logger.info(f'No suitable linter for file {solution_file_id}')
+        checker = get_linter(_logger, code, file_suffix, solution_file_id)
+    except NotImplementedError:
+        _logger.info('All linters must implement BaseLinter core methods.')
+        raise
+
+    if checker is None:
+        _logger.info('No suitable linter for file %s', solution_file_id)
         return []
 
     checker.initialize()
     try:
         return checker.run_check()
     except Exception:  # NOQA: B902
-        _logger.exception(f"Can't check {solution_file_id}")
+        _logger.exception("Can't check solution %s", solution_file_id)
+        return []

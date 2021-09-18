@@ -22,7 +22,8 @@ def solve_solution_with_identical_code(solution_pk: str) -> None:
     try:
         checker.initialize()
     except Solution.DoesNotExist:
-        _logger.exception('Solution %s does not exists', solution_pk)
+        _logger.exception('Solution %s does not exist', solution_pk)
+        raise
 
     checker.check_identical()
 
@@ -38,6 +39,7 @@ def check_if_other_solutions_can_be_solved(solution_pk: str) -> None:
     try:
         checker.initialize()
     except Solution.DoesNotExist:
-        _logger.exception('Solution %s does not exists', solution_pk)
+        _logger.exception('Solution %s does not exist', solution_pk)
+        raise
 
     checker.check_for_match_solutions_to_solve()

@@ -1,8 +1,8 @@
 from typing import Any, Callable, Optional, Tuple, Type
 
 from peewee import (
-    Entity, Expression, Field, IntegerField, Model, OP, OperationalError,
-    ProgrammingError, SQL,
+    Database, Entity, Expression, Field, Model, OP,
+    OperationalError, ProgrammingError, SQL,
 )
 from playhouse.migrate import migrate
 
@@ -215,10 +215,8 @@ def _drop_constraint_if_needed(table: Type[Model], column_name: str) -> bool:
     return True
 
 
-def has_column_named(table: Model, column_name: str) -> bool:
-    db = db_config.database
-    columns = {col.name for col in db.get_columns(table.__name__.lower())}
-    return column_name in columns
+def has_column_named(db: Database, table: Model, column_name: str) -> bool:
+    return column_name in table._meta.sorted_field_names
 
 
 def _add_api_keys_to_users_table(table: Model, _column: Field) -> None:
@@ -235,14 +233,6 @@ def _api_keys_migration() -> bool:
     return True
 
 
-def _fix_notes_type_migration() -> bool:
-    migrator = db_config.get_migrator_instance()
-    with db_config.database.transaction():
-        migrate(migrator.alter_column_type('note', 'privacy', IntegerField()))
-        db_config.database.commit()
-    return True
-
-
 def main():
     with models.database.connection_context():
         models.database.create_tables(models.ALL_MODELS, safe=True)
@@ -253,7 +243,6 @@ def main():
             models.create_demo_users()
 
     _api_keys_migration()
-    _fix_notes_type_migration()
     text_fixer.fix_texts()
     import_tests.load_tests_from_path('/app_dir/notebooks-tests')
 
