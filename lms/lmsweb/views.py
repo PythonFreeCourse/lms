@@ -187,9 +187,7 @@ def confirm_email(user_id: int, token: str):
 @webapp.route('/change-password', methods=['GET', 'POST'])
 @login_required
 def change_password():
-    user = User.get_or_none(User.id == current_user.id)
-    if user is None:
-        return fail(404, 'User not found.')
+    user = User.get(User.id == current_user.id)
 
     form = ChangePasswordForm(user)
     if not form.validate_on_submit():

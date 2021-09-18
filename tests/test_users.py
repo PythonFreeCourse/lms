@@ -125,6 +125,14 @@ class TestUser:
         assert template.name == "login.html"
 
         token = generate_user_token(user)
+        unknown_id_recover_response = client.post(
+            f'/recover-password/{user.id + 1}/{token}', data={
+                'password': 'different pass',
+                'confirm': 'different pass',
+            }, follow_redirects=True,
+        )
+        assert unknown_id_recover_response.status_code == 404
+
         client.post(f'/recover-password/{user.id}/{token}', data={
             'password': 'wrong pass',
             'confirm': 'different pass',
