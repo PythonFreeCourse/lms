@@ -1,13 +1,17 @@
 import logging
-from typing import Iterable, Optional, Tuple
+from typing import Iterable, List, Optional, Tuple
 
 from flask_babel import gettext as _  # type: ignore
 import junitparser
+from junitparser.junitparser import TestCase
 
 from lms.lmsdb import models
 from lms.lmstests.public.unittests import executers
 from lms.lmsweb import routes
 from lms.models import notifications
+
+
+NumberOfErrors = int
 
 
 class UnitTestChecker:
@@ -40,7 +44,7 @@ class UnitTestChecker:
             self._logger.info('No UT for solution %s', self._solution_id)
             return
         junit_results = self._run_tests_on_solution()
-        self._populate_junit_results(junit_results)
+        self._populate_junit_results(junit_results.encode('utf-8'))
         self._logger.info('end run_check solution %s', self._solution_id)
 
     def _run_tests_on_solution(self):
@@ -78,28 +82,28 @@ class UnitTestChecker:
         return f'{test_code}\n\n{user_code}'
 
     def _get_parsed_suites(
-            self, raw_results: str,
+            self, raw_results: bytes,
     ) -> Optional[Iterable[junitparser.TestSuite]]:
         try:
             parsed_string = junitparser.TestSuite.fromstring(raw_results)
             return parsed_string.testsuites()
         except SyntaxError:  # importing xml make the lint go arrrr
             self._logger.exception('Failed to parse junit result')
-            return
+            return None
         except junitparser.JUnitXmlError as error:
             self._logger.exception(
                 'Failed to parse junit result because %s', error,
             )
-            return
+            return None
 
-    def _populate_junit_results(self, raw_results: str) -> None:
+    def _populate_junit_results(self, raw_results: bytes) -> None:
         assert self._solution is not None  # noqa: S101
         if not raw_results:
-            return
+            return None
 
         suites = self._get_parsed_suites(raw_results)
         if not suites:
-            return
+            return None
 
         tests_ran = False
         number_of_failures = 0
@@ -111,10 +115,10 @@ class UnitTestChecker:
 
         if not tests_ran:
             self._handle_failed_to_execute_tests(raw_results)
-            return
+            return None
 
         if not number_of_failures:
-            return
+            return None
 
         fail_message = _(
             'הבודק האוטומטי נכשל ב־ %(number)d דוגמאות בתרגיל "%(subject)s".',
@@ -129,8 +133,8 @@ class UnitTestChecker:
             action_url=f'{routes.SOLUTIONS}/{self._solution_id}',
         )
 
-    def _handle_failed_to_execute_tests(self, raw_results: str) -> None:
-        self._logger.info('junit invalid results (%s) on solution %s',
+    def _handle_failed_to_execute_tests(self, raw_results: bytes) -> None:
+        self._logger.info(b'junit invalid results (%s) on solution %s',
                           raw_results, self._solution_id)
         fail_user_message = _(
             'הבודק האוטומטי לא הצליח להריץ את הקוד שלך.',
@@ -149,33 +153,45 @@ class UnitTestChecker:
             action_url=f'{routes.SOLUTIONS}/{self._solution_id}',
         )
 
+    def _handle_result(
+            self, case_name: str, result: junitparser.Element,
+    ) -> None:
+        message = ' '.join(
+            elem[1].replace('\n', '')
+            for elem in result._elem.items()
+        )
+        self._logger.info(
+            'Create comment on test %s solution %s.',
+            case_name, self._solution_id,
+        )
+        models.SolutionExerciseTestExecution.create_execution_result(
+            solution=self._solution,
+            test_name=case_name,
+            user_message=message,
+            staff_message=result.text,
+        )
+
+    def _handle_test_case(self, case: TestCase) -> NumberOfErrors:
+        results: List[junitparser.Element] = case.result
+        if not results:
+            self._logger.info(
+                'Case %s passed for solution %s.',
+                case.name, self._solution,
+            )
+            return False
+
+        number_of_failures = 0
+        for result in results:
+            self._handle_result(case.name, result)
+            number_of_failures += 1
+        return number_of_failures
+
     def _handle_test_suite(
-            self,
-            test_suite: junitparser.TestSuite,
+            self, test_suite: junitparser.TestSuite,
     ) -> Tuple[int, bool]:
         number_of_failures = 0
         tests_ran = False
         for case in test_suite:
             tests_ran = True
-            result: junitparser.Element = case.result
-            if result is None:
-                self._logger.info(
-                    'Case %s passed for solution %s.',
-                    case.name, self._solution,
-                )
-                continue
-            # invalid case
-            message = ' '.join(
-                elem[1].replace('\n', '')
-                for elem in result._elem.items()
-            )
-            self._logger.info('Create comment on test %s solution %s.',
-                              case.name, self._solution_id)
-            number_of_failures += 1
-            models.SolutionExerciseTestExecution.create_execution_result(
-                solution=self._solution,
-                test_name=case.name,
-                user_message=message,
-                staff_message=result._elem.text,
-            )
+            number_of_failures += int(self._handle_test_case(case))
         return number_of_failures, tests_ran
