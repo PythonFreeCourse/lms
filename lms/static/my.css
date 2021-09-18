@@ -130,7 +130,7 @@ a {
   justify-content: end;
 }
 
-.exercise-id {
+.exercise-number {
   align-items: center;
   border-radius: 100%;
   border: 1px solid;
@@ -142,11 +142,11 @@ a {
   width: 3rem;
 }
 
-.rtl-language > .exercise-id {
+.rtl-language > .exercise-number {
   margin-left: 2em;
 }
 
-.ltr-language > .exercise-id {
+.ltr-language > .exercise-number {
   margin-right: 2em;
 }
 
@@ -876,7 +876,7 @@ code .grader-add .fa {
 }
 
 @media screen and (max-width: 768px) {
-  .exercise-id {
+  .exercise-number {
     display: none;
   }
   .which-notebook {

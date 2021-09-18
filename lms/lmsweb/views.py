@@ -14,7 +14,7 @@ from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
     ALL_MODELS, Comment, Note, RoleOptions, SharedSolution,
-    Solution, SolutionFile, User, database,
+    Solution, SolutionFile, User, UserCourse, database,
 )
 from lms.lmsweb import babel, limiter, routes, webapp
 from lms.lmsweb.admin import (
@@ -305,10 +305,12 @@ def comment():
     return fail(400, f'Unknown or unset act value "{act}".')
 
 
-@webapp.route('/send/<int:_exercise_id>')
+@webapp.route('/send/<int:course_id>/<int:_exercise_number>')
 @login_required
-def send(_exercise_id):
-    return render_template('upload.html')
+def send(course_id: int, _exercise_number: Optional[int]):
+    if not UserCourse.is_user_registered(current_user.id, course_id):
+        return fail(403, "You aren't allowed to watch this page.")
+    return render_template('upload.html', course_id=course_id)
 
 
 @webapp.route('/user/<int:user_id>')
@@ -331,15 +333,17 @@ def user(user_id):
     )
 
 
-@webapp.route('/send', methods=['GET'])
+@webapp.route('/send/<int:course_id>', methods=['GET'])
 @login_required
-def send_():
-    return render_template('upload.html')
+def send_(course_id: int):
+    if not UserCourse.is_user_registered(current_user.id, course_id):
+        return fail(403, "You aren't allowed to watch this page.")
+    return render_template('upload.html', course_id=course_id)
 
 
-@webapp.route('/upload', methods=['POST'])
+@webapp.route('/upload/<int:course_id>', methods=['POST'])
 @login_required
-def upload_page():
+def upload_page(course_id: int):
     user_id = current_user.id
     user = User.get_or_none(User.id == user_id)  # should never happen
     if user is None:
@@ -354,7 +358,7 @@ def upload_page():
         return fail(422, 'No file was given.')
 
     try:
-        matches, misses = upload.new(user, file)
+        matches, misses = upload.new(user, file, course_id)
     except UploadError as e:
         log.debug(e)
         return fail(400, str(e))

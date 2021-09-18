@@ -1,6 +1,7 @@
 import datetime
 
-from lms.lmsdb.models import Exercise
+from lms.lmsdb.models import Course, Exercise, User
+from tests import conftest
 
 
 class TestExercise:
@@ -20,3 +21,13 @@ class TestExercise:
         exercise.due_date = after_due_date
         exercise.save()
         assert exercise.open_for_new_solutions()
+
+    @staticmethod
+    def test_courses_exercises(course: Course, student_user: User):
+        course2 = conftest.create_course(index=1)
+        conftest.create_usercourse(student_user, course)
+        conftest.create_exercise(course2, 1)
+        assert len(list(Exercise.get_objects(student_user.id))) == 0
+
+        conftest.create_exercise(course, 1, index=1)
+        assert len(list(Exercise.get_objects(student_user.id))) == 1

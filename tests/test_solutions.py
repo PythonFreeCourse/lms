@@ -5,7 +5,9 @@ from unittest import mock
 from flask import json
 import pytest
 
-from lms.lmsdb.models import Comment, Exercise, SharedSolution, Solution, User
+from lms.lmsdb.models import (
+    Comment, Course, Exercise, SharedSolution, Solution, User,
+)
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmsweb import routes
 from lms.models import notifications, solutions
@@ -144,12 +146,13 @@ class TestSolutionBridge:
 
     @staticmethod
     def test_get_next_unchecked(
+        course: Course,
         student_user: User,
         exercise: Exercise,
         staff_user: User,
     ):
         student_user2 = conftest.create_student_user(index=1)
-        exercise2 = conftest.create_exercise(3)
+        exercise2 = conftest.create_exercise(course, 2, index=3)
         solution1 = conftest.create_solution(exercise, student_user)
         solution2 = conftest.create_solution(exercise2, student_user)
         solution3 = conftest.create_solution(exercise, student_user2)
@@ -183,9 +186,11 @@ class TestSolutionBridge:
         assert unchecked is None
 
     @staticmethod
-    def test_start_checking(exercise: Exercise, student_user: User):
+    def test_start_checking(
+        course: Course, exercise: Exercise, student_user: User,
+    ):
         student_user2 = conftest.create_student_user(index=1)
-        exercise2 = conftest.create_exercise(1)
+        exercise2 = conftest.create_exercise(course, 2, index=1)
         solution1 = conftest.create_solution(exercise, student_user)
         solution2 = conftest.create_solution(exercise2, student_user)
         solution3 = conftest.create_solution(exercise, student_user2)

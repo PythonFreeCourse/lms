@@ -18,6 +18,7 @@
           <thead>
             <tr>
               <th scope="col">#</th>
+              <th scope="col">{{ _('שם הקורס') }}</th>
               <th scope="col">{{ _('שם תרגיל') }}</th>
               <th scope="col">{{ _('מצב הגשה') }}</th>
               <th scope="col">{{ _('הגשה') }}</th>
@@ -25,9 +26,11 @@
             </tr>
           </thead>
           <tbody>
-            {%- for solution in solutions %}
+            {%- for exercise in solutions.values() %}
+            {% for solution in exercise.values() %}
             <tr>
-              <th scope="row">{{ solution.exercise_id | e }}</th>
+              <th scope="row">{{ solution.exercise_number | e }}</th>
+              <td>{{ solution.course_name | e }}</td>
               <td>{{ solution.exercise_name | e }}</td>
               <td>
                 {{ _('נבדק') if solution.is_checked else _('הוגש') if solution.solution_id else _('לא הוגש') }}
@@ -35,6 +38,7 @@
               <td><a href="/view/{{ solution.solution_id }}">{{ solution.solution_id }}</a></td>
               <td>{{ solution.get('checker', '') | e }}</a></td>
             </tr>
+            {% endfor %}
             {% endfor -%}
           </tbody>
         </table>
