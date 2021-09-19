@@ -71,7 +71,7 @@ def webapp_configurations():
     limiter.enabled = False
 
 
-@pytest.fixture(autouse=True, scope='class')
+@pytest.fixture(autouse=True, scope='session')
 def disable_mail_sending():
     webapp.config['TESTING'] = True
     webmail = Mail(webapp)

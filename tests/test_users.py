@@ -10,7 +10,6 @@ from lms.models.users import generate_user_token
 from tests import conftest
 
 
-@pytest.mark.usefixtures('disable_mail_sending')
 class TestUser:
     def test_password_hashed_on_create(
         self,

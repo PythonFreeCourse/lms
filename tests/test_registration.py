@@ -11,7 +11,6 @@ from lms.models.users import generate_user_token
 from tests import conftest
 
 
-@pytest.mark.usefixtures('disable_mail_sending')
 class TestRegistration:
     @staticmethod
     def test_invalid_username(
