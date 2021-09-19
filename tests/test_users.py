@@ -112,14 +112,18 @@ class TestUser:
         assert check_logout_response.status_code == 302
 
     @staticmethod
-    def test_forgot_my_password(client: FlaskClient, captured_templates):
-        user = conftest.create_student_user(index=1)
+    def test_forgot_my_password_invalid_mail(
+        client: FlaskClient, captured_templates,
+    ):
         client.post('/reset-password', data={
             'email': 'fake-mail@mail.com',
         }, follow_redirects=True)
         template, _ = captured_templates[-1]
         assert template.name == "resetpassword.html"
 
+    @staticmethod
+    def test_forgot_my_password(client: FlaskClient, captured_templates):
+        user = conftest.create_student_user(index=1)
         client.post('/reset-password', data={
             'email': user.mail_address,
         }, follow_redirects=True)
