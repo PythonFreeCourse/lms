@@ -122,7 +122,9 @@ class TestUser:
         assert template.name == "resetpassword.html"
 
     @staticmethod
-    def test_forgot_my_password(client: FlaskClient, captured_templates):
+    def test_forgot_my_password_invalid_recover(
+        client: FlaskClient, captured_templates,
+    ):
         user = conftest.create_student_user(index=1)
         client.post('/reset-password', data={
             'email': user.mail_address,
@@ -146,6 +148,16 @@ class TestUser:
         template, _ = captured_templates[-1]
         assert template.name == "recoverpassword.html"
 
+    @staticmethod
+    def test_forgot_my_password(client: FlaskClient, captured_templates):
+        user = conftest.create_student_user(index=1)
+        client.post('/reset-password', data={
+            'email': user.mail_address,
+        }, follow_redirects=True)
+        template, _ = captured_templates[-1]
+        assert template.name == "login.html"
+
+        token = generate_user_token(user)
         client.post(f'/recover-password/{user.id}/{token}', data={
             'password': 'new pass',
             'confirm': 'new pass',

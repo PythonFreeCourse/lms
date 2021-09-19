@@ -1,10 +1,10 @@
+import sys
 import time
 from unittest.mock import Mock, patch
 
 from flask.testing import FlaskClient
 import pytest
 
-from lms.lmsweb import config_file
 from lms.lmsweb.config import CONFIRMATION_TIME, MAIL_DEFAULT_SENDER
 from lms.lmsdb.models import User
 from lms.models.users import generate_user_token
@@ -135,7 +135,11 @@ class TestRegistration:
 
     @staticmethod
     @pytest.mark.skipif(
-        condition=not config_file.is_file(),
+        condition=(
+            sys.platform != 'darwin'
+            and sys.platform != 'linux'
+            and sys.platform != 'win32'
+        ),
         reason='should run with configuration file and correct mail info',
     )
     def test_successful_registration(client: FlaskClient, captured_templates):
