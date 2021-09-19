@@ -134,16 +134,7 @@ class TestRegistration:
             assert success_login_response.status_code == 200
 
     @staticmethod
-    @pytest.mark.skipif(
-        condition=(
-            sys.platform != 'darwin'
-            and sys.platform != 'linux'
-            and sys.platform != 'win32'
-        ),
-        reason='should run with configuration file and correct mail info',
-    )
     def test_successful_registration(client: FlaskClient, captured_templates):
-        conftest.enable_mail_sending()
         client.post('/signup', data={
             'email': MAIL_DEFAULT_SENDER,
             'username': 'some_user',

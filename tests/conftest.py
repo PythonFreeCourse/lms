@@ -7,6 +7,7 @@ from typing import List, Optional
 
 from flask import template_rendered
 from flask.testing import FlaskClient
+from flask_mail import Mail
 from peewee import SqliteDatabase
 import pytest
 
@@ -73,6 +74,7 @@ def webapp_configurations():
 @pytest.fixture(autouse=True, scope='class')
 def disable_mail_sending():
     webapp.config['TESTING'] = True
+    webmail = Mail(webapp)
 
 
 @pytest.fixture(autouse=True, scope='session')
@@ -90,10 +92,6 @@ def disable_users_comments():
 
 def enable_users_comments():
     webapp.config['USERS_COMMENTS'] = True
-
-
-def enable_mail_sending():
-    webapp.config['TESTING'] = False
 
 
 def disable_registration():
