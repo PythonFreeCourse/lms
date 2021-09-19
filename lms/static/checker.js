@@ -23,6 +23,5 @@ function trackFinished(exerciseId, solutionId, element) {
 }
 
 window.addEventListener('lines-numbered', () => {
-  const exerciseId = codeView.dataset.exercise;
-  trackFinished(exerciseId, window.solutionId, document.getElementById('save-check'));
+  trackFinished(window.exerciseId, window.solutionId, document.getElementById('save-check'));
 });
