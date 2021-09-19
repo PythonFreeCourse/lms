@@ -2,13 +2,15 @@ import time
 from unittest.mock import Mock, patch
 
 from flask.testing import FlaskClient
+import pytest
 
-from lms.lmsweb.config import CONFIRMATION_TIME
+from lms.lmsweb.config import CONFIRMATION_TIME, MAIL_DEFAULT_SENDER
 from lms.lmsdb.models import User
 from lms.models.users import generate_user_token
 from tests import conftest
 
 
+@pytest.mark.usefixtures('disable_mail_sending')
 class TestRegistration:
     @staticmethod
     def test_invalid_username(
@@ -51,35 +53,6 @@ class TestRegistration:
         }, follow_redirects=True)
         fail_login_response = client.get('/exercises')
         assert fail_login_response.status_code == 302
-
-    @staticmethod
-    def test_successful_registration(client: FlaskClient, captured_templates):
-        client.post('/signup', data={
-            'email': 'some_user123@mail.com',
-            'username': 'some_user',
-            'fullname': 'some_name',
-            'password': 'some_password',
-            'confirm': 'some_password',
-        }, follow_redirects=True)
-        template, _ = captured_templates[-1]
-        assert template.name == 'login.html'
-
-        client.post('/login', data={
-            'username': 'some_user',
-            'password': 'some_password',
-        }, follow_redirects=True)
-        fail_login_response = client.get('/exercises')
-        assert fail_login_response.status_code == 302
-
-        user = User.get_or_none(User.username == 'some_user')
-        token = generate_user_token(user)
-        client.get(f'/confirm-email/{user.id}/{token}', follow_redirects=True)
-        client.post('/login', data={
-            'username': 'some_user',
-            'password': 'some_password',
-        }, follow_redirects=True)
-        success_login_response = client.get('/exercises')
-        assert success_login_response.status_code == 200
 
     @staticmethod
     def test_bad_token_or_id(client: FlaskClient):
@@ -158,6 +131,36 @@ class TestRegistration:
             }, follow_redirects=True)
             success_login_response = client.get('/exercises')
             assert success_login_response.status_code == 200
+
+    @staticmethod
+    def test_successful_registration(client: FlaskClient, captured_templates):
+        conftest.enable_mail_sending()
+        client.post('/signup', data={
+            'email': MAIL_DEFAULT_SENDER,
+            'username': 'some_user',
+            'fullname': 'some_name',
+            'password': 'some_password',
+            'confirm': 'some_password',
+        }, follow_redirects=True)
+        template, _ = captured_templates[-1]
+        assert template.name == 'login.html'
+
+        client.post('/login', data={
+            'username': 'some_user',
+            'password': 'some_password',
+        }, follow_redirects=True)
+        fail_login_response = client.get('/exercises')
+        assert fail_login_response.status_code == 302
+
+        user = User.get_or_none(User.username == 'some_user')
+        token = generate_user_token(user)
+        client.get(f'/confirm-email/{user.id}/{token}', follow_redirects=True)
+        client.post('/login', data={
+            'username': 'some_user',
+            'password': 'some_password',
+        }, follow_redirects=True)
+        success_login_response = client.get('/exercises')
+        assert success_login_response.status_code == 200
 
     @staticmethod
     def test_registartion_closed(client: FlaskClient, captured_templates):

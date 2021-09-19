@@ -70,7 +70,7 @@ def webapp_configurations():
     limiter.enabled = False
 
 
-@pytest.fixture(autouse=True, scope='session')
+@pytest.fixture(autouse=True, scope='class')
 def disable_mail_sending():
     webapp.config['TESTING'] = True
 
@@ -90,6 +90,10 @@ def disable_users_comments():
 
 def enable_users_comments():
     webapp.config['USERS_COMMENTS'] = True
+
+
+def enable_mail_sending():
+    webapp.config['TESTING'] = False
 
 
 def disable_registration():

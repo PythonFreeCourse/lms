@@ -2,6 +2,7 @@ import time
 from unittest.mock import Mock, patch
 
 from flask.testing import FlaskClient
+import pytest
 
 from lms.lmsdb.models import User
 from lms.lmsweb.config import CONFIRMATION_TIME, MAX_INVALID_PASSWORD_TRIES
@@ -9,6 +10,7 @@ from lms.models.users import generate_user_token
 from tests import conftest
 
 
+@pytest.mark.usefixtures('disable_mail_sending')
 class TestUser:
     def test_password_hashed_on_create(
         self,
