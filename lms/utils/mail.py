@@ -3,7 +3,7 @@ from flask_babel import gettext as _  # type: ignore
 from flask_mail import Message  # type: ignore
 
 from lms.lmsdb.models import User
-from lms.lmsweb import config, webapp, webmail
+from lms.lmsweb import config, webmail
 from lms.models.users import generate_user_token
 
 
