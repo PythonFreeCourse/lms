@@ -14,7 +14,7 @@ from flask_babel import gettext as _  # type: ignore
 from flask_login import UserMixin, current_user  # type: ignore
 from peewee import (  # type: ignore
     BooleanField, Case, CharField, Check, DateTimeField, ForeignKeyField,
-    IntegerField, JOIN, ManyToManyField, TextField, fn,
+    IntegerField, JOIN, ManyToManyField, TextField, UUIDField, fn,
 )
 from playhouse.signals import Model, post_save, pre_save  # type: ignore
 from werkzeug.security import (
@@ -139,7 +139,7 @@ class User(UserMixin, BaseModel):
     password = CharField()
     role = ForeignKeyField(Role, backref='users')
     api_key = CharField()
-    uuid = CharField(default=uuid4, unique=True)
+    uuid = UUIDField(default=uuid4, unique=True)
 
     def get_id(self):
         return str(self.uuid)

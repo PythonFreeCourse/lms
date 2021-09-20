@@ -48,8 +48,9 @@ a {
 
 #login-container,
 #signup-container,
-#changepassword-container,
-#resetpassword-container {
+#change-password-container,
+#reset-password-container,
+#recover-password-container {
   height: 100%;
   align-items: center;
   display: flex;
@@ -58,8 +59,9 @@ a {
 
 #login,
 #signup,
-#changepassword,
-#resetpassword {
+#change-password,
+#reset-password,
+#recover-password {
   margin: auto;
   max-width: 420px;
   padding: 15px;
@@ -68,7 +70,8 @@ a {
 
 #login-logo,
 #signup-logo,
-#resetpassword-logo {
+#reset-password-logo,
+#recover-password-logo {
   margin-bottom: 1rem;
 }
 
@@ -739,10 +742,6 @@ code .grader-add .fa {
   margin: 5vh 0;
   text-align: center;
 }
-
-/* #change-password-user {
-  text-align: center;
-} /*
 
 #archive-row {
   text-align: center;
