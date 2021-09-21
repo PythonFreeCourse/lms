@@ -219,9 +219,7 @@ def _drop_constraint_if_needed(table: Type[Model], column_name: str) -> bool:
 def has_column_named(table: Model, column_name: str) -> bool:
     db = db_config.database
     columns = {col.name for col in db.get_columns(table.__name__.lower())}
-    if column_name not in columns:
-        return False
-    return True
+    return column_name in columns
 
 
 def _add_api_keys_to_users_table(table: Model, _column: Field) -> None:
