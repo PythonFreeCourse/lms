@@ -1,5 +1,5 @@
 import logging
-import subprocess
+import subprocess  # noqa: S404
 from typing import Iterable, List, Optional, Tuple
 
 from flask_babel import gettext as _  # type: ignore
