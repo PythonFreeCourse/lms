@@ -19,7 +19,9 @@ def run_tests_for_solution(solution_id: str, executor_name=None):
         checker.initialize()
     except models.Solution.DoesNotExist:
         _logger.exception('The solution %s does not exists', solution_id)
+        raise
     except models.ExerciseTest.DoesNotExist:
         _logger.exception('Missing tests for solution %s', solution_id)
+        raise
 
     checker.run_check()

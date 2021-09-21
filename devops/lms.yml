@@ -21,15 +21,11 @@ services:
       - lms
 
   rabbitmq:
-    image: rabbitmq:3.7-management-alpine
+    image: rabbitmq:3.9-management-alpine
     hostname: celery-mq
-    environment:
-      - RABBITMQ_ERLANG_COOKIE=AAVyo5djdSMGIZXiwEQs3JeVaBx5l14z
-      - RABBITMQ_DEFAULT_USER=rabbit-user
-      - RABBITMQ_DEFAULT_PASS=YgKlCvnYVzpTa3T9adG3NrMoUNe4Z5aZ
-      - RABBITMQ_DEFAULT_VHOST=/
     volumes:
       - rabbit-data-volume:/var/lib/rabbitmq
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
     networks:
       - lms
 

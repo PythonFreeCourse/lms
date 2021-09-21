@@ -1,4 +1,5 @@
 import logging
+import subprocess
 from typing import Iterable, List, Optional, Tuple
 
 from flask_babel import gettext as _  # type: ignore
@@ -12,6 +13,7 @@ from lms.models import notifications
 
 
 NumberOfErrors = int
+CANT_EXECUTE_CODE_MESSAGE = _('הבודק האוטומטי לא הצליח להריץ את הקוד שלך.')
 
 
 class UnitTestChecker:
@@ -34,11 +36,7 @@ class UnitTestChecker:
         )
 
     def run_check(self) -> None:
-        if self._solution is None:
-            self._logger.error(
-                "Can't run %s as it is an empty solution", self._executor_name,
-            )
-            return
+        assert self._solution is not None
         self._logger.info('start run_check on solution %s', self._solution_id)
         if self._exercise_auto_test is None:
             self._logger.info('No UT for solution %s', self._solution_id)
@@ -57,17 +55,16 @@ class UnitTestChecker:
         try:
             with executers.get_executor(self._executor_name) as executor:
                 executor.write_file(python_file, python_code)
-                executor.run_on_executor(
-                    args=(
-                        'pytest',
-                        executor.get_file_path(python_file),
-                        '--junitxml',
-                        executor.get_file_path(test_output_path)),
-                )
+                pyfile_path = executor.get_file_path(python_file)
+                test_output_path = executor.get_file_path(test_output_path)
+                args = ('pytest', pyfile_path, '--junitxml', test_output_path)
+                executor.run_on_executor(args=args)
                 junit_results = executor.get_file(file_path=test_output_path)
-        except Exception:  # NOQA: B902
-            self._logger.exception('Failed to run tests on solution %s',
-                                   self._solution_id)
+        except (IOError, subprocess.CalledProcessError):  # NOQA: B902
+            self._logger.exception(
+                'Failed to run tests on solution %s', self._solution_id,
+            )
+            return ''
         self._logger.info('end UT on solution %s', self._solution_id)
         return junit_results
 
@@ -136,9 +133,7 @@ class UnitTestChecker:
     def _handle_failed_to_execute_tests(self, raw_results: bytes) -> None:
         self._logger.info(b'junit invalid results (%s) on solution %s',
                           raw_results, self._solution_id)
-        fail_user_message = _(
-            'הבודק האוטומטי לא הצליח להריץ את הקוד שלך.',
-        )
+        fail_user_message = CANT_EXECUTE_CODE_MESSAGE
         models.SolutionExerciseTestExecution.create_execution_result(
             solution=self._solution,
             test_name=models.ExerciseTestName.FATAL_TEST_NAME,
