@@ -1,7 +1,7 @@
 #!/bin/bash
 
-python_exec=python3
-pip_exec=pip3
+python_exec=python
+pip_exec=pip
 
 set -x
 
@@ -16,13 +16,13 @@ CONFIG_EXAMPLE_FILE_PATH="${LMSWEB_FOLDER}/config.py.example"
 DB_BOOTSTRAP_FILE_PATH="${LMSAPP_FOLDER}/lmsdb/bootstrap.py"
 
 if ! (test -f "${CONFIG_FILE_PATH}"); then
-	echo "Creating config from template"
-	cp "${CONFIG_EXAMPLE_FILE_PATH}" "${CONFIG_FILE_PATH}"
-	echo "Writing secret key to config"
-	secret_key=$($python_exec -c "import os;print(os.urandom(32).hex())")
-	echo "SECRET_KEY = \"${secret_key}\"" >>"${CONFIG_FILE_PATH}"
+  echo "Creating config from template"
+  cp "${CONFIG_EXAMPLE_FILE_PATH}" "${CONFIG_FILE_PATH}"
+  echo "Writing secret key to config"
+  secret_key=$($python_exec -c "import os;print(os.urandom(32).hex())")
+  echo "SECRET_KEY = \"${secret_key}\"" >>"${CONFIG_FILE_PATH}"
 else
-	echo "Config already exists"
+  echo "Config already exists"
 fi
 
 echo "Creating venv"
