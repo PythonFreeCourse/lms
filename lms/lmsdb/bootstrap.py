@@ -89,9 +89,7 @@ def get_details(table: Model, column: Field) -> Tuple[bool, str, str]:
     column_name = column.column_name
 
     cols = {col.name for col in db_config.database.get_columns(table_name)}
-    if column_name in cols:
-        return True, table_name, column_name
-    return False, table_name, column_name
+    return column_name in cols, table_name, column_name
 
 
 def _add_not_null_column(
@@ -219,9 +217,7 @@ def _drop_constraint_if_needed(table: Type[Model], column_name: str) -> bool:
 def has_column_named(table: Model, column_name: str) -> bool:
     db = db_config.database
     columns = {col.name for col in db.get_columns(table.__name__.lower())}
-    if column_name not in columns:
-        return False
-    return True
+    return column_name in columns
 
 
 def _add_api_keys_to_users_table(table: Model, _column: Field) -> None:
