@@ -118,7 +118,7 @@ class TestNotes:
     def test_create_note(
         student_user: User,
         staff_user: User,
-        exercise: Exercise
+        exercise: Exercise,
     ):
         client = conftest.get_logged_user(staff_user.username)
         # Trying to create note with no text
@@ -140,10 +140,11 @@ class TestNotes:
         assert staff_note_response.status_code == 200
 
         # Creating a private note
+        private_note = {'note': 'private note', 'exercise': exercise.subject}
         private_note_response = client.post(
             f'/notes/{student_user.id}',
             data=json.dumps({'act': 'create'}),
-            query_string={'note': 'private note', 'exercise': exercise.subject},
+            query_string=private_note,
             content_type='application/json',
         )
         assert private_note_response.status_code == 200

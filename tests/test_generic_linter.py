@@ -4,7 +4,7 @@ from lms.lmsdb import models
 from lms.lmstests.public.linters import tasks
 
 
-class TestGenericLibnter:
+class TestGenericLinter:
     @staticmethod
     def test_run_linters_expect_unknown_solution(
             solution: models.Solution, caplog: pytest.LogCaptureFixture,
