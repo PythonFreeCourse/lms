@@ -23,6 +23,7 @@ from werkzeug.security import (
 from lms.lmsdb import database_config
 from lms.models.errors import AlreadyExists
 from lms.utils import hashing
+from lms.utils.courses import generate_invite_code
 from lms.utils.log import log
 
 
@@ -137,6 +138,8 @@ class Course(BaseModel):
     due_date = DateTimeField(null=True)
     is_finished = BooleanField(default=False)
     close_registration_date = DateTimeField(default=datetime.now)
+    invite_code = CharField(default=generate_invite_code, unique=True)
+    is_public = BooleanField(default=False)
 
     def __str__(self):
         return f'{self.name}: {self.date} - {self.due_date}'
@@ -230,11 +233,10 @@ class UserCourse(BaseModel):
         return (
             cls.
             select()
-            .join(User)
-            .where(User.id == user_id)
-            .switch()
-            .join(Course)
-            .where(Course.id == course_id)
+            .where(
+                cls.user == user_id,
+                cls.course == course_id,
+            )
             .exists()
         )
 

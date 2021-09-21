@@ -430,7 +430,7 @@ def upload_page(course_id: int):
         return fail(422, 'No file was given.')
 
     try:
-        matches, misses = upload.new(user, file, course_id)
+        matches, misses = upload.new(user, course_id, file)
     except UploadError as e:
         log.debug(e)
         return fail(400, str(e))

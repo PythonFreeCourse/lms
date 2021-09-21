@@ -32,7 +32,8 @@ class TestExtractor:
         self.image_no_exercise_file = next(self.zip_files(
             (self.IMAGE_NO_EXERCISE,),
         ))
-        self.pyfile_different_course = self.get_bytes_io_py_file(
+        self.image_bytes_io = self.get_bytes_io_file(self.IMAGE_NAME)
+        self.pyfile_different_course = self.get_bytes_io_file(
             self.PY_DIFFERENT_COURSE,
         )
         self.pyfiles_files = list(self.py_files(self.PY_NAMES))
@@ -87,7 +88,7 @@ class TestExtractor:
             yield open(f'{SAMPLES_DIR}/{file_name}')
 
     @staticmethod
-    def get_bytes_io_py_file(file_name) -> BytesIO:
+    def get_bytes_io_file(file_name) -> BytesIO:
         with open(f'{SAMPLES_DIR}/{file_name}', 'br') as open_file:
             return BytesIO(open_file.read()), file_name
 
@@ -224,6 +225,20 @@ class TestExtractor:
             'file': self.pyfile_different_course,
         })
         assert fail_upload_response.status_code == 400
+
+    def test_upload_invalid_exercise(
+        self,
+        course: Course,
+        student_user: User,
+    ):
+        conftest.create_usercourse(student_user, course)
+
+        client = conftest.get_logged_user(username=student_user.username)
+        fail_upload_response = client.post(f'/upload/{course.id}', data={
+            'file': self.image_bytes_io,
+        })
+        assert fail_upload_response.status_code == 400
+
 
     def test_upload_correct_course(
         self,

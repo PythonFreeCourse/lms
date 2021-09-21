@@ -64,7 +64,7 @@ def _run_auto_checks(solution: Solution) -> None:
 
 
 def new(
-    user: User, file: FileStorage, course_id: int,
+    user: User, course_id: int, file: FileStorage,
 ) -> Tuple[List[int], List[int]]:
     matches: List[int] = []
     misses: List[int] = []
