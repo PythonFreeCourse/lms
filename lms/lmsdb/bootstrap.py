@@ -1,4 +1,5 @@
 from typing import Any, Callable, Optional, Tuple, Type
+from uuid import uuid4
 
 from peewee import (
     Entity, Expression, Field, Model, OP, OperationalError, ProgrammingError,
@@ -231,9 +232,23 @@ def _add_api_keys_to_users_table(table: Model, _column: Field) -> None:
             user.save()
 
 
+def _add_uuid_to_users_table(table: Model, _colum: Field) -> None:
+    log.info('Adding UUIDs for all users, might take some extra time...')
+    with db_config.database.transaction():
+        for user in table:
+            user.uuid = uuid4()
+            user.save()
+
+
 def _api_keys_migration() -> bool:
     User = models.User
     _add_not_null_column(User, User.api_key, _add_api_keys_to_users_table)
+    return True
+
+
+def _uuid_migration() -> bool:
+    User = models.User
+    _add_not_null_column(User, User.uuid, _add_uuid_to_users_table)
     return True
 
 
@@ -247,6 +262,7 @@ def main():
             models.create_demo_users()
 
     _api_keys_migration()
+    _uuid_migration()
     text_fixer.fix_texts()
     import_tests.load_tests_from_path('/app_dir/notebooks-tests')
 

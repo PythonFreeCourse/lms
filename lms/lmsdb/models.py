@@ -928,9 +928,7 @@ def create_demo_users():
         user = dict(zip(fields, entity))
         password = User.random_password()
         api_key = User.random_password(stronger=True)
-        User.create(
-            **user, password=password, api_key=api_key,
-        )
+        User.create(**user, password=password, api_key=api_key)
         print(f"User: {user['username']}, Password: {password}")  # noqa: T001
 
 
