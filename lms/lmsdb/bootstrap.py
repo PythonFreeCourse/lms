@@ -254,6 +254,10 @@ def _uuid_migration() -> bool:
 
 def main():
     with models.database.connection_context():
+        if models.database.table_exists(models.User.__name__.lower()):
+            _api_keys_migration()
+            _uuid_migration()
+
         models.database.create_tables(models.ALL_MODELS, safe=True)
 
         if models.Role.select().count() == 0:
@@ -261,8 +265,6 @@ def main():
         if models.User.select().count() == 0:
             models.create_demo_users()
 
-    _api_keys_migration()
-    _uuid_migration()
     text_fixer.fix_texts()
     import_tests.load_tests_from_path('/app_dir/notebooks-tests')
 
