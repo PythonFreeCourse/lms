@@ -228,7 +228,7 @@ def _add_api_keys_to_users_table(table: Model, _column: Field) -> None:
             user.save()
 
 
-def _add_uuid_to_users_table(table: Model, _colum: Field) -> None:
+def _add_uuid_to_users_table(table: Model, _column: Field) -> None:
     log.info('Adding UUIDs for all users, might take some extra time...')
     with db_config.database.transaction():
         for user in table:

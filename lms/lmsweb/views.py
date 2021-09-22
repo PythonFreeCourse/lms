@@ -191,7 +191,7 @@ def change_password():
 
     form = ChangePasswordForm(user)
     if not form.validate_on_submit():
-        return render_template('changepassword.html', form=form)
+        return render_template('change-password.html', form=form)
 
     user.password = form.password.data
     user.save()
@@ -209,7 +209,7 @@ def change_password():
 def reset_password():
     form = ResetPassForm()
     if not form.validate_on_submit():
-        return render_template('resetpassword.html', form=form)
+        return render_template('reset-password.html', form=form)
 
     user = User.get(User.mail_address == form.email.data)
 
@@ -250,7 +250,7 @@ def recover_password_check(user: User, token: str):
     form = RecoverPassForm()
     if not form.validate_on_submit():
         return render_template(
-            'recoverpassword.html', form=form, id=user.id, token=token,
+            'recover-password.html', form=form, id=user.id, token=token,
         )
     user.password = form.password.data
     user.save()

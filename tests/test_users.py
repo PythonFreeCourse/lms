@@ -86,7 +86,7 @@ class TestUser:
                 'confirm': 'some_password',
             }, follow_redirects=True)
             template, _ = captured_templates[-1]
-            assert template.name == "changepassword.html"
+            assert template.name == "change-password.html"
 
         client.post('/change-password', data={
             'current_password': 'fake pass',
@@ -94,7 +94,7 @@ class TestUser:
             'confirm': 'some_password',
         }, follow_redirects=True)
         template, _ = captured_templates[-1]
-        assert template.name == "changepassword.html"
+        assert template.name == "change-password.html"
 
     @staticmethod
     def test_valid_change_password(captured_templates):
@@ -118,7 +118,7 @@ class TestUser:
             'email': 'fake-mail@mail.com',
         }, follow_redirects=True)
         template, _ = captured_templates[-1]
-        assert template.name == "resetpassword.html"
+        assert template.name == "reset-password.html"
 
     @staticmethod
     def test_forgot_my_password_invalid_recover(
@@ -145,7 +145,7 @@ class TestUser:
             'confirm': 'different pass',
         }, follow_redirects=True)
         template, _ = captured_templates[-1]
-        assert template.name == "recoverpassword.html"
+        assert template.name == "recover-password.html"
 
     @staticmethod
     def test_forgot_my_password(client: FlaskClient, captured_templates):

@@ -135,7 +135,7 @@ msgid "עליך לאשר את מייל האימות"
 msgstr "You have to confirm your registration with the link sent to your email"
 
 #: templates/banned.html:8 templates/login.html:7
-#: templates/recoverpassword.html:8 templates/resetpassword.html:8
+#: templates/recover-password.html:8 templates/reset-password.html:8
 #: templates/signup.html:8
 msgid "תמונת הפרופיל של קורס פייתון"
 msgstr "Profile picture of the Python Course"
@@ -152,31 +152,31 @@ msgstr "For more details please contact the management team."
 msgid "מערכת הגשת תרגילים לקורס פייתון"
 msgstr "Exercise submission system for the Python Course"
 
-#: templates/changepassword.html:8
+#: templates/change-password.html:8
 #, fuzzy
 msgid "שינוי סיסמה"
 msgstr "Change Password"
 
-#: templates/changepassword.html:10
+#: templates/change-password.html:10
 #, fuzzy
 msgid "הזינו סיסמה ישנה וסיסמה חדשה לצורך שינוי הסיסמה:"
 msgstr "Insert current password and new password for changing it:"
 
-#: templates/changepassword.html:13
+#: templates/change-password.html:13
 msgid "סיסמה נוכחית"
 msgstr "Current password"
 
-#: templates/changepassword.html:14 templates/recoverpassword.html:14
+#: templates/change-password.html:14 templates/recover-password.html:14
 #, fuzzy
 msgid "סיסמה חדשה"
 msgstr "Password"
 
-#: templates/changepassword.html:15 templates/recoverpassword.html:15
+#: templates/change-password.html:15 templates/recover-password.html:15
 #, fuzzy
 msgid "אימות סיסמה חדשה"
 msgstr "Password Confirmation"
 
-#: templates/changepassword.html:18 templates/user.html:19
+#: templates/change-password.html:18 templates/user.html:19
 #, fuzzy
 msgid "שנה סיסמה"
 msgstr "Change Password"
@@ -273,35 +273,35 @@ msgstr "Check Exercises"
 msgid "התנתקות"
 msgstr "Logout"
 
-#: templates/recoverpassword.html:9 templates/resetpassword.html:9
+#: templates/recover-password.html:9 templates/reset-password.html:9
 #, fuzzy
 msgid "איפוס סיסמה"
 msgstr "Reset Password"
 
-#: templates/recoverpassword.html:11
+#: templates/recover-password.html:11
 #, fuzzy
 msgid "הזינו סיסמה לצורך שינוי הסיסמה:"
 msgstr "Insert password for changing it:"
 
-#: templates/recoverpassword.html:18
+#: templates/recover-password.html:18
 #, fuzzy
 msgid "אפס סיסמה"
 msgstr "Reset Password"
 
-#: templates/resetpassword.html:11
+#: templates/reset-password.html:11
 #, fuzzy
 msgid "הזינו אימייל לצורך שליחת קישור לאיפוס הסיסמה:"
 msgstr "Insert your email for getting link to reset it:"
 
-#: templates/resetpassword.html:14 templates/signup.html:15
+#: templates/reset-password.html:14 templates/signup.html:15
 msgid "כתובת אימייל"
 msgstr "Email Address"
 
-#: templates/resetpassword.html:15
+#: templates/reset-password.html:15
 msgid "שלח מייל איפוס סיסמה"
 msgstr "Send Reset Password Link"
 
-#: templates/resetpassword.html:18 templates/signup.html:25
+#: templates/reset-password.html:18 templates/signup.html:25
 msgid "חזרה לדף ההתחברות"
 msgstr "Back to login page"
 
