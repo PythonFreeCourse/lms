@@ -1,27 +1,3 @@
-function trackFinished(exerciseId, solutionId, element) {
-  element.addEventListener('click', () => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', `/checked/${exerciseId}/${solutionId}`, true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.responseType = 'json';
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState === 4) {
-        if (xhr.status === 200) {
-          if (xhr.response.next !== null) {
-            window.location.href = `/view/${xhr.response.next}`;
-          } else {
-            alert("Yay! That's it!");
-          }
-        } else {
-          console.log(xhr.status);
-        }
-      }
-    };
-
-    xhr.send(JSON.stringify({}));
-  });
-}
-
 function sendComment(kind, fileId, line, commentData) {
   const xhr = new XMLHttpRequest();
   xhr.open('POST', '/comments');
@@ -211,13 +187,11 @@ window.deleteComment = deleteComment;
 window.sendExistsComment = sendExistsComment;
 window.addEventListener('lines-numbered', () => {
   const codeView = document.getElementById('code-view');
-  const exerciseId = codeView.dataset.exercise;
   const lineItems = codeView.getElementsByClassName('line');
   addNewCommentButtons(lineItems);
   const addCommentItems = codeView.querySelectorAll('.grader-add');
   trackDragAreas(lineItems, addCommentItems);
   trackDraggables(document.getElementsByClassName('known-comment'));
-  trackFinished(exerciseId, window.solutionId, document.getElementById('save-check'));
   if (!window.isUserGrader()) {
     sessionStorage.setItem('role', 'grader');
   }
