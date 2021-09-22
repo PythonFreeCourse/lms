@@ -1,5 +1,8 @@
 #!/bin/bash
 
+python_exec=python
+pip_exec=pip
+
 set -x
 
 SCRIPT_FILE_PATH=$(readlink -f "${0}")
@@ -11,18 +14,6 @@ LMSWEB_FOLDER="${LMSAPP_FOLDER}/lmsweb"
 CONFIG_FILE_PATH="${LMSWEB_FOLDER}/config.py"
 CONFIG_EXAMPLE_FILE_PATH="${LMSWEB_FOLDER}/config.py.example"
 DB_BOOTSTRAP_FILE_PATH="${LMSAPP_FOLDER}/lmsdb/bootstrap.py"
-
-if (command -v pip); then
-  pip_exec=pip
-else
-  pip_exec=pip3
-fi
-
-if (command -v python); then
-  python_exec=python
-else
-  python_exec=python3
-fi
 
 if ! (test -f "${CONFIG_FILE_PATH}"); then
   echo "Creating config from template"
