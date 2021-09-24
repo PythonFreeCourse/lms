@@ -44,7 +44,7 @@ class TestExercise:
         unregistered_response = client.get(f'change-course/{course2.id}')
         assert unregistered_response.status_code == 403
 
-        fail_response = client.get(f'change-course/123456')
+        fail_response = client.get('change-course/123456')
         assert fail_response.status_code == 404
 
         conftest.create_usercourse(student_user, course2)
