@@ -237,6 +237,12 @@ def _api_keys_migration() -> bool:
     return True
 
 
+def _last_course_viewed_migration() -> bool:
+    User = models.User
+    _add_not_null_column(User, User.last_course_viewed)
+    return True
+
+
 def main():
     with models.database.connection_context():
         models.database.create_tables(models.ALL_MODELS, safe=True)
@@ -247,6 +253,7 @@ def main():
             models.create_demo_users()
 
     _api_keys_migration()
+    _last_course_viewed_migration()
     text_fixer.fix_texts()
     import_tests.load_tests_from_path('/app_dir/notebooks-tests')
 
