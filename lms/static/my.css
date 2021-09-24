@@ -764,11 +764,18 @@ code .grader-add .fa {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-#notification-icon {
+#courses-list {
+  overflow-y: scroll;
+  max-height: 10em;
+}
+
+#notification-icon,
+#courses-icon {
   cursor: pointer;
 }
 
-.notification {
+.notification,
+.course {
   flex-direction: column;
   text-align: start;
 }

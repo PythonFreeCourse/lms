@@ -15,7 +15,7 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, Note, Role, RoleOptions, SharedSolution,
+    ALL_MODELS, Comment, Course, Note, Role, RoleOptions, SharedSolution,
     Solution, SolutionFile, User, UserCourse, database,
 )
 from lms.lmsweb import babel, limiter, routes, webapp
@@ -242,6 +242,20 @@ def status():
     )
 
 
+@webapp.route('/change-course/<int:course_id>')
+@login_required
+def change_last_course_viewed(course_id: int):
+    course = Course.get_or_none(course_id)
+    if course is None:
+        return fail(404, f'No such course {course_id}.')
+    user = User.get(User.id == current_user.id)
+    if not UserCourse.is_user_registered(user.id, course.id):
+        return fail(403, "You're not allowed to access this page.")
+    user.last_course_viewed = course
+    user.save()
+    return redirect(url_for('exercises_page'))
+
+
 @webapp.route('/exercises')
 @login_required
 def exercises_page():
@@ -398,7 +412,9 @@ def user(user_id):
 
     return render_template(
         'user.html',
-        solutions=Solution.of_user(target_user.id, with_archived=True),
+        solutions=Solution.of_user(
+            target_user.id, with_archived=True, select_all=True,
+        ),
         user=target_user,
         is_manager=is_manager,
         notes_options=Note.get_note_options(),

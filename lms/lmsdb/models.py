@@ -1,11 +1,11 @@
-from collections import Counter, defaultdict
+from collections import Counter
 import enum
 import html
 import secrets
 import string
 from datetime import datetime
 from typing import (
-    Any, DefaultDict, Dict, Iterable, List, Optional,
+    Any, Dict, Iterable, List, Optional,
     TYPE_CHECKING, Tuple, Type, Union, cast,
 )
 
@@ -28,7 +28,7 @@ from lms.utils.log import log
 
 
 database = database_config.get_db_instance()
-ExercisesDictById = DefaultDict[str, Dict[int, Dict[str, Any]]]
+ExercisesDictById = Dict[int, Dict[str, Any]]
 if TYPE_CHECKING:
     from lms.extractors.base import File
 
@@ -141,6 +141,16 @@ class Course(BaseModel):
     invite_code = CharField(default=generate_invite_code, unique=True)
     is_public = BooleanField(default=False)
 
+    @classmethod
+    def fetch(cls, user: 'User'):
+        return (
+            cls
+            .select()
+            .join(UserCourse)
+            .where(UserCourse.user == user.id)
+            .order_by(Course.name.desc())
+        )
+
     def __str__(self):
         return f'{self.name}: {self.date} - {self.due_date}'
 
@@ -152,6 +162,7 @@ class User(UserMixin, BaseModel):
     password = CharField()
     role = ForeignKeyField(Role, backref='users')
     api_key = CharField()
+    last_course_viewed = ForeignKeyField(Course, null=True)
 
     def is_password_valid(self, password):
         return check_password_hash(self.password, password)
@@ -176,6 +187,9 @@ class User(UserMixin, BaseModel):
 
     def get_notifications(self) -> Iterable['Notification']:
         return Notification.fetch(self)
+
+    def get_courses(self) -> Iterable['Course']:
+        return Course.fetch(self)
 
     def notes(self) -> Iterable['Note']:
         fields = (
@@ -344,7 +358,11 @@ class Exercise(BaseModel):
         return datetime.now() < self.due_date and not self.is_archived
 
     @classmethod
-    def get_objects(cls, user_id: int, fetch_archived: bool = False):
+    def get_objects(
+        cls, user_id: int, fetch_archived: bool = False,
+        select_all: bool = False,
+    ):
+        user = User.get(User.id == user_id)
         exercises = (
             cls
             .select()
@@ -352,8 +370,12 @@ class Exercise(BaseModel):
             .join(UserCourse)
             .where(UserCourse.user == user_id)
             .switch()
-            .order_by(UserCourse.date, Exercise.order)
+            .order_by(UserCourse.date, Exercise.number, Exercise.order)
         )
+        if not select_all:
+            exercises = exercises.where(
+                UserCourse.course == user.last_course_viewed,
+            )
         if not fetch_archived:
             exercises = exercises.where(cls.is_archived == False)  # NOQA: E712
         return exercises
@@ -372,10 +394,7 @@ class Exercise(BaseModel):
 
     @staticmethod
     def as_dicts(exercises: Iterable['Exercise']) -> ExercisesDictById:
-        nested_dict = defaultdict(dict)
-        for exercise in exercises:
-            nested_dict[exercise.course.name][exercise.id] = exercise.as_dict()
-        return nested_dict
+        return {exercise.id: exercise.as_dict() for exercise in exercises}
 
     def __str__(self):
         return self.subject
@@ -484,9 +503,11 @@ class Solution(BaseModel):
     @classmethod
     def of_user(
         cls, user_id: int, with_archived: bool = False,
-    ) -> Iterable[DefaultDict[str, Dict[str, Any]]]:
+        select_all: bool = False,
+    ) -> Iterable[Dict[str, Any]]:
         db_exercises = Exercise.get_objects(
             user_id=user_id, fetch_archived=with_archived,
+            select_all=select_all,
         )
         exercises = Exercise.as_dicts(db_exercises)
         solutions = (
@@ -496,15 +517,14 @@ class Solution(BaseModel):
             .order_by(cls.submission_timestamp.desc())
         )
         for solution in solutions:
-            course_name = solution.exercise.course.name
-            exercise = exercises[course_name][solution.exercise_id]
+            exercise = exercises[solution.exercise_id]
             if exercise.get('solution_id') is None:
                 exercise['solution_id'] = solution.id
                 exercise['is_checked'] = solution.is_checked
                 exercise['comments_num'] = len(solution.staff_comments)
                 if solution.is_checked and solution.checker:
                     exercise['checker'] = solution.checker.fullname
-        return exercises
+        return tuple(exercises.values())
 
     @property
     def comments(self):
