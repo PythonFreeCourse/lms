@@ -10,7 +10,6 @@ from flask.testing import FlaskClient
 from flask_mail import Mail
 from peewee import SqliteDatabase
 import pytest
-from werkzeug.test import TestResponse
 
 from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Exercise, Note, Notification, Role,
@@ -125,7 +124,7 @@ def logout_user(client: FlaskClient) -> None:
 def signup_client_user(
     client: FlaskClient, email: str, username: str, fullname: str,
     password: str, confirm_password: str,
-) -> TestResponse:
+):
     return client.post('/signup', data={
         'email': email,
         'username': username,
@@ -135,9 +134,7 @@ def signup_client_user(
     }, follow_redirects=True)
 
 
-def login_client_user(
-    client: FlaskClient, username: str, password: str,
-) -> TestResponse:
+def login_client_user(client: FlaskClient, username: str, password: str):
     return client.post('/login', data={
         'username': username,
         'password': password,
@@ -147,7 +144,7 @@ def login_client_user(
 def change_client_password(
     client: FlaskClient, current_password: str,
     new_password: str, confirm_password: str,
-) -> TestResponse:
+):
     return client.post('/change-password', data={
         'current_password': current_password,
         'password': new_password,
@@ -155,7 +152,7 @@ def change_client_password(
     }, follow_redirects=True)
 
 
-def reset_client_password(client: FlaskClient, email: str) -> TestResponse:
+def reset_client_password(client: FlaskClient, email: str):
     return client.post('/reset-password', data={
         'email': email,
     }, follow_redirects=True)
@@ -164,7 +161,7 @@ def reset_client_password(client: FlaskClient, email: str) -> TestResponse:
 def recover_client_password(
     client: FlaskClient, user_id: int, token: str,
     password: str, confirm_password: str,
-) -> TestResponse:
+):
     return client.post(f'/recover-password/{user_id}/{token}', data={
         'password': password,
         'confirm': confirm_password,
