@@ -229,6 +229,32 @@ def _add_api_keys_to_users_table(table: Model, _column: Field) -> None:
             user.save()
 
 
+def _add_numbers_to_exercises_table(table: Model, _column: Field) -> None:
+    log.info('Adding Numbers for all exercises, might take some extra time...')
+    with db_config.database.transaction():
+        for exercise in table:
+            exercise.number = exercise.id
+            exercise.save()
+
+
+def _create_usercourses_objects(table: Model, course: models.Course) -> None:
+    log.info('Adding UserCourse for all users, might take some extra time...')
+    UserCourse = models.UserCourse
+    with db_config.database.transaction():
+        for user in table:
+            UserCourse.create(user=user, course=course)
+
+
+def _add_course_to_exercises_table(
+    table: Model, course: models.Course,
+) -> None:
+    log.info('Adding Course for all exercises, might take some extra time...')
+    with db_config.database.transaction():
+        for exercise in table:
+            exercise.course = course
+            exercise.save()
+
+
 def _api_keys_migration() -> bool:
     User = models.User
     _add_not_null_column(User, User.api_key, _add_api_keys_to_users_table)
@@ -241,6 +267,15 @@ def _last_course_viewed_migration() -> bool:
     return True
 
 
+def _exercise_course_migration(course: models.Course) -> bool:
+    Exercise = models.Exercise
+    _add_not_null_column(Exercise, Exercise.number, _add_numbers_to_exercises_table)
+    _migrate_column_in_table_if_needed(Exercise, Exercise.course)
+    _create_usercourses_objects(models.User, course)
+    _add_course_to_exercises_table(Exercise, course)
+    return True
+
+
 def main():
     with models.database.connection_context():
         models.database.create_tables(models.ALL_MODELS, safe=True)
@@ -249,6 +284,9 @@ def main():
             models.create_basic_roles()
         if models.User.select().count() == 0:
             models.create_demo_users()
+        if models.Course.select().count() == 0:
+            course = models.create_basic_course()
+            _exercise_course_migration(course)
 
     _api_keys_migration()
     _last_course_viewed_migration()

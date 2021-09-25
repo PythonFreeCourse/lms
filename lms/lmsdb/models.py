@@ -989,7 +989,7 @@ def generate_string(
     return ''.join(password)
 
 
-def create_demo_users():
+def create_demo_users() -> None:
     print('First run! Here are some users to get start with:')  # noqa: T001
     fields = ['username', 'fullname', 'mail_address', 'role']
     student_role = Role.by_name('Student')
@@ -1007,9 +1007,13 @@ def create_demo_users():
         print(f"User: {user['username']}, Password: {password}")  # noqa: T001
 
 
-def create_basic_roles():
+def create_basic_roles() -> None:
     for role in RoleOptions:
         Role.create(name=role.value)
+
+
+def create_basic_course() -> Course:
+    return Course.create(name='Python Course', date=datetime.now())
 
 
 ALL_MODELS = BaseModel.__subclasses__()
