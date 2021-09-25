@@ -231,15 +231,6 @@ def _add_api_keys_to_users_table(table: Model, _column: Field) -> None:
             user.save()
 
 
-def _add_last_status_view_to_solution_table(
-    table: Model, _column: Field,
-) -> None:
-    with db_config.database.transaction():
-        for solution in table:
-            solution.last_status_view = models.SolutionStatusView.UPLOADED.name
-            solution.save()
-
-
 def _api_keys_migration() -> bool:
     User = models.User
     _add_not_null_column(User, User.api_key, _add_api_keys_to_users_table)
@@ -248,14 +239,16 @@ def _api_keys_migration() -> bool:
 
 def _last_status_view_migration() -> bool:
     Solution = models.Solution
-    _add_not_null_column(
-        Solution, Solution.last_status_view, _add_last_status_view_to_solution_table,
-    )
+    _migrate_column_in_table_if_needed(Solution, Solution.last_status_view)
     _migrate_column_in_table_if_needed(Solution, Solution.last_time_view)
+    return True
 
 
 def main():
     with models.database.connection_context():
+        if models.database.table_exists(models.Solution.__name__.lower()):
+            _last_status_view_migration()
+
         models.database.create_tables(models.ALL_MODELS, safe=True)
 
         if models.Role.select().count() == 0:
@@ -264,7 +257,6 @@ def main():
             models.create_demo_users()
 
     _api_keys_migration()
-    _last_status_view_migration()
     text_fixer.fix_texts()
     import_tests.load_tests_from_path('/app_dir/notebooks-tests')
 

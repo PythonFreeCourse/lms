@@ -5,7 +5,9 @@ from unittest import mock
 from flask import json
 import pytest
 
-from lms.lmsdb.models import Comment, Exercise, SharedSolution, Solution, User
+from lms.lmsdb.models import (
+    Comment, Exercise, SharedSolution, Solution, SolutionStatusView, User,
+)
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmsweb import routes
 from lms.models import notifications, solutions
@@ -499,3 +501,23 @@ class TestSolutionBridge:
         staff_client = conftest.get_logged_user(staff_user.username)
         view_response = staff_client.get(f'{routes.SOLUTIONS}/{solution.id}')
         assert view_response.status_code == 200
+
+    @staticmethod
+    def test_last_view_status(
+        solution: Solution,
+        student_user: User,
+        staff_user: User,
+    ):
+        client = conftest.get_logged_user(student_user.username)
+        assert solution.last_status_view == SolutionStatusView.UPLOADED.name
+
+        client.get(f'/view/{solution.id}')
+        solution = Solution.get_by_id(solution.id)
+        assert solution.last_status_view == SolutionStatusView.NOT_CHECKED.name
+
+        solutions.mark_as_checked(solution.id, staff_user.id)
+        solution = Solution.get_by_id(solution.id)
+        assert solution.last_status_view == SolutionStatusView.NOT_CHECKED.name
+        client.get(f'/view/{solution.id}')
+        solution = Solution.get_by_id(solution.id)
+        assert solution.last_status_view == SolutionStatusView.CHECKED.name
