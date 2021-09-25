@@ -141,6 +141,9 @@ class Course(BaseModel):
     invite_code = CharField(default=generate_invite_code, unique=True)
     is_public = BooleanField(default=False)
 
+    def has_user(self, user_id: int) -> bool:
+        return UserCourse.is_user_registered(user_id, self)
+
     @classmethod
     def fetch(cls, user: 'User') -> Iterable['Course']:
         return (
@@ -164,8 +167,11 @@ class User(UserMixin, BaseModel):
     api_key = CharField()
     last_course_viewed = ForeignKeyField(Course, null=True)
 
-    def is_password_valid(self, password):
+    def is_password_valid(self, password) -> bool:
         return check_password_hash(self.password, password)
+
+    def is_registered(self, course_id: int) -> bool:
+        return UserCourse.is_user_registered(self, course_id)
 
     @classmethod
     def get_system_user(cls) -> 'User':

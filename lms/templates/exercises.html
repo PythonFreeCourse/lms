@@ -27,7 +27,7 @@
           </div>
           {%- endif %}
           {%- if exercise.get('is_checked') is none %}
-            {% set details = {'page': 'send', 'icon': 'upload', 'text': _('שלח'), 'css': 'send', 'page_id': exercise['course_id']} %}
+            {% set details = {'page': 'send', 'icon': 'upload', 'text': _('שלח'), 'css': 'send', 'page_id': exercise['course_id'] ~ '/' ~ exercise['exercise_id']} %}
           {% elif not exercise.get('is_checked') %}
             {% set details = {'page': 'view', 'icon': 'eye', 'text': _('הצצה'), 'css': 'view', 'page_id': exercise['solution_id']} %}
           {% else %}

@@ -3,7 +3,7 @@ from typing import List, Optional, Tuple, Union
 from werkzeug.datastructures import FileStorage
 
 from lms.extractors.base import Extractor, File
-from lms.lmsdb.models import Exercise, Solution, User, UserCourse
+from lms.lmsdb.models import Exercise, Solution, User
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmstests.public.linters import tasks as linters_tasks
 from lms.lmstests.public.unittests import tasks as unittests_tasks
@@ -32,7 +32,7 @@ def _upload_to_db(
     exercise = Exercise.get_or_none(course=course_id, number=exercise_number)
     if exercise is None:
         raise UploadError(f'No such exercise id: {exercise_number}')
-    elif not UserCourse.is_user_registered(user.id, course_id):
+    elif not user.is_registered(course_id):
         raise UploadError(
             f'Exercise {exercise_number} is invalid for this user.',
         )
