@@ -263,7 +263,7 @@ def _api_keys_migration() -> bool:
 
 def _last_course_viewed_migration() -> bool:
     User = models.User
-    _migrate_column_in_table_if_needed(User, User.last_course_viewed)
+    _add_not_null_column(User, User.last_course_viewed)
     return True
 
 
