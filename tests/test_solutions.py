@@ -521,3 +521,16 @@ class TestSolutionBridge:
         client.get(f'/view/{solution.id}')
         solution = Solution.get_by_id(solution.id)
         assert solution.last_status_view == SolutionStatusView.CHECKED.name
+
+    @staticmethod
+    def test_invalid_file_solution(
+        solution: Solution,
+        student_user: User,
+    ):
+        client = conftest.get_logged_user(student_user.username)
+        successful_response = client.get(f'/view/{solution.id}')
+        assert successful_response.status_code == 200
+
+        fail_response = client.get(f'/view/{solution.id}/12345')
+        assert fail_response.status_code == 404
+
