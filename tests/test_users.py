@@ -2,7 +2,6 @@ import time
 from unittest.mock import Mock, patch
 
 from flask.testing import FlaskClient
-import pytest
 
 from lms.lmsdb.models import User
 from lms.lmsweb.config import CONFIRMATION_TIME, MAX_INVALID_PASSWORD_TRIES
@@ -69,10 +68,9 @@ class TestUser:
 
     @staticmethod
     def test_banned_user(client: FlaskClient, banned_user: User):
-        login_response = client.post('/login', data={
-            'username': banned_user.username,
-            'password': 'fake pass',
-        }, follow_redirects=True)
+        login_response = conftest.login_client_user(
+            client, banned_user.username, 'fake pass',
+        )
         assert 'banned' in login_response.get_data(as_text=True)
 
     @staticmethod
@@ -80,19 +78,15 @@ class TestUser:
         student_user = conftest.create_student_user(index=1)
         client = conftest.get_logged_user(student_user.username)
         for _ in range(MAX_INVALID_PASSWORD_TRIES):
-            client.post('/change-password', data={
-                'current_password': 'wrong pass',
-                'password': 'some_password',
-                'confirm': 'some_password',
-            }, follow_redirects=True)
+            conftest.change_client_password(
+                client, 'wrong pass', 'some_password', 'some_password',
+            )
             template, _ = captured_templates[-1]
             assert template.name == "change-password.html"
 
-        client.post('/change-password', data={
-            'current_password': 'fake pass',
-            'password': 'some_password',
-            'confirm': 'some_password',
-        }, follow_redirects=True)
+        conftest.change_client_password(
+            client, 'fake pass', 'some_password', 'some_password',
+        )
         template, _ = captured_templates[-1]
         assert template.name == "change-password.html"
 
@@ -100,11 +94,9 @@ class TestUser:
     def test_valid_change_password(captured_templates):
         student_user = conftest.create_student_user(index=1)
         client = conftest.get_logged_user(student_user.username)
-        client.post('/change-password', data={
-            'current_password': 'fake pass',
-            'password': 'some_password',
-            'confirm': 'some_password',
-        }, follow_redirects=True)
+        conftest.change_client_password(
+            client, 'fake pass', 'some_password', 'some_password',
+        )
         template, _ = captured_templates[-1]
         assert template.name == "login.html"
         check_logout_response = client.get('/exercises')
@@ -114,9 +106,7 @@ class TestUser:
     def test_forgot_my_password_invalid_mail(
         client: FlaskClient, captured_templates,
     ):
-        client.post('/reset-password', data={
-            'email': 'fake-mail@mail.com',
-        }, follow_redirects=True)
+        conftest.reset_client_password(client, 'fake-mail@mail.com')
         template, _ = captured_templates[-1]
         assert template.name == "reset-password.html"
 
@@ -125,93 +115,64 @@ class TestUser:
         client: FlaskClient, captured_templates,
     ):
         user = conftest.create_student_user(index=1)
-        client.post('/reset-password', data={
-            'email': user.mail_address,
-        }, follow_redirects=True)
+        conftest.reset_client_password(client, user.mail_address)
         template, _ = captured_templates[-1]
         assert template.name == "login.html"
 
         token = generate_user_token(user)
-        unknown_id_recover_response = client.post(
-            f'/recover-password/{user.id + 1}/{token}', data={
-                'password': 'different pass',
-                'confirm': 'different pass',
-            }, follow_redirects=True,
+        unknown_id_recover_response = conftest.recover_client_password(
+            client, user.id + 1, token, 'different pass', 'different pass',
         )
         assert unknown_id_recover_response.status_code == 404
 
-        client.post(f'/recover-password/{user.id}/{token}', data={
-            'password': 'wrong pass',
-            'confirm': 'different pass',
-        }, follow_redirects=True)
+        conftest.recover_client_password(
+            client, user.id, token, 'wrong pass', 'different pass',
+        )
         template, _ = captured_templates[-1]
         assert template.name == "recover-password.html"
 
     @staticmethod
     def test_forgot_my_password(client: FlaskClient, captured_templates):
         user = conftest.create_student_user(index=1)
-        client.post('/reset-password', data={
-            'email': user.mail_address,
-        }, follow_redirects=True)
+        conftest.reset_client_password(client, user.mail_address)
         template, _ = captured_templates[-1]
         assert template.name == "login.html"
 
         token = generate_user_token(user)
-        client.post(f'/recover-password/{user.id}/{token}', data={
-            'password': 'new pass',
-            'confirm': 'new pass',
-        }, follow_redirects=True)
+        conftest.recover_client_password(
+            client, user.id, token, 'new pass', 'new pass',
+        )
         template, _ = captured_templates[-1]
         assert template.name == "login.html"
 
-        second_try_response = client.post(
-            f'/recover-password/{user.id}/{token}', data={
-                'password': 'new pass1',
-                'confirm': 'new pass1',
-            }, follow_redirects=True,
+        second_try_response = conftest.recover_client_password(
+            client, user.id, token, 'new pass1', 'new pass1',
         )
         assert second_try_response.status_code == 404
 
-        client.post('/login', data={
-            'username': user.username,
-            'password': 'fake pass',
-        }, follow_redirects=True)
+        conftest.login_client_user(client, user.username, 'fake pass')
         template, _ = captured_templates[-1]
         assert template.name == 'login.html'
 
-        client.post('/login', data={
-            'username': user.username,
-            'password': 'new pass',
-        }, follow_redirects=True)
+        conftest.login_client_user(client, user.username, 'new pass')
         template, _ = captured_templates[-1]
         assert template.name == 'exercises.html'
 
     @staticmethod
     def test_expired_token(client: FlaskClient):
         user = conftest.create_student_user(index=1)
-        client.post('/reset-password', data={
-            'email': user.mail_address,
-        }, follow_redirects=True)
+        conftest.reset_client_password(client, user.mail_address)
         token = generate_user_token(user)
 
         fake_time = time.time() + CONFIRMATION_TIME + 1
         with patch('time.time', Mock(return_value=fake_time)):
-            client.post(
-                f'/recover-password/{user.id}/{token}', data={
-                    'password': 'new pass1',
-                    'confirm': 'new pass1',
-                }, follow_redirects=True,
+            conftest.recover_client_password(
+                client, user.id, token, 'new pass1', 'new pass1',
             )
-            client.post('/login', data={
-                'username': user.username,
-                'password': 'new pass1',
-            }, follow_redirects=True)
+            conftest.login_client_user(client, user.username, 'new pass1')
             fail_login_response = client.get('/exercises')
             assert fail_login_response.status_code == 302
 
-            client.post('/login', data={
-                'username': user.username,
-                'password': 'fake pass',
-            }, follow_redirects=True)
+            conftest.login_client_user(client, user.username, 'fake pass')
             fail_login_response = client.get('/exercises')
             assert fail_login_response.status_code == 200

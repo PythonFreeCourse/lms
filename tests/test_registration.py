@@ -1,11 +1,9 @@
-import sys
 import time
 from unittest.mock import Mock, patch
 
 from flask.testing import FlaskClient
-import pytest
 
-from lms.lmsweb.config import CONFIRMATION_TIME, MAIL_DEFAULT_SENDER
+from lms.lmsweb.config import CONFIRMATION_TIME
 from lms.lmsdb.models import User
 from lms.models.users import generate_user_token
 from tests import conftest
@@ -16,20 +14,16 @@ class TestRegistration:
     def test_invalid_username(
         client: FlaskClient, student_user: User, captured_templates,
     ):
-        client.post('/signup', data={
-            'email': 'some_name@mail.com',
-            'username': student_user.username,
-            'fullname': 'some_name',
-            'password': 'some_password',
-            'confirm': 'some_password',
-        }, follow_redirects=True)
+        conftest.signup_client_user(
+            client, 'some_name@mail.com', student_user.username,
+            'some_name', 'some_password', 'some_password',
+        )
         template, _ = captured_templates[-1]
         assert template.name == "signup.html"
 
-        client.post('/login', data={
-            'username': student_user.username,
-            'password': 'some_password',
-        }, follow_redirects=True)
+        conftest.login_client_user(
+            client, student_user.username, 'some_password',
+        )
         fail_login_response = client.get('/exercises')
         assert fail_login_response.status_code == 302
 
@@ -37,6 +31,10 @@ class TestRegistration:
     def test_invalid_email(
         client: FlaskClient, student_user: User, captured_templates,
     ):
+        conftest.signup_client_user(
+            client, student_user.mail_address, 'some_user',
+            'some_name', 'some_password', 'some_password',
+        )
         client.post('/signup', data={
             'email': student_user.mail_address,
             'username': 'some_user',
@@ -47,22 +45,16 @@ class TestRegistration:
         template, _ = captured_templates[-1]
         assert template.name == 'signup.html'
 
-        client.post('/login', data={
-            'username': 'some_user',
-            'password': 'some_password',
-        }, follow_redirects=True)
+        conftest.login_client_user(client, 'some_user', 'some_password')
         fail_login_response = client.get('/exercises')
         assert fail_login_response.status_code == 302
 
     @staticmethod
     def test_bad_token_or_id(client: FlaskClient):
-        client.post('/signup', data={
-            'email': 'some_user123@mail.com',
-            'username': 'some_user',
-            'fullname': 'some_name',
-            'password': 'some_password',
-            'confirm': 'some_password',
-        }, follow_redirects=True)
+        conftest.signup_client_user(
+            client, 'some_user123@mail.com', 'some_user',
+            'some_name', 'some_password', 'some_password',
+        )
         user = User.get_or_none(User.username == 'some_user')
         bad_token = "fake-token43@$@"
         fail_confirm_response = client.get(
@@ -78,13 +70,10 @@ class TestRegistration:
 
     @staticmethod
     def test_use_token_twice(client: FlaskClient):
-        client.post('/signup', data={
-            'email': 'some_user123@mail.com',
-            'username': 'some_user',
-            'fullname': 'some_name',
-            'password': 'some_password',
-            'confirm': 'some_password',
-        }, follow_redirects=True)
+        conftest.signup_client_user(
+            client, 'some_user123@mail.com', 'some_user',
+            'some_name', 'some_password', 'some_password',
+        )
         user = User.get_or_none(User.username == 'some_user')
         token = generate_user_token(user)
         success_token_response = client.get(
@@ -99,13 +88,10 @@ class TestRegistration:
 
     @staticmethod
     def test_expired_token(client: FlaskClient):
-        client.post('/signup', data={
-            'email': 'some_user123@mail.com',
-            'username': 'some_user',
-            'fullname': 'some_name',
-            'password': 'some_password',
-            'confirm': 'some_password',
-        }, follow_redirects=True)
+        conftest.signup_client_user(
+            client, 'some_user123@mail.com', 'some_user',
+            'some_name', 'some_password', 'some_password',
+        )
         user = User.get_or_none(User.username == 'some_user')
         token = generate_user_token(user)
 
@@ -114,10 +100,7 @@ class TestRegistration:
             client.get(
                 f'/confirm-email/{user.id}/{token}', follow_redirects=True,
             )
-            client.post('/login', data={
-                'username': 'some_user',
-                'password': 'some_password',
-            }, follow_redirects=True)
+            conftest.login_client_user(client, 'some_user', 'some_password')
             fail_login_response = client.get('/exercises')
             assert fail_login_response.status_code == 302
 
@@ -125,52 +108,37 @@ class TestRegistration:
             client.get(
                 f'/confirm-email/{user.id}/{token}', follow_redirects=True,
             )
-            client.post('/login', data={
-                'username': 'some_user',
-                'password': 'some_password',
-            }, follow_redirects=True)
+            conftest.login_client_user(client, 'some_user', 'some_password')
             success_login_response = client.get('/exercises')
             assert success_login_response.status_code == 200
 
     @staticmethod
     def test_successful_registration(client: FlaskClient, captured_templates):
-        client.post('/signup', data={
-            'email': MAIL_DEFAULT_SENDER,
-            'username': 'some_user',
-            'fullname': 'some_name',
-            'password': 'some_password',
-            'confirm': 'some_password',
-        }, follow_redirects=True)
+        conftest.signup_client_user(
+            client, 'some_user123@mail.com', 'some_user',
+            'some_name', 'some_password', 'some_password',
+        )
         template, _ = captured_templates[-1]
         assert template.name == 'login.html'
 
-        client.post('/login', data={
-            'username': 'some_user',
-            'password': 'some_password',
-        }, follow_redirects=True)
+        conftest.login_client_user(client, 'some_user', 'some_password')
         fail_login_response = client.get('/exercises')
         assert fail_login_response.status_code == 302
 
         user = User.get_or_none(User.username == 'some_user')
         token = generate_user_token(user)
         client.get(f'/confirm-email/{user.id}/{token}', follow_redirects=True)
-        client.post('/login', data={
-            'username': 'some_user',
-            'password': 'some_password',
-        }, follow_redirects=True)
+        conftest.login_client_user(client, 'some_user', 'some_password')
         success_login_response = client.get('/exercises')
         assert success_login_response.status_code == 200
 
     @staticmethod
     def test_registartion_closed(client: FlaskClient, captured_templates):
         conftest.disable_registration()
-        client.post('/signup', data={
-            'email': 'some_user123@mail.com',
-            'username': 'some_user',
-            'fullname': 'some_name',
-            'password': 'some_password',
-            'confirm': 'some_password',
-        }, follow_redirects=True)
+        conftest.signup_client_user(
+            client, 'some_user123@mail.com', 'some_user',
+            'some_name', 'some_password', 'some_password',
+        )
         user = User.get_or_none(User.username == 'some_user')
         assert user is None
 

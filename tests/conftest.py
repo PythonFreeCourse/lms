@@ -10,6 +10,7 @@ from flask.testing import FlaskClient
 from flask_mail import Mail
 from peewee import SqliteDatabase
 import pytest
+from werkzeug.test import TestResponse
 
 from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Exercise, Note, Notification, Role,
@@ -121,9 +122,57 @@ def logout_user(client: FlaskClient) -> None:
     client.get('/logout', follow_redirects=True)
 
 
+def signup_client_user(
+    client: FlaskClient, email: str, username: str, fullname: str,
+    password: str, confirm_password: str,
+) -> TestResponse:
+    return client.post('/signup', data={
+        'email': email,
+        'username': username,
+        'fullname': fullname,
+        'password': password,
+        'confirm': confirm_password,
+    }, follow_redirects=True)
+
+
+def login_client_user(
+    client: FlaskClient, username: str, password: str,
+) -> TestResponse:
+    return client.post('/login', data={
+        'username': username,
+        'password': password,
+    }, follow_redirects=True)
+
+
+def change_client_password(
+    client: FlaskClient, current_password: str,
+    new_password: str, confirm_password: str,
+) -> TestResponse:
+    return client.post('/change-password', data={
+        'current_password': current_password,
+        'password': new_password,
+        'confirm': confirm_password,
+    }, follow_redirects=True)
+
+
+def reset_client_password(client: FlaskClient, email: str) -> TestResponse:
+    return client.post('/reset-password', data={
+        'email': email,
+    }, follow_redirects=True)
+
+
+def recover_client_password(
+    client: FlaskClient, user_id: int, token: str,
+    password: str, confirm_password: str,
+) -> TestResponse:
+    return client.post(f'/recover-password/{user_id}/{token}', data={
+        'password': password,
+        'confirm': confirm_password,
+    }, follow_redirects=True)
+
+
 def create_user(
-        role_name: str = RoleOptions.STUDENT.value,
-        index: int = 1,
+    role_name: str = RoleOptions.STUDENT.value, index: int = 1,
 ) -> User:
     username = f'{role_name}-{index}'
     password = 'fake pass'
