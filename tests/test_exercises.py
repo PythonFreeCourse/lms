@@ -31,7 +31,7 @@ class TestExercise:
         conftest.create_exercise(course2, 1)
         conftest.create_exercise(course2, 2)
         assert len(list(
-            Exercise.get_objects(student_user.id, select_all=True),
+            Exercise.get_objects(student_user.id, from_all_courses=True),
         )) == 0
 
         client = conftest.get_logged_user(username=student_user.username)

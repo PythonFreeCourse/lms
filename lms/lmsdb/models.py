@@ -136,13 +136,13 @@ class Course(BaseModel):
     name = CharField(unique=True)
     date = DateTimeField()
     due_date = DateTimeField(null=True)
-    is_finished = BooleanField(default=False)
+    is_closed = BooleanField(default=False)
     close_registration_date = DateTimeField(default=datetime.now)
     invite_code = CharField(default=generate_invite_code, unique=True)
     is_public = BooleanField(default=False)
 
     @classmethod
-    def fetch(cls, user: 'User'):
+    def fetch(cls, user: 'User') -> Iterable['Course']:
         return (
             cls
             .select()
@@ -360,7 +360,7 @@ class Exercise(BaseModel):
     @classmethod
     def get_objects(
         cls, user_id: int, fetch_archived: bool = False,
-        select_all: bool = False,
+        from_all_courses: bool = False,
     ):
         user = User.get(User.id == user_id)
         exercises = (
@@ -372,7 +372,7 @@ class Exercise(BaseModel):
             .switch()
             .order_by(UserCourse.date, Exercise.number, Exercise.order)
         )
-        if not select_all:
+        if not from_all_courses:
             exercises = exercises.where(
                 UserCourse.course == user.last_course_viewed,
             )
@@ -503,11 +503,11 @@ class Solution(BaseModel):
     @classmethod
     def of_user(
         cls, user_id: int, with_archived: bool = False,
-        select_all: bool = False,
+        from_all_courses: bool = False,
     ) -> Iterable[Dict[str, Any]]:
         db_exercises = Exercise.get_objects(
             user_id=user_id, fetch_archived=with_archived,
-            select_all=select_all,
+            from_all_courses=from_all_courses,
         )
         exercises = Exercise.as_dicts(db_exercises)
         solutions = (

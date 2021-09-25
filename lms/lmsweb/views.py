@@ -413,7 +413,7 @@ def user(user_id):
     return render_template(
         'user.html',
         solutions=Solution.of_user(
-            target_user.id, with_archived=True, select_all=True,
+            target_user.id, with_archived=True, from_all_courses=True,
         ),
         user=target_user,
         is_manager=is_manager,

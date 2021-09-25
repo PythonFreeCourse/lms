@@ -1,4 +1,5 @@
 from io import BufferedReader, BytesIO
+from pathlib import Path
 from tempfile import SpooledTemporaryFile
 from typing import Iterator, List, Tuple
 from zipfile import ZipFile
@@ -80,22 +81,22 @@ class TestExtractor:
             bytes_io.close()
 
     def ipynb_file(self):
-        return open(f'{SAMPLES_DIR}/{self.IPYNB_NAME}', encoding='utf-8')
+        return open(Path(SAMPLES_DIR) / self.IPYNB_NAME, encoding='utf-8')
 
     @staticmethod
     def py_files(filenames: Iterator[str]):
         for file_name in filenames:
-            yield open(f'{SAMPLES_DIR}/{file_name}')
+            yield open(Path(SAMPLES_DIR) / file_name)
 
     @staticmethod
     def get_bytes_io_file(file_name) -> BytesIO:
-        with open(f'{SAMPLES_DIR}/{file_name}', 'br') as open_file:
+        with open(Path(SAMPLES_DIR) / file_name, 'br') as open_file:
             return BytesIO(open_file.read()), file_name
 
     @staticmethod
     def zip_files(filenames: Tuple[str, ...]) -> Iterator[BufferedReader]:
-        for filename in filenames:
-            yield open(f'{SAMPLES_DIR}/{filename}', 'br')
+        for file_name in filenames:
+            yield open(Path(SAMPLES_DIR) / file_name, 'br')
 
     @staticmethod
     def create_zipfile_storage(
