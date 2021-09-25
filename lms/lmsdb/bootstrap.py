@@ -229,7 +229,7 @@ def _add_api_keys_to_users_table(table: Model, _column: Field) -> None:
             user.save()
 
 
-def _add_numbers_to_exercises_table(table: Model, _column: Field) -> None:
+def _add_numbers_to_exercises_table(table: Model) -> None:
     log.info('Adding Numbers for all exercises, might take some extra time...')
     with db_config.database.transaction():
         for exercise in table:
@@ -269,15 +269,32 @@ def _last_course_viewed_migration() -> bool:
 
 def _exercise_course_migration(course: models.Course) -> bool:
     Exercise = models.Exercise
-    _add_not_null_column(Exercise, Exercise.number, _add_numbers_to_exercises_table)
-    _migrate_column_in_table_if_needed(Exercise, Exercise.course)
+    _add_numbers_to_exercises_table(Exercise)
     _create_usercourses_objects(models.User, course)
     _add_course_to_exercises_table(Exercise, course)
     return True
 
 
+def _add_exercise_course_id_and_number_columns_constraint() -> bool:
+    Exercise = models.Exercise
+    migrator = db_config.get_migrator_instance()
+    with db_config.database.transaction():
+        course_not_exists = _add_not_null_column(Exercise, Exercise.course)
+        number_not_exists = _add_not_null_column(Exercise, Exercise.number)
+        if course_not_exists and number_not_exists:
+            migrate(migrator.add_index('exercise', ('course_id', 'number'), True),)
+        db_config.database.commit()
+    return True
+
+
 def main():
     with models.database.connection_context():
+        if models.database.table_exists(models.Exercise.__name__.lower()):
+            _add_exercise_course_id_and_number_columns_constraint()
+
+        if models.database.table_exists(models.User.__name__.lower()):
+            _last_course_viewed_migration()
+
         models.database.create_tables(models.ALL_MODELS, safe=True)
 
         if models.Role.select().count() == 0:
@@ -289,7 +306,6 @@ def main():
             _exercise_course_migration(course)
 
     _api_keys_migration()
-    _last_course_viewed_migration()
     text_fixer.fix_texts()
     import_tests.load_tests_from_path('/app_dir/notebooks-tests')
 
