@@ -229,11 +229,16 @@ def _add_api_keys_to_users_table(table: Model, _column: Field) -> None:
             user.save()
 
 
-def _add_numbers_to_exercises_table(table: Model) -> None:
-    log.info('Adding Numbers for all exercises, might take some extra time...')
+def _add_course_and_numbers_to_exercises_table(
+    table: Model, course: models.Course,
+) -> None:
+    log.info(
+        'Adding Course, Numbers for exercises, might take some extra time...',
+    )
     with db_config.database.transaction():
         for exercise in table:
             exercise.number = exercise.id
+            exercise.course = course
             exercise.save()
 
 
@@ -243,16 +248,6 @@ def _create_usercourses_objects(table: Model, course: models.Course) -> None:
     with db_config.database.transaction():
         for user in table:
             UserCourse.create(user=user, course=course)
-
-
-def _add_course_to_exercises_table(
-    table: Model, course: models.Course,
-) -> None:
-    log.info('Adding Course for all exercises, might take some extra time...')
-    with db_config.database.transaction():
-        for exercise in table:
-            exercise.course = course
-            exercise.save()
 
 
 def _api_keys_migration() -> bool:
@@ -269,9 +264,8 @@ def _last_course_viewed_migration() -> bool:
 
 def _exercise_course_migration(course: models.Course) -> bool:
     Exercise = models.Exercise
-    _add_numbers_to_exercises_table(Exercise)
     _create_usercourses_objects(models.User, course)
-    _add_course_to_exercises_table(Exercise, course)
+    _add_course_and_numbers_to_exercises_table(Exercise, course)
     return True
 
 
