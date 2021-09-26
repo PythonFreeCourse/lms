@@ -2,18 +2,18 @@ version: "3"
 
 services:
   db:
-    image: postgres:11-alpine
+    image: postgres:13-alpine
     ports:
       - 5432:5432
     volumes:
       - db-data-volume:/pg_data
     environment:
-      - PGDATA=/pg_data
+      - PGDATA=/pg_data/13/data
       - POSTGRES_DB=${DB_NAME:-db}
       - POSTGRES_USER=${DB_USERNAME:-postgres}
       - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-U", "$DB_NAME"]
+      test: ["CMD-SHELL", "pg_isready -U $DB_USERNAME -d $DB_NAME"]
       interval: 30s
       timeout: 30s
       retries: 3
@@ -21,15 +21,12 @@ services:
       - lms
 
   rabbitmq:
-    image: rabbitmq:3.7-management-alpine
+    image: rabbitmq:3.9-management-alpine
     hostname: celery-mq
-    environment:
-      - RABBITMQ_ERLANG_COOKIE=AAVyo5djdSMGIZXiwEQs3JeVaBx5l14z
-      - RABBITMQ_DEFAULT_USER=rabbit-user
-      - RABBITMQ_DEFAULT_PASS=YgKlCvnYVzpTa3T9adG3NrMoUNe4Z5aZ
-      - RABBITMQ_DEFAULT_VHOST=/
     volumes:
       - rabbit-data-volume:/var/lib/rabbitmq
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./rabbitmq.cookie:/var/lib/rabbitmq/.erlang.cookie
     networks:
       - lms
 

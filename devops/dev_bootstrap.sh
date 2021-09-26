@@ -15,6 +15,9 @@ CONFIG_FILE_PATH="${LMSWEB_FOLDER}/config.py"
 CONFIG_EXAMPLE_FILE_PATH="${LMSWEB_FOLDER}/config.py.example"
 DB_BOOTSTRAP_FILE_PATH="${LMSAPP_FOLDER}/lmsdb/bootstrap.py"
 
+python_exec=python
+pip_exec=pip
+
 if ! (test -f "${CONFIG_FILE_PATH}"); then
   echo "Creating config from template"
   cp "${CONFIG_EXAMPLE_FILE_PATH}" "${CONFIG_FILE_PATH}"

@@ -50,7 +50,8 @@ class DockerExecutor(BaseExecutor):
             '--rm', '--name', self._container_name, self.base_image,
             'sleep', str(self.timeout_seconds),
         )
-        log.info('Start executing safe container context with %s', args)
+        command = ' '.join(args)
+        log.info(f'Start executing safe container context with {command}')
         subprocess.check_call(args)  # NOQA: S603
         return self
 
@@ -89,9 +90,7 @@ class DockerExecutor(BaseExecutor):
 
 
 class SameProcessExecutor(BaseExecutor):
-    """
-    Used only for testing / local setups without docker
-    """
+    """Used only for testing / local setups without docker"""
     def __init__(self):
         self._cwd = tempfile.mkdtemp()
 
@@ -105,20 +104,22 @@ class SameProcessExecutor(BaseExecutor):
         subprocess.run(args, cwd=self._cwd)  # NOQA: S603
 
     def write_file(self, file_path: str, content: str):
-        open(os.path.join(self._cwd, file_path), 'w').write(content)
+        with open(os.path.join(self._cwd, file_path), 'w') as f:
+            f.write(content)
 
     def get_file(self, file_path: str):
-        return open(os.path.join(self._cwd, file_path), 'r').read()
-
-
-__MAPPING = {
-    executor.executor_name(): executor
-    for executor in (
-        DockerExecutor,
-        SameProcessExecutor,
-    )
-}
+        file_content = ''
+        with open(os.path.join(self._cwd, file_path), 'r') as f:
+            file_content = f.read()
+        return file_content
 
 
 def get_executor(executor_name=None) -> BaseExecutor:
     return __MAPPING.get(executor_name, DockerExecutor)()
+
+
+EXECUTORS = (
+    DockerExecutor,
+    SameProcessExecutor,
+)
+__MAPPING = {executor.executor_name(): executor for executor in EXECUTORS}

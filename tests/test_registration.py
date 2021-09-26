@@ -22,7 +22,7 @@ class TestRegistration:
             'confirm': 'some_password',
         }, follow_redirects=True)
         template, _ = captured_templates[-1]
-        assert template.name == "signup.html"
+        assert template.name == 'signup.html'
 
         client.post('/login', data={
             'username': student_user.username,
@@ -91,7 +91,7 @@ class TestRegistration:
             'confirm': 'some_password',
         }, follow_redirects=True)
         user = User.get_or_none(User.username == 'some_user')
-        bad_token = "fake-token43@$@"
+        bad_token = 'fake-token43@$@'  # noqa: S105
         fail_confirm_response = client.get(
             f'/confirm-email/{user.id}/{bad_token}', follow_redirects=True,
         )

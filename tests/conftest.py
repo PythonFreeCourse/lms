@@ -1,12 +1,15 @@
 import datetime
 from functools import wraps
+import logging
 import os
 import random
 import string
 from typing import List, Optional
 
+from _pytest.logging import caplog as _caplog  # NOQA: F401
 from flask import template_rendered
 from flask.testing import FlaskClient
+from loguru import logger
 from peewee import SqliteDatabase
 import pytest
 
@@ -58,6 +61,17 @@ def client():
 def celery_eager():
     public_app.conf.update(task_always_eager=True)
     sandbox_app.conf.update(task_always_eager=True)
+
+
+@pytest.fixture(autouse=True, scope='function')
+def caplog(_caplog):  # NOQA: F811
+    class PropogateHandler(logging.Handler):
+        def emit(self, record):
+            logging.getLogger(record.name).handle(record)
+
+    handler_id = logger.add(PropogateHandler(), format='{message} {extra}')
+    yield _caplog
+    logger.remove(handler_id)
 
 
 @pytest.fixture(autouse=True, scope='session')

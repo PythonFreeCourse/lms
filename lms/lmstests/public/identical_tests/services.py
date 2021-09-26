@@ -65,13 +65,12 @@ class IdenticalSolutionSolver:
             return
 
         match_code = self.solution.solution_files.get().code
-        for solution_file in models.SolutionFile.select().join(
-                models.Solution,
-        ).filter(
+        files = models.SolutionFile.select().join(models.Solution).filter(
             models.Solution.exercise == self.solution.exercise,
             models.Solution.state == models.Solution.STATES.CREATED.name,
             models.SolutionFile.code == match_code,
-        ):
+        )
+        for solution_file in files:
             self._clone_solution_comments(
                 from_solution=self.solution,
                 to_solution=solution_file.solution,

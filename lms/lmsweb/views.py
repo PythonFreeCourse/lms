@@ -210,10 +210,7 @@ def service_worker():
 
 @webapp.before_request
 def banned_page():
-    if (
-        current_user.is_authenticated
-        and current_user.role.is_banned
-    ):
+    if current_user.is_authenticated and current_user.role.is_banned:
         return render_template('banned.html')
 
 
@@ -564,7 +561,7 @@ def _jinja2_filter_path_to_language_name(filename: str) -> str:
 
 @webapp.context_processor
 def _jinja2_inject_direction():
-    return dict(direction=DIRECTION)
+    return {'direction': DIRECTION}
 
 
 @webapp.template_filter('mime_type')

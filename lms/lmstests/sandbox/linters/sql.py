@@ -1,8 +1,8 @@
 import typing
 
-from sqlfluff.config import FluffConfig
-from sqlfluff.errors import SQLBaseError
-from sqlfluff.linter import Linter
+from sqlfluff.core.config import FluffConfig
+from sqlfluff.core.errors import SQLBaseError
+from sqlfluff.core.linter import Linter
 
 from lms.lmstests.sandbox.linters import defines
 from lms.lmstests.sandbox.linters.base import BaseLinter, LinterError
@@ -30,8 +30,8 @@ class SQLLinter(BaseLinter):
         for result in lint_errors:
             response = LinterError(
                 error_code=result.rule_code(),
-                line_number=result.line_no(),
-                column=result.line_pos(),
+                line_number=result.line_no,
+                column=result.line_pos,
                 text=result.desc(),
                 physical_line='',
                 solution_file_id=self._solution_file_id,
