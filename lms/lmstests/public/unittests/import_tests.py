@@ -15,7 +15,7 @@ def register_test_class(file_path: str, test_class: typing.ClassVar):
     subject = test_class.__doc__
     exercise = models.Exercise.get_or_none(models.Exercise.subject == subject)
     if not exercise:
-        log.info('Failed to find exercise subject %s', subject)
+        log.info(f'Failed to find exercise subject {subject}')
         raise SystemError
 
     with open(file_path, 'r') as file_reader:

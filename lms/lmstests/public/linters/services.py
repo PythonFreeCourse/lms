@@ -16,11 +16,7 @@ LinterError = linters.base.LinterError
 class LinterChecker:
     sandbox_tasks = linters.tasks
 
-    def __init__(
-            self,
-            solution_check_pk: str,
-            logger: logging.Logger,
-    ):
+    def __init__(self, solution_check_pk: str, logger: logging.Logger):
         self._solution_id = solution_check_pk
         self._app = None
         self._solution = None

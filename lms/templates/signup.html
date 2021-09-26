@@ -11,7 +11,7 @@
           {{ _('ברוכים הבאים למערכת התרגילים!') }}<br>
           {{ _('הזינו אימייל וסיסמה לצורך רישום למערכת:') }}
         </p>
-        <form class="align-items-center {{ direction }}-language" method="post" action="/signup">
+        <form class="align-items-center {{ direction }}-language" method="post" action="{{ url_for('signup') }}">
             {{ render_field(form.email, cls="form-control form-control-lg", placeholder=_('כתובת אימייל')) }}
             {{ render_field(form.username, cls="form-control form-control-lg", placeholder=_('שם משתמש')) }}
             {{ render_field(form.fullname, cls="form-control form-control-lg", placeholder=_('שם מלא')) }}
@@ -21,7 +21,7 @@
           <input class="form-control form-control-lg" type="hidden" name="next" id="next" value="{{ request.args.get('next', '') }}">
           <button class="btn btn-primary btn-lg btn-block">{{ _('הירשם') }}</button>
         </form>
-        <hr class="mt-3 mb-3"/>
+        <hr class="mt-3 mb-3">
         <a href="/" class="btn btn-success btn-sm" role="button">{{ _('חזרה לדף ההתחברות') }}</a>
       </div>
     </div>

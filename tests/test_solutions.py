@@ -1,4 +1,3 @@
-from flask.testing import FlaskClient
 from lms.models.errors import ResourceNotFound
 from lms.models.solutions import get_view_parameters
 from unittest import mock
@@ -6,12 +5,15 @@ from unittest import mock
 from flask import json
 import pytest
 
+from lms.lmsdb import models
 from lms.lmsdb.models import (
     Comment, Course, Exercise, SharedSolution, Solution, User,
 )
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmsweb import routes
 from lms.models import notifications, solutions
+from lms.models.errors import ResourceNotFound
+from lms.models.solutions import get_view_parameters
 from tests import conftest
 
 
@@ -525,3 +527,21 @@ class TestSolutionBridge:
 
         fail_send_response = client.get(f'send/{course2.id}/{exercise2.id}')
         assert fail_send_response.status_code == 403
+
+    @staticmethod
+    def test_manager_reset_state_expect_exceptions(
+            solution: Solution, caplog: pytest.LogCaptureFixture,
+    ):
+        reset = general_tasks.reset_solution_state_if_needed
+        assert reset(solution.id) is None
+        assert 'does not exist' not in caplog.text
+        next_unchecked = Solution.next_unchecked()
+        assert next_unchecked
+        next_unchecked.start_checking()
+        assert reset(solution.id) is None
+        assert 'does not exist' not in caplog.text
+
+        solution_id_that_does_not_exists = 1234567890
+        with pytest.raises(models.Solution.DoesNotExist):
+            assert reset(solution_id_that_does_not_exists) is None
+        assert 'does not exist' in caplog.text

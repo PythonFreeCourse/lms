@@ -63,3 +63,6 @@ LOCALE = 'en'
 # Limiter settings
 LIMITS_PER_MINUTE = 5
 LIMITS_PER_HOUR = 50
+
+# Change password settings
+MAX_INVALID_PASSWORD_TRIES = 5
