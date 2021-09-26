@@ -300,8 +300,8 @@ def main():
 
         if models.database.table_exists(models.User.__name__.lower()):
             _api_keys_migration()
-            _uuid_migration()
             _last_course_viewed_migration()
+            _uuid_migration()
 
         models.database.create_tables(models.ALL_MODELS, safe=True)
 
