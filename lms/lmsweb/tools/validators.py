@@ -19,3 +19,11 @@ def UniqueEmailRequired(
     email_exists = User.get_or_none(User.mail_address == field.data)
     if email_exists:
         raise ValidationError(_('האימייל כבר נמצא בשימוש'))
+
+
+def EmailNotExists(
+    _form: 'ResetPassForm', field: StringField,  # type: ignore # NOQA: F821
+) -> None:
+    email_exists = User.get_or_none(User.mail_address == field.data)
+    if not email_exists:
+        raise ValidationError(_('האימייל לא רשום במערכת'))

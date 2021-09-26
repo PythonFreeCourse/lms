@@ -12,6 +12,14 @@
           <li>{{ _('דואר אלקטרוני:') }} {{ user.mail_address | e }}</li>
         </ul>
       </div>
+      <div class="user-actions {{ direction }}">
+        <h2>{{ _('פעולות:') }}</h2>
+        <div id="change-password-user">
+          <ul>
+            <li><a href="{{ url_for('change_password') }}" role="button">{{ _('שנה סיסמה') }}</a></li>
+          </ul>
+        </div>
+      </div>
       <div class="user-exercises {{ direction }}">
       <h2>{{ _('תרגילים שהוגשו:') }}</h2>
         <table class="table table-hover">

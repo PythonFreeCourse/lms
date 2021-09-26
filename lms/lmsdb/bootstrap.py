@@ -1,8 +1,9 @@
 from typing import Any, Callable, Optional, Tuple, Type
+from uuid import uuid4
 
 from peewee import (
-    Entity, Expression, Field, Model, OP, OperationalError, ProgrammingError,
-    SQL,
+    Database, Entity, Expression, Field, Model, OP,
+    OperationalError, ProgrammingError, SQL,
 )
 from playhouse.migrate import migrate
 
@@ -88,9 +89,7 @@ def get_details(table: Model, column: Field) -> Tuple[bool, str, str]:
     column_name = column.column_name
 
     cols = {col.name for col in db_config.database.get_columns(table_name)}
-    if column_name in cols:
-        return True, table_name, column_name
-    return False, table_name, column_name
+    return column_name in cols, table_name, column_name
 
 
 def _add_not_null_column(
@@ -215,10 +214,8 @@ def _drop_constraint_if_needed(table: Type[Model], column_name: str) -> bool:
     return True
 
 
-def has_column_named(table: Model, column_name: str) -> bool:
-    db = db_config.database
-    columns = {col.name for col in db.get_columns(table.__name__.lower())}
-    return column_name in columns
+def has_column_named(db: Database, table: Model, column_name: str) -> bool:
+    return column_name in table._meta.sorted_field_names
 
 
 def _add_api_keys_to_users_table(table: Model, _column: Field) -> None:
@@ -226,6 +223,14 @@ def _add_api_keys_to_users_table(table: Model, _column: Field) -> None:
     with db_config.database.transaction():
         for user in table:
             user.api_key = table.random_password(stronger=True)
+            user.save()
+
+
+def _add_uuid_to_users_table(table: Model, _column: Field) -> None:
+    log.info('Adding UUIDs for all users, might take some extra time...')
+    with db_config.database.transaction():
+        for user in table:
+            user.uuid = uuid4()
             user.save()
 
 
@@ -239,6 +244,11 @@ def _last_status_view_migration() -> bool:
     Solution = models.Solution
     _migrate_column_in_table_if_needed(Solution, Solution.last_status_view)
     _migrate_column_in_table_if_needed(Solution, Solution.last_time_view)
+
+
+def _uuid_migration() -> bool:
+    User = models.User
+    _add_not_null_column(User, User.uuid, _add_uuid_to_users_table)
     return True
 
 
@@ -247,6 +257,10 @@ def main():
         if models.database.table_exists(models.Solution.__name__.lower()):
             _last_status_view_migration()
 
+        if models.database.table_exists(models.User.__name__.lower()):
+            _api_keys_migration()
+            _uuid_migration()
+
         models.database.create_tables(models.ALL_MODELS, safe=True)
 
         if models.Role.select().count() == 0:
@@ -254,7 +268,6 @@ def main():
         if models.User.select().count() == 0:
             models.create_demo_users()
 
-    _api_keys_migration()
     text_fixer.fix_texts()
     import_tests.load_tests_from_path('/app_dir/notebooks-tests')
 
