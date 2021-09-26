@@ -26,6 +26,7 @@ services:
     volumes:
       - rabbit-data-volume:/var/lib/rabbitmq
       - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./rabbitmq.cookie:/var/lib/rabbitmq/.erlang.cookie
     networks:
       - lms
 

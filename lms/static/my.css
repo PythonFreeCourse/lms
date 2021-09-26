@@ -294,12 +294,19 @@ button#share-action:hover {
 }
 
 .file-comments-count {
-  width: 1em;
+  width: 2em;
   height: 1.5em;
   display: flex;
   align-self: center;
   justify-self: center;
-  margin: 0 0.25em;
+  margin-right: 0.5em;
+}
+
+.file-comments-count > .badge {
+  width: 2em;
+  display: flex;
+  align-content: center;
+  justify-content: center;
 }
 
 #files {
@@ -395,7 +402,6 @@ button#share-action:hover {
 
 /* Check/see exercise view */
 #page-view {
-  direction: rtl;
   display: flex;
   flex-direction: column;
   justify-items: center;
@@ -606,7 +612,7 @@ code {
   display: flex;
   flex-direction: column;
   height: 90vh;
-  margin-right: 2rem;
+  margin-inline-start: 2rem;
   position: sticky;
   top: 2rem;
   min-width: 15vw;
@@ -741,11 +747,6 @@ code .grader-add .fa {
 
 /* Navigation bar */
 
-.mr-auto .dropdown-menu {
-  right: auto !important;
-  left: 0;
-}
-
 .nav-item {
   padding-left: 1em;
   padding-right: 1em;
@@ -753,7 +754,7 @@ code .grader-add .fa {
 
 .which-notebook {
   align-self: center;
-  margin: 0 1rem;
+  margin-inline-end: 1rem;
 }
 
 .comments-count {
@@ -762,16 +763,19 @@ code .grader-add .fa {
   align-items: center;
   font-size: 1.25rem;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  margin-inline-end: 1rem;
 }
 
 #notification-icon {
   cursor: pointer;
 }
 
+/*
 .notification {
   flex-direction: column;
   text-align: start;
 }
+*/
 
 .notification[data-read="true"] .icon::before {
   font: normal normal normal 14px/1 FontAwesome;

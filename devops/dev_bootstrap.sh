@@ -1,5 +1,8 @@
 #!/bin/bash
 
+python_exec=python
+pip_exec=pip
+
 set -x
 
 SCRIPT_FILE_PATH=$(readlink -f "${0}")
@@ -34,6 +37,9 @@ echo "Installing prod requirements"
 $pip_exec install -r "${MAIN_FOLDER}/requirements.txt"
 echo "Installing dev requirements"
 $pip_exec install -r "${MAIN_FOLDER}/dev_requirements.txt"
+
+echo "Compiling Flask Babel"
+pybabel compile -d "${MAIN_FOLDER}/lms/lmsweb/translations"
 
 echo "Creating local SQLite DB"
 $python_exec "${DB_BOOTSTRAP_FILE_PATH}"

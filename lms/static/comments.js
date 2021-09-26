@@ -148,6 +148,7 @@ window.addEventListener('load', () => {
   const codeElementData = document.getElementById('code-view').dataset;
   window.solutionId = codeElementData.id;
   window.fileId = codeElementData.file;
+  window.exerciseId = codeElementData.exercise;
   sessionStorage.setItem('role', codeElementData.role);
   sessionStorage.setItem('solver', codeElementData.solver);
   sessionStorage.setItem('allowedComment', codeElementData.allowedComment);
