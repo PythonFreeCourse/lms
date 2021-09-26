@@ -12,17 +12,14 @@ _logger.setLevel(logging.INFO)
 
 @app.task
 def reset_solution_state_if_needed(solution_pk: str) -> None:
+    _logger.info('reset_solution_state_if_needed: solution %s', solution_pk)
+
     try:
-        _logger.info(
-            'Start reset_solution_state_if_needed solution %s',
-            solution_pk,
-        )
         solution = models.Solution.get_by_id(solution_pk)
-        if solution.state == models.Solution.STATES.IN_CHECKING.name:
-            _logger.info('Reset solution %s to CREATED state', solution_pk)
-            solution.set_state(models.Solution.STATES.CREATED)
-    except Exception:
-        _logger.exception(
-            'Failed reset_solution_state_if_needed solution %s',
-            solution_pk,
-        )
+    except models.Solution.DoesNotExist:
+        _logger.exception('Solution %s does not exist', solution_pk)
+        raise
+
+    if solution.state == models.Solution.STATES.IN_CHECKING.name:
+        _logger.info('Reset solution %s to CREATED state', solution_pk)
+        solution.set_state(models.Solution.STATES.CREATED)

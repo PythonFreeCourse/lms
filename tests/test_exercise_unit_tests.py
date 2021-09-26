@@ -3,9 +3,7 @@ import os
 import pytest  # type: ignore
 
 from lms.lmsdb import models
-from lms.lmstests.public.unittests import import_tests
-from lms.lmstests.public.unittests import executers
-from lms.lmstests.public.unittests import tasks
+from lms.lmstests.public.unittests import executers, import_tests, tasks
 from lms.models import notifications
 from tests import conftest
 
@@ -17,15 +15,17 @@ def foo(bar=None):
 
 EXERCISE_TESTS = os.path.join(conftest.SAMPLES_DIR, 'student_test_code.py')
 INVALID_EXERCISE_TESTS = os.path.join(
-    conftest.SAMPLES_DIR, 'not_working_test_code.py')
+    conftest.SAMPLES_DIR, 'not_working_test_code.py',
+)
 UNITTEST_NOTIFICATION = notifications.NotificationKind.UNITTEST_ERROR.value
+DOCKER_EXECUTOR = executers.DockerExecutor.executor_name()
 
 
 class TestUTForExercise:
     def test_check_solution_with_exercise_process_stub(
             self, solution: models.Solution,
     ):
-        self._initialize_solution(solution, EXERCISE_TESTS)
+        self._initialize_solution(solution, STUDENT_CODE, EXERCISE_TESTS)
         self._run_unit_tests(solution.id)
         self._verify_comments()
         self._verify_notifications(solution)
@@ -33,7 +33,9 @@ class TestUTForExercise:
     def test_check_solution_with_invalid_exercise(
             self, solution: models.Solution,
     ):
-        self._initialize_solution(solution, INVALID_EXERCISE_TESTS)
+        self._initialize_solution(
+            solution, STUDENT_CODE, INVALID_EXERCISE_TESTS,
+        )
         self._run_unit_tests(solution.id)
         auto_comments = tuple(models.SolutionExerciseTestExecution.select())
         assert len(auto_comments) == 1
@@ -52,10 +54,8 @@ class TestUTForExercise:
     def test_check_solution_with_exercise_ut_full_docker(
             self, solution: models.Solution,
     ):
-        self._initialize_solution(solution, EXERCISE_TESTS)
-        self._run_unit_tests(
-            solution.id, executers.DockerExecutor.executor_name(),
-        )
+        self._initialize_solution(solution, STUDENT_CODE, EXERCISE_TESTS)
+        self._run_unit_tests(solution.id, DOCKER_EXECUTOR)
         self._verify_comments()
 
     @staticmethod
@@ -77,9 +77,13 @@ class TestUTForExercise:
         assert all_notifications[0].kind == UNITTEST_NOTIFICATION
 
     @staticmethod
-    def _initialize_solution(solution: models.Solution, module_name: str):
+    def _initialize_solution(
+            solution: models.Solution,
+            code: str,
+            module_name: str,
+    ):
         solution_file = solution.solution_files.get()
-        solution_file.code = STUDENT_CODE
+        solution_file.code = code
         solution_file.save()
         import_tests.load_test_from_module(module_name)
 

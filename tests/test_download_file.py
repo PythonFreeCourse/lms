@@ -4,13 +4,11 @@ from tempfile import SpooledTemporaryFile
 from typing import Iterator
 from zipfile import ZipFile
 
-import pytest
 from werkzeug.datastructures import FileStorage
 
 from lms.extractors.base import File
 from lms.lmsdb.models import Exercise, User
 from lms.lmsweb import routes
-from lms.models import errors
 from lms.utils import hashing
 from tests import conftest
 

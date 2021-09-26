@@ -31,8 +31,8 @@ class PythonLinter(BaseLinter):
             temp_file.flush()
 
             self.app.run_checks([temp_file.name])
-            results = self.app.file_checker_manager.checkers[
-                index_of_check].results
+            checkers = self.app.file_checker_manager.checkers
+            results = checkers[index_of_check].results
 
         for result in results:
             response = LinterError(

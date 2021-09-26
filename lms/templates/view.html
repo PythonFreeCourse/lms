@@ -18,15 +18,15 @@
     <p id="solver"><strong>{{ _('מגיש') }}:</strong> <a href="/user/{{ solution['solver']['id'] }}">{{ solution['solver']['fullname'] | e }}</a></p>
     {% endif %}
     {% if not shared_url %}
-    <nav id="versions" class="{{ direction }}-language" aria-label="{{ _('ניווט בגרסאות ההגשה') }}">
+    <nav id="versions" aria-label="{{ _('ניווט בגרסאות ההגשה') }}">
       <ul class="pagination">
-      {%- for version in versions %}
-        {% set current = version['id'] == solution['id'] %}
-        <li class="page-item version{% if current %} active{% endif %}"{% if current %} aria-current="page"{% endif %}>
-          <a href="{{ url_for('view', solution_id=version['id']) }}" class="version page-link">{{ loop.index }}</a>
-        {%- if current %}<span class="visually-hidden">{{ _("העמוד הנוכחי") }}</span>{% endif -%}
-        </li>
-      {% endfor -%}
+        {%- for version in versions %}
+          {% set current = version['id'] == solution['id'] %}
+          <li class="page-item version{% if current %} active{% endif %}"{% if current %} aria-current="page"{% endif %}>
+            <a href="{{ url_for('view', solution_id=version['id']) }}" class="version page-link">{{ loop.index }}</a>
+          {%- if current %}<span class="visually-hidden">{{ _("העמוד הנוכחי") }}</span>{% endif -%}
+          </li>
+        {% endfor -%}
       </ul>
     </nav>
     {% if is_manager and not shared_url %}
@@ -96,7 +96,7 @@
       {% endif %}
     </div>
     {% if is_manager and not shared_url %}
-    <div id="popular-comments" class="{{ direction }}">
+    <div id="popular-comments">
       <div id="exercise-comments">
         <h2>{{ _('הערות על התרגיל') }}</h2>
         <ol id="exercise-comments-list" class="comments exercise-comments">

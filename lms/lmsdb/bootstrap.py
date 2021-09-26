@@ -2,8 +2,8 @@ from typing import Any, Callable, Optional, Tuple, Type
 from uuid import uuid4
 
 from peewee import (
-    Entity, Expression, Field, Model, OP, OperationalError, ProgrammingError,
-    SQL,
+    Database, Entity, Expression, Field, Model, OP,
+    OperationalError, ProgrammingError, SQL,
 )
 from playhouse.migrate import migrate
 
@@ -214,10 +214,8 @@ def _drop_constraint_if_needed(table: Type[Model], column_name: str) -> bool:
     return True
 
 
-def has_column_named(table: Model, column_name: str) -> bool:
-    db = db_config.database
-    columns = {col.name for col in db.get_columns(table.__name__.lower())}
-    return column_name in columns
+def has_column_named(db: Database, table: Model, column_name: str) -> bool:
+    return column_name in table._meta.sorted_field_names
 
 
 def _add_api_keys_to_users_table(table: Model, _column: Field) -> None:
