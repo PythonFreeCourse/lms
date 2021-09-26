@@ -17,7 +17,7 @@
             </p>
         </div>
         {% endif %}
-        <form class="align-items-center" method="post" action="/login">
+        <form class="align-items-center" method="post" action="{{ url_for('login') }}">
           <div class="row mb-3 {{ direction }}-language">
             <label for="username" class="visually-hidden">{{ _('שם משתמש') }}</label>
             <div>
@@ -33,10 +33,11 @@
           <input class="form-control form-control-lg" type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token() }}" required>
           <input class="form-control form-control-lg" type="hidden" name="next" id="next" value="{{ request.args.get('next', '') }}">
           <button class="btn btn-primary btn-lg btn-block">{{ _('התחבר') }}</button>
+          <a href="{{ url_for('reset_password') }}" id="forgot-my-password-link" role="button">{{ _('שכחת את הסיסמה?') }}</a>
         </form>
         {% if config.REGISTRATION_OPEN %}
         <hr class="mt-3 mb-3">
-        <a href="/signup" class="btn btn-success btn-sm" role="button">{{ _('הירשם') }}</a>
+        <a href="{{ url_for('signup') }}" class="btn btn-success btn-sm" role="button">{{ _('הירשם') }}</a>
         {% endif %}
       </div>
     </div>

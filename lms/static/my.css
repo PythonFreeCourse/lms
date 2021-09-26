@@ -47,7 +47,10 @@ a {
 }
 
 #login-container,
-#signup-container {
+#signup-container,
+#change-password-container,
+#reset-password-container,
+#recover-password-container {
   height: 100%;
   align-items: center;
   display: flex;
@@ -55,7 +58,10 @@ a {
 }
 
 #login,
-#signup {
+#signup,
+#change-password,
+#reset-password,
+#recover-password {
   margin: auto;
   max-width: 420px;
   padding: 15px;
@@ -63,12 +69,14 @@ a {
 }
 
 #login-logo,
-#signup-logo {
+#signup-logo,
+#reset-password-logo,
+#recover-password-logo {
   margin-bottom: 1rem;
 }
 
 #login-message-box,
-#signup-errors {
+#form-errors {
   background: #f1c8c8;
   color: #860606;
 }
@@ -818,7 +826,7 @@ code .grader-add .fa {
   width: 80vw;
 }
 
-#user .user-details {
+#user .user-actions {
   margin-bottom: 5em;
 }
 

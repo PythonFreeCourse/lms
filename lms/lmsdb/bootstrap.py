@@ -1,4 +1,5 @@
 from typing import Any, Callable, Optional, Tuple, Type
+from uuid import uuid4
 
 from peewee import (
     Database, Entity, Expression, Field, Model, OP,
@@ -88,9 +89,7 @@ def get_details(table: Model, column: Field) -> Tuple[bool, str, str]:
     column_name = column.column_name
 
     cols = {col.name for col in db_config.database.get_columns(table_name)}
-    if column_name in cols:
-        return True, table_name, column_name
-    return False, table_name, column_name
+    return column_name in cols, table_name, column_name
 
 
 def _add_not_null_column(
@@ -227,14 +226,32 @@ def _add_api_keys_to_users_table(table: Model, _column: Field) -> None:
             user.save()
 
 
+def _add_uuid_to_users_table(table: Model, _column: Field) -> None:
+    log.info('Adding UUIDs for all users, might take some extra time...')
+    with db_config.database.transaction():
+        for user in table:
+            user.uuid = uuid4()
+            user.save()
+
+
 def _api_keys_migration() -> bool:
     User = models.User
     _add_not_null_column(User, User.api_key, _add_api_keys_to_users_table)
     return True
 
 
+def _uuid_migration() -> bool:
+    User = models.User
+    _add_not_null_column(User, User.uuid, _add_uuid_to_users_table)
+    return True
+
+
 def main():
     with models.database.connection_context():
+        if models.database.table_exists(models.User.__name__.lower()):
+            _api_keys_migration()
+            _uuid_migration()
+
         models.database.create_tables(models.ALL_MODELS, safe=True)
 
         if models.Role.select().count() == 0:
@@ -242,7 +259,6 @@ def main():
         if models.User.select().count() == 0:
             models.create_demo_users()
 
-    _api_keys_migration()
     text_fixer.fix_texts()
     import_tests.load_tests_from_path('/app_dir/notebooks-tests')
 

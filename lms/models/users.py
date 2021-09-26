@@ -1,13 +1,16 @@
 import re
 
 from flask_babel import gettext as _  # type: ignore
+from itsdangerous import URLSafeTimedSerializer
 
 from lms.lmsdb.models import User
+from lms.lmsweb import config
 from lms.models.errors import (
     ForbiddenPermission, UnauthorizedError, UnhashedPasswordError,
 )
 
 
+SERIALIZER = URLSafeTimedSerializer(config.SECRET_KEY)
 HASHED_PASSWORD = re.compile(r'^pbkdf2.+?\$(?P<salt>.+?)\$(?P<password>.+)')
 
 
@@ -26,3 +29,7 @@ def auth(username: str, password: str) -> User:
     elif user.role.is_unverified:
         raise ForbiddenPermission(_('עליך לאשר את מייל האימות'), 403)
     return user
+
+
+def generate_user_token(user: User) -> str:
+    return SERIALIZER.dumps(user.mail_address, salt=retrieve_salt(user))

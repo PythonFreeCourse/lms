@@ -2,8 +2,8 @@ from typing import Any, Callable, Optional
 
 import arrow  # type: ignore
 from flask import (
-    jsonify, make_response, render_template,
-    request, send_from_directory, url_for,
+    jsonify, make_response, render_template, request,
+    send_from_directory, session, url_for,
 )
 from flask_babel import gettext as _  # type: ignore
 from flask_limiter.util import get_remote_address  # type: ignore
@@ -26,7 +26,9 @@ from lms.lmsweb.config import (
     CONFIRMATION_TIME, LANGUAGES, LIMITS_PER_HOUR,
     LIMITS_PER_MINUTE, LOCALE, MAX_UPLOAD_SIZE,
 )
+from lms.lmsweb.forms.change_password import ChangePasswordForm
 from lms.lmsweb.forms.register import RegisterForm
+from lms.lmsweb.forms.reset_password import RecoverPassForm, ResetPassForm
 from lms.lmsweb.manifest import MANIFEST
 from lms.lmsweb.redirections import (
     PERMISSIVE_CORS, get_next_url, login_manager,
@@ -38,13 +40,16 @@ from lms.models.errors import (
     FileSizeError, ForbiddenPermission, LmsError,
     UnauthorizedError, UploadError, fail,
 )
-from lms.models.register import SERIALIZER, send_confirmation_mail
-from lms.models.users import auth, retrieve_salt
+from lms.models.users import SERIALIZER, auth, retrieve_salt
 from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import (
     get_language_name_by_extension, get_mime_type_by_extention,
 )
 from lms.utils.log import log
+from lms.utils.mail import (
+    send_change_password_mail, send_confirmation_mail,
+    send_reset_password_mail,
+)
 
 HIGH_ROLES = {str(RoleOptions.STAFF), str(RoleOptions.ADMINISTRATOR)}
 
@@ -75,8 +80,8 @@ def _db_close(exc):
 
 
 @login_manager.user_loader
-def load_user(user_id):
-    return User.get_or_none(id=user_id)
+def load_user(uuid):
+    return User.get_or_none(uuid=uuid)
 
 
 @webapp.errorhandler(429)
@@ -110,6 +115,7 @@ def login(login_message: Optional[str] = None):
             return redirect(url_for('login', **error_details))
         else:
             login_user(user)
+            session['_invalid_password_tries'] = 0
             return get_next_url(next_page)
 
     return render_template('login.html', login_message=login_message)
@@ -176,6 +182,83 @@ def confirm_email(user_id: int, token: str):
                 _('המשתמש שלך אומת בהצלחה, כעת אתה יכול להתחבר למערכת'),
             ),
         ))
+
+
+@webapp.route('/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    user = User.get(User.id == current_user.id)
+
+    form = ChangePasswordForm(user)
+    if not form.validate_on_submit():
+        return render_template('change-password.html', form=form)
+
+    user.password = form.password.data
+    user.save()
+    logout_user()
+    send_change_password_mail(user)
+    return redirect(url_for(
+        'login', login_message=(
+            _('הסיסמה שלך שונתה בהצלחה'),
+        ),
+    ))
+
+
+@webapp.route('/reset-password', methods=['GET', 'POST'])
+@limiter.limit(f'{LIMITS_PER_MINUTE}/minute;{LIMITS_PER_HOUR}/hour')
+def reset_password():
+    form = ResetPassForm()
+    if not form.validate_on_submit():
+        return render_template('reset-password.html', form=form)
+
+    user = User.get(User.mail_address == form.email.data)
+
+    send_reset_password_mail(user)
+    return redirect(url_for(
+        'login', login_message=_('קישור לאיפוס הסיסמה נשלח בהצלחה'),
+    ))
+
+
+@webapp.route(
+    '/recover-password/<int:user_id>/<token>', methods=['GET', 'POST'],
+)
+@limiter.limit(f'{LIMITS_PER_MINUTE}/minute;{LIMITS_PER_HOUR}/hour')
+def recover_password(user_id: int, token: str):
+    user = User.get_or_none(User.id == user_id)
+    if user is None:
+        return fail(404, 'The authentication code is invalid.')
+
+    try:
+        SERIALIZER.loads(
+            token, salt=retrieve_salt(user), max_age=CONFIRMATION_TIME,
+        )
+
+    except SignatureExpired:
+        return redirect(url_for(
+            'login', login_message=(
+                _('קישור איפוס הסיסמה פג תוקף'),
+            ),
+        ))
+    except BadSignature:
+        return fail(404, 'The authentication code is invalid.')
+
+    else:
+        return recover_password_check(user, token)
+
+
+def recover_password_check(user: User, token: str):
+    form = RecoverPassForm()
+    if not form.validate_on_submit():
+        return render_template(
+            'recover-password.html', form=form, id=user.id, token=token,
+        )
+    user.password = form.password.data
+    user.save()
+    return redirect(url_for(
+        'login', login_message=(
+            _('הסיסמה שלך שונתה בהצלחה'),
+        ),
+    ))
 
 
 @webapp.route('/logout')

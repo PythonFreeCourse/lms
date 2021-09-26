@@ -9,6 +9,7 @@ from typing import List, Optional
 from _pytest.logging import caplog as _caplog  # NOQA: F401
 from flask import template_rendered
 from flask.testing import FlaskClient
+from flask_mail import Mail
 from loguru import logger
 from peewee import SqliteDatabase
 import pytest
@@ -87,6 +88,7 @@ def webapp_configurations():
 @pytest.fixture(autouse=True, scope='session')
 def disable_mail_sending():
     webapp.config['TESTING'] = True
+    webmail = Mail(webapp)
 
 
 @pytest.fixture(autouse=True, scope='session')
@@ -133,15 +135,63 @@ def logout_user(client: FlaskClient) -> None:
     client.get('/logout', follow_redirects=True)
 
 
+def signup_client_user(
+    client: FlaskClient, email: str, username: str, fullname: str,
+    password: str, confirm_password: str,
+):
+    return client.post('/signup', data={
+        'email': email,
+        'username': username,
+        'fullname': fullname,
+        'password': password,
+        'confirm': confirm_password,
+    }, follow_redirects=True)
+
+
+def login_client_user(client: FlaskClient, username: str, password: str):
+    return client.post('/login', data={
+        'username': username,
+        'password': password,
+    }, follow_redirects=True)
+
+
+def change_client_password(
+    client: FlaskClient, current_password: str,
+    new_password: str, confirm_password: str,
+):
+    return client.post('/change-password', data={
+        'current_password': current_password,
+        'password': new_password,
+        'confirm': confirm_password,
+    }, follow_redirects=True)
+
+
+def reset_client_password(client: FlaskClient, email: str):
+    return client.post('/reset-password', data={
+        'email': email,
+    }, follow_redirects=True)
+
+
+def recover_client_password(
+    client: FlaskClient, user_id: int, token: str,
+    password: str, confirm_password: str,
+):
+    return client.post(f'/recover-password/{user_id}/{token}', data={
+        'password': password,
+        'confirm': confirm_password,
+    }, follow_redirects=True)
+
+
 def create_user(
-        role_name: str = RoleOptions.STUDENT.value,
-        index: int = 1,
+    role_name: str = RoleOptions.STUDENT.value, index: int = 1,
 ) -> User:
+    username = f'{role_name}-{index}'
+    password = 'fake pass'
     return User.create(  # NOQA: S106
-        username=f'{role_name}-{index}',
+        username=username,
         fullname=f'A{role_name}',
         mail_address=f'so-{role_name}-{index}@mail.com',
-        password='fake pass',
+        password=password,
         api_key='fake key',
         role=Role.by_name(role_name),
     )
@@ -191,11 +241,13 @@ def student_user():
 @pytest.fixture()
 def admin_user():
     admin_role = Role.get(Role.name == RoleOptions.ADMINISTRATOR.value)
+    username = 'Yam'
+    password = 'fake pass'
     return User.create(  # NOQA: B106, S106
-        username='Yam',
+        username=username,
         fullname='Buya',
         mail_address='mymail@mail.com',
-        password='fake pass',
+        password=password,
         api_key='fake key',
         role=admin_role,
     )

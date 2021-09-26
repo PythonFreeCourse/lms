@@ -1,19 +1,20 @@
-from collections import Counter
 import enum
 import html
 import secrets
 import string
+from collections import Counter
 from datetime import datetime
 from typing import (
     Any, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple,
     Type, Union, cast,
 )
+from uuid import uuid4
 
 from flask_babel import gettext as _  # type: ignore
 from flask_login import UserMixin, current_user  # type: ignore
 from peewee import (  # type: ignore
     BooleanField, Case, CharField, Check, DateTimeField, ForeignKeyField,
-    IntegerField, JOIN, ManyToManyField, TextField, fn,
+    IntegerField, JOIN, ManyToManyField, TextField, UUIDField, fn,
 )
 from playhouse.signals import Model, post_save, pre_save  # type: ignore
 from werkzeug.security import (
@@ -138,6 +139,10 @@ class User(UserMixin, BaseModel):
     password = CharField()
     role = ForeignKeyField(Role, backref='users')
     api_key = CharField()
+    uuid = UUIDField(default=uuid4, unique=True)
+
+    def get_id(self):
+        return str(self.uuid)
 
     def is_password_valid(self, password):
         return check_password_hash(self.password, password)
@@ -201,6 +206,7 @@ def on_save_handler(model_class, instance, created):
     is_password_changed = not instance.password.startswith('pbkdf2:sha256')
     if created or is_password_changed:
         instance.password = generate_password_hash(instance.password)
+        instance.uuid = uuid4()
 
     is_api_key_changed = not instance.api_key.startswith('pbkdf2:sha256')
     if created or is_api_key_changed:
