@@ -690,6 +690,10 @@ span.line {
   width: 90%;
 }
 
+.fiv-viv {
+  margin-right: 0.3em;
+}
+
 /*
 code > code:last-of-type{
   display: inherit;
