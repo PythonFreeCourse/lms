@@ -1,7 +1,9 @@
 import pathlib
 import shutil
+import typing
 
 from flask import Flask
+from flask_httpauth import HTTPBasicAuth
 from flask_babel import Babel  # type: ignore
 from flask_limiter import Limiter  # type: ignore
 from flask_limiter.util import get_remote_address  # type: ignore
@@ -28,6 +30,8 @@ webapp = Flask(
     static_folder=str(static_dir),
 )
 
+http_basic_auth = HTTPBasicAuth()
+
 limiter = Limiter(webapp, key_func=get_remote_address)
 
 
@@ -52,3 +56,19 @@ from lms.lmsweb import views  # NOQA: F401, E402
 
 # gunicorn search for application
 application = webapp
+
+
+@http_basic_auth.get_password
+def get_password(username: str) -> typing.Optional[str]:
+    user = models.User.get_or_none(models.User.username == username)
+    return user.password if user else None
+
+
+@http_basic_auth.verify_password
+def verify_password(username: str, client_password: str):
+    login_user: typing.Optional[models.User] = models.User.get_or_none(models.User.username == username)
+    if not login_user:
+        return False
+    if not login_user.is_password_valid(client_password):
+        return False
+    return login_user

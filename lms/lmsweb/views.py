@@ -18,17 +18,18 @@ from lms.lmsdb.models import (
     ALL_MODELS, Comment, Note, Role, RoleOptions, SharedSolution,
     Solution, SolutionFile, User, database,
 )
-from lms.lmsweb import babel, limiter, routes, webapp
+from lms.lmsweb import babel, limiter, routes, webapp, http_basic_auth
 from lms.lmsweb.admin import (
     AdminModelView, SPECIAL_MAPPING, admin, managers_only,
 )
 from lms.lmsweb.config import (
     CONFIRMATION_TIME, LANGUAGES, LIMITS_PER_HOUR,
-    LIMITS_PER_MINUTE, LOCALE, MAX_UPLOAD_SIZE,
+    LIMITS_PER_MINUTE, LOCALE, MAX_UPLOAD_SIZE, REPOSITORY_FOLDER,
 )
 from lms.lmsweb.forms.change_password import ChangePasswordForm
 from lms.lmsweb.forms.register import RegisterForm
 from lms.lmsweb.forms.reset_password import RecoverPassForm, ResetPassForm
+from lms.lmsweb.git_service import GitService
 from lms.lmsweb.manifest import MANIFEST
 from lms.lmsweb.redirections import (
     PERMISSIVE_CORS, get_next_url, login_manager,
@@ -542,6 +543,20 @@ def download(download_id: str):
         filename=f'{filename}.zip'.encode('utf-8'),
     )
     return response
+
+
+@webapp.route(f'{routes.GIT}/<int:exercise_id>.git/info/refs')
+@webapp.route(f'{routes.GIT}/<int:exercise_id>.git/git-receive-pack', methods=['POST'])
+@webapp.route(f'{routes.GIT}/<int:exercise_id>.git/git-upload-pack', methods=('POST',))
+@http_basic_auth.login_required
+def git_handler(exercise_id: int):
+    git_service = GitService(
+        current_user_id=http_basic_auth.current_user().id,
+        exercise_id=exercise_id,
+        request=request,
+        base_repository_folder=REPOSITORY_FOLDER,
+    )
+    return git_service.handle_operation()
 
 
 @webapp.route(f'{routes.SOLUTIONS}/<int:solution_id>')
