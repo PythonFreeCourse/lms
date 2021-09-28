@@ -28,6 +28,7 @@ from lms.lmsweb.config import (
 )
 from lms.lmsweb.forms.change_password import ChangePasswordForm
 from lms.lmsweb.forms.register import RegisterForm
+from lms.lmsweb.forms.login import LoginForm
 from lms.lmsweb.forms.reset_password import RecoverPassForm, ResetPassForm
 from lms.lmsweb.manifest import MANIFEST
 from lms.lmsweb.redirections import (
@@ -92,7 +93,7 @@ def ratelimit_handler(e):
     )
 
 
-@webapp.route('/login', methods=['GET', 'POST'])
+@webapp.route('/login', methods=['GET', 'POST'])  # TODO: change this to use WTForms, like '/signup'
 @limiter.limit(
     f'{LIMITS_PER_MINUTE}/minute;{LIMITS_PER_HOUR}/hour',
     deduct_when=lambda response: response.status_code != 200,
@@ -101,24 +102,28 @@ def login(login_message: Optional[str] = None):
     if current_user.is_authenticated:
         return get_next_url(request.args.get('next'))
 
-    username = request.form.get('username')
-    password = request.form.get('password')
-    next_page = request.form.get('next')
-    login_message = request.args.get('login_message')
+    form = LoginForm()  # above the is.auth...?
+    if not form.validate_on_submit():
+        return render_template('login.html', form=form)
 
-    if request.method == 'POST':
-        try:
-            user = auth(username, password)
-        except (ForbiddenPermission, UnauthorizedError) as e:
-            error_message, _ = e.args
-            error_details = {'next': next_page, 'login_message': error_message}
-            return redirect(url_for('login', **error_details))
-        else:
-            login_user(user)
-            session['_invalid_password_tries'] = 0
-            return get_next_url(next_page)
+    username = form.username.data
+    password = form.password.data
+    next_page = request.form.get('next')  # TODO: what is this? what's the best way to do it on WTForms?
+    login_message = request.args.get('login_message')  # maybe move those to inside the `if` statement?
 
-    return render_template('login.html', login_message=login_message)
+    # if request.method == 'POST':
+    try:
+        user = auth(username, password)
+    except (ForbiddenPermission, UnauthorizedError) as e:
+        error_message, _ = e.args
+        error_details = {'next': next_page, 'login_message': error_message}
+        return redirect(url_for('login', **error_details))
+    else:
+        login_user(user)
+        session['_invalid_password_tries'] = 0
+        return get_next_url(next_page)
+
+    # return render_template('login.html', login_message=login_message)  # form=form?
 
 
 @webapp.route('/signup', methods=['GET', 'POST'])
