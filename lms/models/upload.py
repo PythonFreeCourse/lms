@@ -62,8 +62,7 @@ def new(user: User, file: FileStorage) -> Tuple[List[int], List[int]]:
     errors: List[Union[UploadError, AlreadyExists]] = []
     for exercise_id, files, solution_hash in Extractor(file):
         try:
-            solution = _upload_to_db(exercise_id, user, files, solution_hash)
-            _run_auto_checks(solution)
+            upload_solution(exercise_id, files, solution_hash, user)
         except (UploadError, AlreadyExists) as e:
             log.debug(e)
             errors.append(e)
@@ -75,3 +74,13 @@ def new(user: User, file: FileStorage) -> Tuple[List[int], List[int]]:
         raise UploadError(errors)
 
     return matches, misses
+
+
+def upload_solution(
+        exercise_id: int,
+        files: List[File],
+        solution_hash: str,
+        user: User,
+) -> None:
+    solution = _upload_to_db(exercise_id, user, files, solution_hash)
+    _run_auto_checks(solution)

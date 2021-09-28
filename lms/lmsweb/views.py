@@ -551,7 +551,7 @@ def download(download_id: str):
 @http_basic_auth.login_required
 def git_handler(exercise_id: int):
     git_service = GitService(
-        current_user_id=http_basic_auth.current_user().id,
+        user=http_basic_auth.current_user(),
         exercise_id=exercise_id,
         request=request,
         base_repository_folder=REPOSITORY_FOLDER,
