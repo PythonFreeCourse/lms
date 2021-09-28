@@ -1,12 +1,25 @@
+from functools import wraps
+
 from flask import url_for
 from flask_babel import gettext as _  # type: ignore
 from flask_mail import Message  # type: ignore
 
 from lms.lmsdb.models import User
-from lms.lmsweb import config, webmail
+from lms.lmsweb import config, webapp, webmail
 from lms.models.users import generate_user_token
 
 
+def send_message(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        msg = func(*args, **kwargs)
+        if not webapp.config.get('DISABLE_MAIL'):
+            webmail.send(msg)
+
+    return wrapper
+
+
+@send_message
 def send_confirmation_mail(user: User) -> Message:
     token = generate_user_token(user)
     subject = _('מייל אימות - %(site_name)s', site_name=config.SITE_NAME)
@@ -18,9 +31,10 @@ def send_confirmation_mail(user: User) -> Message:
         'שלום %(fullname)s,\nלינק האימות שלך למערכת הוא: %(link)s',
         fullname=user.fullname, link=link,
     )
-    webmail.send(msg)
+    return msg
 
 
+@send_message
 def send_reset_password_mail(user: User) -> Message:
     token = generate_user_token(user)
     subject = _('מייל איפוס סיסמה - %(site_name)s', site_name=config.SITE_NAME)
@@ -32,9 +46,10 @@ def send_reset_password_mail(user: User) -> Message:
         'שלום %(fullname)s,\nלינק לצורך איפוס הסיסמה שלך הוא: %(link)s',
         fullname=user.fullname, link=link,
     )
-    webmail.send(msg)
+    return msg
 
 
+@send_message
 def send_change_password_mail(user: User) -> Message:
     subject = _('שינוי סיסמה - %(site_name)s', site_name=config.SITE_NAME)
     msg = Message(subject, recipients=[user.mail_address])
@@ -45,4 +60,4 @@ def send_change_password_mail(user: User) -> Message:
         fullname=user.fullname, site_name=config.SITE_NAME,
         site_mail=config.MAIL_DEFAULT_SENDER,
     )
-    webmail.send(msg)
+    return msg

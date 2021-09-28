@@ -526,7 +526,7 @@ def upload_page(course_id: int):
         return fail(422, 'No file was given.')
 
     try:
-        matches, misses = upload.new(user, course_id, file)
+        matches, misses = upload.new(user.id, course_id, file)
     except UploadError as e:
         log.debug(e)
         return fail(400, str(e))
@@ -595,6 +595,9 @@ def view(
     except LmsError as e:
         error_message, status_code = e.args
         return fail(status_code, error_message)
+
+    if viewer_is_solver:
+        solution.view_solution()
 
     return render_template('view.html', **view_params)
 

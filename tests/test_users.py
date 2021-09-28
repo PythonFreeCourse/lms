@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 
 from flask.testing import FlaskClient
 
-from lms.lmsdb.models import User
+from lms.lmsdb.models import Course, User
 from lms.lmsweb.config import CONFIRMATION_TIME, MAX_INVALID_PASSWORD_TRIES
 from lms.models.users import generate_user_token
 from tests import conftest
@@ -176,3 +176,8 @@ class TestUser:
             conftest.login_client_user(client, user.username, 'fake pass')
             fail_login_response = client.get('/exercises')
             assert fail_login_response.status_code == 200
+
+    @staticmethod
+    def test_user_registered_to_course(student_user: User, course: Course):
+        conftest.create_usercourse(student_user, course)
+        assert course.has_user(student_user)

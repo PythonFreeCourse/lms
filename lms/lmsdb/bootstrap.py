@@ -287,6 +287,12 @@ def _add_exercise_course_id_and_number_columns_constraint() -> bool:
         db_config.database.commit()
 
 
+def _last_status_view_migration() -> bool:
+    Solution = models.Solution
+    _migrate_column_in_table_if_needed(Solution, Solution.last_status_view)
+    _migrate_column_in_table_if_needed(Solution, Solution.last_time_view)
+
+
 def _uuid_migration() -> bool:
     User = models.User
     _add_not_null_column(User, User.uuid, _add_uuid_to_users_table)
@@ -297,6 +303,9 @@ def main():
     with models.database.connection_context():
         if models.database.table_exists(models.Exercise.__name__.lower()):
             _add_exercise_course_id_and_number_columns_constraint()
+
+        if models.database.table_exists(models.Solution.__name__.lower()):
+            _last_status_view_migration()
 
         if models.database.table_exists(models.User.__name__.lower()):
             _api_keys_migration()

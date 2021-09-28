@@ -25,11 +25,12 @@ def _is_uploaded_before(
 def _upload_to_db(
         exercise_number: int,
         course_id: int,
-        user: User,
+        user_id: int,
         files: List[File],
         solution_hash: Optional[str] = None,
 ) -> Solution:
     exercise = Exercise.get_or_none(course=course_id, number=exercise_number)
+    user = User.get_by_id(user_id)
     if exercise is None:
         raise UploadError(f'No such exercise id: {exercise_number}')
     elif not user.is_registered(course_id):
@@ -64,7 +65,7 @@ def _run_auto_checks(solution: Solution) -> None:
 
 
 def new(
-    user: User, course_id: int, file: FileStorage,
+    user_id: int, course_id: int, file: FileStorage,
 ) -> Tuple[List[int], List[int]]:
     matches: List[int] = []
     misses: List[int] = []
@@ -72,7 +73,7 @@ def new(
     for exercise_number, files, solution_hash in Extractor(file):
         try:
             solution = _upload_to_db(
-                exercise_number, course_id, user, files, solution_hash,
+                exercise_number, course_id, user_id, files, solution_hash,
             )
             _run_auto_checks(solution)
         except (UploadError, AlreadyExists) as e:
