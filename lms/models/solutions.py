@@ -195,7 +195,7 @@ def get_files_tree(files: Iterable[SolutionFile]) -> List[Dict[str, Any]]:
             'id': file.id,  # type: ignore
             'fullpath': file.path,
             'path': os.path.split(file.path.strip('/'))[1],  # type: ignore
-            'indent': file.path.strip('/').count('/') + 1,  # type: ignore
+            'indent': file.path.strip('/').count('/'),  # type: ignore
             'is_folder': file.path.endswith('/'),
             'code': file.code,
         }
