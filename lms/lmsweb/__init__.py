@@ -66,8 +66,9 @@ def get_password(username: str) -> typing.Optional[str]:
 
 @http_basic_auth.verify_password
 def verify_password(username: str, client_password: str):
-    login_user: typing.Optional[models.User] = models.User.get_or_none(models.User.username == username)
-    if not login_user:
+    username_username = models.User.username == username
+    login_user = models.User.get_or_none(username_username)
+    if login_user is None:
         return False
     if not login_user.is_password_valid(client_password):
         return False

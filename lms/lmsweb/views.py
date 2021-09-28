@@ -18,7 +18,7 @@ from lms.lmsdb.models import (
     ALL_MODELS, Comment, Note, Role, RoleOptions, SharedSolution,
     Solution, SolutionFile, User, database,
 )
-from lms.lmsweb import babel, limiter, routes, webapp, http_basic_auth
+from lms.lmsweb import babel, http_basic_auth, limiter, routes, webapp
 from lms.lmsweb.admin import (
     AdminModelView, SPECIAL_MAPPING, admin, managers_only,
 )
@@ -545,9 +545,9 @@ def download(download_id: str):
     return response
 
 
-@webapp.route(f'{routes.GIT}/<int:exercise_id>.git/info/refs')
-@webapp.route(f'{routes.GIT}/<int:exercise_id>.git/git-receive-pack', methods=['POST'])
-@webapp.route(f'{routes.GIT}/<int:exercise_id>.git/git-upload-pack', methods=('POST',))
+@webapp.route(f'{routes.GIT}/info/refs')
+@webapp.route(f'{routes.GIT}/git-receive-pack', methods=['POST'])
+@webapp.route(f'{routes.GIT}/git-upload-pack', methods=('POST',))
 @http_basic_auth.login_required
 def git_handler(exercise_id: int):
     git_service = GitService(
