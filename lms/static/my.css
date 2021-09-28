@@ -81,6 +81,11 @@ a {
   color: #860606;
 }
 
+#forgot-my-password-link {
+  display: block;
+  margin: 0.5rem;
+}
+
 .page {
   margin: 3rem 0;
 }

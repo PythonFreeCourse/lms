@@ -576,6 +576,9 @@ def view(
         error_message, status_code = e.args
         return fail(status_code, error_message)
 
+    if viewer_is_solver:
+        solution.view_solution()
+
     return render_template('view.html', **view_params)
 
 

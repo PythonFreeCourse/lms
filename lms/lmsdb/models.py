@@ -354,8 +354,20 @@ class SolutionState(enum.Enum):
         return tuple((choice.name, choice.value) for choice in choices)
 
 
+class SolutionStatusView(enum.Enum):
+    UPLOADED = 'Uploaded'
+    NOT_CHECKED = 'Not checked'
+    CHECKED = 'Checked'
+
+    @classmethod
+    def to_choices(cls: enum.EnumMeta) -> Tuple[Tuple[str, str], ...]:
+        choices = cast(Iterable[enum.Enum], tuple(cls))
+        return tuple((choice.name, choice.value) for choice in choices)
+
+
 class Solution(BaseModel):
     STATES = SolutionState
+    STATUS_VIEW = SolutionStatusView
     MAX_CHECK_TIME_SECONDS = 60 * 10
 
     exercise = ForeignKeyField(Exercise, backref='solutions')
@@ -371,6 +383,12 @@ class Solution(BaseModel):
     )
     submission_timestamp = DateTimeField(index=True)
     hashed = TextField()
+    last_status_view = CharField(
+        choices=STATUS_VIEW.to_choices(),
+        default=STATUS_VIEW.UPLOADED.name,
+        index=True,
+    )
+    last_time_view = DateTimeField(default=datetime.now, null=True, index=True)
 
     @property
     def solution_files(
@@ -411,6 +429,20 @@ class Solution(BaseModel):
         )
 
         return last_submission_hash == hash_
+
+    def view_solution(self) -> None:
+        self.last_time_view = datetime.now()
+        if (
+            self.last_status_view != self.STATUS_VIEW.NOT_CHECKED.name
+            and self.state == self.STATES.CREATED.name
+        ):
+            self.last_status_view = self.STATUS_VIEW.NOT_CHECKED.name
+        elif (
+            self.last_status_view != self.STATUS_VIEW.CHECKED.name
+            and self.state == self.STATES.DONE.name
+        ):
+            self.last_status_view = self.STATUS_VIEW.CHECKED.name
+        self.save()
 
     def start_checking(self) -> bool:
         return self.set_state(Solution.STATES.IN_CHECKING)

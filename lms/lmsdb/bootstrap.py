@@ -240,6 +240,12 @@ def _api_keys_migration() -> bool:
     return True
 
 
+def _last_status_view_migration() -> bool:
+    Solution = models.Solution
+    _migrate_column_in_table_if_needed(Solution, Solution.last_status_view)
+    _migrate_column_in_table_if_needed(Solution, Solution.last_time_view)
+
+
 def _uuid_migration() -> bool:
     User = models.User
     _add_not_null_column(User, User.uuid, _add_uuid_to_users_table)
@@ -248,6 +254,9 @@ def _uuid_migration() -> bool:
 
 def main():
     with models.database.connection_context():
+        if models.database.table_exists(models.Solution.__name__.lower()):
+            _last_status_view_migration()
+
         if models.database.table_exists(models.User.__name__.lower()):
             _api_keys_migration()
             _uuid_migration()
