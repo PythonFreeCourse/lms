@@ -135,9 +135,8 @@ class Role(BaseModel):
 
 class Course(BaseModel):
     name = CharField(unique=True)
-    date = DateTimeField()
-    due_date = DateTimeField(null=True)
-    is_closed = BooleanField(default=False)
+    date = DateTimeField(default=datetime.now)
+    close_date = DateTimeField(null=True)
     close_registration_date = DateTimeField(default=datetime.now)
     invite_code = CharField(default=generate_invite_code, unique=True)
     is_public = BooleanField(default=False)
@@ -156,7 +155,7 @@ class Course(BaseModel):
         )
 
     def __str__(self):
-        return f'{self.name}: {self.date} - {self.due_date}'
+        return f'{self.name}: {self.date} - {self.close_date}'
 
 
 class User(UserMixin, BaseModel):
