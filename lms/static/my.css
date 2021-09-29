@@ -306,20 +306,20 @@ button#share-action:hover {
   margin-right: 2rem;
 }
 
-.file-comments-count {
-  width: 2em;
-  height: 1.5em;
-  display: flex;
-  align-self: center;
-  justify-self: center;
-  margin-right: 0.5em;
-}
-
 .file-comments-count > .badge {
   width: 2em;
   display: flex;
   align-content: center;
   justify-content: center;
+}
+
+.file-comments-count {
+  height: 1.5em;
+  display: inline-flex;
+  align-self: center;
+  justify-self: center;
+  margin-right: 0.6em;
+  width: 1em;
 }
 
 #files {
@@ -331,14 +331,6 @@ button#share-action:hover {
   line-height: 2;
   display: flex;
   flex-direction: column;
-}
-
-.file-comments-count {
-  height: 1.5em;
-  display: inline-flex;
-  align-self: center;
-  margin: 0 0.25em;
-  width: 1em;
 }
 
 #files .file {
@@ -693,6 +685,10 @@ span.line {
   display: flex;
   justify-content: center;
   width: 90%;
+}
+
+.fiv-viv {
+  margin-right: 0.3em;
 }
 
 /*
