@@ -22,7 +22,7 @@ MAIL_USE_TLS = False
 MAIL_USERNAME = 'username@gmail.com'
 MAIL_PASSWORD = 'password'
 MAIL_DEFAULT_SENDER = 'username@gmail.com'
-DISABLE_MAIL = True  # On production, delete this line!
+DISABLE_MAIL = True  # On production, change this value to False!
 
 # ADMIN PANEL
 FLASK_ADMIN_FLUID_LAYOUT = True

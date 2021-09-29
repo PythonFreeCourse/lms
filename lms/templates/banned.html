@@ -2,15 +2,15 @@
 
 {% block page_content %}
 <div class="container banned">
-    <div id="login-container">
-        <div id="login" class="text-center">
+    <div id="banned-container">
+        <div id="banned" class="text-center">
             <div id="course-logo" style="opacity: 0.6">
-                <img id="login-logo" src="{{ url_for('static', filename='avatar.jpg') }}" alt="{{ _('תמונת הפרופיל של קורס פייתון') }}" width="144" height="144">
+                <img id="banned-logo" src="{{ url_for('static', filename='avatar.jpg') }}" alt="{{ _('Profile picture of the Python Course') }}" width="144" height="144">
             </div>
             <h1 id="main-title" class="h3 font-weight-normal">השעייה</h1>
             <p>
-                {{ _('המשתמש שלך הושעה על ידי מנהל המערכת.') }}<br>
-                {{ _('לפרטים נוספים אנא פנה אל צוות הניהול.') }}
+                {{ _('Your account has been suspended by the manager.') }}<br>
+                {{ _('For more details please contact the management team.') }}
             </p>
         </div>
     </div> 

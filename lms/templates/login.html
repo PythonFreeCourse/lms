@@ -4,11 +4,11 @@
   <div class="container">
     <div id="login-container">
       <div id="login" class="text-center">
-        <img id="login-logo" src="{{ url_for('static', filename='avatar.jpg') }}" alt="{{ _('תמונת הפרופיל של קורס פייתון') }}" width="72" height="72">
-        <h1 id="main-title" class="h3 font-weight-normal">{{ _('התחברות') }}</h1>
+        <img id="login-logo" src="{{ url_for('static', filename='avatar.jpg') }}" alt="{{ _('Profile picture of the Python Course') }}" width="72" height="72">
+        <h1 id="main-title" class="h3 font-weight-normal">{{ _('Login') }}</h1>
         <p>
-          {{ _('ברוכים הבאים למערכת התרגילים!') }}<br>
-          {{ _('הזינו את שם המשתמש והסיסמה שלכם:') }}
+          {{ _('Welcome to the exercise system!') }}<br>
+          {{ _('Insert your username and password:') }}
         </p>
         {% if login_message %}
         <div id="login-message-box" class="text-center">
@@ -19,25 +19,25 @@
         {% endif %}
         <form class="align-items-center" method="post" action="{{ url_for('login') }}">
           <div class="row mb-3 {{ direction }}-language">
-            <label for="username" class="visually-hidden">{{ _('שם משתמש') }}</label>
+            <label for="username" class="visually-hidden">{{ _('Username') }}</label>
             <div>
-              <input id="username" class="form-control form-control-lg" type="text" name="username" placeholder="{{ _('שם משתמש') }}" required autofocus>
+              <input id="username" class="form-control form-control-lg" type="text" name="username" placeholder="{{ _('Username') }}" required autofocus>
             </div>
           </div>
           <div class="row mb-3 {{ direction }}-language">
-            <label for="password" class="visually-hidden">{{ _('סיסמה') }}</label>
+            <label for="password" class="visually-hidden">{{ _('Password') }}</label>
             <div>
-              <input id="password" class="form-control form-control-lg" type="password" name="password" placeholder="{{ _('סיסמה') }}" required>
+              <input id="password" class="form-control form-control-lg" type="password" name="password" placeholder="{{ _('Password') }}" required>
             </div>
           </div>
           <input class="form-control form-control-lg" type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token() }}" required>
           <input class="form-control form-control-lg" type="hidden" name="next" id="next" value="{{ request.args.get('next', '') }}">
-          <button class="btn btn-primary btn-lg btn-block">{{ _('התחבר') }}</button>
+          <button class="btn btn-primary btn-lg btn-block">{{ _('Login') }}</button>
         </form>
-        <a href="{{ url_for('reset_password') }}" id="forgot-my-password-link" role="button">{{ _('שכחת את הסיסמה?') }}</a>
+        <a href="{{ url_for('reset_password') }}" id="forgot-my-password-link" role="button">{{ _('Forgot your password?') }}</a>
         {% if config.REGISTRATION_OPEN %}
         <hr class="mt-3 mb-3">
-        <a href="{{ url_for('signup') }}" class="btn btn-success btn-sm" role="button">{{ _('הירשם') }}</a>
+        <a href="{{ url_for('signup') }}" class="btn btn-success btn-sm" role="button">{{ _('Register') }}</a>
         {% endif %}
       </div>
     </div>

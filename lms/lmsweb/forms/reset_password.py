@@ -9,7 +9,7 @@ from wtforms.validators import Email, EqualTo, InputRequired, Length
 class ResetPassForm(FlaskForm):
     email = StringField(
         'Email', validators=[
-            InputRequired(), Email(message=_('אימייל לא תקין')),
+            InputRequired(), Email(message=_('Invalid email')),
             EmailNotExists,
         ],
     )
@@ -22,6 +22,6 @@ class RecoverPassForm(FlaskForm):
     confirm = PasswordField(
         'Password Confirmation', validators=[
             InputRequired(),
-            EqualTo('password', message=_('הסיסמאות שהוקלדו אינן זהות')),
+            EqualTo('password', message=_('The passwords are not identical')),
         ],
     )
