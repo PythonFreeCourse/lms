@@ -632,6 +632,10 @@ code {
   margin-bottom: 1em;
 }
 
+#exercise-comments {
+  margin-top: 1em;
+}
+
 ol.comments {
   list-style-type: none;
   padding: 1em;

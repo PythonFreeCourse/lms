@@ -365,9 +365,23 @@ class SolutionStatusView(enum.Enum):
         return tuple((choice.name, choice.value) for choice in choices)
 
 
+class SolutionGradeMark(enum.Enum):
+    EXCELLENT = 'Excellent'
+    NICE = 'Nice'
+    FAIL = 'Fail'
+    PLAGIARISM = 'Plagiarism'
+    UNMARKED = 'Unmarked'
+
+    @classmethod
+    def to_choices(cls: enum.EnumMeta) -> Tuple[Tuple[str, str], ...]:
+        choices = cast(Iterable[enum.Enum], tuple(cls))
+        return tuple((choice.name, choice.value) for choice in choices)
+
+
 class Solution(BaseModel):
     STATES = SolutionState
     STATUS_VIEW = SolutionStatusView
+    GRADES = SolutionGradeMark
     MAX_CHECK_TIME_SECONDS = 60 * 10
 
     exercise = ForeignKeyField(Exercise, backref='solutions')
@@ -389,6 +403,11 @@ class Solution(BaseModel):
         index=True,
     )
     last_time_view = DateTimeField(default=datetime.now, null=True, index=True)
+    grade_mark = CharField(
+        choices=GRADES.to_choices(),
+        default=GRADES.UNMARKED.name,
+        index=True,
+    )
 
     @property
     def solution_files(

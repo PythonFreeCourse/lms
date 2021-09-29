@@ -97,7 +97,23 @@
     </div>
     {% if is_manager and not shared_url %}
     <div id="popular-comments">
-      <div id="exercise-comments">
+      <div id="exercise-grade" class="{{ direction }}">
+        <h2>{{ _('ציון התרגיל') }}</h2>
+        <div class="btn-group" id="solution-grade" role="group" aria-label="grades radio toggle button group">
+          <input type="radio" class="btn-check" name="grades-btnradio" id="btnradio1" autocomplete="off">
+          <label class="btn btn-outline-success" for="btnradio1">Excellent</label>
+
+          <input type="radio" class="btn-check" name="grades-btnradio" id="btnradio2" autocomplete="off" checked>
+          <label class="btn btn-outline-primary" for="btnradio2">Nice</label>
+
+          <input type="radio" class="btn-check" name="grades-btnradio" id="btnradio3" autocomplete="off">
+          <label class="btn btn-outline-danger" for="btnradio3">Fail</label>
+
+          <input type="radio" class="btn-check" name="grades-btnradio" id="btnradio4" autocomplete="off">
+          <label class="btn btn-outline-primary" for="btnradio3">Plagiarism</label>
+        </div>
+      </div>
+      <div id="exercise-comments" class="{{ direction }}">
         <h2>{{ _('הערות על התרגיל') }}</h2>
         <ol id="exercise-comments-list" class="comments exercise-comments">
           {%- for comment in exercise_common_comments %}

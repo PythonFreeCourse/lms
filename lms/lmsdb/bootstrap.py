@@ -240,10 +240,41 @@ def _api_keys_migration() -> bool:
     return True
 
 
+<<<<<<< Updated upstream
+=======
+def _last_course_viewed_migration() -> bool:
+    User = models.User
+    _add_not_null_column(User, User.last_course_viewed)
+    return True
+
+
+def _exercise_course_migration(course: models.Course) -> bool:
+    Exercise = models.Exercise
+    _create_usercourses_objects(models.User, course)
+    _add_course_and_numbers_to_exercises_table(Exercise, course)
+    return True
+
+
+def _add_exercise_course_id_and_number_columns_constraint() -> bool:
+    Exercise = models.Exercise
+    migrator = db_config.get_migrator_instance()
+    with db_config.database.transaction():
+        course_not_exists = _add_not_null_column(Exercise, Exercise.course)
+        number_not_exists = _add_not_null_column(Exercise, Exercise.number)
+        if course_not_exists and number_not_exists:
+            migrate(
+                migrator.add_index('exercise', ('course_id', 'number'), True),
+            )
+        db_config.database.commit()
+    return True
+
+
+>>>>>>> Stashed changes
 def _last_status_view_migration() -> bool:
     Solution = models.Solution
     _migrate_column_in_table_if_needed(Solution, Solution.last_status_view)
     _migrate_column_in_table_if_needed(Solution, Solution.last_time_view)
+    return True
 
 
 def _uuid_migration() -> bool:
@@ -252,10 +283,17 @@ def _uuid_migration() -> bool:
     return True
 
 
+def _grade_mark_migration() -> bool:
+    Solution = models.Solution
+    _migrate_column_in_table_if_needed(Solution, Solution.grade_mark)
+    return True
+
+
 def main():
     with models.database.connection_context():
         if models.database.table_exists(models.Solution.__name__.lower()):
             _last_status_view_migration()
+            _grade_mark_migration()
 
         if models.database.table_exists(models.User.__name__.lower()):
             _api_keys_migration()
