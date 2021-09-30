@@ -378,7 +378,7 @@ class SolutionGradeMarkColors(enum.Enum):
     @classmethod
     def to_choices(cls: enum.EnumMeta) -> Tuple[Tuple[str, str], ...]:
         choices = cast(Iterable[enum.Enum], tuple(cls))
-        return tuple((choice.name, choice.value) for choice in choices)
+        return tuple((choice.value, choice.name) for choice in choices)
 
 
 class SolutionGradeMark(BaseModel):
