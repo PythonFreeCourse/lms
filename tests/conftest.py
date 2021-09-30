@@ -16,7 +16,8 @@ import pytest
 
 from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Exercise, Note, Notification, Role,
-    RoleOptions, SharedSolution, Solution, User,
+    RoleOptions, SharedSolution, Solution, SolutionGradeMark,
+    SolutionGradeMarkColors, User,
 )
 from lms.extractors.base import File
 from lms.lmstests.public import celery_app as public_app
@@ -43,6 +44,23 @@ def db_in_memory():
 def populate_roles():
     for role in RoleOptions:
         Role.create(name=role.value)
+
+
+@pytest.fixture(autouse=True, scope='session')
+def populate_grades():
+    colors = SolutionGradeMarkColors
+    grades_dict = {
+        'Excellent': {'color': colors.GREEN.value, 'icon': 'star'},
+        'Nice': {'color': colors.BLUE.value, 'icon': 'check'},
+        'Fail': {'color': colors.RED.value, 'icon': 'exclamation'},
+        'Plagiarism': {
+            'color': colors.DARK.value, 'icon': 'exclamation-triangle',
+        },
+    }
+    for grade, values in grades_dict.items():
+        SolutionGradeMark.create(
+            name=grade, icon=values.get('icon'), color=values.get('color'),
+        )
 
 
 @pytest.fixture(autouse=True, scope='function')

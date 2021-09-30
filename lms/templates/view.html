@@ -15,7 +15,10 @@
         <p class="unchecked-msg {{ direction }}"><strong>{{ _('התרגיל שלך מחכה לבדיקה.') }}</strong> {{ _('חשוב לנו שכל תרגיל יעבור בדיקה של עין אנושית.') }}</p>
       {% endif %}
     {% else %}
-    <p id="solver"><strong>{{ _('מגיש') }}:</strong> <a href="/user/{{ solution['solver']['id'] }}">{{ solution['solver']['fullname'] | e }}</a></p>
+      <p id="solver"><strong>{{ _('מגיש') }}:</strong> <a href="/user/{{ solution['solver']['id'] }}">{{ solution['solver']['fullname'] | e }}</a></p>
+    {% endif %}
+    {% if solution['grade_mark'] %}
+      <p id="grade"><strong>{{ _('הערה מילולית') }}:</strong> {{ solution['grade_mark']['name'] }} <i class="fa fa-{{ solution['grade_mark']['icon'] }}"></i></p>
     {% endif %}
     {% if not shared_url %}
     <nav id="versions" aria-label="{{ _('ניווט בגרסאות ההגשה') }}">
@@ -99,18 +102,11 @@
     <div id="popular-comments">
       <div id="exercise-grade" class="{{ direction }}">
         <h2>{{ _('ציון התרגיל') }}</h2>
-        <div class="btn-group" id="solution-grade" role="group" aria-label="grades radio toggle button group">
-          <input type="radio" class="btn-check" name="grades-btnradio" id="btnradio1" autocomplete="off">
-          <label class="btn btn-outline-success" for="btnradio1">Excellent</label>
-
-          <input type="radio" class="btn-check" name="grades-btnradio" id="btnradio2" autocomplete="off" checked>
-          <label class="btn btn-outline-primary" for="btnradio2">Nice</label>
-
-          <input type="radio" class="btn-check" name="grades-btnradio" id="btnradio3" autocomplete="off">
-          <label class="btn btn-outline-danger" for="btnradio3">Fail</label>
-
-          <input type="radio" class="btn-check" name="grades-btnradio" id="btnradio4" autocomplete="off">
-          <label class="btn btn-outline-primary" for="btnradio3">Plagiarism</label>
+        <div class="btn-group-vertical" id="solution-grade" role="group" aria-label="grades radio toggle button group">
+          {% for grade_mark in grade_marks %}
+            <input type="radio" class="btn-check" name="grade-mark" id="btnradio{{ loop.index }}" autocomplete="off" value="{{ grade_mark.id }}" {%- if solution['grade_mark'] and solution['grade_mark']['name'] == grade_mark.name %}checked{% else %}{% if loop.index == 1 %}checked{% endif %}{% endif -%}>
+            <label class="btn btn-outline-{{ grade_mark.color }}" for="btnradio{{ loop.index }}">{{ grade_mark.name }} <i class="fa fa-{{ grade_mark.icon }}"></i></label>
+          {% endfor %}
         </div>
       </div>
       <div id="exercise-comments" class="{{ direction }}">

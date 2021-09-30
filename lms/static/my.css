@@ -613,6 +613,10 @@ code {
   display: block;
 }
 
+#solution-grade {
+  display: flex;
+}
+
 #popular-comments {
   display: flex;
   flex-direction: column;

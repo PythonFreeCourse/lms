@@ -8,7 +8,9 @@ from flask_login import current_user  # type: ignore
 from playhouse.shortcuts import model_to_dict  # type: ignore
 
 from lms.extractors.base import File
-from lms.lmsdb.models import SharedSolution, Solution, SolutionFile, User
+from lms.lmsdb.models import (
+    SharedSolution, Solution, SolutionFile, SolutionGradeMark, User,
+)
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmsweb import config, routes
@@ -63,9 +65,11 @@ def get_message_and_addressee(
     return msg, addressee
 
 
-def mark_as_checked(solution_id: int, checker_id: int) -> bool:
+def mark_as_checked(solution_id: int, checker_id: int, grade_id: int) -> bool:
     checked_solution: Solution = Solution.get_by_id(solution_id)
-    is_updated = checked_solution.mark_as_checked(by=checker_id)
+    is_updated = checked_solution.mark_as_checked(
+        grade_id=grade_id, by=checker_id,
+    )
     msg = _(
         'הפתרון שלך לתרגיל "%(subject)s" נבדק.',
         subject=checked_solution.exercise.subject,
@@ -136,6 +140,7 @@ def get_view_parameters(
             'user_comments':
                 comments._common_comments(user_id=current_user.id),
             'left': Solution.left_in_exercise(solution.exercise),
+            'grade_marks': SolutionGradeMark.grades(),
         }
 
     if viewer_is_solver:

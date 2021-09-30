@@ -127,7 +127,7 @@ class TestSolutionBridge:
     ):
         # Basic functionality
         assert solution.state == Solution.STATES.CREATED.name
-        marked = solutions.mark_as_checked(solution.id, staff_user.id)
+        marked = solutions.mark_as_checked(solution.id, staff_user.id, 2)
         # HELL WITH PEEWEE!!!
         solution = Solution.get_by_id(solution.id)
         assert marked
@@ -137,7 +137,7 @@ class TestSolutionBridge:
         # Not duplicating things
         staff_user2 = conftest.create_staff_user(index=1)
         solution2 = conftest.create_solution(exercise, student_user)
-        marked = solutions.mark_as_checked(solution2.id, staff_user2.id)
+        marked = solutions.mark_as_checked(solution2.id, staff_user2.id, 3)
         solution2 = Solution.get_by_id(solution2.id)
         assert solution2.state == Solution.STATES.DONE.name
         assert solution2.checker == staff_user2
@@ -164,13 +164,13 @@ class TestSolutionBridge:
         assert unchecked.exercise.id == solution1.exercise.id
         assert unchecked == solution1
 
-        solutions.mark_as_checked(solution1.id, staff_user)
+        solutions.mark_as_checked(solution1.id, staff_user, 4)
         unchecked = solutions.get_next_unchecked(exercise.id)
         assert unchecked is not None
         assert unchecked.exercise.id == solution3.exercise.id
         assert unchecked == solution3
 
-        solutions.mark_as_checked(solution3.id, staff_user)
+        solutions.mark_as_checked(solution3.id, staff_user, 1)
         unchecked = solutions.get_next_unchecked(exercise.id)
         assert unchecked is None
 
@@ -178,7 +178,7 @@ class TestSolutionBridge:
         assert unchecked is not None
         assert unchecked == solution2
 
-        solutions.mark_as_checked(solution2.id, staff_user)
+        solutions.mark_as_checked(solution2.id, staff_user, 2)
         unchecked = solutions.get_next_unchecked()
         assert unchecked is None
 
@@ -534,7 +534,7 @@ class TestSolutionBridge:
         solution = Solution.get_by_id(solution.id)
         assert solution.last_status_view == SolutionStatusView.NOT_CHECKED.name
 
-        solutions.mark_as_checked(solution.id, staff_user.id)
+        solutions.mark_as_checked(solution.id, staff_user.id, 3)
         solution = Solution.get_by_id(solution.id)
         assert solution.last_status_view == SolutionStatusView.NOT_CHECKED.name
         client.get(f'/view/{solution.id}')
@@ -552,3 +552,16 @@ class TestSolutionBridge:
 
         fail_response = client.get(f'/view/{solution.id}/12345')
         assert fail_response.status_code == 404
+
+    @staticmethod
+    def test_done_checking(
+        solution: Solution,
+        staff_user: User,
+    ):
+        client = conftest.get_logged_user(staff_user.username)
+        response = client.post(
+            f'/checked/{solution.exercise.id}/{solution.id}',
+            data=json.dumps({'grade': 1}),
+            content_type='application/json',
+        )
+        assert response.status_code == 200

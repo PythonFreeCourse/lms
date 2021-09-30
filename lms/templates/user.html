@@ -30,6 +30,7 @@
               <th scope="col">{{ _('מצב הגשה') }}</th>
               <th scope="col">{{ _('הגשה') }}</th>
               <th scope="col">{{ _('בודק') }}</th>
+              <th scope="col">{{ _('הערה מילולית') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -42,6 +43,7 @@
               </td>
               <td><a href="/view/{{ solution.solution_id }}">{{ solution.solution_id }}</a></td>
               <td>{{ solution.get('checker', '') | e }}</a></td>
+              <td>{{ solution.get('grade_mark', '') | e }}</td>
             </tr>
             {% endfor -%}
           </tbody>

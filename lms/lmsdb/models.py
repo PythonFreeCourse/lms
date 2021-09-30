@@ -365,12 +365,15 @@ class SolutionStatusView(enum.Enum):
         return tuple((choice.name, choice.value) for choice in choices)
 
 
-class SolutionGradeMark(enum.Enum):
-    EXCELLENT = 'Excellent'
-    NICE = 'Nice'
-    FAIL = 'Fail'
-    PLAGIARISM = 'Plagiarism'
-    UNMARKED = 'Unmarked'
+class SolutionGradeMarkColors(enum.Enum):
+    BLUE = 'primary'
+    GRAY = 'secondary'
+    GREEN = 'success'
+    RED = 'danger'
+    YELLOW = 'warning'
+    AZURE = 'info'
+    LIGHT = 'light'
+    DARK = 'dark'
 
     @classmethod
     def to_choices(cls: enum.EnumMeta) -> Tuple[Tuple[str, str], ...]:
@@ -378,10 +381,27 @@ class SolutionGradeMark(enum.Enum):
         return tuple((choice.name, choice.value) for choice in choices)
 
 
+class SolutionGradeMark(BaseModel):
+    name = CharField()
+    icon = CharField(null=True)
+    color = CharField(
+        choices=SolutionGradeMarkColors.to_choices(),
+        default=SolutionGradeMarkColors.BLUE.name,
+        index=True,
+    )
+    order = IntegerField(default=0, index=True)
+
+    @classmethod
+    def grades(cls):
+        return cls.select().order_by(cls.order)
+
+    def __str__(self):
+        return self.name
+
+
 class Solution(BaseModel):
     STATES = SolutionState
     STATUS_VIEW = SolutionStatusView
-    GRADES = SolutionGradeMark
     MAX_CHECK_TIME_SECONDS = 60 * 10
 
     exercise = ForeignKeyField(Exercise, backref='solutions')
@@ -403,10 +423,8 @@ class Solution(BaseModel):
         index=True,
     )
     last_time_view = DateTimeField(default=datetime.now, null=True, index=True)
-    grade_mark = CharField(
-        choices=GRADES.to_choices(),
-        default=GRADES.UNMARKED.name,
-        index=True,
+    grade_mark = ForeignKeyField(
+        SolutionGradeMark, backref='solutions', null=True,
     )
 
     @property
@@ -466,13 +484,18 @@ class Solution(BaseModel):
     def start_checking(self) -> bool:
         return self.set_state(Solution.STATES.IN_CHECKING)
 
-    def set_state(self, new_state: SolutionState, **kwargs) -> bool:
+    def set_state(
+        self, new_state: SolutionState,
+        grade_mark: Optional[SolutionGradeMark] = None, **kwargs,
+    ) -> bool:
         # Optional: filter the old state of the object
         # to make sure that no two processes set the state together
         requested_solution = (Solution.id == self.id)
+        updates_dict = {Solution.state.name: new_state.name}
+        if grade_mark is not None:
+            updates_dict[Solution.grade_mark.name] = grade_mark
         changes = Solution.update(
-            **{Solution.state.name: new_state.name},
-            **kwargs,
+            **updates_dict, **kwargs,
         ).where(requested_solution)
         return changes.execute() == 1
 
@@ -494,7 +517,9 @@ class Solution(BaseModel):
 
         solutions = (
             cls
-            .select(cls.exercise, cls.id, cls.state, cls.checker)
+            .select(
+                cls.exercise, cls.id, cls.state, cls.checker, cls.grade_mark,
+            )
             .where(cls.exercise.in_(db_exercises), cls.solver == user_id)
             .order_by(cls.submission_timestamp.desc())
         )
@@ -506,6 +531,8 @@ class Solution(BaseModel):
                 exercise['comments_num'] = len(solution.staff_comments)
                 if solution.is_checked and solution.checker:
                     exercise['checker'] = solution.checker.fullname
+                if solution.grade_mark:
+                    exercise['grade_mark'] = solution.grade_mark.name
         return tuple(exercises.values())
 
     @property
@@ -608,10 +635,12 @@ class Solution(BaseModel):
 
     def mark_as_checked(
         self,
+        grade_id: Optional[int],
         by: Optional[Union[User, int]] = None,
     ) -> bool:
         return self.set_state(
             Solution.STATES.DONE,
+            SolutionGradeMark.get_or_none(SolutionGradeMark.id == grade_id),
             checker=by,
         )
 
@@ -986,6 +1015,22 @@ def create_demo_users():
 def create_basic_roles():
     for role in RoleOptions:
         Role.create(name=role.value)
+
+
+def create_basic_grades():
+    colors = SolutionGradeMarkColors
+    grades_dict = {
+        _('Excellent'): {'color': colors.GREEN.value, 'icon': 'star'},
+        _('Nice'): {'color': colors.BLUE.value, 'icon': 'check'},
+        _('Fail'): {'color': colors.RED.value, 'icon': 'exclamation'},
+        _('Plagiarism'): {
+            'color': colors.DARK.value, 'icon': 'exclamation-triangle',
+        },
+    }
+    for grade, values in grades_dict.items():
+        SolutionGradeMark.create(
+            name=grade, icon=values.get('icon'), color=values.get('color'),
+        )
 
 
 ALL_MODELS = BaseModel.__subclasses__()
