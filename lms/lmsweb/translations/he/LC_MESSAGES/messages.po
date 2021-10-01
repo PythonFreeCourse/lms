@@ -1,0 +1,505 @@
+# Hebrew translations for PROJECT.
+# Copyright (C) 2021 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2021-09-29 11:58+0300\n"
+"PO-Revision-Date: 2021-09-29 11:30+0300\n"
+"Last-Translator: Or Ronai\n"
+"Language: he\n"
+"Language-Team: he <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: lmsdb/models.py:736
+msgid "Fatal error"
+msgstr "כישלון חמור"
+
+#: lmstests/public/identical_tests/services.py:103
+#, python-format
+msgid "Your solution for the %(subject)s exercise has been checked."
+msgstr "הפתרון שלך לתרגיל %(subject)s נבדק."
+
+#: lmstests/public/linters/services.py:95
+#, python-format
+msgid "The automatic checker gave you %(errors_num)d for your %(name)s solution."
+msgstr "הבודק האוטומטי נתן %(errors_num)d הערות על תרגילך %(name)s."
+
+#: lmstests/public/unittests/services.py:16 lmstests/sandbox/linters/base.py:16
+msgid "The automatic checker couldn't run your code."
+msgstr "הבודק האוטומטי לא הצליח להריץ את הקוד שלך."
+
+#: lmstests/public/unittests/services.py:120
+#, python-format
+msgid ""
+"The automatic checker failed in %(number)d examples in your "
+"\"%(subject)s\" solution."
+msgstr "הבודק האוטומטי נכשל ב־ %(number)d דוגמאות בתרגיל \"%(subject)s\"."
+
+#: lmstests/public/unittests/services.py:142
+msgid "Bro, did you check your code?"
+msgstr "אחי, בדקת את הקוד שלך?"
+
+#: lmsweb/views.py:129
+msgid "Can not register now"
+msgstr "לא ניתן להירשם כעת"
+
+#: lmsweb/views.py:146
+msgid "Registration successfully"
+msgstr "ההרשמה בוצעה בהצלחה"
+
+#: lmsweb/views.py:169
+msgid "The confirmation link is expired, new link has been sent to your email"
+msgstr "קישור האימות פג תוקף, קישור חדש נשלח אל תיבת המייל שלך"
+
+#: lmsweb/views.py:185
+msgid "Your user has been successfully confirmed, you can now login"
+msgstr "המשתמש שלך אומת בהצלחה, כעת אתה יכול להתחבר למערכת"
+
+#: lmsweb/views.py:208 lmsweb/views.py:265
+msgid "Your password has successfully changed"
+msgstr "הסיסמה שלך שונתה בהצלחה"
+
+#: lmsweb/views.py:224
+msgid "Password reset link has successfully sent"
+msgstr "קישור לאיפוס הסיסמה נשלח בהצלחה"
+
+#: lmsweb/views.py:245
+msgid "Reset password link is expired"
+msgstr "קישור איפוס הסיסמה פג תוקף"
+
+#: lmsweb/forms/change_password.py:20 lmsweb/forms/register.py:32
+#: lmsweb/forms/reset_password.py:25
+msgid "The passwords are not identical"
+msgstr "הסיסמאות שהוקלדו אינן זהות"
+
+#: lmsweb/forms/change_password.py:31
+msgid "Invalid old password has been inserted too many times"
+msgstr "הזנת סיסמה שגויה מספר רב מדי של פעמים"
+
+#: lmsweb/forms/change_password.py:35
+msgid "Invalid current password"
+msgstr "הסיסמה הנוכחית שהוזנה שגויה"
+
+#: lmsweb/forms/register.py:14 lmsweb/forms/reset_password.py:12
+#: lmsweb/tools/validators.py:29
+msgid "Invalid email"
+msgstr "אימייל לא תקין"
+
+#: lmsweb/tools/validators.py:13
+msgid "The username is already in use"
+msgstr "שם המשתמש כבר נמצא בשימוש"
+
+#: lmsweb/tools/validators.py:21
+msgid "The email is already in use"
+msgstr "האימייל כבר נמצא בשימוש"
+
+#: models/solutions.py:50
+#, python-format
+msgid "%(solver)s has replied for your \"%(subject)s\" check."
+msgstr "%(solver)s הגיב לך על בדיקת תרגיל \"%(subject)s\"."
+
+#: models/solutions.py:57
+#, python-format
+msgid "%(checker)s replied for \"%(subject)s\"."
+msgstr "%(checker)s הגיב לך על תרגיל \"%(subject)s\"."
+
+#: models/solutions.py:69
+#, python-format
+msgid "Your solution for the \"%(subject)s\" exercise has been checked."
+msgstr "הפתרון שלך לתרגיל \"%(subject)s\" נבדק."
+
+#: models/users.py:28
+msgid "Invalid username or password"
+msgstr "שם המשתמש או הסיסמה שהוזנו לא תקינים"
+
+#: models/users.py:31
+msgid "You have to confirm your registration with the link sent to your email"
+msgstr "עליך לאשר את מייל האימות"
+
+#: templates/banned.html:8 templates/login.html:7
+#: templates/recover-password.html:8 templates/reset-password.html:8
+#: templates/signup.html:8
+msgid "Profile picture of the Python Course"
+msgstr "תמונת הפרופיל של קורס פייתון"
+
+#: templates/banned.html:12
+msgid "Your account has been suspended by the manager."
+msgstr "המשתמש שלך הושעה על ידי מנהל המערכת."
+
+#: templates/banned.html:13
+msgid "For more details please contact the management team."
+msgstr "לפרטים נוספים אנא פנה אל צוות הניהול."
+
+#: templates/base.html:6
+msgid "Exercise submission system for the Python Course"
+msgstr "מערכת הגשת תרגילים לקורס פייתון"
+
+#: templates/change-password.html:8 templates/change-password.html:17
+#: templates/user.html:19
+msgid "Change Password"
+msgstr "שנה סיסמה"
+
+#: templates/change-password.html:10
+msgid "Insert current password and new password for changing it:"
+msgstr "הזינו סיסמה ישנה וסיסמה חדשה לצורך שינוי הסיסמה:"
+
+#: templates/change-password.html:13
+msgid "Current password"
+msgstr "סיסמה נוכחית"
+
+#: templates/change-password.html:14 templates/login.html:28
+#: templates/login.html:30 templates/recover-password.html:14
+#: templates/signup.html:18
+msgid "Password"
+msgstr "סיסמה"
+
+#: templates/change-password.html:15 templates/recover-password.html:15
+#: templates/signup.html:19
+msgid "Password Confirmation"
+msgstr "אימות סיסמה"
+
+#: templates/exercises.html:8
+msgid "Exercises"
+msgstr "תרגילים"
+
+#: templates/exercises.html:21 templates/view.html:101
+msgid "Comments for the solution"
+msgstr "הערות על התרגיל"
+
+#: templates/exercises.html:30
+msgid "Send"
+msgstr "שלח"
+
+#: templates/exercises.html:32
+msgid "View"
+msgstr "הצצה"
+
+#: templates/exercises.html:34
+msgid "Check"
+msgstr "לבדיקה"
+
+#: templates/exercises.html:53
+msgid "All Exercises"
+msgstr "לכל התרגילים"
+
+#: templates/login.html:8 templates/login.html:35
+msgid "Login"
+msgstr "התחברות"
+
+#: templates/login.html:10 templates/signup.html:11
+msgid "Welcome to the exercise system!"
+msgstr "ברוכים הבאים למערכת התרגילים!"
+
+#: templates/login.html:11
+msgid "Insert your username and password:"
+msgstr "הזינו את שם המשתמש והסיסמה שלכם:"
+
+#: templates/login.html:22 templates/login.html:24 templates/signup.html:16
+#: templates/user.html:11
+msgid "Username"
+msgstr "שם משתמש"
+
+#: templates/login.html:37
+msgid "Forgot your password?"
+msgstr "שכחת את הסיסמה?"
+
+#: templates/login.html:40 templates/signup.html:22
+msgid "Register"
+msgstr "הירשם"
+
+#: templates/navbar.html:21
+msgid "Messages"
+msgstr "הודעות"
+
+#: templates/navbar.html:37
+msgid "Mark all as read"
+msgstr "סמן הכל כנקרא"
+
+#: templates/navbar.html:44
+msgid "Upload Exercises"
+msgstr "העלאת תרגילים"
+
+#: templates/navbar.html:51
+msgid "Exercises List"
+msgstr "רשימת התרגילים"
+
+#: templates/navbar.html:59
+msgid "Exercises Archive"
+msgstr "ארכיון התרגילים"
+
+#: templates/navbar.html:69
+msgid "Check Exercises"
+msgstr "בדוק תרגילים"
+
+#: templates/navbar.html:76
+msgid "Logout"
+msgstr "התנתקות"
+
+#: templates/recover-password.html:9 templates/recover-password.html:17
+#: templates/reset-password.html:9
+msgid "Reset Password"
+msgstr "אפס סיסמה"
+
+#: templates/recover-password.html:11
+msgid "Insert password for changing it:"
+msgstr "הזינו סיסמה לצורך שינוי הסיסמה:"
+
+#: templates/reset-password.html:11
+msgid "Insert your email for getting link to reset it:"
+msgstr "הזינו אימייל לצורך שליחת קישור לאיפוס הסיסמה:"
+
+#: templates/reset-password.html:14 templates/signup.html:15
+#: templates/user.html:12
+msgid "Email Address"
+msgstr "כתובת אימייל"
+
+#: templates/reset-password.html:15
+msgid "Send Reset Password Link"
+msgstr "שלח מייל איפוס סיסמה"
+
+#: templates/reset-password.html:18 templates/signup.html:25
+msgid "Back to login page"
+msgstr "חזרה לדף ההתחברות"
+
+#: templates/signup.html:9
+msgid "Registration"
+msgstr "הרשמה"
+
+#: templates/signup.html:12
+msgid "Insert your email and password for registration:"
+msgstr "הזינו אימייל וסיסמה לצורך רישום למערכת:"
+
+#: templates/signup.html:17
+msgid "Full Name"
+msgstr "שם מלא"
+
+#: templates/status.html:7
+msgid "Exercises operations room"
+msgstr "חמ\"ל תרגילים"
+
+#: templates/status.html:12
+msgid "Name"
+msgstr "שם"
+
+#: templates/status.html:13 templates/user.html:41
+msgid "Checked"
+msgstr "נבדק/ו"
+
+#: templates/status.html:14
+msgid "Solved"
+msgstr "נפתר/ו"
+
+#: templates/status.html:15
+msgid "Percentage"
+msgstr "באחוזים"
+
+#: templates/status.html:16
+msgid "Measurement"
+msgstr "מדד"
+
+#: templates/status.html:31
+msgid "Archive"
+msgstr "ארכיון"
+
+#: templates/upload.html:7
+msgid "Upload Notebooks"
+msgstr "העלאת מחברות"
+
+#: templates/upload.html:11
+msgid "Drag here the notebook file or click and choose it from your computer."
+msgstr "גררו לכאן את קובץ המחברת,  או לחצו ובחרו אותה מהמחשב שלכם."
+
+#: templates/upload.html:14
+msgid "Back to Exercises List"
+msgstr "חזרו לרשימת התרגילים"
+
+#: templates/upload.html:17
+msgid "Matches"
+msgstr "הועלו"
+
+#: templates/upload.html:18
+msgid "Misses"
+msgstr "נכשלו"
+
+#: templates/user.html:9
+msgid "User details"
+msgstr "פרטי משתמש"
+
+#: templates/user.html:16
+msgid "Actions"
+msgstr "פעולות"
+
+#: templates/user.html:24
+msgid "Exercises Submitted"
+msgstr "תרגילים שהוגשו"
+
+#: templates/user.html:29
+msgid "Exercise name"
+msgstr "שם תרגיל"
+
+#: templates/user.html:30
+msgid "Submission status"
+msgstr "מצב הגשה"
+
+#: templates/user.html:31
+msgid "Submission"
+msgstr "הגשה"
+
+#: templates/user.html:32
+msgid "Checker"
+msgstr "בודק"
+
+#: templates/user.html:41
+msgid "Submitted"
+msgstr "הוגש"
+
+#: templates/user.html:41
+msgid "Not submitted"
+msgstr "לא הוגש"
+
+#: templates/user.html:52
+msgid "Notes"
+msgstr "פתקיות"
+
+#: templates/user.html:57 templates/user.html:59
+msgid "New Note"
+msgstr "פתקית חדשה"
+
+#: templates/user.html:63
+msgid "Related Exercise"
+msgstr "תרגיל משויך"
+
+#: templates/user.html:72
+msgid "Privacy Level"
+msgstr "רמת פרטיות"
+
+#: templates/user.html:78
+msgid "Add Note"
+msgstr "הוסף פתקית"
+
+#: templates/view.html:6
+#, fuzzy
+msgid "Exercise view"
+msgstr "שם תרגיל"
+
+#: templates/view.html:9
+msgid "Your solution had checked!"
+msgstr "התרגיל שלך נבדק!"
+
+#: templates/view.html:9
+msgid "Click on the red lines in order to see the comments."
+msgstr "לחצו על השורות האדומות כדי לראות את הערות הבודקים."
+
+#: templates/view.html:11
+msgid "Your solution is being checked in these moments!"
+msgstr "התרגיל שלך נבדק ברגעים אלו!"
+
+#: templates/view.html:13
+msgid "This solution is not up to date!"
+msgstr "פתרון זה אינו פתרון עדכני!"
+
+#: templates/view.html:15
+#, fuzzy, python-format
+msgid "Your solution hasn't been checked."
+msgstr "הפתרון שלך לתרגיל %(subject)s נבדק."
+
+#: templates/view.html:15
+msgid "It's important for us that all exercises will be checked by human eye."
+msgstr "חשוב לנו שכל תרגיל יעבור בדיקה של עין אנושית."
+
+#: templates/view.html:18
+msgid "Presenter"
+msgstr "מגיש"
+
+#: templates/view.html:21
+msgid "Navigate in solution versions"
+msgstr "ניווט בגרסאות ההגשה"
+
+#: templates/view.html:27
+#, fuzzy
+msgid "Current page"
+msgstr "סיסמה נוכחית"
+
+#: templates/view.html:35
+msgid "Finish Checking"
+msgstr "סיום בדיקה"
+
+#: templates/view.html:75
+msgid "Automatic Checking"
+msgstr "בדיקות אוטומטיות"
+
+#: templates/view.html:82
+#, fuzzy
+msgid "Error"
+msgstr "כישלון חמור"
+
+#: templates/view.html:87
+#, fuzzy
+msgid "Staff Error"
+msgstr "כישלון חמור"
+
+#: templates/view.html:109
+msgid "General comments"
+msgstr "הערות כלליות"
+
+#: templates/view.html:117
+msgid "Checker comments"
+msgstr "הערות בודק"
+
+#: templates/view.html:127
+msgid "Done Checking"
+msgstr "סיום בדיקה"
+
+#: utils/mail.py:25
+#, python-format
+msgid "Confirmation mail - %(site_name)s"
+msgstr "מייל אימות - %(site_name)s"
+
+#: utils/mail.py:32
+#, python-format
+msgid ""
+"Hello %(fullname)s,\n"
+"Your confirmation link is: %(link)s"
+msgstr ""
+"שלום %(fullname)s,\n"
+"לינק האימות שלך למערכת הוא: %(link)s"
+
+#: utils/mail.py:42
+#, python-format
+msgid "Reset password mail - %(site_name)s"
+msgstr "מייל איפוס סיסמה - %(site_name)s"
+
+#: utils/mail.py:49
+#, python-format
+msgid ""
+"Hello %(fullname)s,\n"
+"Your reset password link is: %(link)s"
+msgstr ""
+"שלום %(fullname)s,\n"
+"לינק לצורך איפוס הסיסמה שלך הוא: %(link)s"
+
+#: utils/mail.py:58
+#, python-format
+msgid "Changing password - %(site_name)s"
+msgstr "שינוי סיסמה - %(site_name)s"
+
+#: utils/mail.py:62
+#, python-format
+msgid ""
+"Hello %(fullname)s. Your password in %(site_name)s site has been changed."
+"\n"
+"If you didn't do it please contact with the site management.\n"
+"Mail address: %(site_mail)s"
+msgstr ""
+"שלום %(fullname)s. הסיסמה שלך באתר %(site_name)s שונתה.\n"
+"אם אתה לא עשית את זה צור קשר עם הנהלת האתר.\n"
+"כתובת המייל: %(site_mail)s"
+

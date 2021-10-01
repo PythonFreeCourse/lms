@@ -4,18 +4,18 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.0/min/dropzone.min.css" integrity="sha256-AgL8yEmNfLtCpH+gYp9xqJwiDITGqcwAbI8tCfnY2lw=" crossorigin="anonymous" />
 <div class="container">
   <div id="send-page" class="page">
-    <h1 id="send-head" class="text-center">{{ _('העלאת מחברות') }}</h1>
+    <h1 id="send-head" class="text-center">{{ _('Upload Notebooks') }}</h1>
     <div id="uploads">
       <form action="/upload" class="dropzone needsclick dz-clickable" id="demo-upload">
         <div class="dz-message needsclick">
-          <button type="button" class="dz-button">{{ _('גררו לכאן את קובץ המחברת,  או לחצו ובחרו אותה מהמחשב שלכם.') }}</button>
+          <button type="button" class="dz-button">{{ _('Drag here the notebook file or click and choose it from your computer.') }}</button>
         </div>
       </form>
-      <a id="back-to-exercises" class="btn btn-primary btn-lg" href="/exercises">{{ _('חזרו לרשימת התרגילים') }}</a>
+      <a id="back-to-exercises" class="btn btn-primary btn-lg" href="/exercises">{{ _('Back to Exercises List') }}</a>
     </div>
     <div class="feedback-message feedback-hidden {{ direction }}" id="upload-feedbacks">
-      <span class="upload-feedback feedback-hidden" id="upload-matches">{{ _('הועלו') }}: </span>
-      <span class="upload-feedback feedback-hidden" id="upload-misses">{{ _('נכשלו') }}: </span>
+      <span class="upload-feedback feedback-hidden" id="upload-matches">{{ _('Matches') }}: </span>
+      <span class="upload-feedback feedback-hidden" id="upload-misses">{{ _('Misses') }}: </span>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.0/min/dropzone.min.js" integrity="sha256-OG/103wXh6XINV06JTPspzNgKNa/jnP1LjPP5Y3XQDY=" crossorigin="anonymous"></script>
   </div>

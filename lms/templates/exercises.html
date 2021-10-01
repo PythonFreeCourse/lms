@@ -5,7 +5,7 @@
   <div id="exercises-page" class="page {{ direction }}">
     <div id="exercises-header">
       <div id="main-title">
-        <h1 id="exercises-head">{{ _('תרגילים') }}</h1>
+        <h1 id="exercises-head">{{ _('Exercises') }}</h1>
       </div>
     </div>
     <div id="exercises">
@@ -18,7 +18,7 @@
         <div class="left-side">
           <div class="comments-count">
             <span class="badge bg-secondary">{{ exercise['comments_num'] }}</span>
-            <span class="visually-hidden">{{ _("הערות על התרגיל") }}</span>
+            <span class="visually-hidden">{{ _("Comments for the solution") }}</span>
           </div>
           {%- if exercise['notebook'] %}
           <div class="which-notebook">
@@ -27,11 +27,11 @@
           </div>
           {%- endif %}
           {%- if exercise.get('is_checked') is none %}
-            {% set details = {'page': 'send', 'icon': 'upload', 'text': _('שלח'), 'css': 'send', 'page_id': exercise['exercise_id']} %}
+            {% set details = {'page': 'send', 'icon': 'upload', 'text': _('Send'), 'css': 'send', 'page_id': exercise['exercise_id']} %}
           {% elif not exercise.get('is_checked') %}
-            {% set details = {'page': 'view', 'icon': 'eye', 'text': _('הצצה'), 'css': 'view', 'page_id': exercise['solution_id']} %}
+            {% set details = {'page': 'view', 'icon': 'eye', 'text': _('View'), 'css': 'view', 'page_id': exercise['solution_id']} %}
           {% else %}
-            {% set details = {'page': 'view', 'icon': 'check-circle-o', 'text': _('לבדיקה'), 'css': 'checked', 'page_id': exercise['solution_id']} %}
+            {% set details = {'page': 'view', 'icon': 'check-circle-o', 'text': _('Check'), 'css': 'checked', 'page_id': exercise['solution_id']} %}
           {% endif -%}
           {%- if not exercise.get('is_archived') or exercise.get('is_checked') is not none %}
           <a class="our-button go-{{ details['css'] }}" href="{{ details['page'] }}/{{ details['page_id'] }}">
@@ -50,7 +50,7 @@
       {%- if not fetch_archived %}
       <div class="exercise centered">
         <div id="show-all-exercises-action" class="right-side">
-          <a href="?archived=1">{{ _('לכל התרגילים') }}</a>
+          <a href="?archived=1">{{ _('All Exercises') }}</a>
         </div>
       </div>
       {% endif -%}
