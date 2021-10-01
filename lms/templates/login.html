@@ -20,7 +20,7 @@
 			</div>
 			{% endif %}
 
-			<form class="align-items-center {{ direction }}-language" method="post" action="{{ url_for('signup') }}">
+			<form class="align-items-center {{ direction }}-language" method="post" action="{{ url_for('login') }}">
 				{{ render_field(form.username, cls="form-control form-control-lg", placeholder=_('שם משתמש')) }}
 				{{ render_field(form.password, cls="form-control form-control-lg", placeholder=_('סיסמה')) }}
 				<input class="form-control form-control-lg" type="hidden" name="csrf_token" id="csrf_token"
