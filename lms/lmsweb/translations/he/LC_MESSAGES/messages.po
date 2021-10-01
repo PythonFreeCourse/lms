@@ -1,13 +1,13 @@
-# Hebrew translations for PROJECT.
+# Hebrew translations for LMS prjoect.
 # Copyright (C) 2021 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
+# This file is distributed under the same license as the LMS project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: 1.0\n"
+"Project-Id-Version:  1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-09-29 11:58+0300\n"
+"POT-Creation-Date: 2021-10-01 10:15+0300\n"
 "PO-Revision-Date: 2021-09-29 11:30+0300\n"
 "Last-Translator: Or Ronai\n"
 "Language: he\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.1\n"
 
-#: lmsdb/models.py:736
+#: lmsdb/models.py:815
 msgid "Fatal error"
 msgstr "כישלון חמור"
 
@@ -223,23 +223,28 @@ msgstr "הודעות"
 msgid "Mark all as read"
 msgstr "סמן הכל כנקרא"
 
-#: templates/navbar.html:44
+#: templates/navbar.html:45
+#, fuzzy
+msgid "Courses List"
+msgstr "רשימת הקורסים"
+
+#: templates/navbar.html:65
 msgid "Upload Exercises"
 msgstr "העלאת תרגילים"
 
-#: templates/navbar.html:51
+#: templates/navbar.html:73
 msgid "Exercises List"
 msgstr "רשימת התרגילים"
 
-#: templates/navbar.html:59
+#: templates/navbar.html:81
 msgid "Exercises Archive"
 msgstr "ארכיון התרגילים"
 
-#: templates/navbar.html:69
+#: templates/navbar.html:91
 msgid "Check Exercises"
 msgstr "בדוק תרגילים"
 
-#: templates/navbar.html:76
+#: templates/navbar.html:98
 msgid "Logout"
 msgstr "התנתקות"
 
@@ -289,7 +294,7 @@ msgstr "חמ\"ל תרגילים"
 msgid "Name"
 msgstr "שם"
 
-#: templates/status.html:13 templates/user.html:41
+#: templates/status.html:13 templates/user.html:43
 msgid "Checked"
 msgstr "נבדק/ו"
 
@@ -342,46 +347,51 @@ msgid "Exercises Submitted"
 msgstr "תרגילים שהוגשו"
 
 #: templates/user.html:29
+#, fuzzy
+msgid "Course name"
+msgstr "שם קורס"
+
+#: templates/user.html:30
 msgid "Exercise name"
 msgstr "שם תרגיל"
 
-#: templates/user.html:30
+#: templates/user.html:31
 msgid "Submission status"
 msgstr "מצב הגשה"
 
-#: templates/user.html:31
+#: templates/user.html:32
 msgid "Submission"
 msgstr "הגשה"
 
-#: templates/user.html:32
+#: templates/user.html:33
 msgid "Checker"
 msgstr "בודק"
 
-#: templates/user.html:41
+#: templates/user.html:43
 msgid "Submitted"
 msgstr "הוגש"
 
-#: templates/user.html:41
+#: templates/user.html:43
 msgid "Not submitted"
 msgstr "לא הוגש"
 
-#: templates/user.html:52
+#: templates/user.html:54
 msgid "Notes"
 msgstr "פתקיות"
 
-#: templates/user.html:57 templates/user.html:59
+#: templates/user.html:59 templates/user.html:61
 msgid "New Note"
 msgstr "פתקית חדשה"
 
-#: templates/user.html:63
+#: templates/user.html:65
 msgid "Related Exercise"
 msgstr "תרגיל משויך"
 
-#: templates/user.html:72
+#: templates/user.html:74
 msgid "Privacy Level"
 msgstr "רמת פרטיות"
 
-#: templates/user.html:78
+#: templates/user.html:80
 msgid "Add Note"
 msgstr "הוסף פתקית"
 
@@ -407,7 +417,7 @@ msgid "This solution is not up to date!"
 msgstr "פתרון זה אינו פתרון עדכני!"
 
 #: templates/view.html:15
-#, fuzzy, python-format
+#, fuzzy
 msgid "Your solution hasn't been checked."
 msgstr "הפתרון שלך לתרגיל %(subject)s נבדק."
 

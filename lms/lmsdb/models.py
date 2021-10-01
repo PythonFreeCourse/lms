@@ -24,7 +24,6 @@ from werkzeug.security import (
 from lms.lmsdb import database_config
 from lms.models.errors import AlreadyExists
 from lms.utils import hashing
-from lms.utils.courses import generate_invite_code
 from lms.utils.log import log
 
 
@@ -138,7 +137,7 @@ class Course(BaseModel):
     date = DateTimeField(default=datetime.now)
     close_date = DateTimeField(null=True)
     close_registration_date = DateTimeField(default=datetime.now)
-    invite_code = CharField(default=generate_invite_code, unique=True)
+    invite_code = CharField(null=True)
     is_public = BooleanField(default=False)
 
     def has_user(self, user_id: int) -> bool:

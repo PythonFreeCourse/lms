@@ -39,40 +39,30 @@
           </ul>
         </li>
         <li class="nav-item dropdown">
-          <a id="courses-icon" href="#" class="nav-link" aria-expanded="false" aria-haspopup="true" aria-label="Courses" role="button" data-toggle="dropdown">
+          <a id="courses-icon" href="#" class="nav-link dropdown-toggle" aria-expanded="false" aria-haspopup="true" aria-label="Courses List" role="button" data-bs-toggle="dropdown">
             <i class="fa fa-graduation-cap" aria-hidden="true"></i>
             {% if not current_user.last_course_viewed %}
               {{ _('Courses List') }}
             {% else %}
               {{ current_user.last_course_viewed.name | e }}
             {% endif %}
-        <li class="nav-item">
-          <a href="/send" class="nav-link">
-            <i class="fa fa-upload" aria-hidden="true"></i>
-            {{ _('Upload Exercises') }}
           </a>
-          <div id="courses-list" aria-labelledby="navbarDropdown" class="dropdown-menu 
-          {%- if direction == 'rtl' %}
-          dropdown-menu-right
-          {%- else %}
-          dropdown-menu-left
-          {%- endif %}
-          ">
+          <ul id="courses-list" aria-labelledby="courses-icon" class="dropdown-menu">
             {% for course in current_user.get_courses() %}
-            <div class="course dropdown-item {{ direction }}">
-              <i class="fa fa-book" aria-hidden="true"></i>
-              <a href="{{ url_for('change_last_course_viewed', course_id=course.id) }}" class="course-text {{ direction }}">
-                {{ course.name | e }}
-              </a>
-            </div>
+              <li class="course dropdown-item">
+                <i class="fa fa-book" aria-hidden="true"></i>
+                <a href="{{ url_for('change_last_course_viewed', course_id=course.id) }}" class="course-text">
+                  {{ course.name | e }}
+                </a>
+              </li>
             {% endfor -%}
-          </div>
+          </ul>
         </li>
         {%- if current_user.last_course_viewed %}
           <li class="nav-item">
             <a href="{{ url_for('send_', course_id=current_user.last_course_viewed.id) }}" class="nav-link">
               <i class="fa fa-upload" aria-hidden="true"></i>
-              {{ _('העלאת תרגילים') }}
+              {{ _('Upload Exercises') }}
             </a>
           </li>
         {% endif -%}
