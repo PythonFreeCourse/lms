@@ -10,7 +10,7 @@ def UniqueUsernameRequired(
 ) -> None:
     username_exists = User.get_or_none(User.username == field.data)
     if username_exists:
-        raise ValidationError(_('שם המשתמש כבר נמצא בשימוש'))
+        raise ValidationError(_('The username is already in use'))
 
 
 def UniqueEmailRequired(
@@ -18,7 +18,7 @@ def UniqueEmailRequired(
 ) -> None:
     email_exists = User.get_or_none(User.mail_address == field.data)
     if email_exists:
-        raise ValidationError(_('האימייל כבר נמצא בשימוש'))
+        raise ValidationError(_('The email is already in use'))
 
 
 def EmailNotExists(
@@ -26,4 +26,4 @@ def EmailNotExists(
 ) -> None:
     email_exists = User.get_or_none(User.mail_address == field.data)
     if not email_exists:
-        raise ValidationError(_('האימייל לא רשום במערכת'))
+        raise ValidationError(_('Invalid email'))

@@ -50,14 +50,14 @@ def get_message_and_addressee(
 ) -> Tuple[str, User]:
     if solution.solver == user:
         msg = _(
-            '%(solver)s הגיב לך על בדיקת תרגיל "%(subject)s".',
+            '%(solver)s has replied for your "%(subject)s" check.',
             solver=solution.solver.fullname,
             subject=solution.exercise.subject,
         )
         addressee = solution.checker
     else:  # solution.checker == user
         msg = _(
-            '%(checker)s הגיב לך על תרגיל "%(subject)s".',
+            '%(checker)s replied for "%(subject)s".',
             checker=solution.checker.fullname,
             subject=solution.exercise.subject,
         )
@@ -71,7 +71,7 @@ def mark_as_checked(solution_id: int, checker_id: int, grade_id: int) -> bool:
         grade_id=grade_id, by=checker_id,
     )
     msg = _(
-        'הפתרון שלך לתרגיל "%(subject)s" נבדק.',
+        'Your solution for the "%(subject)s" exercise has been checked.',
         subject=checked_solution.exercise.subject,
     )
     if is_updated:

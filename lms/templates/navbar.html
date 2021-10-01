@@ -18,7 +18,7 @@
         <li class="nav-item dropdown">
           <a id="notifications-icon" href="#" class="nav-link dropdown-toggle" aria-expanded="false" aria-haspopup="true" aria-label="Notifications" role="button" data-bs-toggle="dropdown">
             <i class="fa fa-bell" aria-hidden="true"></i>
-            {{ _('הודעות') }}
+            {{ _('Messages') }}
             <span id="notification-count" class="badge bg-secondary">0</span>
           </a>
           <ul id="notifications-list" aria-labelledby="notifications-icon" class="dropdown-menu">
@@ -34,21 +34,21 @@
             <li><hr class="dropdown-divider"></li>
             <li id="read-notifications" class="notification dropdown-item">
               <i class="fa fa-check" aria-hidden="true"></i>
-              <a href="#">{{ _('סמן הכל כנקרא') }}.</a>
+              <a href="#">{{ _('Mark all as read') }}.</a>
             </li>
           </ul>
         </li>
         <li class="nav-item">
           <a href="/send" class="nav-link">
             <i class="fa fa-upload" aria-hidden="true"></i>
-            {{ _('העלאת תרגילים') }}
+            {{ _('Upload Exercises') }}
           </a>
         </li>
         {%- if not exercises or fetch_archived %}
         <li class="nav-item">
           <a href="/exercises" class="nav-link">
             <i class="fa fa-book" aria-hidden="true"></i>
-            {{ _('רשימת התרגילים') }}
+            {{ _('Exercises List') }}
           </a>
         </li>
         {% endif -%}
@@ -56,7 +56,7 @@
         <li class="nav-item">
           <a href="/exercises?archived=1" class="nav-link">
             <i class="fa fa-archive" aria-hidden="true"></i>
-            {{ _('ארכיון התרגילים') }}
+            {{ _('Exercises Archive') }}
           </a>
         </li>
         {% endif -%}
@@ -66,14 +66,14 @@
         <li class="nav-item">
           <a href="/status" class="nav-link">
             <i class="fa fa-check-square-o" aria-hidden="true"></i>
-            {{ _('בדוק תרגילים') }}
+            {{ _('Check Exercises') }}
           </a>
         </li>
         {% endif -%}
         <li class="nav-item">
           <a href="/logout" class="nav-link">
             <i class="fa fa-sign-out" aria-hidden="true"></i>
-            {{ _('התנתקות') }}
+            {{ _('Logout') }}
           </a>
         </li>
       </ul>

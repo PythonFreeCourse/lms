@@ -13,7 +13,7 @@ class LinterError(typing.NamedTuple):
     solution_file_id: str
 
 
-CANT_EXECUTE_CODE_MESSAGE = _('הבודק האוטומטי לא הצליח להריץ את הקוד שלך.')
+CANT_EXECUTE_CODE_MESSAGE = _("The automatic checker couldn't run your code.")
 
 
 class BaseLinter:

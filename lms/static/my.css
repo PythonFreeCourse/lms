@@ -47,6 +47,7 @@ a {
 }
 
 #login-container,
+#banned-container,
 #signup-container,
 #change-password-container,
 #reset-password-container,
@@ -58,6 +59,7 @@ a {
 }
 
 #login,
+#banned,
 #signup,
 #change-password,
 #reset-password,
@@ -69,6 +71,7 @@ a {
 }
 
 #login-logo,
+#banned-logo,
 #signup-logo,
 #reset-password-logo,
 #recover-password-logo {
