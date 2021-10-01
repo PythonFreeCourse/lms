@@ -174,7 +174,7 @@ class User(UserMixin, BaseModel):
     def is_password_valid(self, password) -> bool:
         return check_password_hash(self.password, password)
 
-    def is_registered(self, course_id: int) -> bool:
+    def has_course(self, course_id: int) -> bool:
         return UserCourse.is_user_registered(self, course_id)
 
     @classmethod

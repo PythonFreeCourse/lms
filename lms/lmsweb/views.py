@@ -322,7 +322,7 @@ def status():
     )
 
 
-@webapp.route('/change-course/<int:course_id>')
+@webapp.route('/course/<int:course_id>')
 @login_required
 def change_last_course_viewed(course_id: int):
     course = Course.get_or_none(course_id)

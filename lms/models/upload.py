@@ -33,7 +33,7 @@ def _upload_to_db(
     user = User.get_by_id(user_id)
     if exercise is None:
         raise UploadError(f'No such exercise id: {exercise_number}')
-    elif not user.is_registered(course_id):
+    elif not user.has_course(course_id):
         raise UploadError(
             f'Exercise {exercise_number} is invalid for this user.',
         )

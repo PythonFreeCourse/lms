@@ -785,11 +785,13 @@ code .grader-add .fa {
   cursor: pointer;
 }
 
+/*
 .notification,
 .course {
   flex-direction: column;
   text-align: start;
 }
+*/
 
 .notification[data-read="true"] .icon::before {
   font: normal normal normal 14px/1 FontAwesome;

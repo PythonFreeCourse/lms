@@ -35,20 +35,20 @@ class TestExercise:
         )) == 0
 
         client = conftest.get_logged_user(username=student_user.username)
-        client.get(f'change-course/{course.id}')
+        client.get(f'course/{course.id}')
         template, _ = captured_templates[-1]
         assert template.name == 'exercises.html'
         conftest.create_exercise(course, 1, index=1)
         assert len(list(Exercise.get_objects(student_user.id))) == 1
 
-        unregistered_response = client.get(f'change-course/{course2.id}')
+        unregistered_response = client.get(f'course/{course2.id}')
         assert unregistered_response.status_code == 403
 
-        fail_response = client.get('change-course/123456')
+        fail_response = client.get('course/123456')
         assert fail_response.status_code == 404
 
         conftest.create_usercourse(student_user, course2)
-        client.get(f'change-course/{course2.id}')
+        client.get(f'course/{course2.id}')
         template, _ = captured_templates[-1]
         assert template.name == 'exercises.html'
         assert len(list(Exercise.get_objects(student_user.id))) == 2
