@@ -107,7 +107,7 @@ def login(login_message: Optional[str] = None):
     login_message = request.args.get('login_message')
     if not form.validate_on_submit():
         return render_template(
-            'login.html', form=form, login_message=login_message
+            'login.html', form=form, login_message=login_message,
         )
 
     username = form.username.data

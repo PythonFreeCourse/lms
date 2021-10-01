@@ -1,4 +1,3 @@
-from flask_babel import gettext as _  # type: ignore
 from flask_wtf import FlaskForm
 from wtforms import PasswordField, StringField
 from wtforms.fields.simple import PasswordField

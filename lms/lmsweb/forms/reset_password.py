@@ -2,7 +2,7 @@ from lms.lmsweb.tools.validators import EmailNotExists
 from flask_babel import gettext as _  # type: ignore
 from flask_wtf import FlaskForm
 from wtforms import StringField
-from wtforms.fields.simple import PasswordField
+from wtforms import PasswordField
 from wtforms.validators import Email, EqualTo, InputRequired, Length
 
 
