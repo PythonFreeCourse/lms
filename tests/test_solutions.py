@@ -4,7 +4,9 @@ from flask import json
 import pytest
 
 from lms.lmsdb import models
-from lms.lmsdb.models import Comment, Exercise, SharedSolution, Solution, User
+from lms.lmsdb.models import (
+    Comment, Exercise, SharedSolution, Solution, SolutionStatusView, User,
+)
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmsweb import routes
 from lms.models import notifications, solutions
@@ -518,3 +520,35 @@ class TestSolutionBridge:
         with pytest.raises(models.Solution.DoesNotExist):
             assert reset(solution_id_that_does_not_exists) is None
         assert 'does not exist' in caplog.text
+
+    @staticmethod
+    def test_last_view_status(
+        solution: Solution,
+        student_user: User,
+        staff_user: User,
+    ):
+        client = conftest.get_logged_user(student_user.username)
+        assert solution.last_status_view == SolutionStatusView.UPLOADED.name
+
+        client.get(f'/view/{solution.id}')
+        solution = Solution.get_by_id(solution.id)
+        assert solution.last_status_view == SolutionStatusView.NOT_CHECKED.name
+
+        solutions.mark_as_checked(solution.id, staff_user.id)
+        solution = Solution.get_by_id(solution.id)
+        assert solution.last_status_view == SolutionStatusView.NOT_CHECKED.name
+        client.get(f'/view/{solution.id}')
+        solution = Solution.get_by_id(solution.id)
+        assert solution.last_status_view == SolutionStatusView.CHECKED.name
+
+    @staticmethod
+    def test_invalid_file_solution(
+        solution: Solution,
+        student_user: User,
+    ):
+        client = conftest.get_logged_user(student_user.username)
+        successful_response = client.get(f'/view/{solution.id}')
+        assert successful_response.status_code == 200
+
+        fail_response = client.get(f'/view/{solution.id}/12345')
+        assert fail_response.status_code == 404

@@ -3,28 +3,28 @@
 {% block page_content %}
 <div id="page-view">
   <div id="view-head">
-    <h1>{{ _('תצוגת תרגיל') }} {{ solution['exercise']['id'] }}: {{ solution['exercise']['subject'] }}</h1>
+    <h1>{{ _('Exercise view') }} {{ solution['exercise']['id'] }}: {{ solution['exercise']['subject'] }}</h1>
     {% if not is_manager and not shared_url %}
       {% if solution['state'] == 'DONE' %}
-        <p class="checked-msg {{ direction }}"><strong>{{ _('התרגיל שלך נבדק!') }}</strong> {{ _('לחצו על השורות האדומות כדי לראות את הערות הבודקים.') }}</p>
+        <p class="checked-msg {{ direction }}"><strong>{{ _('Your solution had checked!') }}</strong> {{ _('Click on the red lines in order to see the comments.') }}</p>
       {% elif solution['state'] == 'IN_CHECKING' %}
-        <p class="unchecked-msg {{ direction }}"><strong>{{ _('התרגיל שלך נבדק ברגעים אלו!') }}</strong></p>
+        <p class="unchecked-msg {{ direction }}"><strong>{{ _('Your solution is being checked in these moments!') }}</strong></p>
       {% elif solution['state'] == 'OLD_SOLUTION' %}
-        <p class="unchecked-msg {{ direction }}"><strong>{{ _('פתרון זה אינו פתרון עדכני!') }}</strong></p>
+        <p class="unchecked-msg {{ direction }}"><strong>{{ _('This solution is not up to date!') }}</strong></p>
       {% else %}
-        <p class="unchecked-msg {{ direction }}"><strong>{{ _('התרגיל שלך מחכה לבדיקה.') }}</strong> {{ _('חשוב לנו שכל תרגיל יעבור בדיקה של עין אנושית.') }}</p>
+        <p class="unchecked-msg {{ direction }}"><strong>{{ _("Your solution hasn't been checked.") }}</strong> {{ _("It's important for us that all exercises will be checked by human eye.") }}</p>
       {% endif %}
     {% else %}
-    <p id="solver"><strong>{{ _('מגיש') }}:</strong> <a href="/user/{{ solution['solver']['id'] }}">{{ solution['solver']['fullname'] | e }}</a></p>
+    <p id="solver"><strong>{{ _('Presenter') }}:</strong> <a href="/user/{{ solution['solver']['id'] }}">{{ solution['solver']['fullname'] | e }}</a></p>
     {% endif %}
     {% if not shared_url %}
-    <nav id="versions" aria-label="{{ _('ניווט בגרסאות ההגשה') }}">
+    <nav id="versions" aria-label="{{ _('Navigate in solution versions') }}">
       <ul class="pagination">
         {%- for version in versions %}
           {% set current = version['id'] == solution['id'] %}
           <li class="page-item version{% if current %} active{% endif %}"{% if current %} aria-current="page"{% endif %}>
             <a href="{{ url_for('view', solution_id=version['id']) }}" class="version page-link">{{ loop.index }}</a>
-          {%- if current %}<span class="visually-hidden">{{ _("העמוד הנוכחי") }}</span>{% endif -%}
+          {%- if current %}<span class="visually-hidden">{{ _('Current page') }}</span>{% endif -%}
           </li>
         {% endfor -%}
       </ul>
@@ -32,7 +32,7 @@
     {% if is_manager and not shared_url %}
         <div class="progress manager-progress-bar">
             <div class="progress-bar" style="width: {{ left }}%;" role="progressbar" aria-valuenow="{{ left }}" aria-valuemax="100">
-                {{ left }}% {{ _('לסיום בדיקה') }}
+                {{ left }}% {{ _('Finish Checking') }}
             </div>
         </div>
     {% endif %}
@@ -72,19 +72,19 @@
       </div>
       {% if test_results and not shared_url %}
       <div class="test-results">
-          <h3 class="test-result-title">{{ _('בדיקות אוטומטיות') }}</h3>
+          <h3 class="test-result-title">{{ _('Automatic Checking') }}</h3>
           <ol class="test-results-list">
               {%- for test_result in test_results %}
               <li class="test-result">
                   <h5 class="test-name">
                       {{ test_result.pretty_test_name | e }}
                   </h5>
-                  <span class="title">{{ _('שגיאה:') }}</span>
+                  <span class="title">{{ _('Error') }}:</span>
                   <span>
                       <pre><code class="language-{{ current_file | language_name }} highlight">{{ test_result.user_message | e }}</code></pre>
                   </span>
                   {% if is_manager %}
-                  <span class="title">{{ _('שגיאת סגל:') }}</span>
+                  <span class="title">{{ _('Staff Error') }}:</span>
                   <span class="stack-trace">
                       <pre><code class="language-{{ current_file | language_name }} highlight">{{ test_result.staff_message | e }}</code></pre>
                   </span>
@@ -98,7 +98,7 @@
     {% if is_manager and not shared_url %}
     <div id="popular-comments">
       <div id="exercise-comments">
-        <h2>{{ _('הערות על התרגיל') }}</h2>
+        <h2>{{ _('Comments for the solution') }}</h2>
         <ol id="exercise-comments-list" class="comments exercise-comments">
           {%- for comment in exercise_common_comments %}
           <li class="known-comment {{ direction }}" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text | e }}</li>
@@ -106,7 +106,7 @@
         </ol>
       </div>
       <div id="all-comments" class="{{ direction }}">
-        <h2>{{ _('הערות כלליות') }}</h2>
+        <h2>{{ _('General comments') }}</h2>
         <ol id="all-comments-list" class="comments all-comments">
           {%- for comment in all_common_comments %}
           <li class="known-comment {{ direction }}" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text | e }}</li>
@@ -114,7 +114,7 @@
         </ol>
       </div>
       <div id="my-all-comments" class="{{ direction }}">
-        <h2>{{ _('הערות בודק') }}</h2>
+        <h2>{{ _('Checker comments') }}</h2>
         {% if user_comments %}
             <ol id="my-comments-list" class="comments my-comments">
               {%- for comment in user_comments %}
@@ -124,7 +124,7 @@
         {% endif -%}
       </div>
       <div id="grader-buttons" class="{{ direction }}">
-        <button id="save-check" class="btn btn-success">{{ _('סיימתי לבדוק!') }}</button>
+        <button id="save-check" class="btn btn-success">{{ _('Done Checking') }}!</button>
         <a id="ninja" href="#" class="badge bg-dark" style="display: none;">Ninja Mode</a>
       </div>
     </div>

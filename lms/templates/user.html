@@ -6,30 +6,30 @@
     <h1>{{ user.fullname | e }}</h1>
     <div class="body">
       <div class="user-details {{ direction }}">
-        <h2>{{ _('פרטי משתמש:') }}</h2>
+        <h2>{{ _('User details') }}:</h2>
         <ul>
-          <li>{{ _('שם משתמש:') }} {{ user.username | e }}</li>
-          <li>{{ _('דואר אלקטרוני:') }} {{ user.mail_address | e }}</li>
+          <li>{{ _('Username') }}: {{ user.username | e }}</li>
+          <li>{{ _('Email Address') }}: {{ user.mail_address | e }}</li>
         </ul>
       </div>
       <div class="user-actions {{ direction }}">
-        <h2>{{ _('פעולות:') }}</h2>
+        <h2>{{ _('Actions') }}:</h2>
         <div id="change-password-user">
           <ul>
-            <li><a href="{{ url_for('change_password') }}" role="button">{{ _('שנה סיסמה') }}</a></li>
+            <li><a href="{{ url_for('change_password') }}" role="button">{{ _('Change Password') }}</a></li>
           </ul>
         </div>
       </div>
       <div class="user-exercises {{ direction }}">
-      <h2>{{ _('תרגילים שהוגשו:') }}</h2>
+      <h2>{{ _('Exercises Submitted') }}:</h2>
         <table class="table table-hover">
           <thead>
             <tr>
               <th scope="col">#</th>
-              <th scope="col">{{ _('שם תרגיל') }}</th>
-              <th scope="col">{{ _('מצב הגשה') }}</th>
-              <th scope="col">{{ _('הגשה') }}</th>
-              <th scope="col">{{ _('בודק') }}</th>
+              <th scope="col">{{ _('Exercise name') }}</th>
+              <th scope="col">{{ _('Submission status') }}</th>
+              <th scope="col">{{ _('Submission') }}</th>
+              <th scope="col">{{ _('Checker') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -38,7 +38,7 @@
               <th scope="row">{{ solution.exercise_id | e }}</th>
               <td>{{ solution.exercise_name | e }}</td>
               <td>
-                {{ _('נבדק') if solution.is_checked else _('הוגש') if solution.solution_id else _('לא הוגש') }}
+                {{ _('Checked') if solution.is_checked else _('Submitted') if solution.solution_id else _('Not submitted') }}
               </td>
               <td><a href="/view/{{ solution.solution_id }}">{{ solution.solution_id }}</a></td>
               <td>{{ solution.get('checker', '') | e }}</a></td>
@@ -49,18 +49,18 @@
       </div>
       {% if user.notes or is_manager %}
         <div class="{{ direction }}">
-          <h2>{{ _('פתקיות:') }}</h2>
+          <h2>{{ _('Notes') }}:</h2>
           <div class="user-notes {{ direction }}" id="notes-user"></div>
           {%- if is_manager %}
             <form class="align-items-center" id="notes-form">
               <div class="row mb-3 {{ direction }}-language">
-                <label for="note-text" class="visually-hidden">{{ _('פתקית חדשה') }}</label>
+                <label for="note-text" class="visually-hidden">{{ _('New Note') }}</label>
                 <div>
-                  <input id="note-text" class="form-control form-control-lg {{ direction }}" type="text" name="note" placeholder="{{ _('פתקית חדשה') }}" required>
+                  <input id="note-text" class="form-control form-control-lg {{ direction }}" type="text" name="note" placeholder="{{ _('New Note') }}" required>
                 </div>
               </div>
               <div class="mb-3 {{ direction }}-language note-exercise-select">
-                <label class="form-label auto-width" for="note-exercise">{{ _('תרגיל משויך:') }}</label>
+                <label class="form-label auto-width" for="note-exercise">{{ _('Related Exercise') }}:</label>
                 <input class="form-control auto-width" list="note-exercises" id="note-exercise" name="exercise">
                 <datalist id="note-exercises">
                   {% for solution in solutions %}
@@ -69,13 +69,13 @@
                 </datalist>
               </div>
               <div class="row mb-3 {{ direction }}-language note-privacy-select">
-                <label class="form-label auto-width" for="note-privacy">{{ _('רמת פרטיות:') }}</label>
+                <label class="form-label auto-width" for="note-privacy">{{ _('Privacy Level') }}:</label>
                 <div class="note-privacy-input-range">
                   <input type="range" class="form-range" min="0" max="{{ notes_options.split(',') | length - 1 }}" value="0" id="note-privacy" name="privacy">
                   <span class="note-privacy-text" id="privacy-text"></span>
                 </div>
               </div>
-              <button class="btn btn-primary btn-sm btn-block add-note">{{ _('הוסף פתקית') }}</button>
+              <button class="btn btn-primary btn-sm btn-block add-note">{{ _('Add Note') }}</button>
             </form>
           {% endif -%}
         </div>

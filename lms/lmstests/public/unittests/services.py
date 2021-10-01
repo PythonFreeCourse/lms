@@ -13,7 +13,7 @@ from lms.models import notifications
 
 
 NumberOfErrors = int
-CANT_EXECUTE_CODE_MESSAGE = _('הבודק האוטומטי לא הצליח להריץ את הקוד שלך.')
+CANT_EXECUTE_CODE_MESSAGE = _("The automatic checker couldn't run your code.")
 
 
 class UnitTestChecker:
@@ -118,7 +118,8 @@ class UnitTestChecker:
             return None
 
         fail_message = _(
-            'הבודק האוטומטי נכשל ב־ %(number)d דוגמאות בתרגיל "%(subject)s".',
+            'The automatic checker failed in %(number)d examples in your '
+            '"%(subject)s" solution.',
             number=number_of_failures,
             subject=self._solution.exercise.subject,
         )
@@ -138,7 +139,7 @@ class UnitTestChecker:
             solution=self._solution,
             test_name=models.ExerciseTestName.FATAL_TEST_NAME,
             user_message=fail_user_message,
-            staff_message=_('אחי, בדקת את הקוד שלך?'),
+            staff_message=_('Bro, did you check your code?'),
         )
         notifications.send(
             kind=notifications.NotificationKind.UNITTEST_ERROR,
