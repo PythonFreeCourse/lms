@@ -1,6 +1,5 @@
 from flask_wtf import FlaskForm
 from wtforms import PasswordField, StringField
-from wtforms.fields.simple import PasswordField
 from wtforms.validators import InputRequired, Length
 
 
