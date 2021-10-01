@@ -2,13 +2,13 @@ version: "3"
 
 services:
   db:
-    image: postgres:13-alpine
+    image: postgres:14-alpine
     ports:
       - 5432:5432
     volumes:
       - db-data-volume:/pg_data
     environment:
-      - PGDATA=/pg_data/13/data
+      - PGDATA=/pg_data/14/data
       - POSTGRES_DB=${DB_NAME:-db}
       - POSTGRES_USER=${DB_USERNAME:-postgres}
       - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
