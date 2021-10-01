@@ -93,7 +93,8 @@ class LinterChecker:
         errors_len = len(self._errors)
         exercise_name = self.solution.exercise.subject
         msg = _(
-            'הבודק האוטומטי נתן %(errors_num)d הערות על תרגילך %(name)s.',
+            'The automatic checker gave you %(errors_num)d for your '
+            '%(name)s solution.',
             errors_num=errors_len, name=exercise_name,
         )
         return notifications.send(

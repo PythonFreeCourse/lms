@@ -4,16 +4,16 @@
 {% block page_content %}
 <div id="page-status" class="{{ direction }}">
   <div id="status-head">
-    <h1>{{ _('חמ"ל תרגילים') }}</h1>
+    <h1>{{ _('Exercises operations room') }}</h1>
     <table class="table">
       <thead>
 	<tr>
           <th scope="col">#</th>
-          <th scope="col">{{ _('שם') }}</th>
-          <th scope="col">{{ _('נבדקו') }}</th>
-          <th scope="col">{{ _('נפתרו') }}</th>
-          <th scope="col">{{ _('באחוזים') }}</th>
-          <th scope="col">{{ _('מדד') }}</th>
+          <th scope="col">{{ _('Name') }}</th>
+          <th scope="col">{{ _('Checked') }}</th>
+          <th scope="col">{{ _('Solved') }}</th>
+          <th scope="col">{{ _('Percentage') }}</th>
+          <th scope="col">{{ _('Measurement') }}</th>
 	</tr>
       </thead>
       <tbody>
@@ -28,7 +28,7 @@
 	</tr>
     {% endfor -%}
     <tr id="archive-row">
-        <td colspan="100%"><strong>{{ _('ארכיון') }}</strong></td>
+        <td colspan="100%"><strong>{{ _('Archive') }}</strong></td>
     </tr>
     {%- for exercise in exercises|selectattr("is_archived") %}
         <tr>

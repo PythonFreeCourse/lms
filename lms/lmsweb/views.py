@@ -126,7 +126,7 @@ def login(login_message: Optional[str] = None):
 def signup():
     if not webapp.config.get('REGISTRATION_OPEN', False):
         return redirect(url_for(
-            'login', login_message=_('לא ניתן להירשם כעת'),
+            'login', login_message=_('Can not register now'),
         ))
 
     form = RegisterForm()
@@ -143,7 +143,7 @@ def signup():
     })
     send_confirmation_mail(user)
     return redirect(url_for(
-        'login', login_message=_('ההרשמה בוצעה בהצלחה'),
+        'login', login_message=_('Registration successfully'),
     ))
 
 
@@ -166,7 +166,10 @@ def confirm_email(user_id: int, token: str):
         send_confirmation_mail(user)
         return redirect(url_for(
             'login', login_message=(
-                _('קישור האימות פג תוקף, קישור חדש נשלח אל תיבת המייל שלך'),
+                _(
+                    'The confirmation link is expired, new link has been '
+                    'sent to your email',
+                ),
             ),
         ))
     except BadSignature:
@@ -179,7 +182,10 @@ def confirm_email(user_id: int, token: str):
         update.execute()
         return redirect(url_for(
             'login', login_message=(
-                _('המשתמש שלך אומת בהצלחה, כעת אתה יכול להתחבר למערכת'),
+                _(
+                    'Your user has been successfully confirmed, '
+                    'you can now login',
+                ),
             ),
         ))
 
@@ -199,7 +205,7 @@ def change_password():
     send_change_password_mail(user)
     return redirect(url_for(
         'login', login_message=(
-            _('הסיסמה שלך שונתה בהצלחה'),
+            _('Your password has successfully changed'),
         ),
     ))
 
@@ -215,7 +221,7 @@ def reset_password():
 
     send_reset_password_mail(user)
     return redirect(url_for(
-        'login', login_message=_('קישור לאיפוס הסיסמה נשלח בהצלחה'),
+        'login', login_message=_('Password reset link has successfully sent'),
     ))
 
 
@@ -236,7 +242,7 @@ def recover_password(user_id: int, token: str):
     except SignatureExpired:
         return redirect(url_for(
             'login', login_message=(
-                _('קישור איפוס הסיסמה פג תוקף'),
+                _('Reset password link is expired'),
             ),
         ))
     except BadSignature:
@@ -256,7 +262,7 @@ def recover_password_check(user: User, token: str):
     user.save()
     return redirect(url_for(
         'login', login_message=(
-            _('הסיסמה שלך שונתה בהצלחה'),
+            _('Your password has successfully changed'),
         ),
     ))
 

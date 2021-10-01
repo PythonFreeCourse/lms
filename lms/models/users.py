@@ -25,9 +25,14 @@ def retrieve_salt(user: User) -> str:
 def auth(username: str, password: str) -> User:
     user = User.get_or_none(username=username)
     if user is None or not user.is_password_valid(password):
-        raise UnauthorizedError(_('שם המשתמש או הסיסמה שהוזנו לא תקינים'), 400)
+        raise UnauthorizedError(_('Invalid username or password'), 400)
     elif user.role.is_unverified:
-        raise ForbiddenPermission(_('עליך לאשר את מייל האימות'), 403)
+        raise ForbiddenPermission(
+            _(
+                'You have to confirm your registration with the link sent '
+                'to your email',
+            ), 403,
+        )
     return user
 
 

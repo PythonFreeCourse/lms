@@ -82,7 +82,7 @@ After logging in, use [localhost admin](https://127.0.0.1:8080/admin) to modify 
 In case you want to enable the mail system:
 
 1. Insert your mail details in the configuration file.
-2. Delete the `DISABLE_MAIL` line.
+2. Change the `DISABLE_MAIL` line value to False.
 
 
 ## Code modification check list
