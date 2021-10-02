@@ -1,13 +1,13 @@
-# Hebrew translations for PROJECT.
+# Hebrew translations for LMS project.
 # Copyright (C) 2021 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
+# This file is distributed under the same license as the  project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: 1.0\n"
+"Project-Id-Version:  1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-09-29 11:58+0300\n"
+"POT-Creation-Date: 2021-10-02 12:46+0300\n"
 "PO-Revision-Date: 2021-09-29 11:30+0300\n"
 "Last-Translator: Or Ronai\n"
 "Language: he\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.1\n"
 
-#: lmsdb/models.py:736
+#: lmsdb/models.py:764
 msgid "Fatal error"
 msgstr "כישלון חמור"
 
@@ -101,17 +101,17 @@ msgstr "שם המשתמש כבר נמצא בשימוש"
 msgid "The email is already in use"
 msgstr "האימייל כבר נמצא בשימוש"
 
-#: models/solutions.py:50
+#: models/solutions.py:52
 #, python-format
 msgid "%(solver)s has replied for your \"%(subject)s\" check."
 msgstr "%(solver)s הגיב לך על בדיקת תרגיל \"%(subject)s\"."
 
-#: models/solutions.py:57
+#: models/solutions.py:59
 #, python-format
 msgid "%(checker)s replied for \"%(subject)s\"."
 msgstr "%(checker)s הגיב לך על תרגיל \"%(subject)s\"."
 
-#: models/solutions.py:69
+#: models/solutions.py:75
 #, python-format
 msgid "Your solution for the \"%(subject)s\" exercise has been checked."
 msgstr "הפתרון שלך לתרגיל \"%(subject)s\" נבדק."
@@ -170,7 +170,7 @@ msgstr "אימות סיסמה"
 msgid "Exercises"
 msgstr "תרגילים"
 
-#: templates/exercises.html:21 templates/view.html:101
+#: templates/exercises.html:21 templates/view.html:113
 msgid "Comments for the solution"
 msgstr "הערות על התרגיל"
 
@@ -289,7 +289,7 @@ msgstr "חמ\"ל תרגילים"
 msgid "Name"
 msgstr "שם"
 
-#: templates/status.html:13 templates/user.html:41
+#: templates/status.html:13 templates/user.html:42
 msgid "Checked"
 msgstr "נבדק/ו"
 
@@ -357,36 +357,39 @@ msgstr "הגשה"
 msgid "Checker"
 msgstr "בודק"
 
-#: templates/user.html:41
+#: templates/user.html:33 templates/view.html:21 templates/view.html:104
+msgid "Verbal note"
+msgstr "הערה מילולית"
+
+#: templates/user.html:42
 msgid "Submitted"
 msgstr "הוגש"
 
-#: templates/user.html:41
+#: templates/user.html:42
 msgid "Not submitted"
 msgstr "לא הוגש"
 
-#: templates/user.html:52
+#: templates/user.html:54
 msgid "Notes"
 msgstr "פתקיות"
 
-#: templates/user.html:57 templates/user.html:59
+#: templates/user.html:59 templates/user.html:61
 msgid "New Note"
 msgstr "פתקית חדשה"
 
-#: templates/user.html:63
+#: templates/user.html:65
 msgid "Related Exercise"
 msgstr "תרגיל משויך"
 
-#: templates/user.html:72
+#: templates/user.html:74
 msgid "Privacy Level"
 msgstr "רמת פרטיות"
 
-#: templates/user.html:78
+#: templates/user.html:80
 msgid "Add Note"
 msgstr "הוסף פתקית"
 
 #: templates/view.html:6
-#, fuzzy
 msgid "Exercise view"
 msgstr "שם תרגיל"
 
@@ -407,7 +410,6 @@ msgid "This solution is not up to date!"
 msgstr "פתרון זה אינו פתרון עדכני!"
 
 #: templates/view.html:15
-#, fuzzy, python-format
 msgid "Your solution hasn't been checked."
 msgstr "הפתרון שלך לתרגיל %(subject)s נבדק."
 
@@ -419,42 +421,39 @@ msgstr "חשוב לנו שכל תרגיל יעבור בדיקה של עין אנ
 msgid "Presenter"
 msgstr "מגיש"
 
-#: templates/view.html:21
+#: templates/view.html:24
 msgid "Navigate in solution versions"
 msgstr "ניווט בגרסאות ההגשה"
 
-#: templates/view.html:27
-#, fuzzy
+#: templates/view.html:30
 msgid "Current page"
 msgstr "סיסמה נוכחית"
 
-#: templates/view.html:35
+#: templates/view.html:38
 msgid "Finish Checking"
 msgstr "סיום בדיקה"
 
-#: templates/view.html:75
+#: templates/view.html:78
 msgid "Automatic Checking"
 msgstr "בדיקות אוטומטיות"
 
-#: templates/view.html:82
-#, fuzzy
+#: templates/view.html:85
 msgid "Error"
 msgstr "כישלון חמור"
 
-#: templates/view.html:87
-#, fuzzy
+#: templates/view.html:90
 msgid "Staff Error"
 msgstr "כישלון חמור"
 
-#: templates/view.html:109
+#: templates/view.html:121
 msgid "General comments"
 msgstr "הערות כלליות"
 
-#: templates/view.html:117
+#: templates/view.html:129
 msgid "Checker comments"
 msgstr "הערות בודק"
 
-#: templates/view.html:127
+#: templates/view.html:139
 msgid "Done Checking"
 msgstr "סיום בדיקה"
 

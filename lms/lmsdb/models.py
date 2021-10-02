@@ -999,10 +999,10 @@ def create_basic_roles():
 
 def create_basic_grades():
     grades_dict = {
-        _('Excellent'): {'color': 'green', 'icon': 'star', 'order': 1},
-        _('Nice'): {'color': 'blue', 'icon': 'check', 'order': 2},
-        _('Try again'): {'color': 'red', 'icon': 'exclamation', 'order': 3},
-        _('Plagiarism'): {
+        'Excellent': {'color': 'green', 'icon': 'star', 'order': 1},
+        'Nice': {'color': 'blue', 'icon': 'check', 'order': 2},
+        'Try again': {'color': 'red', 'icon': 'exclamation', 'order': 3},
+        'Plagiarism': {
             'color': 'black', 'icon': 'exclamation-triangle', 'order': 4,
         },
     }

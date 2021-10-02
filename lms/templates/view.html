@@ -17,7 +17,7 @@
     {% else %}
       <p id="solver"><strong>{{ _('Presenter') }}:</strong> <a href="/user/{{ solution['solver']['id'] }}">{{ solution['solver']['fullname'] | e }}</a></p>
     {% endif %}
-    {% if solution['grade_mark'] %}
+    {% if solution['grade_mark'] and not shared_url %}
       <p id="grade"><strong>{{ _('Verbal note') }}:</strong> {{ solution['grade_mark']['name'] }} <i class="fa fa-{{ solution['grade_mark']['icon'] }}"></i></p>
     {% endif %}
     {% if not shared_url %}
@@ -101,7 +101,7 @@
     {% if is_manager and not shared_url %}
     <div id="popular-comments">
       <div id="exercise-grade" class="{{ direction }}">
-        <h2>{{ _('Solution grade') }}</h2>
+        <h2>{{ _('Verbal note') }}</h2>
         <div class="btn-group-vertical" id="solution-grade" role="group" aria-label="grades radio toggle button group">
           {% for grade_mark in grade_marks %}
             <input type="radio" class="btn-check" name="grade-mark" id="btnradio{{ loop.index }}" autocomplete="off" value="{{ grade_mark.id }}" {%- if solution['grade_mark'] and solution['grade_mark']['name'] == grade_mark.name %}checked{% else %}{% if loop.index == 1 %}checked{% endif %}{% endif -%}>
