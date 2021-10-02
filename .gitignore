@@ -135,3 +135,4 @@ yarn-error.log*
 lms/lmsweb/config.py
 db.sqlite
 vim.session
+devops/rabbitmq.cookie
