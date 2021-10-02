@@ -9,7 +9,7 @@ from playhouse.shortcuts import model_to_dict  # type: ignore
 
 from lms.extractors.base import File
 from lms.lmsdb.models import (
-    SharedSolution, Solution, SolutionFile, SolutionGradeMark, User,
+    SharedSolution, Solution, SolutionEvaluation, SolutionFile, User,
 )
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
@@ -66,11 +66,11 @@ def get_message_and_addressee(
 
 
 def mark_as_checked(
-    solution_id: int, checker_id: int, grade_id: Optional[int] = None,
+    solution_id: int, checker_id: int, evaluation_id: Optional[int] = None,
 ) -> bool:
     checked_solution: Solution = Solution.get_by_id(solution_id)
     is_updated = checked_solution.mark_as_checked(
-        grade_id=grade_id, by=checker_id,
+        evaluation_id=evaluation_id, by=checker_id,
     )
     msg = _(
         'Your solution for the "%(subject)s" exercise has been checked.',
@@ -142,7 +142,7 @@ def get_view_parameters(
             'user_comments':
                 comments._common_comments(user_id=current_user.id),
             'left': Solution.left_in_exercise(solution.exercise),
-            'grade_marks': SolutionGradeMark.grades(),
+            'evaluations': SolutionEvaluation.get_evaluations(),
         }
 
     if viewer_is_solver:

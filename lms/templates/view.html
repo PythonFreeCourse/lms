@@ -17,8 +17,8 @@
     {% else %}
       <p id="solver"><strong>{{ _('Presenter') }}:</strong> <a href="/user/{{ solution['solver']['id'] }}">{{ solution['solver']['fullname'] | e }}</a></p>
     {% endif %}
-    {% if solution['grade_mark'] and not shared_url %}
-      <p id="grade"><strong>{{ _('Verbal note') }}:</strong> {{ solution['grade_mark']['name'] }} <i class="fa fa-{{ solution['grade_mark']['icon'] }}"></i></p>
+    {% if solution.evaluation and not shared_url %}
+      <p id="evaluation"><strong>{{ _('Verbal note') }}:</strong>{% if solution.evaluation.icon %} <i class="fa fa-{{ solution.evaluation.icon | e }}"></i>{% endif %} {{ solution.evaluation.name | e }}</p>
     {% endif %}
     {% if not shared_url %}
     <nav id="versions" aria-label="{{ _('Navigate in solution versions') }}">
@@ -100,12 +100,12 @@
     </div>
     {% if is_manager and not shared_url %}
     <div id="popular-comments">
-      <div id="exercise-grade" class="{{ direction }}">
+      <div id="exercise-evaluation" class="{{ direction }}">
         <h2>{{ _('Verbal note') }}</h2>
-        <div class="btn-group-vertical" id="solution-grade" role="group" aria-label="grades radio toggle button group">
-          {% for grade_mark in grade_marks %}
-            <input type="radio" class="btn-check" name="grade-mark" id="btnradio{{ loop.index }}" autocomplete="off" value="{{ grade_mark.id }}" {%- if solution['grade_mark'] and solution['grade_mark']['name'] == grade_mark.name %}checked{% else %}{% if loop.index == 1 %}checked{% endif %}{% endif -%}>
-            <label class="btn btn-outline-{{ grade_mark.color }}" for="btnradio{{ loop.index }}">{{ grade_mark.name }} <i class="fa fa-{{ grade_mark.icon }}"></i></label>
+        <div class="btn-group-vertical" id="solution-evaluation" role="group" aria-label="evaluations radio toggle button group">
+          {% for evaluation in evaluations %}
+            <input type="radio" class="btn-check" name="evaluation" id="btnradio{{ loop.index }}" autocomplete="off" value="{{ evaluation.id }}" {%- if solution.evaluation.name == evaluation.name or loop.first %}checked{% endif -%}>
+            <label class="btn btn-outline" style="--color: {{ evaluation.color }}; --active-color: {{ evaluation.active_color }};" for="btnradio{{ loop.index }}">{% if evaluation.icon %}<i class="fa fa-{{ evaluation.icon }}"></i> {% endif %}{{ evaluation.name }}</label>
           {% endfor %}
         </div>
       </div>

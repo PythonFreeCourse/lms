@@ -616,8 +616,24 @@ code {
   display: block;
 }
 
-#solution-grade {
+#solution-evaluation {
   display: flex;
+}
+
+.btn-outline {
+  color: var(--color);
+  border-color: var(--color);
+}
+
+.btn-check:active + .btn-outline,
+.btn-check:checked + .btn-outline,
+.btn-check:hover + .btn-outline,
+.btn-outline:active,
+.btn-outline:hover,
+.btn-outline:checked {
+  color: var(--active-color);
+  background-color: var(--color);
+  border-color: var(--color);
 }
 
 #popular-comments {

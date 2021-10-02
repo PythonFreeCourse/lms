@@ -411,7 +411,7 @@ msgstr "פתרון זה אינו פתרון עדכני!"
 
 #: templates/view.html:15
 msgid "Your solution hasn't been checked."
-msgstr "הפתרון שלך לתרגיל %(subject)s נבדק."
+msgstr "הפתרון שלך עדיין לא נבדק."
 
 #: templates/view.html:15
 msgid "It's important for us that all exercises will be checked by human eye."

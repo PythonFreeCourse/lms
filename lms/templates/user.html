@@ -43,7 +43,7 @@
               </td>
               <td><a href="/view/{{ solution.solution_id }}">{{ solution.solution_id }}</a></td>
               <td>{{ solution.get('checker', '') | e }}</a></td>
-              <td>{{ solution.get('grade_mark', '') | e }}</td>
+              <td>{{ solution.get('evaluation', '') | e }}</td>
             </tr>
             {% endfor -%}
           </tbody>

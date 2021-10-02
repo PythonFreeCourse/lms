@@ -24,6 +24,7 @@ from werkzeug.security import (
 from lms.lmsdb import database_config
 from lms.models.errors import AlreadyExists
 from lms.utils import hashing
+from lms.utils.consts import COLORS
 from lms.utils.log import log
 
 
@@ -365,18 +366,32 @@ class SolutionStatusView(enum.Enum):
         return tuple((choice.name, choice.value) for choice in choices)
 
 
-class SolutionGradeMark(BaseModel):
+class SolutionEvaluation(BaseModel):
     name = CharField()
     icon = CharField(null=True)
     color = CharField()
+    active_color = CharField()
     order = IntegerField(default=0, index=True, unique=True)
 
     @classmethod
-    def grades(cls):
+    def get_evaluations(cls):
         return cls.select().order_by(cls.order)
 
     def __str__(self):
         return self.name
+
+
+@pre_save(sender=SolutionEvaluation)
+def evaluation_on_save_handler(_model_class, instance, created):
+    """Change colors to hex."""
+
+    is_color_changed = not instance.color.startswith('#')
+    if created or is_color_changed:
+        instance.color = COLORS.get(instance.color, '#0d6efd')
+
+    is_active_color_changed = not instance.active_color.startswith('#')
+    if created or is_active_color_changed:
+        instance.active_color = COLORS.get(instance.active_color, '#fff')
 
 
 class Solution(BaseModel):
@@ -403,8 +418,8 @@ class Solution(BaseModel):
         index=True,
     )
     last_time_view = DateTimeField(default=datetime.now, null=True, index=True)
-    grade_mark = ForeignKeyField(
-        SolutionGradeMark, backref='solutions', null=True,
+    evaluation = ForeignKeyField(
+        SolutionEvaluation, backref='solutions', null=True,
     )
 
     @property
@@ -466,14 +481,14 @@ class Solution(BaseModel):
 
     def set_state(
         self, new_state: SolutionState,
-        grade_mark: Optional[SolutionGradeMark] = None, **kwargs,
+        evaluation: Optional[SolutionEvaluation] = None, **kwargs,
     ) -> bool:
         # Optional: filter the old state of the object
         # to make sure that no two processes set the state together
         requested_solution = (Solution.id == self.id)
         updates_dict = {Solution.state.name: new_state.name}
-        if grade_mark is not None:
-            updates_dict[Solution.grade_mark.name] = grade_mark
+        if evaluation is not None:
+            updates_dict[Solution.evaluation.name] = evaluation
         changes = Solution.update(
             **updates_dict, **kwargs,
         ).where(requested_solution)
@@ -498,7 +513,7 @@ class Solution(BaseModel):
         solutions = (
             cls
             .select(
-                cls.exercise, cls.id, cls.state, cls.checker, cls.grade_mark,
+                cls.exercise, cls.id, cls.state, cls.checker, cls.evaluation,
             )
             .where(cls.exercise.in_(db_exercises), cls.solver == user_id)
             .order_by(cls.submission_timestamp.desc())
@@ -511,8 +526,8 @@ class Solution(BaseModel):
                 exercise['comments_num'] = len(solution.staff_comments)
                 if solution.is_checked and solution.checker:
                     exercise['checker'] = solution.checker.fullname
-                if solution.grade_mark:
-                    exercise['grade_mark'] = solution.grade_mark.name
+                if solution.evaluation:
+                    exercise['evaluation'] = solution.evaluation.name
         return tuple(exercises.values())
 
     @property
@@ -615,12 +630,14 @@ class Solution(BaseModel):
 
     def mark_as_checked(
         self,
-        grade_id: Optional[int] = None,
+        evaluation_id: Optional[int] = None,
         by: Optional[Union[User, int]] = None,
     ) -> bool:
         return self.set_state(
             Solution.STATES.DONE,
-            SolutionGradeMark.get_or_none(SolutionGradeMark.id == grade_id),
+            SolutionEvaluation.get_or_none(
+                SolutionEvaluation.id == evaluation_id,
+            ),
             checker=by,
         )
 
@@ -997,8 +1014,8 @@ def create_basic_roles():
         Role.create(name=role.value)
 
 
-def create_basic_grades():
-    grades_dict = {
+def create_basic_evaluations():
+    evaluations_dict = {
         'Excellent': {'color': 'green', 'icon': 'star', 'order': 1},
         'Nice': {'color': 'blue', 'icon': 'check', 'order': 2},
         'Try again': {'color': 'red', 'icon': 'exclamation', 'order': 3},
@@ -1006,10 +1023,10 @@ def create_basic_grades():
             'color': 'black', 'icon': 'exclamation-triangle', 'order': 4,
         },
     }
-    for grade, values in grades_dict.items():
-        SolutionGradeMark.create(
-            name=grade, icon=values.get('icon'), color=values.get('color'),
-            order=values.get('order'),
+    for name, values in evaluations_dict.items():
+        SolutionEvaluation.create(
+            name=name, icon=values.get('icon'), color=values.get('color'),
+            active_color='white', order=values.get('order'),
         )
 
 

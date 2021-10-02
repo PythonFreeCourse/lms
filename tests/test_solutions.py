@@ -561,7 +561,7 @@ class TestSolutionBridge:
         client = conftest.get_logged_user(staff_user.username)
         response = client.post(
             f'/checked/{solution.exercise.id}/{solution.id}',
-            data=json.dumps({'grade': 1}),
+            data=json.dumps({'evaluation': 1}),
             content_type='application/json',
         )
         assert response.status_code == 200

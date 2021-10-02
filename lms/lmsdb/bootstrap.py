@@ -253,9 +253,9 @@ def _uuid_migration() -> bool:
     return True
 
 
-def _grade_mark_migration() -> bool:
+def _evaluation_migration() -> bool:
     Solution = models.Solution
-    _add_not_null_column(Solution, Solution.grade_mark)
+    _add_not_null_column(Solution, Solution.evaluation)
     return True
 
 
@@ -263,7 +263,7 @@ def main():
     with models.database.connection_context():
         if models.database.table_exists(models.Solution.__name__.lower()):
             _last_status_view_migration()
-            _grade_mark_migration()
+            _evaluation_migration()
 
         if models.database.table_exists(models.User.__name__.lower()):
             _api_keys_migration()
@@ -275,8 +275,8 @@ def main():
             models.create_basic_roles()
         if models.User.select().count() == 0:
             models.create_demo_users()
-        if models.SolutionGradeMark.select().count() == 0:
-            models.create_basic_grades()
+        if models.SolutionEvaluation.select().count() == 0:
+            models.create_basic_evaluations()
 
     text_fixer.fix_texts()
     import_tests.load_tests_from_path('/app_dir/notebooks-tests')

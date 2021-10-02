@@ -614,11 +614,11 @@ def shared_solution(shared_url: str, file_id: Optional[int] = None):
 @managers_only
 def done_checking(exercise_id, solution_id):
     if request.method == 'POST':
-        grade_id = request.json.get('grade')
+        evaluation_id = request.json.get('evaluation')
     else:  # it's a GET
-        grade_id = request.args.get('grade')
+        evaluation_id = request.args.get('evaluation')
     is_updated = solutions.mark_as_checked(
-        solution_id, current_user.id, grade_id,
+        solution_id, current_user.id, evaluation_id,
     )
     next_solution = solutions.get_next_unchecked(exercise_id)
     next_solution_id = getattr(next_solution, 'id', None)
