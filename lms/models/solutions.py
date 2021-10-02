@@ -65,7 +65,9 @@ def get_message_and_addressee(
     return msg, addressee
 
 
-def mark_as_checked(solution_id: int, checker_id: int, grade_id: int) -> bool:
+def mark_as_checked(
+    solution_id: int, checker_id: int, grade_id: Optional[int] = None,
+) -> bool:
     checked_solution: Solution = Solution.get_by_id(solution_id)
     is_updated = checked_solution.mark_as_checked(
         grade_id=grade_id, by=checker_id,

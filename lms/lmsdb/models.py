@@ -365,31 +365,11 @@ class SolutionStatusView(enum.Enum):
         return tuple((choice.name, choice.value) for choice in choices)
 
 
-class SolutionGradeMarkColors(enum.Enum):
-    BLUE = 'primary'
-    GRAY = 'secondary'
-    GREEN = 'success'
-    RED = 'danger'
-    YELLOW = 'warning'
-    AZURE = 'info'
-    LIGHT = 'light'
-    DARK = 'dark'
-
-    @classmethod
-    def to_choices(cls: enum.EnumMeta) -> Tuple[Tuple[str, str], ...]:
-        choices = cast(Iterable[enum.Enum], tuple(cls))
-        return tuple((choice.value, choice.name) for choice in choices)
-
-
 class SolutionGradeMark(BaseModel):
     name = CharField()
     icon = CharField(null=True)
-    color = CharField(
-        choices=SolutionGradeMarkColors.to_choices(),
-        default=SolutionGradeMarkColors.BLUE.name,
-        index=True,
-    )
-    order = IntegerField(default=0, index=True)
+    color = CharField()
+    order = IntegerField(default=0, index=True, unique=True)
 
     @classmethod
     def grades(cls):
@@ -635,7 +615,7 @@ class Solution(BaseModel):
 
     def mark_as_checked(
         self,
-        grade_id: Optional[int],
+        grade_id: Optional[int] = None,
         by: Optional[Union[User, int]] = None,
     ) -> bool:
         return self.set_state(
@@ -1018,18 +998,18 @@ def create_basic_roles():
 
 
 def create_basic_grades():
-    colors = SolutionGradeMarkColors
     grades_dict = {
-        _('Excellent'): {'color': colors.GREEN.value, 'icon': 'star'},
-        _('Nice'): {'color': colors.BLUE.value, 'icon': 'check'},
-        _('Fail'): {'color': colors.RED.value, 'icon': 'exclamation'},
+        _('Excellent'): {'color': 'green', 'icon': 'star', 'order': 1},
+        _('Nice'): {'color': 'blue', 'icon': 'check', 'order': 2},
+        _('Try again'): {'color': 'red', 'icon': 'exclamation', 'order': 3},
         _('Plagiarism'): {
-            'color': colors.DARK.value, 'icon': 'exclamation-triangle',
+            'color': 'black', 'icon': 'exclamation-triangle', 'order': 4,
         },
     }
     for grade, values in grades_dict.items():
         SolutionGradeMark.create(
             name=grade, icon=values.get('icon'), color=values.get('color'),
+            order=values.get('order'),
         )
 
 

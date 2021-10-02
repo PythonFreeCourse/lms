@@ -1,6 +1,7 @@
 function trackFinished(exerciseId, solutionId, element) {
   element.addEventListener('click', () => {
-    const solutionGrade = document.querySelector('input[name="grade-mark"]:checked').value;
+    const grade = document.querySelector('input[name="grade-mark"]:checked');
+    const gradeValue = grade.value;
     const xhr = new XMLHttpRequest();
     xhr.open('POST', `/checked/${exerciseId}/${solutionId}`, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -20,7 +21,7 @@ function trackFinished(exerciseId, solutionId, element) {
     };
 
     xhr.send(JSON.stringify({
-      grade: solutionGrade,
+      grade: gradeValue,
     }));
   });
 }
