@@ -69,8 +69,7 @@ class GitService:
                 user=self._user,
             )
 
-        res = self.build_response(data_out, git_operation)
-        return res
+        return self.build_response(data_out, git_operation)
 
     def _execute_git_operation(self, git_operation: _GitOperation) -> bytes:
         proc = subprocess.Popen(  # noqa: S603
