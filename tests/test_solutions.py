@@ -1,3 +1,5 @@
+from lms.models.errors import ResourceNotFound
+from lms.models.solutions import get_view_parameters
 from unittest import mock
 
 from flask import json
@@ -5,7 +7,8 @@ import pytest
 
 from lms.lmsdb import models
 from lms.lmsdb.models import (
-    Comment, Exercise, SharedSolution, Solution, SolutionStatusView, User,
+    Comment, Course, Exercise, SharedSolution,
+    Solution, SolutionStatusView, User,
 )
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmsweb import routes
@@ -147,12 +150,13 @@ class TestSolutionBridge:
 
     @staticmethod
     def test_get_next_unchecked(
+        course: Course,
         student_user: User,
         exercise: Exercise,
         staff_user: User,
     ):
         student_user2 = conftest.create_student_user(index=1)
-        exercise2 = conftest.create_exercise(3)
+        exercise2 = conftest.create_exercise(course, 2, index=3)
         solution1 = conftest.create_solution(exercise, student_user)
         solution2 = conftest.create_solution(exercise2, student_user)
         solution3 = conftest.create_solution(exercise, student_user2)
@@ -186,9 +190,11 @@ class TestSolutionBridge:
         assert unchecked is None
 
     @staticmethod
-    def test_start_checking(exercise: Exercise, student_user: User):
+    def test_start_checking(
+        course: Course, exercise: Exercise, student_user: User,
+    ):
         student_user2 = conftest.create_student_user(index=1)
-        exercise2 = conftest.create_exercise(1)
+        exercise2 = conftest.create_exercise(course, 2, index=1)
         solution1 = conftest.create_solution(exercise, student_user)
         solution2 = conftest.create_solution(exercise2, student_user)
         solution3 = conftest.create_solution(exercise, student_user2)
@@ -502,6 +508,26 @@ class TestSolutionBridge:
         staff_client = conftest.get_logged_user(staff_user.username)
         view_response = staff_client.get(f'{routes.SOLUTIONS}/{solution.id}')
         assert view_response.status_code == 200
+
+    @staticmethod
+    def test_send_page(
+        student_user: User, course: Course, exercise: Exercise,
+    ):
+        course2 = conftest.create_course(2)
+        exercise2 = conftest.create_exercise(course2, 1)
+        conftest.create_usercourse(student_user, course)
+        client = conftest.get_logged_user(student_user.username)
+        success_send_response = client.get(f'send/{course.id}')
+        assert success_send_response.status_code == 200
+
+        success_send_response2 = client.get(f'send/{course.id}/{exercise.id}')
+        assert success_send_response2.status_code == 200
+
+        fail_send_response = client.get(f'send/{course2.id}')
+        assert fail_send_response.status_code == 403
+
+        fail_send_response = client.get(f'send/{course2.id}/{exercise2.id}')
+        assert fail_send_response.status_code == 403
 
     @staticmethod
     def test_manager_reset_state_expect_exceptions(
