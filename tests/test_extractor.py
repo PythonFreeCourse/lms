@@ -89,7 +89,7 @@ class TestExtractor:
             yield open(Path(SAMPLES_DIR) / file_name)
 
     @staticmethod
-    def get_bytes_io_file(file_name) -> BytesIO:
+    def get_bytes_io_file(file_name: str) -> Tuple[BytesIO, str]:
         with open(Path(SAMPLES_DIR) / file_name, 'br') as open_file:
             return BytesIO(open_file.read()), file_name
 

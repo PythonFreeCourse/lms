@@ -181,3 +181,7 @@ class TestUser:
     def test_user_registered_to_course(student_user: User, course: Course):
         conftest.create_usercourse(student_user, course)
         assert course.has_user(student_user)
+
+        course2 = conftest.create_course(index=1)
+        assert not course2.has_user(student_user)
+

@@ -135,7 +135,7 @@ class Role(BaseModel):
 class Course(BaseModel):
     name = CharField(unique=True)
     date = DateTimeField(default=datetime.now)
-    close_date = DateTimeField(null=True)
+    end_date = DateTimeField(null=True)
     close_registration_date = DateTimeField(default=datetime.now)
     invite_code = CharField(null=True)
     is_public = BooleanField(default=False)
@@ -154,7 +154,7 @@ class Course(BaseModel):
         )
 
     def __str__(self):
-        return f'{self.name}: {self.date} - {self.close_date}'
+        return f'{self.name}: {self.date} - {self.end_date}'
 
 
 class User(UserMixin, BaseModel):
@@ -355,7 +355,7 @@ class Exercise(BaseModel):
     notebook_num = IntegerField(default=0)
     order = IntegerField(default=0, index=True)
     course = ForeignKeyField(Course, backref='exercise')
-    number = IntegerField()
+    number = IntegerField(default=1)
 
     class Meta:
         indexes = (
@@ -366,6 +366,14 @@ class Exercise(BaseModel):
         if self.due_date is None:
             return not self.is_archived
         return datetime.now() < self.due_date and not self.is_archived
+
+    @classmethod
+    def get_highest_number(cls):
+        return cls.select(fn.MAX(cls.number)).scalar()
+
+    @classmethod
+    def is_number_exists(cls, number: int) -> bool:
+        return cls.select().where(cls.number == number).exists()
 
     @classmethod
     def get_objects(
@@ -408,6 +416,14 @@ class Exercise(BaseModel):
 
     def __str__(self):
         return self.subject
+
+
+@pre_save(sender=Exercise)
+def exercise_number_save_handler(model_class, instance, created):
+    """Change the exercise number to the highest consecutive number."""
+
+    if model_class.is_number_exists(instance.number):
+        instance.number = model_class.get_highest_number() + 1
 
 
 class SolutionState(enum.Enum):
