@@ -70,9 +70,7 @@ class TestSendSolutionFromGit:
         headers = (
             ('Authorization', f'Basic {encoded_credentials}'),
         )
-        query_string = None
-        if service is not None:
-            query_string = {'service': service}
+        query_string = {'service': service} if service is not None else None
         return getattr(client, method_name)(url, query_string=query_string, headers=headers, data=data)
 
     def test_not_authorized_access(self, exercise: models.Exercise, student_user: models.User):
