@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-10-02 12:46+0300\n"
+"POT-Creation-Date: 2021-10-03 09:13+0300\n"
 "PO-Revision-Date: 2021-09-29 11:30+0300\n"
 "Last-Translator: Or Ronai\n"
 "Language: he\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.1\n"
 
-#: lmsdb/models.py:764
+#: lmsdb/models.py:781
 msgid "Fatal error"
 msgstr "כישלון חמור"
 
@@ -418,7 +418,7 @@ msgid "It's important for us that all exercises will be checked by human eye."
 msgstr "חשוב לנו שכל תרגיל יעבור בדיקה של עין אנושית."
 
 #: templates/view.html:18
-msgid "Presenter"
+msgid "Solver"
 msgstr "מגיש"
 
 #: templates/view.html:24

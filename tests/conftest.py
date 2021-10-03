@@ -16,7 +16,7 @@ import pytest
 
 from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Exercise, Note, Notification, Role,
-    RoleOptions, SharedSolution, Solution, SolutionEvaluation, User,
+    RoleOptions, SharedSolution, Solution, SolutionAssessment, User,
 )
 from lms.extractors.base import File
 from lms.lmstests.public import celery_app as public_app
@@ -46,8 +46,8 @@ def populate_roles():
 
 
 @pytest.fixture(autouse=True, scope='session')
-def populate_evaluations():
-    evaluations_dict = {
+def populate_assessments():
+    assessments_dict = {
         'Excellent': {'color': 'green', 'icon': 'star', 'order': 1},
         'Nice': {'color': 'blue', 'icon': 'check', 'order': 2},
         'Try again': {'color': 'red', 'icon': 'exclamation', 'order': 3},
@@ -55,8 +55,8 @@ def populate_evaluations():
             'color': 'black', 'icon': 'exclamation-triangle', 'order': 4,
         },
     }
-    for name, values in evaluations_dict.items():
-        SolutionEvaluation.create(
+    for name, values in assessments_dict.items():
+        SolutionAssessment.create(
             name=name, icon=values.get('icon'), color=values.get('color'),
             active_color='white', order=values.get('order'),
         )

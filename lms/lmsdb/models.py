@@ -24,7 +24,8 @@ from werkzeug.security import (
 from lms.lmsdb import database_config
 from lms.models.errors import AlreadyExists
 from lms.utils import hashing
-from lms.utils.consts import COLORS
+from lms.utils.colors import get_hex_color
+from lms.utils.consts import DEFAULT_ACTIVE_COLOR, DEFAULT_COLOR
 from lms.utils.log import log
 
 
@@ -366,7 +367,7 @@ class SolutionStatusView(enum.Enum):
         return tuple((choice.name, choice.value) for choice in choices)
 
 
-class SolutionEvaluation(BaseModel):
+class SolutionAssessment(BaseModel):
     name = CharField()
     icon = CharField(null=True)
     color = CharField()
@@ -374,24 +375,26 @@ class SolutionEvaluation(BaseModel):
     order = IntegerField(default=0, index=True, unique=True)
 
     @classmethod
-    def get_evaluations(cls):
+    def get_assessments(cls):
         return cls.select().order_by(cls.order)
 
     def __str__(self):
         return self.name
 
 
-@pre_save(sender=SolutionEvaluation)
-def evaluation_on_save_handler(_model_class, instance, created):
+@pre_save(sender=SolutionAssessment)
+def assessment_on_save_handler(_model_class, instance, created):
     """Change colors to hex."""
 
-    is_color_changed = not instance.color.startswith('#')
-    if created or is_color_changed:
-        instance.color = COLORS.get(instance.color, '#0d6efd')
+    try:
+        instance.color = get_hex_color(instance.color)
+    except ValueError:
+        instance.color = DEFAULT_COLOR
 
-    is_active_color_changed = not instance.active_color.startswith('#')
-    if created or is_active_color_changed:
-        instance.active_color = COLORS.get(instance.active_color, '#fff')
+    try:
+        instance.active_color = get_hex_color(instance.active_color)
+    except ValueError:
+        instance.active_color = DEFAULT_ACTIVE_COLOR
 
 
 class Solution(BaseModel):
@@ -418,8 +421,8 @@ class Solution(BaseModel):
         index=True,
     )
     last_time_view = DateTimeField(default=datetime.now, null=True, index=True)
-    evaluation = ForeignKeyField(
-        SolutionEvaluation, backref='solutions', null=True,
+    assessment = ForeignKeyField(
+        SolutionAssessment, backref='solutions', null=True,
     )
 
     @property
@@ -481,14 +484,14 @@ class Solution(BaseModel):
 
     def set_state(
         self, new_state: SolutionState,
-        evaluation: Optional[SolutionEvaluation] = None, **kwargs,
+        assessment: Optional[SolutionAssessment] = None, **kwargs,
     ) -> bool:
         # Optional: filter the old state of the object
         # to make sure that no two processes set the state together
         requested_solution = (Solution.id == self.id)
         updates_dict = {Solution.state.name: new_state.name}
-        if evaluation is not None:
-            updates_dict[Solution.evaluation.name] = evaluation
+        if assessment is not None:
+            updates_dict[Solution.assessment.name] = assessment
         changes = Solution.update(
             **updates_dict, **kwargs,
         ).where(requested_solution)
@@ -513,7 +516,7 @@ class Solution(BaseModel):
         solutions = (
             cls
             .select(
-                cls.exercise, cls.id, cls.state, cls.checker, cls.evaluation,
+                cls.exercise, cls.id, cls.state, cls.checker, cls.assessment,
             )
             .where(cls.exercise.in_(db_exercises), cls.solver == user_id)
             .order_by(cls.submission_timestamp.desc())
@@ -526,8 +529,8 @@ class Solution(BaseModel):
                 exercise['comments_num'] = len(solution.staff_comments)
                 if solution.is_checked and solution.checker:
                     exercise['checker'] = solution.checker.fullname
-                if solution.evaluation:
-                    exercise['evaluation'] = solution.evaluation.name
+                if solution.assessment:
+                    exercise['assessment'] = solution.assessment.name
         return tuple(exercises.values())
 
     @property
@@ -630,13 +633,13 @@ class Solution(BaseModel):
 
     def mark_as_checked(
         self,
-        evaluation_id: Optional[int] = None,
+        assessment_id: Optional[int] = None,
         by: Optional[Union[User, int]] = None,
     ) -> bool:
         return self.set_state(
             Solution.STATES.DONE,
-            SolutionEvaluation.get_or_none(
-                SolutionEvaluation.id == evaluation_id,
+            SolutionAssessment.get_or_none(
+                SolutionAssessment.id == assessment_id,
             ),
             checker=by,
         )
@@ -1014,8 +1017,8 @@ def create_basic_roles():
         Role.create(name=role.value)
 
 
-def create_basic_evaluations():
-    evaluations_dict = {
+def create_basic_assessments():
+    assessments_dict = {
         'Excellent': {'color': 'green', 'icon': 'star', 'order': 1},
         'Nice': {'color': 'blue', 'icon': 'check', 'order': 2},
         'Try again': {'color': 'red', 'icon': 'exclamation', 'order': 3},
@@ -1023,8 +1026,8 @@ def create_basic_evaluations():
             'color': 'black', 'icon': 'exclamation-triangle', 'order': 4,
         },
     }
-    for name, values in evaluations_dict.items():
-        SolutionEvaluation.create(
+    for name, values in assessments_dict.items():
+        SolutionAssessment.create(
             name=name, icon=values.get('icon'), color=values.get('color'),
             active_color='white', order=values.get('order'),
         )

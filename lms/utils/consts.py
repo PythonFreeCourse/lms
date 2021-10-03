@@ -13,3 +13,5 @@ COLORS = {
     'teal': '#20c997', 'orange': '#fd7e14', 'pink': '#d63384',
     'purple': '#6f42c1', 'indigo': '#6610f2', 'light': '#f8f9fa',
 }
+DEFAULT_COLOR = '#0d6efd'  # primary
+DEFAULT_ACTIVE_COLOR = '#fff'  # white

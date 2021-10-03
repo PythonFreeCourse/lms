@@ -1,7 +1,7 @@
 function trackFinished(exerciseId, solutionId, element) {
   element.addEventListener('click', () => {
-    const evaluation = document.querySelector('input[name="evaluation"]:checked');
-    const evaluationValue = evaluation.value;
+    const assessment = document.querySelector('input[name="assessment"]:checked');
+    const assessmentValue = assessment.value;
     const xhr = new XMLHttpRequest();
     xhr.open('POST', `/checked/${exerciseId}/${solutionId}`, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -21,7 +21,7 @@ function trackFinished(exerciseId, solutionId, element) {
     };
 
     xhr.send(JSON.stringify({
-      evaluation: evaluationValue,
+      assessment: assessmentValue,
     }));
   });
 }

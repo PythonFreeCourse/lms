@@ -15,10 +15,10 @@
         <p class="unchecked-msg {{ direction }}"><strong>{{ _("Your solution hasn't been checked.") }}</strong> {{ _("It's important for us that all exercises will be checked by human eye.") }}</p>
       {% endif %}
     {% else %}
-      <p id="solver"><strong>{{ _('Presenter') }}:</strong> <a href="/user/{{ solution['solver']['id'] }}">{{ solution['solver']['fullname'] | e }}</a></p>
+      <p id="solver"><strong>{{ _('Solver') }}:</strong> <a href="/user/{{ solution['solver']['id'] }}">{{ solution['solver']['fullname'] | e }}</a></p>
     {% endif %}
-    {% if solution.evaluation and not shared_url %}
-      <p id="evaluation"><strong>{{ _('Verbal note') }}:</strong>{% if solution.evaluation.icon %} <i class="fa fa-{{ solution.evaluation.icon | e }}"></i>{% endif %} {{ solution.evaluation.name | e }}</p>
+    {% if solution.assessment and not shared_url %}
+      <p id="assessment"><strong>{{ _('Verbal note') }}:</strong>{% if solution.assessment.icon %} <i class="fa fa-{{ solution.assessment.icon | e }}"></i>{% endif %} {{ solution.assessment.name | e }}</p>
     {% endif %}
     {% if not shared_url %}
     <nav id="versions" aria-label="{{ _('Navigate in solution versions') }}">
@@ -100,12 +100,12 @@
     </div>
     {% if is_manager and not shared_url %}
     <div id="popular-comments">
-      <div id="exercise-evaluation" class="{{ direction }}">
+      <div id="exercise-assessment" class="{{ direction }}">
         <h2>{{ _('Verbal note') }}</h2>
-        <div class="btn-group-vertical" id="solution-evaluation" role="group" aria-label="evaluations radio toggle button group">
-          {% for evaluation in evaluations %}
-            <input type="radio" class="btn-check" name="evaluation" id="btnradio{{ loop.index }}" autocomplete="off" value="{{ evaluation.id }}" {%- if solution.evaluation.name == evaluation.name or loop.first %}checked{% endif -%}>
-            <label class="btn btn-outline" style="--color: {{ evaluation.color }}; --active-color: {{ evaluation.active_color }};" for="btnradio{{ loop.index }}">{% if evaluation.icon %}<i class="fa fa-{{ evaluation.icon }}"></i> {% endif %}{{ evaluation.name }}</label>
+        <div class="btn-group-vertical" id="solution-assessment" role="group" aria-label="assessments radio toggle button group">
+          {% for assessment in assessments %}
+            <input type="radio" class="btn-check" name="assessment" id="btnradio{{ loop.index }}" autocomplete="off" value="{{ assessment.id }}" {%- if solution.assessment.name == assessment.name or loop.first %}checked{% endif -%}>
+            <label class="btn btn-outline" style="--color: {{ assessment.color }}; --active-color: {{ assessment.active_color }};" for="btnradio{{ loop.index }}">{% if assessment.icon %}<i class="fa fa-{{ assessment.icon }}"></i> {% endif %}{{ assessment.name }}</label>
           {% endfor %}
         </div>
       </div>
