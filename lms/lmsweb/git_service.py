@@ -45,43 +45,16 @@ class GitService:
 
     def handle_operation(self) -> flask.Response:
         git_operation = self._extract_git_operation()
+        git_repository_folder = os.path.join(self.repository_folder, 'config')
 
-        git_repository_folder = os.path.join(self.repository_folder, '.git')
         first_time_repository = not os.path.exists(git_repository_folder)
         if first_time_repository:
-            os.makedirs(self.repository_folder, exist_ok=True)
-            proc = subprocess.Popen(  # noqa: S603
-                args=['git', 'init', '--bare'],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                cwd=self.repository_folder,
-            )
-            if proc.wait() != 0:
-                _logger.error(
-                    'Failed to execute command. stdout=%s\nstderr=%s',
-                    proc.stdout.read(), proc.stderr.read(),
-                )
-                raise EnvironmentError
+            self._initialize_bare_repository()
 
         if not git_operation.supported:
             raise EnvironmentError
 
-        proc = subprocess.Popen(  # noqa: S603
-            args=git_operation.service_command,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            cwd=self._base_repository_folder,
-        )
-        data_out, _ = proc.communicate(self._request.data, 20)
-
-        if proc.wait() != 0:
-            _logger.error(
-                'Failed to execute command. stdout=%s\nstderr=%s',
-                proc.stdout.read(), proc.stderr.read(),
-            )
-            raise EnvironmentError
+        data_out = self._execute_git_operation(git_operation)
 
         if git_operation.format_response:
             data_out = git_operation.format_response(data_out)
@@ -99,13 +72,45 @@ class GitService:
         res = self.build_response(data_out, git_operation)
         return res
 
+    def _execute_git_operation(self, git_operation: _GitOperation) -> bytes:
+        proc = subprocess.Popen(  # noqa: S603
+            args=git_operation.service_command,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=self._base_repository_folder,
+        )
+        data_out, _ = proc.communicate(self._request.data, 20)
+        if proc.wait() != 0:
+            _logger.error(
+                'Failed to execute command. stdout=%s\nstderr=%s',
+                proc.stdout.read(), proc.stderr.read(),
+            )
+            raise EnvironmentError
+        return data_out
+
+    def _initialize_bare_repository(self):
+        os.makedirs(self.repository_folder, exist_ok=True)
+        proc = subprocess.Popen(  # noqa: S603
+            args=['git', 'init', '--bare'],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=self.repository_folder,
+        )
+        if proc.wait() != 0:
+            _logger.error(
+                'Failed to execute command. stdout=%s\nstderr=%s',
+                proc.stdout.read(), proc.stderr.read(),
+            )
+            raise EnvironmentError
+
     @staticmethod
     def build_response(
             data_out: bytes,
             git_operation: _GitOperation,
     ) -> flask.Response:
         res = flask.make_response(data_out)
-        res.headers['Expires'] = 'Fri, 01 Jan 1980 00:00:00 GMT'
         res.headers['Pragma'] = 'no-cache'
         res.headers['Cache-Control'] = 'no-cache, max-age=0, must-revalidate'
         res.headers['Content-Type'] = git_operation.response_content_type
