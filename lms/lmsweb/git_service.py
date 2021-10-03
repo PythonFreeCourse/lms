@@ -28,7 +28,7 @@ class GitService:
             user: models.User,
             exercise_id: int,
             request: flask.Request,
-            base_repository_folder,
+            base_repository_folder: str,
     ):
         self._base_repository_folder = base_repository_folder
         self._user = user
@@ -36,7 +36,7 @@ class GitService:
         self._request = request
 
     @property
-    def project_name(self):
+    def project_name(self) -> str:
         return f'{self._exercise_id}-{self._user.id}'
 
     @property
@@ -89,7 +89,7 @@ class GitService:
             raise EnvironmentError
         return data_out
 
-    def _initialize_bare_repository(self):
+    def _initialize_bare_repository(self) -> None:
         os.makedirs(self.repository_folder, exist_ok=True)
         proc = subprocess.Popen(  # noqa: S603
             args=['git', 'init', '--bare'],
