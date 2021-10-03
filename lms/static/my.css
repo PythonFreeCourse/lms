@@ -162,14 +162,6 @@ a {
   width: 3rem;
 }
 
-/* .rtl-language > .exercise-number {
-  margin-left: 2em;
-}
-
-.ltr-language > .exercise-number {
-  margin-right: 2em;
-} */
-
 .exercise-name {
   align-items: center;
   display: flex;
