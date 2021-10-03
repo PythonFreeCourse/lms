@@ -15,8 +15,8 @@ from peewee import SqliteDatabase
 import pytest
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, CommentText, Exercise, Note, Notification, Role,
-    RoleOptions, SharedSolution, Solution, User,
+    ALL_MODELS, Comment, CommentText, Course, Exercise, Note, Notification,
+    Role, RoleOptions, SharedSolution, Solution, User, UserCourse,
 )
 from lms.extractors.base import File
 from lms.lmstests.public import celery_app as public_app
@@ -281,11 +281,30 @@ def create_notification(
     )
 
 
-def create_exercise(index: int = 0, is_archived: bool = False) -> Exercise:
+def create_course(index: int = 0) -> Course:
+    return Course.create(
+        number=index,
+        name=f'course {index}',
+        date=datetime.datetime.now(),
+    )
+
+
+def create_usercourse(user: User, course: Course) -> UserCourse:
+    return UserCourse.create(
+        user=user,
+        course=course,
+    )
+
+
+def create_exercise(
+    course: Course, number: int, index: int = 0, is_archived: bool = False,
+) -> Exercise:
     return Exercise.create(
         subject=f'python {index}',
         date=datetime.datetime.now(),
         is_archived=is_archived,
+        course=course,
+        number=number,
     )
 
 
@@ -311,8 +330,13 @@ def create_note(
 
 
 @pytest.fixture()
-def exercise() -> Exercise:
-    return create_exercise()
+def course() -> Course:
+    return create_course()
+
+
+@pytest.fixture()
+def exercise(course: Course) -> Exercise:
+    return create_exercise(course, 1)
 
 
 def create_solution(

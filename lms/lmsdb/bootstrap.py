@@ -226,6 +226,27 @@ def _add_api_keys_to_users_table(table: Model, _column: Field) -> None:
             user.save()
 
 
+def _add_course_and_numbers_to_exercises_table(
+    table: Model, course: models.Course,
+) -> None:
+    log.info(
+        'Adding Course, Numbers for exercises, might take some extra time...',
+    )
+    with db_config.database.transaction():
+        for exercise in table:
+            exercise.number = exercise.id
+            exercise.course = course
+            exercise.save()
+
+
+def _create_usercourses_objects(table: Model, course: models.Course) -> None:
+    log.info('Adding UserCourse for all users, might take some extra time...')
+    UserCourse = models.UserCourse
+    with db_config.database.transaction():
+        for user in table:
+            UserCourse.create(user=user, course=course)
+
+
 def _add_uuid_to_users_table(table: Model, _column: Field) -> None:
     log.info('Adding UUIDs for all users, might take some extra time...')
     with db_config.database.transaction():
@@ -238,6 +259,32 @@ def _api_keys_migration() -> bool:
     User = models.User
     _add_not_null_column(User, User.api_key, _add_api_keys_to_users_table)
     return True
+
+
+def _last_course_viewed_migration() -> bool:
+    User = models.User
+    _add_not_null_column(User, User.last_course_viewed)
+    return True
+
+
+def _exercise_course_migration(course: models.Course) -> bool:
+    Exercise = models.Exercise
+    _create_usercourses_objects(models.User, course)
+    _add_course_and_numbers_to_exercises_table(Exercise, course)
+    return True
+
+
+def _add_exercise_course_id_and_number_columns_constraint() -> bool:
+    Exercise = models.Exercise
+    migrator = db_config.get_migrator_instance()
+    with db_config.database.transaction():
+        course_not_exists = _add_not_null_column(Exercise, Exercise.course)
+        number_not_exists = _add_not_null_column(Exercise, Exercise.number)
+        if course_not_exists and number_not_exists:
+            migrate(
+                migrator.add_index('exercise', ('course_id', 'number'), True),
+            )
+        db_config.database.commit()
 
 
 def _last_status_view_migration() -> bool:
@@ -254,11 +301,15 @@ def _uuid_migration() -> bool:
 
 def main():
     with models.database.connection_context():
+        if models.database.table_exists(models.Exercise.__name__.lower()):
+            _add_exercise_course_id_and_number_columns_constraint()
+
         if models.database.table_exists(models.Solution.__name__.lower()):
             _last_status_view_migration()
 
         if models.database.table_exists(models.User.__name__.lower()):
             _api_keys_migration()
+            _last_course_viewed_migration()
             _uuid_migration()
 
         models.database.create_tables(models.ALL_MODELS, safe=True)
@@ -267,6 +318,9 @@ def main():
             models.create_basic_roles()
         if models.User.select().count() == 0:
             models.create_demo_users()
+        if models.Course.select().count() == 0:
+            course = models.create_basic_course()
+            _exercise_course_migration(course)
 
     text_fixer.fix_texts()
     import_tests.load_tests_from_path('/app_dir/notebooks-tests')

@@ -150,7 +150,7 @@ a {
   justify-content: end;
 }
 
-.exercise-id {
+.exercise-number {
   align-items: center;
   border-radius: 100%;
   border: 1px solid;
@@ -160,14 +160,6 @@ a {
   overflow: hidden;
   text-align: center;
   width: 3rem;
-}
-
-.rtl-language > .exercise-id {
-  margin-left: 2em;
-}
-
-.ltr-language > .exercise-id {
-  margin-right: 2em;
 }
 
 .exercise-name {
@@ -778,12 +770,19 @@ code .grader-add .fa {
   margin-inline-end: 1rem;
 }
 
-#notification-icon {
+#courses-list {
+  overflow-y: scroll;
+  max-height: 10em;
+}
+
+#notification-icon,
+#courses-icon {
   cursor: pointer;
 }
 
 /*
-.notification {
+.notification,
+.course {
   flex-direction: column;
   text-align: start;
 }
@@ -896,7 +895,7 @@ code .grader-add .fa {
 }
 
 @media screen and (max-width: 768px) {
-  .exercise-id {
+  .exercise-number {
     display: none;
   }
   .which-notebook {

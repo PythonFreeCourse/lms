@@ -38,12 +38,34 @@
             </li>
           </ul>
         </li>
-        <li class="nav-item">
-          <a href="/send" class="nav-link">
-            <i class="fa fa-upload" aria-hidden="true"></i>
-            {{ _('Upload Exercises') }}
+        <li class="nav-item dropdown">
+          <a id="courses-icon" href="#" class="nav-link dropdown-toggle" aria-expanded="false" aria-haspopup="true" aria-label="Courses List" role="button" data-bs-toggle="dropdown">
+            <i class="fa fa-graduation-cap" aria-hidden="true"></i>
+            {% if not current_user.last_course_viewed %}
+              {{ _('Courses List') }}
+            {% else %}
+              {{ current_user.last_course_viewed.name | e }}
+            {% endif %}
           </a>
+          <ul id="courses-list" aria-labelledby="courses-icon" class="dropdown-menu">
+            {% for course in current_user.get_courses() %}
+              <li class="course dropdown-item">
+                <i class="fa fa-book" aria-hidden="true"></i>
+                <a href="{{ url_for('change_last_course_viewed', course_id=course.id) }}" class="course-text">
+                  {{ course.name | e }}
+                </a>
+              </li>
+            {% endfor -%}
+          </ul>
         </li>
+        {%- if current_user.last_course_viewed %}
+          <li class="nav-item">
+            <a href="{{ url_for('send_', course_id=current_user.last_course_viewed.id) }}" class="nav-link">
+              <i class="fa fa-upload" aria-hidden="true"></i>
+              {{ _('Upload Exercises') }}
+            </a>
+          </li>
+        {% endif -%}
         {%- if not exercises or fetch_archived %}
         <li class="nav-item">
           <a href="/exercises" class="nav-link">

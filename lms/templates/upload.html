@@ -6,12 +6,12 @@
   <div id="send-page" class="page">
     <h1 id="send-head" class="text-center">{{ _('Upload Notebooks') }}</h1>
     <div id="uploads">
-      <form action="/upload" class="dropzone needsclick dz-clickable" id="demo-upload">
+      <form action="{{ url_for('upload_page', course_id=course_id) }}" class="dropzone needsclick dz-clickable" id="demo-upload">
         <div class="dz-message needsclick">
           <button type="button" class="dz-button">{{ _('Drag here the notebook file or click and choose it from your computer.') }}</button>
         </div>
       </form>
-      <a id="back-to-exercises" class="btn btn-primary btn-lg" href="/exercises">{{ _('Back to Exercises List') }}</a>
+      <a id="back-to-exercises" class="btn btn-primary btn-lg" href="{{ url_for('exercises_page') }}">{{ _('Back to Exercises List') }}</a>
     </div>
     <div class="feedback-message feedback-hidden {{ direction }}" id="upload-feedbacks">
       <span class="upload-feedback feedback-hidden" id="upload-matches">{{ _('Matches') }}: </span>

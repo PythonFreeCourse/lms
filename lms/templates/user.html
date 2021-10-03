@@ -26,6 +26,7 @@
           <thead>
             <tr>
               <th scope="col">#</th>
+              <th scope="col">{{ _('Course name') }}</th>
               <th scope="col">{{ _('Exercise name') }}</th>
               <th scope="col">{{ _('Submission status') }}</th>
               <th scope="col">{{ _('Submission') }}</th>
@@ -33,17 +34,18 @@
             </tr>
           </thead>
           <tbody>
-            {%- for solution in solutions %}
-            <tr>
-              <th scope="row">{{ solution.exercise_id | e }}</th>
-              <td>{{ solution.exercise_name | e }}</td>
-              <td>
-                {{ _('Checked') if solution.is_checked else _('Submitted') if solution.solution_id else _('Not submitted') }}
-              </td>
-              <td><a href="/view/{{ solution.solution_id }}">{{ solution.solution_id }}</a></td>
-              <td>{{ solution.get('checker', '') | e }}</a></td>
-            </tr>
-            {% endfor -%}
+            {% for solution in solutions %}
+              <tr>
+                <th scope="row">{{ solution.exercise_number | e }}</th>
+                <td>{{ solution.course_name | e }}</td>
+                <td>{{ solution.exercise_name | e }}</td>
+                <td>
+                  {{ _('Checked') if solution.is_checked else _('Submitted') if solution.solution_id else _('Not submitted') }}
+                </td>
+                <td><a href="/view/{{ solution.solution_id }}">{{ solution.solution_id }}</a></td>
+                <td>{{ solution.get('checker', '') | e }}</a></td>
+              </tr>
+            {% endfor %}
           </tbody>
         </table>
       </div>

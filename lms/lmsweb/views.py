@@ -15,8 +15,8 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, Note, Role, RoleOptions, SharedSolution,
-    Solution, SolutionFile, User, database,
+    ALL_MODELS, Comment, Course, Note, Role, RoleOptions, SharedSolution,
+    Solution, SolutionFile, User, UserCourse, database,
 )
 from lms.lmsweb import babel, limiter, routes, webapp
 from lms.lmsweb.admin import (
@@ -328,6 +328,20 @@ def status():
     )
 
 
+@webapp.route('/course/<int:course_id>')
+@login_required
+def change_last_course_viewed(course_id: int):
+    course = Course.get_or_none(course_id)
+    if course is None:
+        return fail(404, f'No such course {course_id}.')
+    user = User.get(User.id == current_user.id)
+    if not UserCourse.is_user_registered(user.id, course.id):
+        return fail(403, "You're not allowed to access this page.")
+    user.last_course_viewed = course
+    user.save()
+    return redirect(url_for('exercises_page'))
+
+
 @webapp.route('/exercises')
 @login_required
 def exercises_page():
@@ -463,10 +477,12 @@ def comment():
     return fail(400, f'Unknown or unset act value "{act}".')
 
 
-@webapp.route('/send/<int:_exercise_id>')
+@webapp.route('/send/<int:course_id>/<int:_exercise_number>')
 @login_required
-def send(_exercise_id):
-    return render_template('upload.html')
+def send(course_id: int, _exercise_number: Optional[int]):
+    if not UserCourse.is_user_registered(current_user.id, course_id):
+        return fail(403, "You aren't allowed to watch this page.")
+    return render_template('upload.html', course_id=course_id)
 
 
 @webapp.route('/user/<int:user_id>')
@@ -482,22 +498,26 @@ def user(user_id):
 
     return render_template(
         'user.html',
-        solutions=Solution.of_user(target_user.id, with_archived=True),
+        solutions=Solution.of_user(
+            target_user.id, with_archived=True, from_all_courses=True,
+        ),
         user=target_user,
         is_manager=is_manager,
         notes_options=Note.get_note_options(),
     )
 
 
-@webapp.route('/send', methods=['GET'])
+@webapp.route('/send/<int:course_id>', methods=['GET'])
 @login_required
-def send_():
-    return render_template('upload.html')
+def send_(course_id: int):
+    if not UserCourse.is_user_registered(current_user.id, course_id):
+        return fail(403, "You aren't allowed to watch this page.")
+    return render_template('upload.html', course_id=course_id)
 
 
-@webapp.route('/upload', methods=['POST'])
+@webapp.route('/upload/<int:course_id>', methods=['POST'])
 @login_required
-def upload_page():
+def upload_page(course_id: int):
     user_id = current_user.id
     user = User.get_or_none(User.id == user_id)  # should never happen
     if user is None:
@@ -512,7 +532,7 @@ def upload_page():
         return fail(422, 'No file was given.')
 
     try:
-        matches, misses = upload.new(user, file)
+        matches, misses = upload.new(user.id, course_id, file)
     except UploadError as e:
         log.debug(e)
         return fail(400, str(e))

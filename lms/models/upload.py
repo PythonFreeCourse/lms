@@ -23,22 +23,30 @@ def _is_uploaded_before(
 
 
 def _upload_to_db(
-        exercise_id: int,
-        user: User,
+        exercise_number: int,
+        course_id: int,
+        user_id: int,
         files: List[File],
         solution_hash: Optional[str] = None,
 ) -> Solution:
-    exercise = Exercise.get_or_none(exercise_id)
+    exercise = Exercise.get_or_none(course=course_id, number=exercise_number)
+    user = User.get_by_id(user_id)
     if exercise is None:
-        raise UploadError(f'No such exercise id: {exercise_id}')
+        raise UploadError(f'No such exercise id: {exercise_number}')
+    elif not user.has_course(course_id):
+        raise UploadError(
+            f'Exercise {exercise_number} is invalid for this user.',
+        )
     elif not exercise.open_for_new_solutions():
         raise UploadError(
-            f'Exercise {exercise_id} is closed for new solutions.')
+            f'Exercise {exercise_number} is closed for new solutions.')
 
     if solution_hash and _is_uploaded_before(user, exercise, solution_hash):
         raise AlreadyExists('You try to reupload an old solution.')
     elif not files:
-        raise UploadError(f'There are no files to upload for {exercise_id}.')
+        raise UploadError(
+            f'There are no files to upload for {exercise_number}.',
+        )
 
     return Solution.create_solution(
         exercise=exercise,
@@ -56,20 +64,24 @@ def _run_auto_checks(solution: Solution) -> None:
         check_ident.apply_async(args=(solution.id,))
 
 
-def new(user: User, file: FileStorage) -> Tuple[List[int], List[int]]:
+def new(
+    user_id: int, course_id: int, file: FileStorage,
+) -> Tuple[List[int], List[int]]:
     matches: List[int] = []
     misses: List[int] = []
     errors: List[Union[UploadError, AlreadyExists]] = []
-    for exercise_id, files, solution_hash in Extractor(file):
+    for exercise_number, files, solution_hash in Extractor(file):
         try:
-            solution = _upload_to_db(exercise_id, user, files, solution_hash)
+            solution = _upload_to_db(
+                exercise_number, course_id, user_id, files, solution_hash,
+            )
             _run_auto_checks(solution)
         except (UploadError, AlreadyExists) as e:
             log.debug(e)
             errors.append(e)
-            misses.append(exercise_id)
+            misses.append(exercise_number)
         else:
-            matches.append(exercise_id)
+            matches.append(exercise_number)
 
     if not matches and errors:
         raise UploadError(errors)

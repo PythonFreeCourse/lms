@@ -5,8 +5,8 @@ import string
 from collections import Counter
 from datetime import datetime
 from typing import (
-    Any, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple,
-    Type, Union, cast,
+    Any, Dict, Iterable, List, Optional,
+    TYPE_CHECKING, Tuple, Type, Union, cast,
 )
 from uuid import uuid4
 
@@ -132,6 +132,31 @@ class Role(BaseModel):
         return self.name == RoleOptions.VIEWER.value or self.is_manager
 
 
+class Course(BaseModel):
+    name = CharField(unique=True)
+    date = DateTimeField(default=datetime.now)
+    end_date = DateTimeField(null=True)
+    close_registration_date = DateTimeField(default=datetime.now)
+    invite_code = CharField(null=True)
+    is_public = BooleanField(default=False)
+
+    def has_user(self, user_id: int) -> bool:
+        return UserCourse.is_user_registered(user_id, self)
+
+    @classmethod
+    def fetch(cls, user: 'User') -> Iterable['Course']:
+        return (
+            cls
+            .select()
+            .join(UserCourse)
+            .where(UserCourse.user == user.id)
+            .order_by(Course.name.desc())
+        )
+
+    def __str__(self):
+        return f'{self.name}: {self.date} - {self.end_date}'
+
+
 class User(UserMixin, BaseModel):
     username = CharField(unique=True)
     fullname = CharField()
@@ -139,13 +164,17 @@ class User(UserMixin, BaseModel):
     password = CharField()
     role = ForeignKeyField(Role, backref='users')
     api_key = CharField()
+    last_course_viewed = ForeignKeyField(Course, null=True)
     uuid = UUIDField(default=uuid4, unique=True)
 
     def get_id(self):
         return str(self.uuid)
 
-    def is_password_valid(self, password):
+    def is_password_valid(self, password) -> bool:
         return check_password_hash(self.password, password)
+
+    def has_course(self, course_id: int) -> bool:
+        return UserCourse.is_user_registered(self, course_id)
 
     @classmethod
     def get_system_user(cls) -> 'User':
@@ -167,6 +196,9 @@ class User(UserMixin, BaseModel):
 
     def get_notifications(self) -> Iterable['Notification']:
         return Notification.fetch(self)
+
+    def get_courses(self) -> Iterable['Course']:
+        return Course.fetch(self)
 
     def notes(self) -> Iterable['Note']:
         fields = (
@@ -213,6 +245,24 @@ def on_save_handler(model_class, instance, created):
         if not instance.api_key:
             instance.api_key = model_class.random_password()
         instance.api_key = generate_password_hash(instance.api_key)
+
+
+class UserCourse(BaseModel):
+    user = ForeignKeyField(User, backref='usercourses')
+    course = ForeignKeyField(Course, backref='usercourses')
+    date = DateTimeField(default=datetime.now)
+
+    @classmethod
+    def is_user_registered(cls, user_id: int, course_id: int) -> bool:
+        return (
+            cls.
+            select()
+            .where(
+                cls.user == user_id,
+                cls.course == course_id,
+            )
+            .exists()
+        )
 
 
 class Notification(BaseModel):
@@ -304,6 +354,13 @@ class Exercise(BaseModel):
     due_date = DateTimeField(null=True)
     notebook_num = IntegerField(default=0)
     order = IntegerField(default=0, index=True)
+    course = ForeignKeyField(Course, backref='exercise')
+    number = IntegerField(default=1)
+
+    class Meta:
+        indexes = (
+            (('course_id', 'number'), True),
+        )
 
     def open_for_new_solutions(self) -> bool:
         if self.due_date is None:
@@ -311,8 +368,32 @@ class Exercise(BaseModel):
         return datetime.now() < self.due_date and not self.is_archived
 
     @classmethod
-    def get_objects(cls, fetch_archived: bool = False):
-        exercises = cls.select().order_by(Exercise.order)
+    def get_highest_number(cls):
+        return cls.select(fn.MAX(cls.number)).scalar()
+
+    @classmethod
+    def is_number_exists(cls, number: int) -> bool:
+        return cls.select().where(cls.number == number).exists()
+
+    @classmethod
+    def get_objects(
+        cls, user_id: int, fetch_archived: bool = False,
+        from_all_courses: bool = False,
+    ):
+        user = User.get(User.id == user_id)
+        exercises = (
+            cls
+            .select()
+            .join(Course)
+            .join(UserCourse)
+            .where(UserCourse.user == user_id)
+            .switch()
+            .order_by(UserCourse.date, Exercise.number, Exercise.order)
+        )
+        if not from_all_courses:
+            exercises = exercises.where(
+                UserCourse.course == user.last_course_viewed,
+            )
         if not fetch_archived:
             exercises = exercises.where(cls.is_archived == False)  # NOQA: E712
         return exercises
@@ -324,6 +405,9 @@ class Exercise(BaseModel):
             'is_archived': self.is_archived,
             'notebook': self.notebook_num,
             'due_date': self.due_date,
+            'exercise_number': self.number,
+            'course_id': self.course.id,
+            'course_name': self.course.name,
         }
 
     @staticmethod
@@ -332,6 +416,14 @@ class Exercise(BaseModel):
 
     def __str__(self):
         return self.subject
+
+
+@pre_save(sender=Exercise)
+def exercise_number_save_handler(model_class, instance, created):
+    """Change the exercise number to the highest consecutive number."""
+
+    if model_class.is_number_exists(instance.number):
+        instance.number = model_class.get_highest_number() + 1
 
 
 class SolutionState(enum.Enum):
@@ -469,10 +561,13 @@ class Solution(BaseModel):
     @classmethod
     def of_user(
         cls, user_id: int, with_archived: bool = False,
+        from_all_courses: bool = False,
     ) -> Iterable[Dict[str, Any]]:
-        db_exercises = Exercise.get_objects(fetch_archived=with_archived)
+        db_exercises = Exercise.get_objects(
+            user_id=user_id, fetch_archived=with_archived,
+            from_all_courses=from_all_courses,
+        )
         exercises = Exercise.as_dicts(db_exercises)
-
         solutions = (
             cls
             .select(cls.exercise, cls.id, cls.state, cls.checker)
@@ -946,7 +1041,7 @@ def generate_string(
     return ''.join(password)
 
 
-def create_demo_users():
+def create_demo_users() -> None:
     print('First run! Here are some users to get start with:')  # noqa: T001
     fields = ['username', 'fullname', 'mail_address', 'role']
     student_role = Role.by_name('Student')
@@ -964,9 +1059,13 @@ def create_demo_users():
         print(f"User: {user['username']}, Password: {password}")  # noqa: T001
 
 
-def create_basic_roles():
+def create_basic_roles() -> None:
     for role in RoleOptions:
         Role.create(name=role.value)
+
+
+def create_basic_course() -> Course:
+    return Course.create(name='Python Course', date=datetime.now())
 
 
 ALL_MODELS = BaseModel.__subclasses__()

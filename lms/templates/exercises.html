@@ -12,7 +12,7 @@
       {%- for exercise in exercises %}
       <div class="exercise">
         <div class="right-side {{ direction }}-language">
-          <div class="exercise-id">{{ exercise['exercise_id'] }}</div>
+          <div class="exercise-number me-3">{{ exercise['exercise_number'] }}</div>
           <div class="exercise-name"><div class="ex-title">{{ exercise['exercise_name'] | e }}</div></div>
         </div>
         <div class="left-side">
@@ -27,7 +27,7 @@
           </div>
           {%- endif %}
           {%- if exercise.get('is_checked') is none %}
-            {% set details = {'page': 'send', 'icon': 'upload', 'text': _('Send'), 'css': 'send', 'page_id': exercise['exercise_id']} %}
+            {% set details = {'page': 'send', 'icon': 'upload', 'text': _('Send'), 'css': 'send', 'page_id': exercise['course_id'] ~ '/' ~ exercise['exercise_id']} %}
           {% elif not exercise.get('is_checked') %}
             {% set details = {'page': 'view', 'icon': 'eye', 'text': _('View'), 'css': 'view', 'page_id': exercise['solution_id']} %}
           {% else %}
