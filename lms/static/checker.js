@@ -27,8 +27,8 @@ function trackFinished(exerciseId, solutionId, element) {
 }
 
 function trackAssessmentButtons() {
-  assessmentGroup = document.getElementById('solution-assessment');
-  assessmentElements = document.querySelectorAll('input[name="assessment"]');
+  const assessmentGroup = document.getElementById('solution-assessment');
+  const assessmentElements = document.querySelectorAll('input[name="assessment"]');
   Array.from(assessmentElements).forEach((item) => {
     item.addEventListener('click', () => {
       if (item.value == assessmentGroup.dataset.checkedid) {
