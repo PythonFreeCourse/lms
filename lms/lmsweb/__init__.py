@@ -3,8 +3,8 @@ import shutil
 import typing
 
 from flask import Flask
-from flask_httpauth import HTTPBasicAuth
 from flask_babel import Babel  # type: ignore
+from flask_httpauth import HTTPBasicAuth
 from flask_limiter import Limiter  # type: ignore
 from flask_limiter.util import get_remote_address  # type: ignore
 from flask_mail import Mail  # type: ignore
@@ -68,8 +68,6 @@ def get_password(username: str) -> typing.Optional[str]:
 def verify_password(username: str, client_password: str):
     username_username = models.User.username == username
     login_user = models.User.get_or_none(username_username)
-    if login_user is None:
-        return False
-    if not login_user.is_password_valid(client_password):
+    if login_user is None or not login_user.is_password_valid(client_password):
         return False
     return login_user

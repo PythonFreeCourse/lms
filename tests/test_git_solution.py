@@ -2,11 +2,12 @@ import base64
 import os.path
 import shutil
 import tempfile
+from unittest import mock
 
 from flask.testing import FlaskClient
 
 from lms.lmsdb import models
-from lms.lmsweb import config, webapp
+from lms.lmsweb import webapp
 from tests import conftest
 
 
@@ -38,26 +39,21 @@ class TestSendSolutionFromGit:
     GET_METHOD = FlaskClient.get.__name__
     POST_METHOD = FlaskClient.post.__name__
 
-    temp_folder = None
+    temp_folder = ''
 
-    @classmethod
-    def setup_class(cls):
-        cls.temp_folder = tempfile.mkdtemp()
+    def setup_method(self, _method: str) -> None:
+        self.temp_folder = tempfile.mkdtemp()
 
-    def setup_method(self, method):
-        config._REPOSITORY_FOLDER = os.path.join(self.temp_folder, method.__name__)
-
-    @classmethod
-    def teardown_class(cls):
-        if cls.temp_folder and os.path.exists(cls.temp_folder):
-            shutil.rmtree(cls.temp_folder)
+    def teardown_method(self, _method: str) -> None:
+        if self.temp_folder and os.path.exists(self.temp_folder):
+            shutil.rmtree(self.temp_folder)
 
     @staticmethod
     def _get_formatted_git_url(exercise: models.Exercise, rel_path: str) -> str:
         return f'/git/{exercise.id}.git/{rel_path}'
 
-    @staticmethod
     def _send_git_request(
+            self,
             username: str,
             method_name: str,
             url: str,
@@ -71,7 +67,10 @@ class TestSendSolutionFromGit:
             ('Authorization', f'Basic {encoded_credentials}'),
         )
         query_string = {'service': service} if service is not None else None
-        return getattr(client, method_name)(url, query_string=query_string, headers=headers, data=data)
+
+        # patch the REPOSITORY_FOLDER to make new repository every test
+        with mock.patch('lms.lmsweb.views.REPOSITORY_FOLDER', self.temp_folder):
+            return getattr(client, method_name)(url, query_string=query_string, headers=headers, data=data)
 
     def test_not_authorized_access(self, exercise: models.Exercise, student_user: models.User):
         client = conftest.get_logged_user(student_user.username)

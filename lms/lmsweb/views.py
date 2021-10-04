@@ -2,7 +2,7 @@ from typing import Any, Callable, Optional
 
 import arrow  # type: ignore
 from flask import (
-    jsonify, make_response, render_template, request,
+    Response, jsonify, make_response, render_template, request,
     send_from_directory, session, url_for,
 )
 from flask_babel import gettext as _  # type: ignore
@@ -24,7 +24,7 @@ from lms.lmsweb.admin import (
 )
 from lms.lmsweb.config import (
     CONFIRMATION_TIME, LANGUAGES, LIMITS_PER_HOUR,
-    LIMITS_PER_MINUTE, LOCALE, MAX_UPLOAD_SIZE, get_repository_folder,
+    LIMITS_PER_MINUTE, LOCALE, MAX_UPLOAD_SIZE, REPOSITORY_FOLDER,
 )
 from lms.lmsweb.forms.change_password import ChangePasswordForm
 from lms.lmsweb.forms.register import RegisterForm
@@ -547,14 +547,14 @@ def download(download_id: str):
 
 @webapp.route(f'{routes.GIT}/info/refs')
 @webapp.route(f'{routes.GIT}/git-receive-pack', methods=['POST'])
-@webapp.route(f'{routes.GIT}/git-upload-pack', methods=('POST',))
+@webapp.route(f'{routes.GIT}/git-upload-pack', methods=['POST'])
 @http_basic_auth.login_required
-def git_handler(exercise_id: int):
+def git_handler(exercise_id: int) -> Response:
     git_service = GitService(
         user=http_basic_auth.current_user(),
         exercise_id=exercise_id,
         request=request,
-        base_repository_folder=get_repository_folder(),
+        base_repository_folder=REPOSITORY_FOLDER,
     )
     return git_service.handle_operation()
 

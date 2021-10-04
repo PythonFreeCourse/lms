@@ -3,15 +3,14 @@ import shutil
 import subprocess  # noqa: S404
 import tempfile
 import typing
-import logging
+import pathlib
 
 import flask
 
 from lms.lmsdb import models
 from lms.models import upload
 from lms.utils import hashing
-
-_logger = logging.getLogger(__name__)
+from lms.utils.log import log
 
 
 class _GitOperation(typing.NamedTuple):
@@ -23,6 +22,9 @@ class _GitOperation(typing.NamedTuple):
 
 
 class GitService:
+    _GIT_PROCESS_TIMEOUT = 20
+    _GIT_VALID_EXIT_CODE = 0
+
     def __init__(
             self,
             user: models.User,
@@ -40,19 +42,19 @@ class GitService:
         return f'{self._exercise_id}-{self._user.id}'
 
     @property
-    def repository_folder(self) -> str:
-        return os.path.join(self._base_repository_folder, self.project_name)
+    def repository_folder(self) -> pathlib.Path:
+        return pathlib.Path(self._base_repository_folder) / self.project_name
 
     def handle_operation(self) -> flask.Response:
         git_operation = self._extract_git_operation()
-        git_repository_folder = os.path.join(self.repository_folder, 'config')
+        repository_folder = self.repository_folder / 'config'
 
-        first_time_repository = not os.path.exists(git_repository_folder)
-        if first_time_repository:
+        new_repository = not repository_folder.exists()
+        if new_repository:
             self._initialize_bare_repository()
 
         if not git_operation.supported:
-            raise EnvironmentError
+            raise OSError
 
         data_out = self._execute_git_operation(git_operation)
 
@@ -71,38 +73,42 @@ class GitService:
 
         return self.build_response(data_out, git_operation)
 
-    def _execute_git_operation(self, git_operation: _GitOperation) -> bytes:
+    def _execute_command(
+            self,
+            args: typing.List[str],
+            cwd: typing.Union[str, pathlib.Path],
+            proc_input: typing.Optional[bytes] = None,
+    ):
         proc = subprocess.Popen(  # noqa: S603
-            args=git_operation.service_command,
+            args=args,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            cwd=self._base_repository_folder,
+            cwd=cwd,
         )
-        data_out, _ = proc.communicate(self._request.data, 20)
-        if proc.wait() != 0:
-            _logger.error(
-                'Failed to execute command. stdout=%s\nstderr=%s',
-                proc.stdout.read(), proc.stderr.read(),
+        data_out, _ = proc.communicate(proc_input, self._GIT_PROCESS_TIMEOUT)
+        operation_failed = proc.wait() != self._GIT_VALID_EXIT_CODE
+        if operation_failed:
+            log.error(
+                'Failed to execute command %s. stdout=%s\nstderr=%s',
+                args, proc.stdout.read(), proc.stderr.read(),
             )
-            raise EnvironmentError
+            raise OSError
         return data_out
+
+    def _execute_git_operation(self, git_operation: _GitOperation) -> bytes:
+        return self._execute_command(
+            args=git_operation.service_command,
+            cwd=self._base_repository_folder,
+            proc_input=self._request.data,
+        )
 
     def _initialize_bare_repository(self) -> None:
         os.makedirs(self.repository_folder, exist_ok=True)
-        proc = subprocess.Popen(  # noqa: S603
+        self._execute_command(
             args=['git', 'init', '--bare'],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
             cwd=self.repository_folder,
         )
-        if proc.wait() != 0:
-            _logger.error(
-                'Failed to execute command. stdout=%s\nstderr=%s',
-                proc.stdout.read(), proc.stderr.read(),
-            )
-            raise EnvironmentError
 
     @staticmethod
     def build_response(
@@ -167,7 +173,7 @@ class GitService:
             format_response = format_response_callback
 
         else:
-            _logger.error(
+            log.error(
                 'Failed to find the git command for route %s',
                 self._request.path,
             )
@@ -182,24 +188,20 @@ class GitService:
         )
 
     def _load_files_from_repository(self) -> typing.List[upload.File]:
+        """
+        Since the remote server is a git bare repository
+        we need to 'clone' the bare repository to resolve the files.
+        We are not changing the remote at any end - that is why we
+        don't care about git files here.
+        """
         with tempfile.TemporaryDirectory() as tempdir:
-            proc = subprocess.Popen(  # noqa: S603
+            self._execute_command(
                 args=['git', 'clone', self.repository_folder, '.'],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
                 cwd=tempdir,
             )
-            return_code = proc.wait()
-            if return_code != 0:
-                _logger.error(
-                    'Failed to execute command. stdout=%s\nstderr=%s',
-                    proc.stdout.read(), proc.stderr.read(),
-                )
-                raise EnvironmentError
             to_return = []
             # remove git internal files
-            shutil.rmtree(os.path.join(tempdir, '.git'))
+            shutil.rmtree(pathlib.Path(tempdir) / '.git')
             for root, _, files in os.walk(tempdir):
                 for file in files:
                     upload_file = self._load_file(file, root, tempdir)
@@ -207,8 +209,8 @@ class GitService:
             return to_return
 
     @staticmethod
-    def _load_file(file_path: str, root: str, tempdir: str) -> upload.File:
-        with open(os.path.join(root, file_path)) as f:
-            file_path = os.path.join(os.path.relpath(root, tempdir), file_path)
+    def _load_file(file_name: str, root: str, tempdir: str) -> upload.File:
+        file_path = str(pathlib.Path(root).relative_to(tempdir) / file_name)
+        with open(pathlib.Path(root) / file_name) as f:
             upload_file = upload.File(path=file_path, code=f.read())
         return upload_file
