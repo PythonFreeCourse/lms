@@ -47,6 +47,7 @@ a {
 }
 
 #login-container,
+#banned-container,
 #signup-container,
 #change-password-container,
 #reset-password-container,
@@ -58,6 +59,7 @@ a {
 }
 
 #login,
+#banned,
 #signup,
 #change-password,
 #reset-password,
@@ -69,6 +71,7 @@ a {
 }
 
 #login-logo,
+#banned-logo,
 #signup-logo,
 #reset-password-logo,
 #recover-password-logo {
@@ -79,6 +82,11 @@ a {
 #form-errors {
   background: #f1c8c8;
   color: #860606;
+}
+
+#forgot-my-password-link {
+  display: block;
+  margin: 0.5rem;
 }
 
 .page {
@@ -142,7 +150,7 @@ a {
   justify-content: end;
 }
 
-.exercise-id {
+.exercise-number {
   align-items: center;
   border-radius: 100%;
   border: 1px solid;
@@ -152,14 +160,6 @@ a {
   overflow: hidden;
   text-align: center;
   width: 3rem;
-}
-
-.rtl-language > .exercise-id {
-  margin-left: 2em;
-}
-
-.ltr-language > .exercise-id {
-  margin-right: 2em;
 }
 
 .exercise-name {
@@ -301,20 +301,20 @@ button#share-action:hover {
   margin-right: 2rem;
 }
 
-.file-comments-count {
-  width: 2em;
-  height: 1.5em;
-  display: flex;
-  align-self: center;
-  justify-self: center;
-  margin-right: 0.5em;
-}
-
 .file-comments-count > .badge {
   width: 2em;
   display: flex;
   align-content: center;
   justify-content: center;
+}
+
+.file-comments-count {
+  height: 1.5em;
+  display: inline-flex;
+  align-self: center;
+  justify-self: center;
+  margin-right: 0.6em;
+  width: 1em;
 }
 
 #files {
@@ -326,14 +326,6 @@ button#share-action:hover {
   line-height: 2;
   display: flex;
   flex-direction: column;
-}
-
-.file-comments-count {
-  height: 1.5em;
-  display: inline-flex;
-  align-self: center;
-  margin: 0 0.25em;
-  width: 1em;
 }
 
 #files .file {
@@ -690,6 +682,10 @@ span.line {
   width: 90%;
 }
 
+.fiv-viv {
+  margin-right: 0.3em;
+}
+
 /*
 code > code:last-of-type{
   display: inherit;
@@ -774,12 +770,19 @@ code .grader-add .fa {
   margin-inline-end: 1rem;
 }
 
-#notification-icon {
+#courses-list {
+  overflow-y: scroll;
+  max-height: 10em;
+}
+
+#notification-icon,
+#courses-icon {
   cursor: pointer;
 }
 
 /*
-.notification {
+.notification,
+.course {
   flex-direction: column;
   text-align: start;
 }
@@ -892,7 +895,7 @@ code .grader-add .fa {
 }
 
 @media screen and (max-width: 768px) {
-  .exercise-id {
+  .exercise-number {
     display: none;
   }
   .which-notebook {

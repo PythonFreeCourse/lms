@@ -28,18 +28,20 @@ class GitService:
     def __init__(
             self,
             user: models.User,
-            exercise_id: int,
+            exercise_number: int,
+            course_id: int,
             request: flask.Request,
             base_repository_folder: str,
     ):
         self._base_repository_folder = base_repository_folder
         self._user = user
-        self._exercise_id = exercise_id
+        self._exercise_number = exercise_number
+        self._course_id = course_id
         self._request = request
 
     @property
     def project_name(self) -> str:
-        return f'{self._exercise_id}-{self._user.id}'
+        return f'{self._course_id}-{self._exercise_number}-{self._user.id}'
 
     @property
     def repository_folder(self) -> pathlib.Path:
@@ -65,10 +67,11 @@ class GitService:
             files = self._load_files_from_repository()
             solution_hash = hashing.by_content(str(files))
             upload.upload_solution(
-                exercise_id=self._exercise_id,
+                course_id=self._course_id,
+                exercise_number=self._exercise_number,
                 files=files,
                 solution_hash=solution_hash,
-                user=self._user,
+                user_id=self._user.id,
             )
 
         return self.build_response(data_out, git_operation)

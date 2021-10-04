@@ -50,7 +50,7 @@ class TestSendSolutionFromGit:
 
     @staticmethod
     def _get_formatted_git_url(exercise: models.Exercise, rel_path: str) -> str:
-        return f'/git/{exercise.id}.git/{rel_path}'
+        return f'/git/{exercise.course.id}/{exercise.number}.git/{rel_path}'
 
     def _send_git_request(
             self,
@@ -96,6 +96,8 @@ class TestSendSolutionFromGit:
 
     def test_push_exercise(self, exercise: models.Exercise, student_user: models.User):
         git_receive_pack = 'git-receive-pack'
+        conftest.create_usercourse(student_user, exercise.course)
+
         response = self._send_git_request(
             username=student_user.username,
             method_name=self.GET_METHOD,
@@ -117,6 +119,7 @@ class TestSendSolutionFromGit:
 
     def test_get_exercise(self, exercise: models.Exercise, student_user: models.User):
         git_upload_pack = 'git-upload-pack'
+        conftest.create_usercourse(student_user, exercise.course)
         self.test_push_exercise(exercise, student_user)
         response = self._send_git_request(
             username=student_user.username,

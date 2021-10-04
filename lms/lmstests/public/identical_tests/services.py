@@ -101,7 +101,7 @@ class IdenticalSolutionSolver:
             user=to_solution.solver,
             related_id=to_solution,
             message=_(
-                'הפתרון שלך לתרגיל %(subject)s נבדק.',
+                'Your solution for the %(subject)s exercise has been checked.',
                 subject=to_solution.exercise.subject,
             ),
             action_url=f'{routes.SOLUTIONS}/{to_solution.id}',

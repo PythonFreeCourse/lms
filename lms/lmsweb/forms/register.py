@@ -11,7 +11,7 @@ from lms.lmsweb.tools.validators import (
 class RegisterForm(FlaskForm):
     email = StringField(
         'Email', validators=[
-            InputRequired(), Email(message=_('אימייל לא תקין')),
+            InputRequired(), Email(message=_('Invalid email')),
             UniqueEmailRequired,
         ],
     )
@@ -29,6 +29,6 @@ class RegisterForm(FlaskForm):
     confirm = PasswordField(
         'Password Confirmation', validators=[
             InputRequired(),
-            EqualTo('password', message=_('הסיסמאות שהוקלדו אינן זהות')),
+            EqualTo('password', message=_('The passwords are not identical')),
         ],
     )

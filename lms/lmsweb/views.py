@@ -15,8 +15,8 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, Note, Role, RoleOptions, SharedSolution,
-    Solution, SolutionFile, User, database,
+    ALL_MODELS, Comment, Course, Note, Role, RoleOptions, SharedSolution,
+    Solution, SolutionFile, User, UserCourse, database,
 )
 from lms.lmsweb import babel, http_basic_auth, limiter, routes, webapp
 from lms.lmsweb.admin import (
@@ -127,7 +127,7 @@ def login(login_message: Optional[str] = None):
 def signup():
     if not webapp.config.get('REGISTRATION_OPEN', False):
         return redirect(url_for(
-            'login', login_message=_('לא ניתן להירשם כעת'),
+            'login', login_message=_('Can not register now'),
         ))
 
     form = RegisterForm()
@@ -144,7 +144,7 @@ def signup():
     })
     send_confirmation_mail(user)
     return redirect(url_for(
-        'login', login_message=_('ההרשמה בוצעה בהצלחה'),
+        'login', login_message=_('Registration successfully'),
     ))
 
 
@@ -167,7 +167,10 @@ def confirm_email(user_id: int, token: str):
         send_confirmation_mail(user)
         return redirect(url_for(
             'login', login_message=(
-                _('קישור האימות פג תוקף, קישור חדש נשלח אל תיבת המייל שלך'),
+                _(
+                    'The confirmation link is expired, new link has been '
+                    'sent to your email',
+                ),
             ),
         ))
     except BadSignature:
@@ -180,7 +183,10 @@ def confirm_email(user_id: int, token: str):
         update.execute()
         return redirect(url_for(
             'login', login_message=(
-                _('המשתמש שלך אומת בהצלחה, כעת אתה יכול להתחבר למערכת'),
+                _(
+                    'Your user has been successfully confirmed, '
+                    'you can now login',
+                ),
             ),
         ))
 
@@ -200,7 +206,7 @@ def change_password():
     send_change_password_mail(user)
     return redirect(url_for(
         'login', login_message=(
-            _('הסיסמה שלך שונתה בהצלחה'),
+            _('Your password has successfully changed'),
         ),
     ))
 
@@ -216,7 +222,7 @@ def reset_password():
 
     send_reset_password_mail(user)
     return redirect(url_for(
-        'login', login_message=_('קישור לאיפוס הסיסמה נשלח בהצלחה'),
+        'login', login_message=_('Password reset link has successfully sent'),
     ))
 
 
@@ -237,7 +243,7 @@ def recover_password(user_id: int, token: str):
     except SignatureExpired:
         return redirect(url_for(
             'login', login_message=(
-                _('קישור איפוס הסיסמה פג תוקף'),
+                _('Reset password link is expired'),
             ),
         ))
     except BadSignature:
@@ -257,7 +263,7 @@ def recover_password_check(user: User, token: str):
     user.save()
     return redirect(url_for(
         'login', login_message=(
-            _('הסיסמה שלך שונתה בהצלחה'),
+            _('Your password has successfully changed'),
         ),
     ))
 
@@ -321,6 +327,20 @@ def status():
         'status.html',
         exercises=Solution.status(),
     )
+
+
+@webapp.route('/course/<int:course_id>')
+@login_required
+def change_last_course_viewed(course_id: int):
+    course = Course.get_or_none(course_id)
+    if course is None:
+        return fail(404, f'No such course {course_id}.')
+    user = User.get(User.id == current_user.id)
+    if not UserCourse.is_user_registered(user.id, course.id):
+        return fail(403, "You're not allowed to access this page.")
+    user.last_course_viewed = course
+    user.save()
+    return redirect(url_for('exercises_page'))
 
 
 @webapp.route('/exercises')
@@ -458,10 +478,12 @@ def comment():
     return fail(400, f'Unknown or unset act value "{act}".')
 
 
-@webapp.route('/send/<int:_exercise_id>')
+@webapp.route('/send/<int:course_id>/<int:_exercise_number>')
 @login_required
-def send(_exercise_id):
-    return render_template('upload.html')
+def send(course_id: int, _exercise_number: Optional[int]):
+    if not UserCourse.is_user_registered(current_user.id, course_id):
+        return fail(403, "You aren't allowed to watch this page.")
+    return render_template('upload.html', course_id=course_id)
 
 
 @webapp.route('/user/<int:user_id>')
@@ -477,22 +499,26 @@ def user(user_id):
 
     return render_template(
         'user.html',
-        solutions=Solution.of_user(target_user.id, with_archived=True),
+        solutions=Solution.of_user(
+            target_user.id, with_archived=True, from_all_courses=True,
+        ),
         user=target_user,
         is_manager=is_manager,
         notes_options=Note.get_note_options(),
     )
 
 
-@webapp.route('/send', methods=['GET'])
+@webapp.route('/send/<int:course_id>', methods=['GET'])
 @login_required
-def send_():
-    return render_template('upload.html')
+def send_(course_id: int):
+    if not UserCourse.is_user_registered(current_user.id, course_id):
+        return fail(403, "You aren't allowed to watch this page.")
+    return render_template('upload.html', course_id=course_id)
 
 
-@webapp.route('/upload', methods=['POST'])
+@webapp.route('/upload/<int:course_id>', methods=['POST'])
 @login_required
-def upload_page():
+def upload_page(course_id: int):
     user_id = current_user.id
     user = User.get_or_none(User.id == user_id)  # should never happen
     if user is None:
@@ -507,7 +533,7 @@ def upload_page():
         return fail(422, 'No file was given.')
 
     try:
-        matches, misses = upload.new(user, file)
+        matches, misses = upload.new(user.id, course_id, file)
     except UploadError as e:
         log.debug(e)
         return fail(400, str(e))
@@ -549,10 +575,11 @@ def download(download_id: str):
 @webapp.route(f'{routes.GIT}/git-receive-pack', methods=['POST'])
 @webapp.route(f'{routes.GIT}/git-upload-pack', methods=['POST'])
 @http_basic_auth.login_required
-def git_handler(exercise_id: int) -> Response:
+def git_handler(course_id: int, exercise_number: int) -> Response:
     git_service = GitService(
         user=http_basic_auth.current_user(),
-        exercise_id=exercise_id,
+        exercise_number=exercise_number,
+        course_id=course_id,
         request=request,
         base_repository_folder=REPOSITORY_FOLDER,
     )
@@ -590,6 +617,9 @@ def view(
     except LmsError as e:
         error_message, status_code = e.args
         return fail(status_code, error_message)
+
+    if viewer_is_solver:
+        solution.view_solution()
 
     return render_template('view.html', **view_params)
 

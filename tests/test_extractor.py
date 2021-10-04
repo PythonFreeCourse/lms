@@ -1,4 +1,5 @@
 from io import BufferedReader, BytesIO
+from pathlib import Path
 from tempfile import SpooledTemporaryFile
 from typing import Iterator, List, Tuple
 from zipfile import ZipFile
@@ -9,7 +10,7 @@ from werkzeug.datastructures import FileStorage
 
 import lms.extractors.base as extractor
 import lms.extractors.ziparchive as zipfilearchive
-from lms.lmsdb.models import User
+from lms.lmsdb.models import Course, User
 from lms.models.errors import BadUploadFile
 from tests import conftest
 from tests.conftest import SAMPLES_DIR
@@ -20,6 +21,7 @@ class TestExtractor:
     IGNORE_FILES_ZIP_NAME = 'Upload_123.zip'
     IMAGE_NAME = 'Upload 3.jpg'
     IMAGE_NO_EXERCISE = 'bird.jpg'
+    PY_DIFFERENT_COURSE = 'Upload 1.py'
     PY_NAMES = ('code1.py', 'code2.py', 'Upload 3141.py')
     PY_NO_EXERCISE = 'noexercise.py'
     ZIP_FILES = ('Upload_1.zip', 'zipfiletest.zip')
@@ -31,6 +33,10 @@ class TestExtractor:
         self.image_no_exercise_file = next(self.zip_files(
             (self.IMAGE_NO_EXERCISE,),
         ))
+        self.image_bytes_io = self.get_bytes_io_file(self.IMAGE_NAME)
+        self.pyfile_different_course = self.get_bytes_io_file(
+            self.PY_DIFFERENT_COURSE,
+        )
         self.pyfiles_files = list(self.py_files(self.PY_NAMES))
         self.pyfile_no_exercise_file = next(self.py_files(
             (self.PY_NO_EXERCISE,),
@@ -75,17 +81,22 @@ class TestExtractor:
             bytes_io.close()
 
     def ipynb_file(self):
-        return open(f'{SAMPLES_DIR}/{self.IPYNB_NAME}', encoding='utf-8')
+        return open(Path(SAMPLES_DIR) / self.IPYNB_NAME, encoding='utf-8')
 
     @staticmethod
     def py_files(filenames: Iterator[str]):
         for file_name in filenames:
-            yield open(f'{SAMPLES_DIR}/{file_name}')
+            yield open(Path(SAMPLES_DIR) / file_name)
+
+    @staticmethod
+    def get_bytes_io_file(file_name: str) -> Tuple[BytesIO, str]:
+        with open(Path(SAMPLES_DIR) / file_name, 'br') as open_file:
+            return BytesIO(open_file.read()), file_name
 
     @staticmethod
     def zip_files(filenames: Tuple[str, ...]) -> Iterator[BufferedReader]:
-        for filename in filenames:
-            yield open(f'{SAMPLES_DIR}/{filename}', 'br')
+        for file_name in filenames:
+            yield open(Path(SAMPLES_DIR) / file_name, 'br')
 
     @staticmethod
     def create_zipfile_storage(
@@ -164,16 +175,17 @@ class TestExtractor:
             for exercise_path in exercises_paths
         )
 
-    def test_zip(self, student_user: User):
-        conftest.create_exercise()
-        conftest.create_exercise()
-        conftest.create_exercise()
-        conftest.create_exercise(is_archived=True)
+    def test_zip(self, course: Course, student_user: User):
+        conftest.create_exercise(course, 1)
+        conftest.create_exercise(course, 2)
+        conftest.create_exercise(course, 3)
+        conftest.create_exercise(course, 4, is_archived=True)
+        conftest.create_usercourse(student_user, course)
 
         client = conftest.get_logged_user(username=student_user.username)
 
         # Uploading a multiple zip solutions file
-        upload_response = client.post('/upload', data={
+        upload_response = client.post(f'/upload/{course.id}', data={
             'file': self.zipfiles_extractors_bytes_io[1],
         })
         json_response_upload = json.loads(
@@ -184,18 +196,61 @@ class TestExtractor:
         assert upload_response.status_code == 200
 
         # Uploading a zip file with a same solution exists in the previous zip
-        second_upload_response = client.post('/upload', data={
+        second_upload_response = client.post(f'/upload/{course.id}', data={
             'file': self.zipfiles_extractors_bytes_io[0],
         })
         assert second_upload_response.status_code == 400
 
-    def test_zip_bomb(self, student_user: User):
-        conftest.create_exercise()
+    def test_zip_bomb(self, course: Course, student_user: User):
+        conftest.create_exercise(course, 1)
 
         client = conftest.get_logged_user(username=student_user.username)
 
         # Trying to upload a zipbomb file
-        upload_response = client.post('/upload', data={
+        upload_response = client.post(f'/upload/{course.id}', data={
             'file': self.zipbomb_bytes_io,
         })
         assert upload_response.status_code == 413
+
+    def test_upload_another_course(
+        self,
+        course: Course,
+        student_user: User,
+    ):
+        course2 = conftest.create_course(index=1)
+        conftest.create_exercise(course2, 1)
+        conftest.create_usercourse(student_user, course)
+
+        client = conftest.get_logged_user(username=student_user.username)
+        fail_upload_response = client.post(f'/upload/{course2.id}', data={
+            'file': self.pyfile_different_course,
+        })
+        assert fail_upload_response.status_code == 400
+
+    def test_upload_invalid_exercise(
+        self,
+        course: Course,
+        student_user: User,
+    ):
+        conftest.create_usercourse(student_user, course)
+
+        client = conftest.get_logged_user(username=student_user.username)
+        fail_upload_response = client.post(f'/upload/{course.id}', data={
+            'file': self.image_bytes_io,
+        })
+        assert fail_upload_response.status_code == 400
+
+
+    def test_upload_correct_course(
+        self,
+        course: Course,
+        student_user: User,
+    ):
+        conftest.create_exercise(course, 1)
+        conftest.create_usercourse(student_user, course)
+
+        client = conftest.get_logged_user(username=student_user.username)
+        success_upload_response = client.post(f'/upload/{course.id}', data={
+            'file': self.pyfile_different_course,
+        })
+        assert success_upload_response.status_code == 200
