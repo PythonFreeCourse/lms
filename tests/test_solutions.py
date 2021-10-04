@@ -8,13 +8,14 @@ import pytest
 from lms.lmsdb import models
 from lms.lmsdb.models import (
     Comment, Course, Exercise, SharedSolution,
-    Solution, SolutionStatusView, User,
+    Solution, SolutionAssessment, SolutionStatusView, User,
 )
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmsweb import routes
 from lms.models import notifications, solutions
 from lms.models.errors import ResourceNotFound
 from lms.models.solutions import get_view_parameters
+from lms.utils.consts import COLORS, DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR, DEFAULT_ASSESSMENT_BUTTON_COLOR
 from tests import conftest
 
 
@@ -591,3 +592,38 @@ class TestSolutionBridge:
             content_type='application/json',
         )
         assert response.status_code == 200
+
+    @staticmethod
+    def test_solution_assessment_color_on_create(course: Course, _assessments):
+        assessment1 = SolutionAssessment.create(
+            name='Ok', color='red', active_color='lmnop',
+            order=5, course=course,
+        )
+        assert assessment1.color == COLORS.get('red')
+        assert (
+            assessment1.active_color == DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR,
+        )
+
+        assessment2 = SolutionAssessment.create(
+            name='Fine', color='invalid', active_color='abcdef',
+            order=6, course=course,
+        )
+        assert assessment2.color == DEFAULT_ASSESSMENT_BUTTON_COLOR
+        assert assessment2.active_color == '#abcdef'
+
+    @staticmethod
+    def test_solution_assessment_on_save(course: Course, _assessments):
+        assessment = SolutionAssessment.get(SolutionAssessment.order == 2)
+        assessment.color = 'secondary'
+        assessment.active_color = 'fff'
+        assessment.save()
+        assert assessment.color == COLORS.get('secondary')
+        assert assessment.active_color == '#fff'
+
+        assessment.color = 'xox'
+        assessment.active_color = 'invalid'
+        assessment.save()
+        assert assessment.color == DEFAULT_ASSESSMENT_BUTTON_COLOR
+        assert (
+            assessment.active_color == DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR,
+        )

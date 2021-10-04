@@ -25,7 +25,9 @@ from lms.lmsdb import database_config
 from lms.models.errors import AlreadyExists
 from lms.utils import hashing
 from lms.utils.colors import get_hex_color
-from lms.utils.consts import DEFAULT_ACTIVE_COLOR, DEFAULT_COLOR
+from lms.utils.consts import (
+    DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR, DEFAULT_ASSESSMENT_BUTTON_COLOR,
+)
 from lms.utils.log import log
 
 
@@ -370,12 +372,24 @@ class Exercise(BaseModel):
         return datetime.now() < self.due_date and not self.is_archived
 
     @classmethod
-    def get_highest_number(cls):
-        return cls.select(fn.MAX(cls.number)).scalar()
+    def get_highest_number(cls, course: Course):
+        return (
+            cls
+            .select(cls.number)
+            .where(cls.course == course)
+            .order_by(cls.number.desc())
+            .limit(1)
+            .scalar()
+        )
 
     @classmethod
-    def is_number_exists(cls, number: int) -> bool:
-        return cls.select().where(cls.number == number).exists()
+    def is_number_exists(cls, course: Course, number: int) -> bool:
+        return (
+            cls
+            .select()
+            .where(cls.course == course, cls.number == number)
+            .exists()
+        )
 
     @classmethod
     def get_objects(
@@ -424,8 +438,8 @@ class Exercise(BaseModel):
 def exercise_number_save_handler(model_class, instance, created):
     """Change the exercise number to the highest consecutive number."""
 
-    if model_class.is_number_exists(instance.number):
-        instance.number = model_class.get_highest_number() + 1
+    if model_class.is_number_exists(instance.course, instance.number):
+        instance.number = model_class.get_highest_number(instance.course) + 1
 
 
 class SolutionState(enum.Enum):
@@ -464,11 +478,12 @@ class SolutionAssessment(BaseModel):
     icon = CharField(null=True)
     color = CharField()
     active_color = CharField()
-    order = IntegerField(default=0, index=True, unique=True)
+    order = IntegerField(default=0, index=True)
+    course = ForeignKeyField(Course, backref='assessments')
 
     @classmethod
-    def get_assessments(cls):
-        return cls.select().order_by(cls.order)
+    def get_assessments(cls, course: Course):
+        return cls.select().where(cls.course == course).order_by(cls.order)
 
     def __str__(self):
         return self.name
@@ -481,12 +496,12 @@ def assessment_on_save_handler(_model_class, instance, created):
     try:
         instance.color = get_hex_color(instance.color)
     except ValueError:
-        instance.color = DEFAULT_COLOR
+        instance.color = DEFAULT_ASSESSMENT_BUTTON_COLOR
 
     try:
         instance.active_color = get_hex_color(instance.active_color)
     except ValueError:
-        instance.active_color = DEFAULT_ACTIVE_COLOR
+        instance.active_color = DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR
 
 
 class Solution(BaseModel):
@@ -1121,11 +1136,13 @@ def create_basic_assessments() -> None:
             'color': 'black', 'icon': 'exclamation-triangle', 'order': 4,
         },
     }
-    for name, values in assessments_dict.items():
-        SolutionAssessment.create(
-            name=name, icon=values.get('icon'), color=values.get('color'),
-            active_color='white', order=values.get('order'),
-        )
+    courses = Course.select()
+    for course in courses:
+        for name, values in assessments_dict.items():
+            SolutionAssessment.create(
+                name=name, icon=values.get('icon'), color=values.get('color'),
+                active_color='white', order=values.get('order'), course=course,
+            )
 
 
 def create_basic_course() -> Course:

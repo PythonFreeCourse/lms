@@ -142,7 +142,8 @@ def get_view_parameters(
             'user_comments':
                 comments._common_comments(user_id=current_user.id),
             'left': Solution.left_in_exercise(solution.exercise),
-            'assessments': SolutionAssessment.get_assessments(),
+            'assessments':
+                SolutionAssessment.get_assessments(solution.exercise.course),
         }
 
     if viewer_is_solver:
