@@ -615,7 +615,7 @@ class TestSolutionBridge:
     def test_solution_assessment_on_save(course: Course, _assessments):
         assessment = SolutionAssessment.get(SolutionAssessment.order == 2)
         assessment.color = 'secondary'
-        assessment.active_color = 'fff'
+        assessment.active_color = '#fff'
         assessment.save()
         assert assessment.color == COLORS.get('secondary')
         assert assessment.active_color == '#fff'
