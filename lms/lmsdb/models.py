@@ -16,7 +16,9 @@ from peewee import (  # type: ignore
     BooleanField, Case, CharField, Check, DateTimeField, ForeignKeyField,
     IntegerField, JOIN, ManyToManyField, TextField, UUIDField, fn,
 )
-from playhouse.signals import Model, post_save, pre_save  # type: ignore
+from playhouse.signals import (  # type: ignore
+    Model, post_delete, post_save, pre_save,
+)
 from werkzeug.security import (
     check_password_hash, generate_password_hash,
 )
@@ -263,6 +265,27 @@ class UserCourse(BaseModel):
             )
             .exists()
         )
+
+
+@post_save(sender=UserCourse)
+def on_save_user_course(model_class, instance, created):
+    """Changes user's last course viewed."""
+
+    if instance.user.last_course_viewed is None:
+        instance.user.last_course_viewed = instance.course
+        instance.user.save()
+
+
+@post_delete(sender=UserCourse)
+def on_delete_user_course(model_class, instance):
+    """Changes user's last course viewed."""
+
+    if instance.user.last_course_viewed == instance.course:
+        if new_last_course_viewed := Course.fetch(instance.user).limit(1):
+            instance.user.last_course_viewed = new_last_course_viewed
+        else:
+            instance.user.last_course_viewed = None
+        instance.user.save()
 
 
 class Notification(BaseModel):
