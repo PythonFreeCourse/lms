@@ -52,3 +52,28 @@ class TestExercise:
         template, _ = captured_templates[-1]
         assert template.name == 'exercises.html'
         assert len(list(Exercise.get_objects(student_user.id))) == 2
+
+    @staticmethod
+    def test_exercise_tags(
+        student_user: User, course: Course, exercise: Exercise,
+    ):
+        client = conftest.get_logged_user(username=student_user.username)
+        conftest.create_usercourse(student_user, course)
+        client.get(f'course/{course.id}')
+        conftest.create_exercise_tag('tag1', exercise)
+        tag_response = client.get('/exercises/tag1')
+        assert tag_response.status_code == 200
+
+        course2 = conftest.create_course(index=1)
+        exercise2 = conftest.create_exercise(course2, 2)
+        conftest.create_usercourse(student_user, course2)
+        conftest.create_exercise_tag('tag2', exercise2)
+        bad_tag_response = client.get('/exercises/tag2')
+        assert bad_tag_response.status_code == 404
+
+        client.get(f'course/{course2.id}')
+        success_tag_response = client.get('/exercises/tag2')
+        assert success_tag_response.status_code == 200
+
+        another_bad_tag_response = client.get('/exercises/wrongtag')
+        assert another_bad_tag_response.status_code == 404

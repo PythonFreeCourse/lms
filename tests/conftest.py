@@ -15,8 +15,9 @@ from peewee import SqliteDatabase
 import pytest
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, CommentText, Course, Exercise, Note, Notification,
-    Role, RoleOptions, SharedSolution, Solution, User, UserCourse,
+    ALL_MODELS, Comment, CommentText, Course, Exercise, ExerciseTag,
+    ExerciseTagText, Note, Notification, Role, RoleOptions, SharedSolution,
+    Solution, User, UserCourse,
 )
 from lms.extractors.base import File
 from lms.lmstests.public import celery_app as public_app
@@ -308,6 +309,11 @@ def create_exercise(
     )
 
 
+def create_exercise_tag(tag_text: str, exercise: Exercise):
+    new_tag_id = ExerciseTagText.create_tag(text=tag_text).id
+    return ExerciseTag.create(exercise=exercise, tag=new_tag_id)
+
+
 def create_shared_solution(solution: Solution) -> SharedSolution:
     return SharedSolution.create_new(solution=solution)
 
@@ -315,7 +321,7 @@ def create_shared_solution(solution: Solution) -> SharedSolution:
 def create_note(
     creator: User,
     user: User,
-    note_text: CommentText,
+    note_text: str,
     privacy: int,
 ):
     new_note_id = CommentText.create_comment(text=note_text).id

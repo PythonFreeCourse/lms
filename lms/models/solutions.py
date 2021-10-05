@@ -8,7 +8,9 @@ from flask_login import current_user  # type: ignore
 from playhouse.shortcuts import model_to_dict  # type: ignore
 
 from lms.extractors.base import File
-from lms.lmsdb.models import SharedSolution, Solution, SolutionFile, User
+from lms.lmsdb.models import (
+    ExerciseTag, ExerciseTagText, SharedSolution, Solution, SolutionFile, User,
+)
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmsweb import config, routes
@@ -205,3 +207,15 @@ def get_files_tree(files: Iterable[SolutionFile]) -> List[Dict[str, Any]]:
     for file in file_details:
         del file['fullpath']
     return file_details
+
+
+def check_tag_name(tag_name: Optional[str]) -> None:
+    if (
+        tag_name is not None and not ExerciseTag.is_course_tag_exists(
+            current_user.last_course_viewed, tag_name,
+        )
+    ):
+        raise ResourceNotFound(
+            f'No such tag {tag_name} for course '
+            f'{current_user.last_course_viewed.name}.', 404,
+        )

@@ -177,6 +177,24 @@ a {
   line-height: 3rem;
 }
 
+.exercise-tags {
+  align-items: center;
+  display: flex;
+  font-size: 1em;
+  height: 3rem;
+  justify-content: center;
+  text-align: center;
+  white-space: normal;
+}
+
+#exercise-tag-link {
+  color: #919191;
+}
+
+#exercise-tag-link:hover {
+  color: #646464;
+}
+
 .exercise-send {
   display: flex;
   flex-direction: row;

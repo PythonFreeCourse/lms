@@ -346,6 +346,18 @@ def on_notification_saved(
         instance.delete_instance()
 
 
+class ExerciseTagText(BaseModel):
+    text = TextField(unique=True)
+
+    @classmethod
+    def create_tag(cls, text: str) -> 'ExerciseTagText':
+        instance, _ = cls.get_or_create(**{cls.text.name: html.escape(text)})
+        return instance
+
+    def __str__(self):
+        return self.text
+
+
 class Exercise(BaseModel):
     subject = CharField()
     date = DateTimeField()
@@ -378,7 +390,7 @@ class Exercise(BaseModel):
     @classmethod
     def get_objects(
         cls, user_id: int, fetch_archived: bool = False,
-        from_all_courses: bool = False,
+        from_all_courses: bool = False, exercise_tag: Optional[str] = None,
     ):
         user = User.get(User.id == user_id)
         exercises = (
@@ -394,6 +406,13 @@ class Exercise(BaseModel):
             exercises = exercises.where(
                 UserCourse.course == user.last_course_viewed,
             )
+        if exercise_tag:
+            exercises = (
+                exercises
+                .join(ExerciseTag)
+                .join(ExerciseTagText)
+                .where(ExerciseTagText.text == exercise_tag)
+            )
         if not fetch_archived:
             exercises = exercises.where(cls.is_archived == False)  # NOQA: E712
         return exercises
@@ -408,6 +427,7 @@ class Exercise(BaseModel):
             'exercise_number': self.number,
             'course_id': self.course.id,
             'course_name': self.course.name,
+            'tags': ExerciseTag.by_exercise(self),
         }
 
     @staticmethod
@@ -424,6 +444,36 @@ def exercise_number_save_handler(model_class, instance, created):
 
     if model_class.is_number_exists(instance.number):
         instance.number = model_class.get_highest_number() + 1
+
+
+class ExerciseTag(BaseModel):
+    exercise = ForeignKeyField(Exercise)
+    tag = ForeignKeyField(ExerciseTagText)
+    date = DateTimeField(default=datetime.now)
+
+    @classmethod
+    def by_exercise(
+        cls, exercise: Exercise,
+    ) -> Union[Iterable['ExerciseTag'], 'ExerciseTag']:
+        return (
+            cls
+            .select()
+            .where(cls.exercise == exercise)
+            .order_by(cls.date)
+        )
+
+    @classmethod
+    def is_course_tag_exists(cls, course: Course, tag_name: str):
+        return (
+            cls
+            .select()
+            .join(ExerciseTagText)
+            .where(ExerciseTagText.text == tag_name)
+            .switch()
+            .join(Exercise)
+            .where(Exercise.course == course)
+            .exists()
+        )
 
 
 class SolutionState(enum.Enum):
@@ -561,11 +611,11 @@ class Solution(BaseModel):
     @classmethod
     def of_user(
         cls, user_id: int, with_archived: bool = False,
-        from_all_courses: bool = False,
+        from_all_courses: bool = False, exercise_tag: Optional[str] = None,
     ) -> Iterable[Dict[str, Any]]:
         db_exercises = Exercise.get_objects(
             user_id=user_id, fetch_archived=with_archived,
-            from_all_courses=from_all_courses,
+            from_all_courses=from_all_courses, exercise_tag=exercise_tag,
         )
         exercises = Exercise.as_dicts(db_exercises)
         solutions = (

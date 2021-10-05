@@ -15,8 +15,9 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, Course, Note, Role, RoleOptions, SharedSolution,
-    Solution, SolutionFile, User, UserCourse, database,
+    ALL_MODELS, Comment, Course, ExerciseTag, ExerciseTagText, Note, Role,
+    RoleOptions, SharedSolution, Solution, SolutionFile, User, UserCourse,
+    database,
 )
 from lms.lmsweb import babel, limiter, routes, webapp
 from lms.lmsweb.admin import (
@@ -343,16 +344,26 @@ def change_last_course_viewed(course_id: int):
 
 
 @webapp.route('/exercises')
+@webapp.route('/exercises/<tag_name>')
 @login_required
-def exercises_page():
+def exercises_page(tag_name: Optional[str] = None):
     fetch_archived = bool(request.args.get('archived'))
-    exercises = Solution.of_user(current_user.id, fetch_archived)
+    try:
+        solutions.check_tag_name(tag_name)
+    except LmsError as e:
+        error_message, status_code = e.args
+        return fail(status_code, error_message)
+
+    exercises = Solution.of_user(
+        current_user.id, fetch_archived, exercise_tag=tag_name,
+    )
     is_manager = current_user.role.is_manager
     return render_template(
         'exercises.html',
         exercises=exercises,
         is_manager=is_manager,
         fetch_archived=fetch_archived,
+        tag_name=tag_name,
     )
 
 
@@ -479,7 +490,7 @@ def comment():
 
 @webapp.route('/send/<int:course_id>/<int:_exercise_number>')
 @login_required
-def send(course_id: int, _exercise_number: Optional[int]):
+def send(course_id: int, _exercise_number: Optional[int] = None):
     if not UserCourse.is_user_registered(current_user.id, course_id):
         return fail(403, "You aren't allowed to watch this page.")
     return render_template('upload.html', course_id=course_id)

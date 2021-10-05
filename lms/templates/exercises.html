@@ -5,7 +5,7 @@
   <div id="exercises-page" class="page {{ direction }}">
     <div id="exercises-header">
       <div id="main-title">
-        <h1 id="exercises-head">{{ _('Exercises') }}</h1>
+        <h1 id="exercises-head">{{ _('Exercises') }}{% if tag_name %} - #{{ tag_name }}{% endif %}</h1>
       </div>
     </div>
     <div id="exercises">
@@ -14,6 +14,11 @@
         <div class="right-side {{ direction }}-language">
           <div class="exercise-number me-3">{{ exercise['exercise_number'] }}</div>
           <div class="exercise-name"><div class="ex-title">{{ exercise['exercise_name'] | e }}</div></div>
+          <div class="exercise-tags ms-1">
+            {% for tag in exercise.tags %}
+              <a class="ms-1" id="exercise-tag-link" href="{{ url_for('exercises_page', tag_name=tag.tag) }}">#{{ tag.tag }}</a>
+            {% endfor %}
+          </div>
         </div>
         <div class="left-side">
           <div class="comments-count">
