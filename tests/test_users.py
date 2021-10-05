@@ -186,15 +186,16 @@ class TestUser:
         assert not course2.has_user(student_user)
 
     @staticmethod
-    def test_usercourse_on_save(student_user: User, course: Course):
-        course2 = conftest.create_course(index=1)
-        usercourse2 = conftest.create_usercourse(student_user, course2)
-        assert student_user.last_course_viewed == course2
+    def test_usercourse_on_delete(student_user: User, course: Course):
+        usercourse = conftest.create_usercourse(student_user, course)
+        assert student_user.last_course_viewed == course
 
-        usercourse2.delete_instance()
-        print(student_user.last_course_viewed)
+        usercourse.delete_instance()
         assert student_user.last_course_viewed is None
 
+    @staticmethod
+    def test_usercourse_on_save(student_user: User, course: Course):
+        course2 = conftest.create_course(index=1)
         usercourse = conftest.create_usercourse(student_user, course)
         assert student_user.last_course_viewed == course
 
