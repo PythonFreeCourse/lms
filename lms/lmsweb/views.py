@@ -34,7 +34,7 @@ from lms.lmsweb.redirections import (
     PERMISSIVE_CORS, get_next_url, login_manager,
 )
 from lms.models import (
-    comments, notes, notifications, share_link, solutions, upload,
+    comments, notes, notifications, share_link, solutions, upload, users,
 )
 from lms.models.errors import (
     FileSizeError, ForbiddenPermission, LmsError,
@@ -366,6 +366,12 @@ def get_notifications():
 @webapp.route('/read', methods=['PATCH'])
 def read_all_notification():
     success_state = notifications.read(user=current_user)
+    return jsonify({'success': success_state})
+
+
+@webapp.route('/subscribe/<act>', methods=['PATCH'])
+def mail_subscription(act: str):
+    success_state = users.change_mail_subscription(current_user, act)
     return jsonify({'success': success_state})
 
 

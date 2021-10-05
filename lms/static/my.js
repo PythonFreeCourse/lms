@@ -118,6 +118,20 @@ function trackReadAllNotificationsButton(button) {
   });
 }
 
+function trackMailSubscriptionCheckbox() {
+  const checkbox = document.getElementById('mail-subscription-checkbox');
+  if (checkbox === null) {
+    return;
+  }
+
+  checkbox.addEventListener('change', (e) => {
+    const act = (e.currentTarget.checked) ? 'subscribe' : 'unsubscribe';
+    const request = new XMLHttpRequest();
+    request.open('PATCH', `/subscribe/${act}`);
+    return request.send();
+  });
+}
+
 function postUploadMessageUpdate(feedbacks, uploadStatus, matchesSpan, missesSpan) {
   const matches = uploadStatus.exercise_matches;
   const misses = uploadStatus.exercise_misses;
@@ -158,6 +172,7 @@ window.isUserGrader = isUserGrader;
 window.addEventListener('load', () => {
   updateNotificationsBadge();
   trackReadAllNotificationsButton(document.getElementById('read-notifications'));
+  trackMailSubscriptionCheckbox();
   const codeElement = document.getElementById('code-view');
   if (codeElement !== null) {
     const codeElementData = codeElement.dataset;

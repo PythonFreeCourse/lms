@@ -4,17 +4,20 @@ from flask import url_for
 from flask_babel import gettext as _  # type: ignore
 from flask_mail import Message  # type: ignore
 
-from lms.lmsdb.models import User
-from lms.lmsweb import config, webapp, webmail
+from lms.lmsdb.models import NotificationMail, User
+from lms.lmsweb import config, webapp, webmail, webscheduler
 from lms.models.users import generate_user_token
+from lms.utils.config.celery import app
 
 
+@app.task
 def send_message(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        msg = func(*args, **kwargs)
-        if not webapp.config.get('DISABLE_MAIL'):
-            webmail.send(msg)
+        with webapp.app_context():
+            msg = func(*args, **kwargs)
+            if not webapp.config.get('DISABLE_MAIL'):
+                return webmail.send(msg)
 
     return wrapper
 
@@ -67,3 +70,28 @@ def send_change_password_mail(user: User) -> Message:
         site_mail=config.MAIL_DEFAULT_SENDER,
     )
     return msg
+
+
+@send_message
+def send_notification_mail(user: User, message: str, number: int) -> Message:
+    subject = _(
+        'New notification - %(site_name)s', site_name=config.SITE_NAME,
+    )
+    msg = Message(subject, recipients=[user.mail_address])
+    msg.body = _(
+        'Hello %(fullname)s. You have %(number)d '
+        'new notification/s:\n%(message)s',
+        fullname=user.fullname, number=number, message=message,
+    )
+    return msg
+
+
+@webscheduler.task('interval', id='mail_notifications', hours=2)
+def send_all_notifications_mails():
+    for notification in NotificationMail.select():
+        if notification.user.mail_subscription:
+            send_message(send_notification_mail(
+                notification.user, notification.message.rstrip(),
+                notification.number,
+            ))
+        notification.delete_instance()

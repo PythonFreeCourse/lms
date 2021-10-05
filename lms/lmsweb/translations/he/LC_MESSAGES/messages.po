@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-10-01 10:15+0300\n"
+"POT-Creation-Date: 2021-10-05 21:56+0300\n"
 "PO-Revision-Date: 2021-09-29 11:30+0300\n"
 "Last-Translator: Or Ronai\n"
 "Language: he\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.1\n"
 
-#: lmsdb/models.py:815
+#: lmsdb/models.py:851
 msgid "Fatal error"
 msgstr "כישלון חמור"
 
@@ -294,7 +294,7 @@ msgstr "חמ\"ל תרגילים"
 msgid "Name"
 msgstr "שם"
 
-#: templates/status.html:13 templates/user.html:43
+#: templates/status.html:13 templates/user.html:49
 msgid "Checked"
 msgstr "נבדק/ו"
 
@@ -342,56 +342,59 @@ msgstr "פרטי משתמש"
 msgid "Actions"
 msgstr "פעולות"
 
-#: templates/user.html:24
+#: templates/user.html:23
+msgid "Mail Subscription"
+msgstr "מנוי לדואר"
+
+#: templates/user.html:30
 msgid "Exercises Submitted"
 msgstr "תרגילים שהוגשו"
 
-#: templates/user.html:29
-#, fuzzy
+#: templates/user.html:35
 msgid "Course name"
 msgstr "שם קורס"
 
-#: templates/user.html:30
+#: templates/user.html:36
 msgid "Exercise name"
 msgstr "שם תרגיל"
 
-#: templates/user.html:31
+#: templates/user.html:37
 msgid "Submission status"
 msgstr "מצב הגשה"
 
-#: templates/user.html:32
+#: templates/user.html:38
 msgid "Submission"
 msgstr "הגשה"
 
-#: templates/user.html:33
+#: templates/user.html:39
 msgid "Checker"
 msgstr "בודק"
 
-#: templates/user.html:43
+#: templates/user.html:49
 msgid "Submitted"
 msgstr "הוגש"
 
-#: templates/user.html:43
+#: templates/user.html:49
 msgid "Not submitted"
 msgstr "לא הוגש"
 
-#: templates/user.html:54
+#: templates/user.html:60
 msgid "Notes"
 msgstr "פתקיות"
 
-#: templates/user.html:59 templates/user.html:61
+#: templates/user.html:65 templates/user.html:67
 msgid "New Note"
 msgstr "פתקית חדשה"
 
-#: templates/user.html:65
+#: templates/user.html:71
 msgid "Related Exercise"
 msgstr "תרגיל משויך"
 
-#: templates/user.html:74
+#: templates/user.html:80
 msgid "Privacy Level"
 msgstr "רמת פרטיות"
 
-#: templates/user.html:80
+#: templates/user.html:86
 msgid "Add Note"
 msgstr "הוסף פתקית"
 
@@ -468,12 +471,12 @@ msgstr "הערות בודק"
 msgid "Done Checking"
 msgstr "סיום בדיקה"
 
-#: utils/mail.py:25
+#: utils/mail.py:28
 #, python-format
 msgid "Confirmation mail - %(site_name)s"
 msgstr "מייל אימות - %(site_name)s"
 
-#: utils/mail.py:32
+#: utils/mail.py:35
 #, python-format
 msgid ""
 "Hello %(fullname)s,\n"
@@ -482,12 +485,12 @@ msgstr ""
 "שלום %(fullname)s,\n"
 "לינק האימות שלך למערכת הוא: %(link)s"
 
-#: utils/mail.py:42
+#: utils/mail.py:45
 #, python-format
 msgid "Reset password mail - %(site_name)s"
 msgstr "מייל איפוס סיסמה - %(site_name)s"
 
-#: utils/mail.py:49
+#: utils/mail.py:52
 #, python-format
 msgid ""
 "Hello %(fullname)s,\n"
@@ -496,12 +499,12 @@ msgstr ""
 "שלום %(fullname)s,\n"
 "לינק לצורך איפוס הסיסמה שלך הוא: %(link)s"
 
-#: utils/mail.py:58
+#: utils/mail.py:61
 #, python-format
 msgid "Changing password - %(site_name)s"
 msgstr "שינוי סיסמה - %(site_name)s"
 
-#: utils/mail.py:62
+#: utils/mail.py:65
 #, python-format
 msgid ""
 "Hello %(fullname)s. Your password in %(site_name)s site has been changed."
@@ -512,4 +515,16 @@ msgstr ""
 "שלום %(fullname)s. הסיסמה שלך באתר %(site_name)s שונתה.\n"
 "אם אתה לא עשית את זה צור קשר עם הנהלת האתר.\n"
 "כתובת המייל: %(site_mail)s"
+
+#: utils/mail.py:77
+#, fuzzy, python-format
+msgid "New notification - %(site_name)s"
+msgstr "התראה חדשה - %(site_name)s"
+
+#: utils/mail.py:81
+#, python-format
+msgid ""
+"Hello %(fullname)s. You have %(number)d new notification/s:\n"
+"%(message)s"
+msgstr "היי %(fullname)s. יש לך %(number)d התראה/ות חדשה/ות:\n%(message)s"
 

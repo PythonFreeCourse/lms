@@ -2,6 +2,7 @@ import pathlib
 import shutil
 
 from flask import Flask
+from flask_apscheduler import APScheduler  # type: ignore
 from flask_babel import Babel  # type: ignore
 from flask_limiter import Limiter  # type: ignore
 from flask_limiter.util import get_remote_address  # type: ignore
@@ -43,6 +44,10 @@ csrf = CSRFProtect(webapp)
 babel = Babel(webapp)
 
 webmail = Mail(webapp)
+
+webscheduler = APScheduler()
+webscheduler.init_app(webapp)
+webscheduler.start()
 
 
 # Must import files after app's creation

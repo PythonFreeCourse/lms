@@ -38,3 +38,14 @@ def auth(username: str, password: str) -> User:
 
 def generate_user_token(user: User) -> str:
     return SERIALIZER.dumps(user.mail_address, salt=retrieve_salt(user))
+
+
+def change_mail_subscription(user: User, act: str):
+    if act == 'subscribe':
+        user.mail_subscription = True
+    elif act == 'unsubscribe':
+        user.mail_subscription = False
+    else:
+        return False
+    user.save()
+    return True

@@ -65,5 +65,8 @@ LOCALE = 'en'
 LIMITS_PER_MINUTE = 5
 LIMITS_PER_HOUR = 50
 
+# Scheduler
+SCHEDULER_API_ENABLED = True
+
 # Change password settings
 MAX_INVALID_PASSWORD_TRIES = 5

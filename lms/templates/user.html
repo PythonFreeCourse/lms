@@ -17,6 +17,12 @@
         <div id="change-password-user">
           <ul>
             <li><a href="{{ url_for('change_password') }}" role="button">{{ _('Change Password') }}</a></li>
+            <div class="form-check mail-subscription">
+              <input class="form-check-input" type="checkbox" value="" id="mail-subscription-checkbox"{% if current_user.mail_subscription %} checked{% endif %}>
+              <label class="form-check-label" for="mail-subscription-checkbox">
+                {{ _('Mail Subscription') }}
+              </label>
+            </div>
           </ul>
         </div>
       </div>

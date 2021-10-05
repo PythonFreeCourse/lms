@@ -166,6 +166,7 @@ class User(UserMixin, BaseModel):
     api_key = CharField()
     last_course_viewed = ForeignKeyField(Course, null=True)
     uuid = UUIDField(default=uuid4, unique=True)
+    mail_subscription = BooleanField(default=True)
 
     def get_id(self):
         return str(self.uuid)
@@ -344,6 +345,25 @@ def on_notification_saved(
     ).offset(Notification.MAX_PER_USER)
     for instance in old_notifications:
         instance.delete_instance()
+
+
+class NotificationMail(BaseModel):
+    user = ForeignKeyField(User, unique=True)
+    number = IntegerField(default=1)
+    message = TextField()
+
+    @classmethod
+    def get_or_create_notification_mail(cls, user: User, message: str):
+        instance, created = cls.get_or_create(**{
+            cls.user.name: user,
+        }, defaults={
+            cls.message.name: message,
+        })
+        if not created:
+            instance.message += f'\n{message}'
+            instance.number += 1
+            instance.save()
+        return instance
 
 
 class Exercise(BaseModel):
