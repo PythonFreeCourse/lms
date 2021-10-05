@@ -15,9 +15,8 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import redirect
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, Course, ExerciseTag, ExerciseTagText, Note, Role,
-    RoleOptions, SharedSolution, Solution, SolutionFile, User, UserCourse,
-    database,
+    ALL_MODELS, Comment, Course, Note, Role, RoleOptions, SharedSolution,
+    Solution, SolutionFile, User, UserCourse, database,
 )
 from lms.lmsweb import babel, limiter, routes, webapp
 from lms.lmsweb.admin import (

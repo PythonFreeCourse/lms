@@ -9,7 +9,7 @@ from playhouse.shortcuts import model_to_dict  # type: ignore
 
 from lms.extractors.base import File
 from lms.lmsdb.models import (
-    ExerciseTag, ExerciseTagText, SharedSolution, Solution, SolutionFile, User,
+    ExerciseTag, SharedSolution, Solution, SolutionFile, User,
 )
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
