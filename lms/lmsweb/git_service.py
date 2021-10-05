@@ -24,6 +24,11 @@ class _GitOperation(typing.NamedTuple):
 class GitService:
     _GIT_PROCESS_TIMEOUT = 20
     _GIT_VALID_EXIT_CODE = 0
+    _STATELESS_RPC = '--stateless-rpc'
+    _ADVERTISE_REFS = '--advertise-refs'
+    _UPLOAD_COMMAND = 'git-upload-pack'
+    _RECEIVE_COMMAND = 'git-receive-pack'
+    _REFS_COMMAND = '/info/refs'
 
     def __init__(
             self,
@@ -125,55 +130,14 @@ class GitService:
         return res
 
     def _extract_git_operation(self) -> _GitOperation:
-        stateless_rpc = '--stateless-rpc'
-        advertise_refs = '--advertise-refs'
-        upload_pack_command = 'git-upload-pack'
-        receive_pack_command = 'git-receive-pack'
-        allowed_commands = [upload_pack_command, receive_pack_command]
+        if self._request.path.endswith(self._UPLOAD_COMMAND):
+            return self._build_upload_operation()
 
-        supported = True
-        format_response = False
-        contain_new_commits = False
+        elif self._request.path.endswith(self._RECEIVE_COMMAND):
+            return self._build_receive_operation()
 
-        if self._request.path.endswith(upload_pack_command):
-            content_type = 'application/x-git-upload-pack-result'
-            service_command = [
-                upload_pack_command,
-                stateless_rpc,
-                self.project_name,
-            ]
-
-        elif self._request.path.endswith(receive_pack_command):
-            content_type = 'application/x-git-receive-pack-result'
-            service_command = [
-                receive_pack_command,
-                stateless_rpc,
-                self.project_name,
-            ]
-            contain_new_commits = True
-
-        elif self._request.path.endswith('/info/refs'):
-            service_name = self._request.args.get('service')
-            service_command = [
-                service_name,
-                stateless_rpc,
-                advertise_refs,
-                self.project_name,
-            ]
-            content_type = f'application/x-{service_name}-advertisement'
-
-            supported = service_name in allowed_commands
-
-            def format_response_callback(response_bytes: bytes) -> bytes:
-                packet = f'# service={service_name}\n'
-                length = len(packet) + 4
-                prefix = '{:04x}'.format(length & 0xFFFF)
-
-                data = (prefix + packet + '0000').encode()
-                data += response_bytes
-                return data
-
-            format_response = format_response_callback
+        elif self._request.path.endswith(self._REFS_COMMAND):
+            return self._build_refs_operation()
 
         else:
             log.error(
@@ -182,12 +146,58 @@ class GitService:
             )
             raise NotImplementedError
 
+    def _build_refs_operation(self) -> _GitOperation:
+        allowed_commands = [self._UPLOAD_COMMAND, self._RECEIVE_COMMAND]
+        service_name = self._request.args.get('service')
+        content_type = f'application/x-{service_name}-advertisement'
+        supported = service_name in allowed_commands
+
+        def format_response_callback(response_bytes: bytes) -> bytes:
+            packet = f'# service={service_name}\n'
+            length = len(packet) + 4
+            prefix = '{:04x}'.format(length & 0xFFFF)
+
+            data = (prefix + packet + '0000').encode()
+            data += response_bytes
+            return data
+
         return _GitOperation(
             response_content_type=content_type,
-            service_command=service_command,
+            service_command=[
+                service_name,
+                self._STATELESS_RPC,
+                self._ADVERTISE_REFS,
+                self.project_name,
+            ],
             supported=supported,
-            format_response=format_response,
-            contain_new_commits=contain_new_commits,
+            format_response=format_response_callback,
+            contain_new_commits=False,
+        )
+
+    def _build_receive_operation(self) -> _GitOperation:
+        return _GitOperation(
+            response_content_type='application/x-git-receive-pack-result',
+            service_command=[
+                self._RECEIVE_COMMAND,
+                self._STATELESS_RPC,
+                self.project_name,
+            ],
+            supported=True,
+            format_response=None,
+            contain_new_commits=True,
+        )
+
+    def _build_upload_operation(self) -> _GitOperation:
+        return _GitOperation(
+            response_content_type='application/x-git-upload-pack-result',
+            service_command=[
+                self._UPLOAD_COMMAND,
+                self._STATELESS_RPC,
+                self.project_name,
+            ],
+            supported=True,
+            format_response=None,
+            contain_new_commits=False,
         )
 
     def _load_files_from_repository(self) -> typing.List[upload.File]:
