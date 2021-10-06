@@ -284,7 +284,9 @@ def on_save_user_course(model_class, instance, created):
 def on_delete_user_course(model_class, instance):
     """Changes user's last course viewed."""
     if instance.user.last_course_viewed == instance.course:
-        instance.user.last_course_viewed = Course.fetch(instance.user).limit(1)
+        instance.user.last_course_viewed = (
+            Course.fetch(instance.user).limit(1).scalar()
+        )
         instance.user.save()
 
 
