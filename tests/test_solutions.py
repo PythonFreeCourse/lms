@@ -128,6 +128,7 @@ class TestSolutionBridge:
         student_user: User,
         staff_user: User,
         solution: Solution,
+        _assessments,
     ):
         # Basic functionality
         assert solution.state == Solution.STATES.CREATED.name
@@ -155,6 +156,7 @@ class TestSolutionBridge:
         student_user: User,
         exercise: Exercise,
         staff_user: User,
+        _assessments,
     ):
         student_user2 = conftest.create_student_user(index=1)
         exercise2 = conftest.create_exercise(course, 2, index=3)
@@ -627,3 +629,21 @@ class TestSolutionBridge:
         assert (
             assessment.active_color == DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR,
         )
+
+    @staticmethod
+    def test_solutions_of_user(
+        staff_user: User, student_user: User, course: Course,
+        solution: Solution, _assessments,
+    ):
+        conftest.create_usercourse(student_user, course)
+        solutions.mark_as_checked(solution.id, staff_user.id, 2)
+        solution = Solution.get_by_id(solution.id)
+
+        exercise2 = conftest.create_exercise(course, 2)
+        solution2 = conftest.create_solution(exercise2, student_user)
+        solutions.mark_as_checked(solution2.id, staff_user.id)
+        solution2 = Solution.get_by_id(solution2.id)
+        
+        exercises = solution.of_user(student_user.id, from_all_courses=True)
+        assert exercises[0].get('assessment') == 'Nice'
+        assert exercises[1].get('assessment') is None

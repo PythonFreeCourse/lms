@@ -26,18 +26,22 @@ function trackFinished(exerciseId, solutionId, element) {
   });
 }
 
+function changeAssessmentsAttributes(assessmentGroup, item) {
+  if (item.value == assessmentGroup.dataset.checkedid) {
+    item.removeAttribute('checked');
+    item.checked = false;
+    assessmentGroup.dataset.checkedid = 'None';
+  } else {
+    assessmentGroup.dataset.checkedid = item.value;
+  }
+}
+
 function trackAssessmentButtons() {
   const assessmentGroup = document.getElementById('solution-assessment');
   const assessmentElements = document.querySelectorAll('input[name="assessment"]');
   Array.from(assessmentElements).forEach((item) => {
     item.addEventListener('click', () => {
-      if (item.value == assessmentGroup.dataset.checkedid) {
-        item.removeAttribute('checked');
-        item.checked = false;
-        assessmentGroup.dataset.checkedid = 'None';
-      } else {
-        assessmentGroup.dataset.checkedid = item.value;
-      }
+      changeAssessmentsAttributes(assessmentGroup, item);
     }, true);
   });
 }

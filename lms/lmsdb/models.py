@@ -375,10 +375,9 @@ class Exercise(BaseModel):
     def get_highest_number(cls, course: Course):
         return (
             cls
-            .select(cls.number)
+            .select(fn.MAX(cls.number))
             .where(cls.course == course)
-            .order_by(cls.number.desc())
-            .limit(1)
+            .group_by(cls.course)
             .scalar()
         )
 
@@ -437,7 +436,6 @@ class Exercise(BaseModel):
 @pre_save(sender=Exercise)
 def exercise_number_save_handler(model_class, instance, created):
     """Change the exercise number to the highest consecutive number."""
-
     if model_class.is_number_exists(instance.course, instance.number):
         instance.number = model_class.get_highest_number(instance.course) + 1
 
@@ -746,11 +744,12 @@ class Solution(BaseModel):
         assessment_id: Optional[int] = None,
         by: Optional[Union[User, int]] = None,
     ) -> bool:
+        assessment = SolutionAssessment.get_or_none(
+            SolutionAssessment.id == assessment_id,
+        )
         return self.set_state(
             Solution.STATES.DONE,
-            SolutionAssessment.get_or_none(
-                SolutionAssessment.id == assessment_id,
-            ),
+            assessment=assessment,
             checker=by,
         )
 
