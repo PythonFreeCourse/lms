@@ -16,7 +16,7 @@ import pytest
 
 from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Course, Exercise, ExerciseTag,
-    ExerciseTagText, Note, Notification, Role, RoleOptions, SharedSolution,
+    Tag, Note, Notification, Role, RoleOptions, SharedSolution,
     Solution, User, UserCourse,
 )
 from lms.extractors.base import File
@@ -309,8 +309,8 @@ def create_exercise(
     )
 
 
-def create_exercise_tag(tag_text: str, exercise: Exercise):
-    new_tag_id = ExerciseTagText.create_tag(text=tag_text).id
+def create_exercise_tag(tag_text: str, course: Course, exercise: Exercise):
+    new_tag_id = Tag.create_tag(text=tag_text, course=course).id
     return ExerciseTag.create(exercise=exercise, tag=new_tag_id)
 
 

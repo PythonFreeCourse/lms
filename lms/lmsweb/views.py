@@ -343,12 +343,25 @@ def change_last_course_viewed(course_id: int):
 
 
 @webapp.route('/exercises')
+@login_required
+def exercises_page():
+    fetch_archived = bool(request.args.get('archived'))
+    exercises = Solution.of_user(current_user.id, fetch_archived)
+    is_manager = current_user.role.is_manager
+    return render_template(
+        'exercises.html',
+        exercises=exercises,
+        is_manager=is_manager,
+        fetch_archived=fetch_archived,
+    )
+
+
 @webapp.route('/exercises/<tag_name>')
 @login_required
-def exercises_page(tag_name: Optional[str] = None):
+def exercises_tag_page(tag_name: str):
     fetch_archived = bool(request.args.get('archived'))
     try:
-        solutions.check_tag_name(tag_name)
+        solutions.check_tag_name(tag_name, current_user.last_course_viewed)
     except LmsError as e:
         error_message, status_code = e.args
         return fail(status_code, error_message)

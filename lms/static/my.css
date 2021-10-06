@@ -187,14 +187,6 @@ a {
   white-space: normal;
 }
 
-#exercise-tag-link {
-  color: #919191;
-}
-
-#exercise-tag-link:hover {
-  color: #646464;
-}
-
 .exercise-send {
   display: flex;
   flex-direction: row;

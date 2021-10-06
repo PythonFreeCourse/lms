@@ -9,12 +9,12 @@ from playhouse.shortcuts import model_to_dict  # type: ignore
 
 from lms.extractors.base import File
 from lms.lmsdb.models import (
-    ExerciseTag, SharedSolution, Solution, SolutionFile, User,
+    Course, SharedSolution, Solution, SolutionFile, User,
 )
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmsweb import config, routes
-from lms.models import comments, notifications
+from lms.models import comments, notifications, tags
 from lms.models.errors import ForbiddenPermission, ResourceNotFound
 from lms.utils.files import ALLOWED_IMAGES_EXTENSIONS
 
@@ -209,12 +209,8 @@ def get_files_tree(files: Iterable[SolutionFile]) -> List[Dict[str, Any]]:
     return file_details
 
 
-def check_tag_name(tag_name: Optional[str]) -> None:
-    if (
-        tag_name is not None and not ExerciseTag.is_course_tag_exists(
-            current_user.last_course_viewed, tag_name,
-        )
-    ):
+def check_tag_name(tag_name: str, course: Course) -> None:
+    if not tags.get_exercises_of(course, tag_name):
         raise ResourceNotFound(
             f'No such tag {tag_name} for course '
             f'{current_user.last_course_viewed.name}.', 404,

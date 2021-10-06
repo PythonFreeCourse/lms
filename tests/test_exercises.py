@@ -1,6 +1,7 @@
 import datetime
 
 from lms.lmsdb.models import Course, Exercise, User
+from lms.models import tags
 from tests import conftest
 
 
@@ -60,14 +61,14 @@ class TestExercise:
         client = conftest.get_logged_user(username=student_user.username)
         conftest.create_usercourse(student_user, course)
         client.get(f'course/{course.id}')
-        conftest.create_exercise_tag('tag1', exercise)
+        conftest.create_exercise_tag('tag1', course, exercise)
         tag_response = client.get('/exercises/tag1')
         assert tag_response.status_code == 200
 
         course2 = conftest.create_course(index=1)
         exercise2 = conftest.create_exercise(course2, 2)
         conftest.create_usercourse(student_user, course2)
-        conftest.create_exercise_tag('tag2', exercise2)
+        conftest.create_exercise_tag('tag2', course2, exercise2)
         bad_tag_response = client.get('/exercises/tag2')
         assert bad_tag_response.status_code == 404
 
@@ -77,3 +78,13 @@ class TestExercise:
 
         another_bad_tag_response = client.get('/exercises/wrongtag')
         assert another_bad_tag_response.status_code == 404
+
+    @staticmethod
+    def test_course_tags(course: Course, exercise: Exercise):
+        course2 = conftest.create_course(index=1)
+        conftest.create_exercise_tag('tag1', course, exercise)
+        conftest.create_exercise_tag('tag2', course, exercise)
+        exercise2 = conftest.create_exercise(course, 2)
+        conftest.create_exercise_tag('tag1', course, exercise2)
+        assert len(tags.of_exercise(course=course.id)) == 3
+        assert len(tags.of_exercise(course=course2.id)) == 0

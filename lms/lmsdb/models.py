@@ -346,12 +346,21 @@ def on_notification_saved(
         instance.delete_instance()
 
 
-class ExerciseTagText(BaseModel):
-    text = TextField(unique=True)
+class Tag(BaseModel):
+    text = TextField()
+    course = ForeignKeyField(Course)
+    date_created = DateTimeField(default=datetime.now)
+
+    class Meta:
+        indexes = (
+            (('text', 'course_id'), True),
+        )
 
     @classmethod
-    def create_tag(cls, text: str) -> 'ExerciseTagText':
-        instance, _ = cls.get_or_create(**{cls.text.name: html.escape(text)})
+    def create_tag(cls, text: str, course: Course) -> 'Tag':
+        instance, _ = cls.get_or_create(
+            **{cls.text.name: html.escape(text), cls.course.name: course},
+        )
         return instance
 
     def __str__(self):
@@ -388,12 +397,8 @@ class Exercise(BaseModel):
         return cls.select().where(cls.number == number).exists()
 
     @classmethod
-    def get_objects(
-        cls, user_id: int, fetch_archived: bool = False,
-        from_all_courses: bool = False, exercise_tag: Optional[str] = None,
-    ):
-        user = User.get(User.id == user_id)
-        exercises = (
+    def by_user(cls, user_id: int):
+        return (
             cls
             .select()
             .join(Course)
@@ -402,17 +407,20 @@ class Exercise(BaseModel):
             .switch()
             .order_by(UserCourse.date, Exercise.number, Exercise.order)
         )
+
+    @classmethod
+    def get_objects(
+        cls, user_id: int, fetch_archived: bool = False,
+        from_all_courses: bool = False, exercise_tag: Optional[str] = None,
+    ):
+        user = User.get(User.id == user_id)
+        exercises = cls.by_user(user_id)
         if not from_all_courses:
             exercises = exercises.where(
                 UserCourse.course == user.last_course_viewed,
             )
         if exercise_tag:
-            exercises = (
-                exercises
-                .join(ExerciseTag)
-                .join(ExerciseTagText)
-                .where(ExerciseTagText.text == exercise_tag)
-            )
+            exercises = Exercise.by_tags(exercises, exercise_tag)
         if not fetch_archived:
             exercises = exercises.where(cls.is_archived == False)  # NOQA: E712
         return exercises
@@ -434,6 +442,15 @@ class Exercise(BaseModel):
     def as_dicts(exercises: Iterable['Exercise']) -> ExercisesDictById:
         return {exercise.id: exercise.as_dict() for exercise in exercises}
 
+    @staticmethod
+    def by_tags(exercises: Iterable['Exercise'], exercise_tag: str):
+        return (
+            exercises
+            .join(ExerciseTag)
+            .join(Tag)
+            .where(Tag.text == exercise_tag)
+        )
+
     def __str__(self):
         return self.subject
 
@@ -448,7 +465,7 @@ def exercise_number_save_handler(model_class, instance, created):
 
 class ExerciseTag(BaseModel):
     exercise = ForeignKeyField(Exercise)
-    tag = ForeignKeyField(ExerciseTagText)
+    tag = ForeignKeyField(Tag)
     date = DateTimeField(default=datetime.now)
 
     @classmethod
@@ -467,8 +484,8 @@ class ExerciseTag(BaseModel):
         return (
             cls
             .select()
-            .join(ExerciseTagText)
-            .where(ExerciseTagText.text == tag_name)
+            .join(Tag)
+            .where(Tag.text == tag_name)
             .switch()
             .join(Exercise)
             .where(Exercise.course == course)
