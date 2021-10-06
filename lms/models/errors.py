@@ -5,7 +5,7 @@ class LmsError(Exception):
     pass
 
 
-class AlreadyExists(LmsError):
+class AlreadyExists(LmsError):  # Error 409
     pass
 
 

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block page_content %}
+<div id="page-public-courses">
+  <div id="public-courses" class="{{ direction }}">
+    <h1>{{ _('Public Courses List') }}</h1>
+    <div class="body">
+      <div class="public-courses-links {{ direction }}">
+        <ul>
+          {% for course in courses %}
+            <li><a href="{{ url_for('join_public_course', course_id=course.id) }}" role="button">{{ course.name | e }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

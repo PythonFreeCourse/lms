@@ -290,9 +290,17 @@ def _add_exercise_course_id_and_number_columns_constraint() -> bool:
 def _add_user_course_constaint() -> bool:
     migrator = db_config.get_migrator_instance()
     with db_config.database.transaction():
-        migrate(
-            migrator.add_index('usercourse', ('user_id', 'course_id'), True),
-        )
+        try:
+            migrate(
+                migrator.add_index(
+                    'usercourse', ('user_id', 'course_id'), True,
+                ),
+            )
+        except OperationalError as e:
+            if 'already exists' in str(e):
+                log.info(f'index usercourse already exists: {e}')
+            else:
+                raise
         db_config.database.commit()
 
 

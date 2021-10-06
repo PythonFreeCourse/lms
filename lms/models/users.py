@@ -3,10 +3,11 @@ import re
 from flask_babel import gettext as _  # type: ignore
 from itsdangerous import URLSafeTimedSerializer
 
-from lms.lmsdb.models import User
+from lms.lmsdb.models import Course, User, UserCourse
 from lms.lmsweb import config
 from lms.models.errors import (
-    ForbiddenPermission, UnauthorizedError, UnhashedPasswordError,
+    AlreadyExists, ForbiddenPermission, UnauthorizedError,
+    UnhashedPasswordError,
 )
 
 
@@ -38,3 +39,16 @@ def auth(username: str, password: str) -> User:
 
 def generate_user_token(user: User) -> str:
     return SERIALIZER.dumps(user.mail_address, salt=retrieve_salt(user))
+
+
+def join_public_course(course: Course, user: User) -> None:
+    __, created = UserCourse.get_or_create(**{
+        UserCourse.user.name: user, UserCourse.course.name: course,
+    })
+    if not created:
+        raise AlreadyExists(
+            _(
+                'You are already registered to %(course_name)s course.',
+                course_name=course.name,
+            ), 409,
+        )
