@@ -164,3 +164,6 @@ class TestRegistration:
         client.get(f'/join-course/{course.id}')
         template, _ = captured_templates[-1]
         assert template.name == 'exercises.html'
+
+        already_registered_response = client.get(f'/join-course/{course.id}')
+        assert already_registered_response.status_code == 409
