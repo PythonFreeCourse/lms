@@ -254,6 +254,11 @@ class UserCourse(BaseModel):
     course = ForeignKeyField(Course, backref='usercourses')
     date = DateTimeField(default=datetime.now)
 
+    class Meta:
+        indexes = (
+            (('user_id', 'course_id'), True),
+        )
+
     @classmethod
     def is_user_registered(cls, user_id: int, course_id: int) -> bool:
         return (
@@ -270,7 +275,6 @@ class UserCourse(BaseModel):
 @post_save(sender=UserCourse)
 def on_save_user_course(model_class, instance, created):
     """Changes user's last course viewed."""
-
     if instance.user.last_course_viewed is None:
         instance.user.last_course_viewed = instance.course
         instance.user.save()
@@ -279,12 +283,8 @@ def on_save_user_course(model_class, instance, created):
 @post_delete(sender=UserCourse)
 def on_delete_user_course(model_class, instance):
     """Changes user's last course viewed."""
-
     if instance.user.last_course_viewed == instance.course:
-        if new_last_course_viewed := Course.fetch(instance.user).limit(1):
-            instance.user.last_course_viewed = new_last_course_viewed
-        else:
-            instance.user.last_course_viewed = None
+        instance.user.last_course_viewed = Course.fetch(instance.user).limit(1)
         instance.user.save()
 
 
