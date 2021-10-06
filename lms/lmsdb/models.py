@@ -479,19 +479,6 @@ class ExerciseTag(BaseModel):
             .order_by(cls.date)
         )
 
-    @classmethod
-    def is_course_tag_exists(cls, course: Course, tag_name: str):
-        return (
-            cls
-            .select()
-            .join(Tag)
-            .where(Tag.text == tag_name)
-            .switch()
-            .join(Exercise)
-            .where(Exercise.course == course)
-            .exists()
-        )
-
 
 class SolutionState(enum.Enum):
     CREATED = 'Created'
