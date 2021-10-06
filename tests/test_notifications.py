@@ -1,10 +1,15 @@
+import datetime
 import random
 import string
+from unittest.mock import Mock, patch
 
 from flask import json
 import pytest  # type: ignore
 
-from lms.lmsdb.models import Exercise, Notification, Solution, User
+from lms.lmsdb.models import (
+    Exercise, Notification, NotificationMail, Solution, User,
+)
+from lms.lmsweb import webapp
 from lms.models import notifications, solutions
 from tests import conftest
 
@@ -216,3 +221,34 @@ class TestNotification:
         )
         assert another_comment_response.status_code == 200
         assert len(list(notifications.get(staff_user))) == 2
+
+    @staticmethod
+    def test_notifications_subscriptions(student_user: User):
+        client = conftest.get_logged_user(username=student_user.username)
+        unsubscribe_response = client.patch('/subscribe/unsubscribe')
+        assert unsubscribe_response.status_code == 200
+        student_user = User.get_by_id(student_user.id)
+        assert student_user.mail_subscription == False
+
+        subscribe_response = client.patch('/subscribe/subscribe')
+        assert subscribe_response.status_code == 200
+        student_user = User.get_by_id(student_user.id)
+        assert student_user.mail_subscription == True
+
+        wrong_response = client.patch('/subscribe/wrong')
+        json_data = json.loads(wrong_response.get_data(as_text=True))
+        assert json_data['success'] == False
+
+    @staticmethod
+    def test_send_mails_notifications(student_user: User):
+        conftest.create_notification_mail(student_user)
+        conftest.create_notification_mail(student_user)
+        assert NotificationMail.get_instances_number() == 2
+
+        mock_hours=webapp.config.get('DEFAULT_DO_TASKS_EVERY_HOURS')
+        fake_date = (
+            datetime.datetime.now() +
+            datetime.timedelta(hours=mock_hours, minutes=1)
+        )
+        with patch('datetime.datetime', Mock(return_value=fake_date)):
+            assert NotificationMail.get_instances_number() == 0

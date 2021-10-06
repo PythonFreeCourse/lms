@@ -365,6 +365,10 @@ class NotificationMail(BaseModel):
             instance.save()
         return instance
 
+    @classmethod
+    def get_instances_number(cls):
+        return cls.select(fn.Count(cls.id))
+
 
 class Exercise(BaseModel):
     subject = CharField()

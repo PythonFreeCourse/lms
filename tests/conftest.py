@@ -16,7 +16,8 @@ import pytest
 
 from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Course, Exercise, Note, Notification,
-    Role, RoleOptions, SharedSolution, Solution, User, UserCourse,
+    NotificationMail, Role, RoleOptions, SharedSolution, Solution, User,
+    UserCourse,
 )
 from lms.extractors.base import File
 from lms.lmstests.public import celery_app as public_app
@@ -278,6 +279,12 @@ def create_notification(
         message=f'Test message {index}',
         related_id=solution.id,
         action_url=f'{routes.SOLUTIONS}/{solution.id}',
+    )
+
+
+def create_notification_mail(student_user: User) -> NotificationMail:
+    return NotificationMail.get_or_create_notification_mail(
+        user=student_user, message='Test message',
     )
 
 

@@ -86,7 +86,10 @@ def send_notification_mail(user: User, message: str, number: int) -> Message:
     return msg
 
 
-@webscheduler.task('interval', id='mail_notifications', hours=2)
+@webscheduler.task(
+    'interval', id='mail_notifications',
+    hours=config.DEFAULT_DO_TASKS_EVERY_HOURS,
+)
 def send_all_notifications_mails():
     for notification in NotificationMail.select():
         if notification.user.mail_subscription:

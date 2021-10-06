@@ -45,8 +45,7 @@ babel = Babel(webapp)
 
 webmail = Mail(webapp)
 
-webscheduler = APScheduler()
-webscheduler.init_app(webapp)
+webscheduler = APScheduler(app=webapp)
 webscheduler.start()
 
 
