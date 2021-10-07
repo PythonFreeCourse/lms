@@ -25,6 +25,9 @@ from lms.lmsweb import limiter, routes, webapp
 from lms.models import notifications
 
 
+FAKE_PASSWORD = 'fake pass'
+
+
 @pytest.fixture(autouse=True, scope='session')
 def db_in_memory():
     """Binds all models to in-memory SQLite and creates all tables`"""
@@ -126,7 +129,7 @@ def get_logged_user(username: str) -> FlaskClient:
     client = webapp.test_client()
     client.post('/login', data={  # noqa: S106
         'username': username,
-        'password': 'fake pass',
+        'password': FAKE_PASSWORD,
     }, follow_redirects=True)
     return client
 
@@ -186,12 +189,11 @@ def create_user(
     role_name: str = RoleOptions.STUDENT.value, index: int = 1,
 ) -> User:
     username = f'{role_name}-{index}'
-    password = 'fake pass'
     return User.create(  # NOQA: S106
         username=username,
         fullname=f'A{role_name}',
         mail_address=f'so-{role_name}-{index}@mail.com',
-        password=password,
+        password=FAKE_PASSWORD,
         api_key='fake key',
         role=Role.by_name(role_name),
     )
@@ -215,7 +217,7 @@ def create_staff_user(index: int = 0) -> User:
 
 @pytest.fixture()
 def staff_password():
-    return 'fake pass'
+    return FAKE_PASSWORD
 
 
 @pytest.fixture
@@ -242,12 +244,11 @@ def student_user():
 def admin_user():
     admin_role = Role.get(Role.name == RoleOptions.ADMINISTRATOR.value)
     username = 'Yam'
-    password = 'fake pass'
     return User.create(  # NOQA: B106, S106
         username=username,
         fullname='Buya',
         mail_address='mymail@mail.com',
-        password=password,
+        password=FAKE_PASSWORD,
         api_key='fake key',
         role=admin_role,
     )

@@ -97,6 +97,7 @@ services:
     volumes:
       - ../lms:/app_dir/lms
       - ../../notebooks-tests:/app_dir/notebooks-tests
+      - repositories-data-volume:/repositories
     environment:
       - DB_NAME=${DB_NAME:-db}
       - DB_USER=${DB_USERNAME:-postgres}
@@ -109,6 +110,7 @@ services:
       - CELERY_CHECKS_PUBLIC_VHOST=lmstests-public
       - CELERY_RABBITMQ_HOST=rabbitmq
       - CELERY_RABBITMQ_PORT=5672
+      - REPOSITORY_FOLDER=/repositories
     links:
       - db
       - rabbitmq
@@ -126,6 +128,7 @@ volumes:
   docker-engine-lib:
   db-data-volume:
   rabbit-data-volume:
+  repositories-data-volume:
 
 
 networks:

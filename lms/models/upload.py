@@ -72,10 +72,13 @@ def new(
     errors: List[Union[UploadError, AlreadyExists]] = []
     for exercise_number, files, solution_hash in Extractor(file):
         try:
-            solution = _upload_to_db(
-                exercise_number, course_id, user_id, files, solution_hash,
+            upload_solution(
+                course_id=course_id,
+                exercise_number=exercise_number,
+                files=files,
+                solution_hash=solution_hash,
+                user_id=user_id,
             )
-            _run_auto_checks(solution)
         except (UploadError, AlreadyExists) as e:
             log.debug(e)
             errors.append(e)
@@ -87,3 +90,20 @@ def new(
         raise UploadError(errors)
 
     return matches, misses
+
+
+def upload_solution(
+        course_id: int,
+        exercise_number: int,
+        files: List[File],
+        solution_hash: str,
+        user_id: int,
+):
+    solution = _upload_to_db(
+        exercise_number=exercise_number,
+        course_id=course_id,
+        user_id=user_id,
+        files=files,
+        solution_hash=solution_hash,
+    )
+    _run_auto_checks(solution)
