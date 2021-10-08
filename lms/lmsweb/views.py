@@ -2,7 +2,7 @@ from typing import Any, Callable, Optional
 
 import arrow  # type: ignore
 from flask import (
-    jsonify, make_response, render_template, request,
+    Response, jsonify, make_response, render_template, request,
     send_from_directory, session, url_for,
 )
 from flask_babel import gettext as _  # type: ignore
@@ -18,17 +18,18 @@ from lms.lmsdb.models import (
     ALL_MODELS, Comment, Course, Note, Role, RoleOptions, SharedSolution,
     Solution, SolutionFile, User, UserCourse, database,
 )
-from lms.lmsweb import babel, limiter, routes, webapp
+from lms.lmsweb import babel, http_basic_auth, limiter, routes, webapp
 from lms.lmsweb.admin import (
     AdminModelView, SPECIAL_MAPPING, admin, managers_only,
 )
 from lms.lmsweb.config import (
     CONFIRMATION_TIME, LANGUAGES, LIMITS_PER_HOUR,
-    LIMITS_PER_MINUTE, LOCALE, MAX_UPLOAD_SIZE,
+    LIMITS_PER_MINUTE, LOCALE, MAX_UPLOAD_SIZE, REPOSITORY_FOLDER,
 )
 from lms.lmsweb.forms.change_password import ChangePasswordForm
 from lms.lmsweb.forms.register import RegisterForm
 from lms.lmsweb.forms.reset_password import RecoverPassForm, ResetPassForm
+from lms.lmsweb.git_service import GitService
 from lms.lmsweb.manifest import MANIFEST
 from lms.lmsweb.redirections import (
     PERMISSIVE_CORS, get_next_url, login_manager,
@@ -568,6 +569,21 @@ def download(download_id: str):
         filename=f'{filename}.zip'.encode('utf-8'),
     )
     return response
+
+
+@webapp.route(f'{routes.GIT}/info/refs')
+@webapp.route(f'{routes.GIT}/git-receive-pack', methods=['POST'])
+@webapp.route(f'{routes.GIT}/git-upload-pack', methods=['POST'])
+@http_basic_auth.login_required
+def git_handler(course_id: int, exercise_number: int) -> Response:
+    git_service = GitService(
+        user=http_basic_auth.current_user(),
+        exercise_number=exercise_number,
+        course_id=course_id,
+        request=request,
+        base_repository_folder=REPOSITORY_FOLDER,
+    )
+    return git_service.handle_operation()
 
 
 @webapp.route(f'{routes.SOLUTIONS}/<int:solution_id>')
