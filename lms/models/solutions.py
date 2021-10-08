@@ -9,7 +9,7 @@ from playhouse.shortcuts import model_to_dict  # type: ignore
 
 from lms.extractors.base import File
 from lms.lmsdb.models import (
-    Course, SharedSolution, Solution, SolutionFile, User,
+    SharedSolution, Solution, SolutionAssessment, SolutionFile, User,
 )
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
@@ -65,9 +65,13 @@ def get_message_and_addressee(
     return msg, addressee
 
 
-def mark_as_checked(solution_id: int, checker_id: int) -> bool:
+def mark_as_checked(
+    solution_id: int, checker_id: int, assessment_id: Optional[int] = None,
+) -> bool:
     checked_solution: Solution = Solution.get_by_id(solution_id)
-    is_updated = checked_solution.mark_as_checked(by=checker_id)
+    is_updated = checked_solution.mark_as_checked(
+        assessment_id=assessment_id, by=checker_id,
+    )
     msg = _(
         'Your solution for the "%(subject)s" exercise has been checked.',
         subject=checked_solution.exercise.subject,
@@ -138,6 +142,8 @@ def get_view_parameters(
             'user_comments':
                 comments._common_comments(user_id=current_user.id),
             'left': Solution.left_in_exercise(solution.exercise),
+            'assessments':
+                SolutionAssessment.get_assessments(solution.exercise.course),
         }
 
     if viewer_is_solver:
@@ -209,8 +215,8 @@ def get_files_tree(files: Iterable[SolutionFile]) -> List[Dict[str, Any]]:
     return file_details
 
 
-def check_tag_name(tag_name: str, course: Course) -> None:
-    if not tags.get_exercises_of(course, tag_name):
+def is_tag_name_exists(tag_name: str, course_id: int) -> None:
+    if not tags.get_exercises_of(course_id, tag_name):
         raise ResourceNotFound(
             f'No such tag {tag_name} for course '
             f'{current_user.last_course_viewed.name}.', 404,

@@ -86,5 +86,9 @@ class TestExercise:
         conftest.create_exercise_tag('tag2', course, exercise)
         exercise2 = conftest.create_exercise(course, 2)
         conftest.create_exercise_tag('tag1', course, exercise2)
-        assert len(tags.of_exercise(course=course.id)) == 3
-        assert len(tags.of_exercise(course=course2.id)) == 0
+        assert len(tags.by_course(course=course.id)) == 3
+        assert len(
+            tags.by_exercise_number(course=course.id, number=exercise.number),
+        ) == 2
+        assert len(tags.by_exercise_id(exercise_id=exercise2.id)) == 1
+        assert len(tags.by_course(course=course2.id)) == 0

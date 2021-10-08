@@ -1,33 +1,30 @@
-from typing import Iterable, Optional, Union
+from typing import Iterable, Union
 
-from lms.lmsdb.models import Course, Exercise, ExerciseTag, Tag
+from lms.lmsdb.models import Exercise, ExerciseTag, Tag
 
 
 def get_exercises_of(
-    course: Course, tag_name: str,
+    course_id: int, tag_name: str,
 ) -> Union[Iterable['ExerciseTag'], 'ExerciseTag']:
     return (
         ExerciseTag
         .select(ExerciseTag.exercise)
         .join(Tag)
-        .where(Tag.text == tag_name, Tag.course == course)
+        .where(Tag.text == tag_name, Tag.course == course_id)
     )
 
 
-def of_exercise(
-    exercise_id: Optional[int] = None, course: Optional[int] = None,
-    number: Optional[int] = None,
-) -> Optional[Union[Iterable['ExerciseTag'], 'ExerciseTag']]:
-    if exercise_id is not None:
-        return ExerciseTag.select().where(ExerciseTag.exercise == id)
-    elif course is not None:
-        tags = (
-            ExerciseTag
-            .select()
-            .join(Exercise)
-            .where(Exercise.course == course)
-        )
-        if number is not None:
-            tags = tags.where(Exercise.number == number)
-        return tags
-    return None
+def by_exercise_id(
+    exercise_id: int,
+) -> Union[Iterable['ExerciseTag'], 'ExerciseTag']:
+    return ExerciseTag.select().where(ExerciseTag.exercise == exercise_id)
+
+
+def by_course(course: int) -> Union[Iterable['ExerciseTag'], 'ExerciseTag']:
+    return ExerciseTag.select().join(Exercise).where(Exercise.course == course)
+
+
+def by_exercise_number(
+    course: int, number: int,
+) -> Union[Iterable['ExerciseTag'], 'ExerciseTag']:
+    return by_course(course).where(Exercise.number == number)

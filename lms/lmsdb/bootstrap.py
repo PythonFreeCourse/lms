@@ -287,15 +287,31 @@ def _add_exercise_course_id_and_number_columns_constraint() -> bool:
         db_config.database.commit()
 
 
+def _add_user_course_constaint() -> bool:
+    migrator = db_config.get_migrator_instance()
+    with db_config.database.transaction():
+        migrate(
+            migrator.add_index('usercourse', ('user_id', 'course_id'), True),
+        )
+        db_config.database.commit()
+
+
 def _last_status_view_migration() -> bool:
     Solution = models.Solution
     _migrate_column_in_table_if_needed(Solution, Solution.last_status_view)
     _migrate_column_in_table_if_needed(Solution, Solution.last_time_view)
+    return True
 
 
 def _uuid_migration() -> bool:
     User = models.User
     _add_not_null_column(User, User.uuid, _add_uuid_to_users_table)
+    return True
+
+
+def _assessment_migration() -> bool:
+    Solution = models.Solution
+    _add_not_null_column(Solution, Solution.assessment)
     return True
 
 
@@ -306,11 +322,15 @@ def main():
 
         if models.database.table_exists(models.Solution.__name__.lower()):
             _last_status_view_migration()
+            _assessment_migration()
 
         if models.database.table_exists(models.User.__name__.lower()):
             _api_keys_migration()
             _last_course_viewed_migration()
             _uuid_migration()
+
+        if models.database.table_exists(models.UserCourse.__name__.lower()):
+            _add_user_course_constaint()
 
         models.database.create_tables(models.ALL_MODELS, safe=True)
 
@@ -318,6 +338,8 @@ def main():
             models.create_basic_roles()
         if models.User.select().count() == 0:
             models.create_demo_users()
+        if models.SolutionAssessment.select().count() == 0:
+            models.create_basic_assessments()
         if models.Course.select().count() == 0:
             course = models.create_basic_course()
             _exercise_course_migration(course)
