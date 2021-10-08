@@ -287,6 +287,15 @@ def _add_exercise_course_id_and_number_columns_constraint() -> bool:
         db_config.database.commit()
 
 
+def _add_user_course_constaint() -> bool:
+    migrator = db_config.get_migrator_instance()
+    with db_config.database.transaction():
+        migrate(
+            migrator.add_index('usercourse', ('user_id', 'course_id'), True),
+        )
+        db_config.database.commit()
+
+
 def _last_status_view_migration() -> bool:
     Solution = models.Solution
     _migrate_column_in_table_if_needed(Solution, Solution.last_status_view)
@@ -311,6 +320,9 @@ def main():
             _api_keys_migration()
             _last_course_viewed_migration()
             _uuid_migration()
+
+        if models.database.table_exists(models.UserCourse.__name__.lower()):
+            _add_user_course_constaint()
 
         models.database.create_tables(models.ALL_MODELS, safe=True)
 
