@@ -67,3 +67,5 @@ LIMITS_PER_HOUR = 50
 
 # Change password settings
 MAX_INVALID_PASSWORD_TRIES = 5
+
+REPOSITORY_FOLDER = os.getenv("REPOSITORY_FOLDER", os.path.abspath(os.path.join(os.curdir, "repositories")))

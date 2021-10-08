@@ -16,13 +16,17 @@ import pytest
 
 from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Course, Exercise, Note, Notification,
-    Role, RoleOptions, SharedSolution, Solution, User, UserCourse,
+    Role, RoleOptions, SharedSolution, Solution, SolutionAssessment, User,
+    UserCourse,
 )
 from lms.extractors.base import File
 from lms.lmstests.public import celery_app as public_app
 from lms.lmstests.sandbox import celery_app as sandbox_app
 from lms.lmsweb import limiter, routes, webapp
 from lms.models import notifications
+
+
+FAKE_PASSWORD = 'fake pass'
 
 
 @pytest.fixture(autouse=True, scope='session')
@@ -126,7 +130,7 @@ def get_logged_user(username: str) -> FlaskClient:
     client = webapp.test_client()
     client.post('/login', data={  # noqa: S106
         'username': username,
-        'password': 'fake pass',
+        'password': FAKE_PASSWORD,
     }, follow_redirects=True)
     return client
 
@@ -186,12 +190,11 @@ def create_user(
     role_name: str = RoleOptions.STUDENT.value, index: int = 1,
 ) -> User:
     username = f'{role_name}-{index}'
-    password = 'fake pass'
     return User.create(  # NOQA: S106
         username=username,
         fullname=f'A{role_name}',
         mail_address=f'so-{role_name}-{index}@mail.com',
-        password=password,
+        password=FAKE_PASSWORD,
         api_key='fake key',
         role=Role.by_name(role_name),
     )
@@ -215,7 +218,7 @@ def create_staff_user(index: int = 0) -> User:
 
 @pytest.fixture()
 def staff_password():
-    return 'fake pass'
+    return FAKE_PASSWORD
 
 
 @pytest.fixture
@@ -242,12 +245,11 @@ def student_user():
 def admin_user():
     admin_role = Role.get(Role.name == RoleOptions.ADMINISTRATOR.value)
     username = 'Yam'
-    password = 'fake pass'
     return User.create(  # NOQA: B106, S106
         username=username,
         fullname='Buya',
         mail_address='mymail@mail.com',
-        password=password,
+        password=FAKE_PASSWORD,
         api_key='fake key',
         role=admin_role,
     )
@@ -332,6 +334,23 @@ def create_note(
 @pytest.fixture()
 def course() -> Course:
     return create_course()
+
+
+@pytest.fixture()
+def _assessments(course: Course) -> None:
+    assessments_dict = {
+        'Excellent': {'color': 'green', 'icon': 'star', 'order': 1},
+        'Nice': {'color': 'blue', 'icon': 'check', 'order': 2},
+        'Try again': {'color': 'red', 'icon': 'exclamation', 'order': 3},
+        'Plagiarism': {
+            'color': 'black', 'icon': 'exclamation-triangle', 'order': 4,
+        },
+    }
+    for name, values in assessments_dict.items():
+        SolutionAssessment.create(
+            name=name, icon=values.get('icon'), color=values.get('color'),
+            active_color='white', order=values.get('order'), course=course,
+        )
 
 
 @pytest.fixture()

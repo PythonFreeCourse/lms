@@ -7,9 +7,12 @@ else
   echo "Using default dev variables"
 fi
 
-
 SCRIPT_FILE_PATH=$(readlink -f "${0}")
 SCRIPT_FOLDER=$(dirname "${SCRIPT_FILE_PATH}")
+ERLANG_COOKIE_FILE="${SCRIPT_FOLDER}/rabbitmq.cookie"
+
+echo erlang_cookie=AAVyo5djdSMGIZXiwEQs3JeVaBx5l14z > "$ERLANG_COOKIE_FILE"
+chmod 600 "$ERLANG_COOKIE_FILE"
 
 docker network create lms
 

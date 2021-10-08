@@ -34,6 +34,7 @@
               <th scope="col">{{ _('Submission status') }}</th>
               <th scope="col">{{ _('Submission') }}</th>
               <th scope="col">{{ _('Checker') }}</th>
+              <th scope="col">{{ _('Assessment') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -47,6 +48,7 @@
                 </td>
                 <td><a href="/view/{{ solution.solution_id }}">{{ solution.solution_id }}</a></td>
                 <td>{{ solution.get('checker', '') | e }}</a></td>
+                <td>{{ solution.get('assessment', '') | e }}</td>
               </tr>
             {% endfor %}
           </tbody>

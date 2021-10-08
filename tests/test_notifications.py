@@ -175,7 +175,7 @@ class TestNotification:
         client = conftest.get_logged_user(student_user.username)
 
         # Marking the solution as checked
-        solutions.mark_as_checked(solution.id, staff_user.id)
+        solutions.mark_as_checked(solution.id, staff_user.id, 1)
         solution = Solution.get_by_id(solution.id)
 
         # Sending comments after solution checked
