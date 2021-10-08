@@ -490,7 +490,6 @@ class SolutionAssessment(BaseModel):
 @pre_save(sender=SolutionAssessment)
 def assessment_on_save_handler(_model_class, instance, created):
     """Change colors to hex."""
-
     try:
         instance.color = get_hex_color(instance.color)
     except ValueError:
