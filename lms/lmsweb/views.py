@@ -649,7 +649,13 @@ def shared_solution(shared_url: str, file_id: Optional[int] = None):
 @login_required
 @managers_only
 def done_checking(exercise_id, solution_id):
-    is_updated = solutions.mark_as_checked(solution_id, current_user.id)
+    if request.method == 'POST':
+        assessment_id = request.json.get('assessment')
+    else:  # it's a GET
+        assessment_id = request.args.get('assessment')
+    is_updated = solutions.mark_as_checked(
+        solution_id, current_user.id, assessment_id,
+    )
     next_solution = solutions.get_next_unchecked(exercise_id)
     next_solution_id = getattr(next_solution, 'id', None)
     return jsonify({'success': is_updated, 'next': next_solution_id})

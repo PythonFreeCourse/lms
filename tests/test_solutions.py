@@ -8,13 +8,14 @@ import pytest
 from lms.lmsdb import models
 from lms.lmsdb.models import (
     Comment, Course, Exercise, SharedSolution,
-    Solution, SolutionStatusView, User,
+    Solution, SolutionAssessment, SolutionStatusView, User,
 )
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmsweb import routes
 from lms.models import notifications, solutions
 from lms.models.errors import ResourceNotFound
 from lms.models.solutions import get_view_parameters
+from lms.utils.consts import COLORS, DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR, DEFAULT_ASSESSMENT_BUTTON_COLOR
 from tests import conftest
 
 
@@ -127,10 +128,11 @@ class TestSolutionBridge:
         student_user: User,
         staff_user: User,
         solution: Solution,
+        _assessments,
     ):
         # Basic functionality
         assert solution.state == Solution.STATES.CREATED.name
-        marked = solutions.mark_as_checked(solution.id, staff_user.id)
+        marked = solutions.mark_as_checked(solution.id, staff_user.id, 2)
         # HELL WITH PEEWEE!!!
         solution = Solution.get_by_id(solution.id)
         assert marked
@@ -140,7 +142,7 @@ class TestSolutionBridge:
         # Not duplicating things
         staff_user2 = conftest.create_staff_user(index=1)
         solution2 = conftest.create_solution(exercise, student_user)
-        marked = solutions.mark_as_checked(solution2.id, staff_user2.id)
+        marked = solutions.mark_as_checked(solution2.id, staff_user2.id, 3)
         solution2 = Solution.get_by_id(solution2.id)
         assert solution2.state == Solution.STATES.DONE.name
         assert solution2.checker == staff_user2
@@ -154,6 +156,7 @@ class TestSolutionBridge:
         student_user: User,
         exercise: Exercise,
         staff_user: User,
+        _assessments,
     ):
         student_user2 = conftest.create_student_user(index=1)
         exercise2 = conftest.create_exercise(course, 2, index=3)
@@ -168,13 +171,13 @@ class TestSolutionBridge:
         assert unchecked.exercise.id == solution1.exercise.id
         assert unchecked == solution1
 
-        solutions.mark_as_checked(solution1.id, staff_user)
+        solutions.mark_as_checked(solution1.id, staff_user, 4)
         unchecked = solutions.get_next_unchecked(exercise.id)
         assert unchecked is not None
         assert unchecked.exercise.id == solution3.exercise.id
         assert unchecked == solution3
 
-        solutions.mark_as_checked(solution3.id, staff_user)
+        solutions.mark_as_checked(solution3.id, staff_user, 1)
         unchecked = solutions.get_next_unchecked(exercise.id)
         assert unchecked is None
 
@@ -182,7 +185,7 @@ class TestSolutionBridge:
         assert unchecked is not None
         assert unchecked == solution2
 
-        solutions.mark_as_checked(solution2.id, staff_user)
+        solutions.mark_as_checked(solution2.id, staff_user, 2)
         unchecked = solutions.get_next_unchecked()
         assert unchecked is None
 
@@ -560,7 +563,7 @@ class TestSolutionBridge:
         solution = Solution.get_by_id(solution.id)
         assert solution.last_status_view == SolutionStatusView.NOT_CHECKED.name
 
-        solutions.mark_as_checked(solution.id, staff_user.id)
+        solutions.mark_as_checked(solution.id, staff_user.id, 3)
         solution = Solution.get_by_id(solution.id)
         assert solution.last_status_view == SolutionStatusView.NOT_CHECKED.name
         client.get(f'/view/{solution.id}')
@@ -578,3 +581,69 @@ class TestSolutionBridge:
 
         fail_response = client.get(f'/view/{solution.id}/12345')
         assert fail_response.status_code == 404
+
+    @staticmethod
+    def test_done_checking(
+        solution: Solution,
+        staff_user: User,
+    ):
+        client = conftest.get_logged_user(staff_user.username)
+        response = client.post(
+            f'/checked/{solution.exercise.id}/{solution.id}',
+            data=json.dumps({'assessment': 1}),
+            content_type='application/json',
+        )
+        assert response.status_code == 200
+
+    @staticmethod
+    def test_solution_assessment_color_on_create(course: Course, _assessments):
+        assessment1 = SolutionAssessment.create(
+            name='Ok', color='red', active_color='lmnop',
+            order=5, course=course,
+        )
+        assert assessment1.color == COLORS.get('red')
+        assert (
+            assessment1.active_color == DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR,
+        )
+
+        assessment2 = SolutionAssessment.create(
+            name='Fine', color='invalid', active_color='abcdef',
+            order=6, course=course,
+        )
+        assert assessment2.color == DEFAULT_ASSESSMENT_BUTTON_COLOR
+        assert assessment2.active_color == '#abcdef'
+
+    @staticmethod
+    def test_solution_assessment_on_save(course: Course, _assessments):
+        assessment = SolutionAssessment.get(SolutionAssessment.order == 2)
+        assessment.color = 'secondary'
+        assessment.active_color = '#fff'
+        assessment.save()
+        assert assessment.color == COLORS.get('secondary')
+        assert assessment.active_color == '#fff'
+
+        assessment.color = 'xox'
+        assessment.active_color = 'invalid'
+        assessment.save()
+        assert assessment.color == DEFAULT_ASSESSMENT_BUTTON_COLOR
+        assert (
+            assessment.active_color == DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR,
+        )
+
+    @staticmethod
+    def test_solutions_of_user(
+        staff_user: User, student_user: User, course: Course,
+        solution: Solution, _assessments,
+    ):
+        conftest.create_usercourse(student_user, course)
+        solutions.mark_as_checked(solution.id, staff_user.id, 2)
+        solution = Solution.get_by_id(solution.id)
+
+        exercise2 = conftest.create_exercise(course, 2)
+        solution2 = conftest.create_solution(exercise2, student_user)
+        solutions.mark_as_checked(solution2.id, staff_user.id)
+        solution2 = Solution.get_by_id(solution2.id)
+        
+        exercises = solution.of_user(student_user.id, from_all_courses=True)
+        assert exercises[0].get('assessment') == 'Nice'
+        assert exercises[1].get('assessment') is None

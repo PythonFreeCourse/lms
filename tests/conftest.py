@@ -16,7 +16,8 @@ import pytest
 
 from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Course, Exercise, Note, Notification,
-    Role, RoleOptions, SharedSolution, Solution, User, UserCourse,
+    Role, RoleOptions, SharedSolution, Solution, SolutionAssessment, User,
+    UserCourse,
 )
 from lms.extractors.base import File
 from lms.lmstests.public import celery_app as public_app
@@ -333,6 +334,23 @@ def create_note(
 @pytest.fixture()
 def course() -> Course:
     return create_course()
+
+
+@pytest.fixture()
+def _assessments(course: Course) -> None:
+    assessments_dict = {
+        'Excellent': {'color': 'green', 'icon': 'star', 'order': 1},
+        'Nice': {'color': 'blue', 'icon': 'check', 'order': 2},
+        'Try again': {'color': 'red', 'icon': 'exclamation', 'order': 3},
+        'Plagiarism': {
+            'color': 'black', 'icon': 'exclamation-triangle', 'order': 4,
+        },
+    }
+    for name, values in assessments_dict.items():
+        SolutionAssessment.create(
+            name=name, icon=values.get('icon'), color=values.get('color'),
+            active_color='white', order=values.get('order'), course=course,
+        )
 
 
 @pytest.fixture()

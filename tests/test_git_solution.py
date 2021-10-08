@@ -119,7 +119,6 @@ class TestSendSolutionFromGit:
 
     def test_get_exercise(self, exercise: models.Exercise, student_user: models.User):
         git_upload_pack = 'git-upload-pack'
-        conftest.create_usercourse(student_user, exercise.course)
         self.test_push_exercise(exercise, student_user)
         response = self._send_git_request(
             username=student_user.username,
