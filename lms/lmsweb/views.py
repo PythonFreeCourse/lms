@@ -357,20 +357,20 @@ def exercises_page():
     )
 
 
-@webapp.route('/exercises/<tag_name>')
+@webapp.route('/exercises/<tagname>')
 @login_required
-def exercises_tag_page(tag_name: str):
+def exercises_tag_page(tagname: str):
     fetch_archived = bool(request.args.get('archived'))
     try:
         solutions.is_tag_name_exists(
-            tag_name, current_user.last_course_viewed.id,
+            tagname, current_user.last_course_viewed.id,
         )
     except LmsError as e:
         error_message, status_code = e.args
         return fail(status_code, error_message)
 
     exercises = Solution.of_user(
-        current_user.id, fetch_archived, exercise_tag=tag_name,
+        current_user.id, fetch_archived, exercise_tag=tagname,
     )
     is_manager = current_user.role.is_manager
     return render_template(
@@ -378,7 +378,7 @@ def exercises_tag_page(tag_name: str):
         exercises=exercises,
         is_manager=is_manager,
         fetch_archived=fetch_archived,
-        tag_name=tag_name,
+        tag_name=tagname,
     )
 
 
