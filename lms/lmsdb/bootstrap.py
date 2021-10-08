@@ -286,7 +286,7 @@ def _add_exercise_course_id_and_number_columns_constraint() -> bool:
             )
         except OperationalError as e:
             if 'already exists' in str(e):
-                log.info(f'index usercourse already exists: {e}')
+                log.info(f'index exercise already exists: {e}')
             else:
                 raise
         db_config.database.commit()
