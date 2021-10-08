@@ -2,13 +2,13 @@ version: "3"
 
 services:
   db:
-    image: postgres:13-alpine
+    image: postgres:14-alpine
     ports:
       - 5432:5432
     volumes:
       - db-data-volume:/pg_data
     environment:
-      - PGDATA=/pg_data/13/data
+      - PGDATA=/pg_data/14/data
       - POSTGRES_DB=${DB_NAME:-db}
       - POSTGRES_USER=${DB_USERNAME:-postgres}
       - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
@@ -117,6 +117,7 @@ services:
     volumes:
       - ../lms:/app_dir/lms
       - ../../notebooks-tests:/app_dir/notebooks-tests
+      - repositories-data-volume:/repositories
     environment:
       - DB_NAME=${DB_NAME:-db}
       - DB_USER=${DB_USERNAME:-postgres}
@@ -129,6 +130,7 @@ services:
       - CELERY_CHECKS_PUBLIC_VHOST=lmstests-public
       - CELERY_RABBITMQ_HOST=rabbitmq
       - CELERY_RABBITMQ_PORT=5672
+      - REPOSITORY_FOLDER=/repositories
     links:
       - db
       - rabbitmq
@@ -146,6 +148,7 @@ volumes:
   docker-engine-lib:
   db-data-volume:
   rabbit-data-volume:
+  repositories-data-volume:
 
 
 networks:

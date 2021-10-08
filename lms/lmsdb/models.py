@@ -16,7 +16,9 @@ from peewee import (  # type: ignore
     BooleanField, Case, CharField, Check, DateTimeField, ForeignKeyField,
     IntegerField, JOIN, ManyToManyField, TextField, UUIDField, fn,
 )
-from playhouse.signals import Model, post_save, pre_save  # type: ignore
+from playhouse.signals import (  # type: ignore
+    Model, post_delete, post_save, pre_save,
+)
 from werkzeug.security import (
     check_password_hash, generate_password_hash,
 )
@@ -24,6 +26,10 @@ from werkzeug.security import (
 from lms.lmsdb import database_config
 from lms.models.errors import AlreadyExists
 from lms.utils import hashing
+from lms.utils.colors import get_hex_color
+from lms.utils.consts import (
+    DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR, DEFAULT_ASSESSMENT_BUTTON_COLOR,
+)
 from lms.utils.log import log
 
 
@@ -253,6 +259,11 @@ class UserCourse(BaseModel):
     course = ForeignKeyField(Course, backref='usercourses')
     date = DateTimeField(default=datetime.now)
 
+    class Meta:
+        indexes = (
+            (('user_id', 'course_id'), True),
+        )
+
     @classmethod
     def is_user_registered(cls, user_id: int, course_id: int) -> bool:
         return (
@@ -264,6 +275,24 @@ class UserCourse(BaseModel):
             )
             .exists()
         )
+
+
+@post_save(sender=UserCourse)
+def on_save_user_course(model_class, instance, created):
+    """Changes user's last course viewed."""
+    if instance.user.last_course_viewed is None:
+        instance.user.last_course_viewed = instance.course
+        instance.user.save()
+
+
+@post_delete(sender=UserCourse)
+def on_delete_user_course(model_class, instance):
+    """Changes user's last course viewed."""
+    if instance.user.last_course_viewed == instance.course:
+        instance.user.last_course_viewed = (
+            Course.fetch(instance.user).limit(1).scalar()
+        )
+        instance.user.save()
 
 
 class Notification(BaseModel):
@@ -392,12 +421,23 @@ class Exercise(BaseModel):
         return datetime.now() < self.due_date and not self.is_archived
 
     @classmethod
-    def get_highest_number(cls):
-        return cls.select(fn.MAX(cls.number)).scalar()
+    def get_highest_number(cls, course: Course):
+        return (
+            cls
+            .select(fn.MAX(cls.number))
+            .where(cls.course == course)
+            .group_by(cls.course)
+            .scalar()
+        )
 
     @classmethod
-    def is_number_exists(cls, number: int) -> bool:
-        return cls.select().where(cls.number == number).exists()
+    def is_number_exists(cls, course: Course, number: int) -> bool:
+        return (
+            cls
+            .select()
+            .where(cls.course == course, cls.number == number)
+            .exists()
+        )
 
     @classmethod
     def get_objects(
@@ -445,9 +485,8 @@ class Exercise(BaseModel):
 @pre_save(sender=Exercise)
 def exercise_number_save_handler(model_class, instance, created):
     """Change the exercise number to the highest consecutive number."""
-
-    if model_class.is_number_exists(instance.number):
-        instance.number = model_class.get_highest_number() + 1
+    if model_class.is_number_exists(instance.course, instance.number):
+        instance.number = model_class.get_highest_number(instance.course) + 1
 
 
 class SolutionState(enum.Enum):
@@ -481,6 +520,36 @@ class SolutionStatusView(enum.Enum):
         return tuple((choice.name, choice.value) for choice in choices)
 
 
+class SolutionAssessment(BaseModel):
+    name = CharField()
+    icon = CharField(null=True)
+    color = CharField()
+    active_color = CharField()
+    order = IntegerField(default=0, index=True)
+    course = ForeignKeyField(Course, backref='assessments')
+
+    @classmethod
+    def get_assessments(cls, course: Course):
+        return cls.select().where(cls.course == course).order_by(cls.order)
+
+    def __str__(self):
+        return self.name
+
+
+@pre_save(sender=SolutionAssessment)
+def assessment_on_save_handler(_model_class, instance, created):
+    """Change colors to hex."""
+    try:
+        instance.color = get_hex_color(instance.color)
+    except ValueError:
+        instance.color = DEFAULT_ASSESSMENT_BUTTON_COLOR
+
+    try:
+        instance.active_color = get_hex_color(instance.active_color)
+    except ValueError:
+        instance.active_color = DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR
+
+
 class Solution(BaseModel):
     STATES = SolutionState
     STATUS_VIEW = SolutionStatusView
@@ -505,6 +574,9 @@ class Solution(BaseModel):
         index=True,
     )
     last_time_view = DateTimeField(default=datetime.now, null=True, index=True)
+    assessment = ForeignKeyField(
+        SolutionAssessment, backref='solutions', null=True,
+    )
 
     @property
     def solution_files(
@@ -563,13 +635,18 @@ class Solution(BaseModel):
     def start_checking(self) -> bool:
         return self.set_state(Solution.STATES.IN_CHECKING)
 
-    def set_state(self, new_state: SolutionState, **kwargs) -> bool:
+    def set_state(
+        self, new_state: SolutionState,
+        assessment: Optional[SolutionAssessment] = None, **kwargs,
+    ) -> bool:
         # Optional: filter the old state of the object
         # to make sure that no two processes set the state together
         requested_solution = (Solution.id == self.id)
+        updates_dict = {Solution.state.name: new_state.name}
+        if assessment is not None:
+            updates_dict[Solution.assessment.name] = assessment
         changes = Solution.update(
-            **{Solution.state.name: new_state.name},
-            **kwargs,
+            **updates_dict, **kwargs,
         ).where(requested_solution)
         return changes.execute() == 1
 
@@ -594,7 +671,9 @@ class Solution(BaseModel):
         exercises = Exercise.as_dicts(db_exercises)
         solutions = (
             cls
-            .select(cls.exercise, cls.id, cls.state, cls.checker)
+            .select(
+                cls.exercise, cls.id, cls.state, cls.checker, cls.assessment,
+            )
             .where(cls.exercise.in_(db_exercises), cls.solver == user_id)
             .order_by(cls.submission_timestamp.desc())
         )
@@ -606,6 +685,8 @@ class Solution(BaseModel):
                 exercise['comments_num'] = len(solution.staff_comments)
                 if solution.is_checked and solution.checker:
                     exercise['checker'] = solution.checker.fullname
+                if solution.assessment:
+                    exercise['assessment'] = solution.assessment.name
         return tuple(exercises.values())
 
     @property
@@ -708,10 +789,15 @@ class Solution(BaseModel):
 
     def mark_as_checked(
         self,
+        assessment_id: Optional[int] = None,
         by: Optional[Union[User, int]] = None,
     ) -> bool:
+        assessment = SolutionAssessment.get_or_none(
+            SolutionAssessment.id == assessment_id,
+        )
         return self.set_state(
             Solution.STATES.DONE,
+            assessment=assessment,
             checker=by,
         )
 
@@ -1086,6 +1172,24 @@ def create_demo_users() -> None:
 def create_basic_roles() -> None:
     for role in RoleOptions:
         Role.create(name=role.value)
+
+
+def create_basic_assessments() -> None:
+    assessments_dict = {
+        'Excellent': {'color': 'green', 'icon': 'star', 'order': 1},
+        'Nice': {'color': 'blue', 'icon': 'check', 'order': 2},
+        'Try again': {'color': 'red', 'icon': 'exclamation', 'order': 3},
+        'Plagiarism': {
+            'color': 'black', 'icon': 'exclamation-triangle', 'order': 4,
+        },
+    }
+    courses = Course.select()
+    for course in courses:
+        for name, values in assessments_dict.items():
+            SolutionAssessment.create(
+                name=name, icon=values.get('icon'), color=values.get('color'),
+                active_color='white', order=values.get('order'), course=course,
+            )
 
 
 def create_basic_course() -> Course:
