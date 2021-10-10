@@ -188,9 +188,7 @@ def recover_client_password(
 
 
 def upload_avatar(client: FlaskClient, avatar: FileStorage):
-    return client.post(
-        f'/avatar', data={'avatar': avatar}, follow_redirects=True,
-    )
+    return client.post('/avatar', data={'avatar': avatar}, follow_redirects=True)
 
 
 def create_user(
