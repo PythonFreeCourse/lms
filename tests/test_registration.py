@@ -152,18 +152,18 @@ class TestRegistration:
         student_user: User, course: Course, captured_templates,
     ):
         client = conftest.get_logged_user(username=student_user.username)
-        not_public_course_response = client.get(f'/join-course/{course.id}')
+        not_public_course_response = client.get(f'/course/join/{course.id}')
         assert not_public_course_response.status_code == 403
 
-        unknown_course_response = client.get('/join-course/123456')
+        unknown_course_response = client.get('/course/join/123456')
         assert unknown_course_response.status_code == 404
 
         course.is_public = True
         course.save()
         course = Course.get_by_id(course.id)
-        client.get(f'/join-course/{course.id}')
+        client.get(f'/course/join/{course.id}')
         template, _ = captured_templates[-1]
         assert template.name == 'exercises.html'
 
-        already_registered_response = client.get(f'/join-course/{course.id}')
+        already_registered_response = client.get(f'/course/join/{course.id}')
         assert already_registered_response.status_code == 409

@@ -509,7 +509,7 @@ def user(user_id):
     )
 
 
-@webapp.route('/courses-list')
+@webapp.route('/course')
 @login_required
 def public_courses():
     return render_template(
@@ -518,7 +518,7 @@ def public_courses():
     )
 
 
-@webapp.route('/join-course/<int:course_id>')
+@webapp.route('/course/join/<int:course_id>')
 @login_required
 def join_public_course(course_id: int):
     course = Course.get_or_none(course_id)
