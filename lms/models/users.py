@@ -40,10 +40,10 @@ def generate_user_token(user: User) -> str:
     return SERIALIZER.dumps(user.mail_address, salt=retrieve_salt(user))
 
 
-def change_mail_subscription(user: User, act: str):
-    if act == 'subscribe':
+def change_mail_subscription(user: User, subscription: str) -> bool:
+    if subscription == 'subscribe':
         user.mail_subscription = True
-    elif act == 'unsubscribe':
+    elif subscription == 'unsubscribe':
         user.mail_subscription = False
     else:
         return False

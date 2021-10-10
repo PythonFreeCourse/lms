@@ -309,6 +309,9 @@ class Notification(BaseModel):
 
     def read(self) -> bool:
         self.viewed = True
+        mail = MailMessage.get_or_none(MailMessage.notification == self)
+        if mail:
+            mail.delete_instance()
         return bool(self.save())
 
     @classmethod
@@ -376,23 +379,22 @@ def on_notification_saved(
         instance.delete_instance()
 
 
-class NotificationMail(BaseModel):
-    user = ForeignKeyField(User, unique=True)
-    number = IntegerField(default=1)
-    message = TextField()
+class MailMessage(BaseModel):
+    user = ForeignKeyField(User, backref='mails')
+    notification = ForeignKeyField(Notification, backref='mails')
+    date = DateTimeField(default=datetime.now)
 
     @classmethod
-    def get_or_create_notification_mail(cls, user: User, message: str):
-        instance, created = cls.get_or_create(**{
-            cls.user.name: user,
-        }, defaults={
-            cls.message.name: message,
-        })
-        if not created:
-            instance.message += f'\n{message}'
-            instance.number += 1
-            instance.save()
-        return instance
+    def distincit_users(cls):
+        return cls.select(cls.user).distinct()
+
+    @classmethod
+    def by_user(cls, user: User) -> Iterable['MailMessage']:
+        return cls.select().where(cls.user == user)
+
+    @classmethod
+    def user_messages_number(cls, user: User) -> int:
+        return cls.select(fn.Count(cls.id)).where(cls.user == user).scalar()
 
     @classmethod
     def get_instances_number(cls):

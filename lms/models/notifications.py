@@ -1,7 +1,7 @@
 import enum
 from typing import Iterable, Optional
 
-from lms.lmsdb.models import Notification, NotificationMail, User
+from lms.lmsdb.models import MailMessage, Notification, User
 
 
 class NotificationKind(enum.Enum):
@@ -48,5 +48,5 @@ def send(
     notification = Notification.send(
         user, kind.value, message, related_id, action_url,
     )
-    NotificationMail.get_or_create_notification_mail(user, message)
+    MailMessage.create(user=user, notification=notification)
     return notification

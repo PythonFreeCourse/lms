@@ -15,8 +15,8 @@ from peewee import SqliteDatabase
 import pytest
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, CommentText, Course, Exercise, Note, Notification,
-    NotificationMail, Role, RoleOptions, SharedSolution, Solution,
+    ALL_MODELS, Comment, CommentText, Course, Exercise, MailMessage, Note,
+    Notification, Role, RoleOptions, SharedSolution, Solution,
     SolutionAssessment, User, UserCourse,
 )
 from lms.extractors.base import File
@@ -283,10 +283,9 @@ def create_notification(
     )
 
 
-def create_notification_mail(student_user: User) -> NotificationMail:
-    return NotificationMail.get_or_create_notification_mail(
-        user=student_user, message='Test message',
-    )
+def create_notification_mail(student_user: User, solution) -> MailMessage:
+    notification=create_notification(student_user, solution)
+    return MailMessage.create(user=student_user, notification=notification)
 
 
 def create_course(index: int = 0) -> Course:

@@ -370,9 +370,9 @@ def read_all_notification():
     return jsonify({'success': success_state})
 
 
-@webapp.route('/subscribe/<act>', methods=['PATCH'])
-def mail_subscription(act: str):
-    success_state = users.change_mail_subscription(current_user, act)
+@webapp.route('/mail/<subscription>', methods=['PATCH'])
+def mail_subscription(subscription: str):
+    success_state = users.change_mail_subscription(current_user, subscription)
     return jsonify({'success': success_state})
 
 

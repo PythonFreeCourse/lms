@@ -5,7 +5,7 @@ from flask import json
 import pytest  # type: ignore
 
 from lms.lmsdb.models import (
-    Exercise, Notification, NotificationMail, Solution, User,
+    Exercise, MailMessage, Notification, Solution, User,
 )
 from lms.models import notifications, solutions
 from lms.utils.mail import send_all_notifications_mails
@@ -223,25 +223,25 @@ class TestNotification:
     @staticmethod
     def test_notifications_subscriptions(student_user: User):
         client = conftest.get_logged_user(username=student_user.username)
-        unsubscribe_response = client.patch('/subscribe/unsubscribe')
+        unsubscribe_response = client.patch('/mail/unsubscribe')
         assert unsubscribe_response.status_code == 200
         student_user = User.get_by_id(student_user.id)
         assert student_user.mail_subscription == False
 
-        subscribe_response = client.patch('/subscribe/subscribe')
+        subscribe_response = client.patch('/mail/subscribe')
         assert subscribe_response.status_code == 200
         student_user = User.get_by_id(student_user.id)
         assert student_user.mail_subscription == True
 
-        wrong_response = client.patch('/subscribe/wrong')
+        wrong_response = client.patch('/mail/wrong')
         json_data = json.loads(wrong_response.get_data(as_text=True))
         assert json_data['success'] == False
 
     @staticmethod
-    def test_send_mails_notifications(student_user: User):
-        conftest.create_notification_mail(student_user)
-        conftest.create_notification_mail(student_user)
-        assert NotificationMail.get_instances_number() == 2
+    def test_send_mails_notifications(student_user: User, solution: Solution):
+        conftest.create_notification_mail(student_user, solution)
+        conftest.create_notification_mail(student_user, solution)
+        assert MailMessage.get_instances_number() == 2
 
         send_all_notifications_mails()
-        assert NotificationMail.get_instances_number() == 0
+        assert MailMessage.get_instances_number() == 0

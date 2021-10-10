@@ -125,9 +125,9 @@ function trackMailSubscriptionCheckbox() {
   }
 
   checkbox.addEventListener('change', (e) => {
-    const act = (e.currentTarget.checked) ? 'subscribe' : 'unsubscribe';
+    const subscription = (e.currentTarget.checked) ? 'subscribe' : 'unsubscribe';
     const request = new XMLHttpRequest();
-    request.open('PATCH', `/subscribe/${act}`);
+    request.open('PATCH', `/mail/${subscription}`);
     return request.send();
   });
 }

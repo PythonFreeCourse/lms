@@ -30,7 +30,7 @@ services:
     networks:
       - lms
   
-  utils:
+  mailer:
     image: lms:latest
     command: celery -A lms.utils worker
     volumes:
@@ -39,7 +39,7 @@ services:
       - CELERY_RABBITMQ_ERLANG_COOKIE=AAVyo5djdSMGIZXiwEQs3JeVaBx5l14z
       - CELERY_RABBITMQ_DEFAULT_USER=rabbit-user
       - CELERY_RABBITMQ_DEFAULT_PASS=YgKlCvnYVzpTa3T9adG3NrMoUNe4Z5aZ
-      - CELERY_UTILS_VHOST=utils
+      - CELERY_MAILER_VHOST=utils
       - CELERY_RABBITMQ_HOST=rabbitmq
       - CELERY_RABBITMQ_PORT=5672
     links:
@@ -97,7 +97,6 @@ services:
       - CELERY_RABBITMQ_ERLANG_COOKIE=AAVyo5djdSMGIZXiwEQs3JeVaBx5l14z
       - CELERY_RABBITMQ_DEFAULT_USER=rabbit-user
       - CELERY_RABBITMQ_DEFAULT_PASS=YgKlCvnYVzpTa3T9adG3NrMoUNe4Z5aZ
-      - CELERY_UTILS_VHOST=utils
       - CELERY_CHECKS_PUBLIC_VHOST=lmstests-public
       - CELERY_CHECKS_SANDBOX_VHOST=lmstests-sandbox
       - CELERY_RABBITMQ_HOST=rabbitmq
