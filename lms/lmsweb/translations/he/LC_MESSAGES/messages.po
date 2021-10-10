@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-10-03 22:01+0300\n"
+"POT-Creation-Date: 2021-10-10 18:00+0300\n"
 "PO-Revision-Date: 2021-09-29 11:30+0300\n"
 "Last-Translator: Or Ronai\n"
 "Language: he\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.1\n"
 
-#: lmsdb/models.py:879
+#: lmsdb/models.py:918
 msgid "Fatal error"
 msgstr "כישלון חמור"
 
@@ -47,31 +47,31 @@ msgstr "הבודק האוטומטי נכשל ב־ %(number)d דוגמאות בת
 msgid "Bro, did you check your code?"
 msgstr "אחי, בדקת את הקוד שלך?"
 
-#: lmsweb/views.py:129
+#: lmsweb/views.py:133
 msgid "Can not register now"
 msgstr "לא ניתן להירשם כעת"
 
-#: lmsweb/views.py:146
+#: lmsweb/views.py:150
 msgid "Registration successfully"
 msgstr "ההרשמה בוצעה בהצלחה"
 
-#: lmsweb/views.py:169
+#: lmsweb/views.py:173
 msgid "The confirmation link is expired, new link has been sent to your email"
 msgstr "קישור האימות פג תוקף, קישור חדש נשלח אל תיבת המייל שלך"
 
-#: lmsweb/views.py:185
+#: lmsweb/views.py:189
 msgid "Your user has been successfully confirmed, you can now login"
 msgstr "המשתמש שלך אומת בהצלחה, כעת אתה יכול להתחבר למערכת"
 
-#: lmsweb/views.py:208 lmsweb/views.py:265
+#: lmsweb/views.py:212 lmsweb/views.py:293
 msgid "Your password has successfully changed"
 msgstr "הסיסמה שלך שונתה בהצלחה"
 
-#: lmsweb/views.py:224
+#: lmsweb/views.py:252
 msgid "Password reset link has successfully sent"
 msgstr "קישור לאיפוס הסיסמה נשלח בהצלחה"
 
-#: lmsweb/views.py:245
+#: lmsweb/views.py:273
 msgid "Reset password link is expired"
 msgstr "קישור איפוס הסיסמה פג תוקף"
 
@@ -92,6 +92,15 @@ msgstr "הסיסמה הנוכחית שהוזנה שגויה"
 #: lmsweb/tools/validators.py:29
 msgid "Invalid email"
 msgstr "אימייל לא תקין"
+
+#: lmsweb/forms/update_avatar.py:13
+msgid "No file added"
+msgstr "לא צורף קובץ"
+
+#: lmsweb/forms/update_avatar.py:15
+#, python-format
+msgid "File size is too big - %(size)dMB allowed"
+msgstr "הקובץ גדול מידי - גודל הקובץ המקסימלי הוא עד %(size)dMB"
 
 #: lmsweb/tools/validators.py:13
 msgid "The username is already in use"
@@ -116,11 +125,11 @@ msgstr "%(checker)s הגיב לך על תרגיל \"%(subject)s\"."
 msgid "Your solution for the \"%(subject)s\" exercise has been checked."
 msgstr "הפתרון שלך לתרגיל \"%(subject)s\" נבדק."
 
-#: models/users.py:28
+#: models/users.py:32
 msgid "Invalid username or password"
 msgstr "שם המשתמש או הסיסמה שהוזנו לא תקינים"
 
-#: models/users.py:31
+#: models/users.py:35
 msgid "You have to confirm your registration with the link sent to your email"
 msgstr "עליך לאשר את מייל האימות"
 
@@ -143,7 +152,7 @@ msgid "Exercise submission system for the Python Course"
 msgstr "מערכת הגשת תרגילים לקורס פייתון"
 
 #: templates/change-password.html:8 templates/change-password.html:17
-#: templates/user.html:19
+#: templates/user.html:22
 msgid "Change Password"
 msgstr "שנה סיסמה"
 
@@ -170,7 +179,7 @@ msgstr "אימות סיסמה"
 msgid "Exercises"
 msgstr "תרגילים"
 
-#: templates/exercises.html:21 templates/view.html:113
+#: templates/exercises.html:21 templates/view.html:126
 msgid "Comments for the solution"
 msgstr "הערות על התרגיל"
 
@@ -203,7 +212,7 @@ msgid "Insert your username and password:"
 msgstr "הזינו את שם המשתמש והסיסמה שלכם:"
 
 #: templates/login.html:22 templates/login.html:24 templates/signup.html:16
-#: templates/user.html:11
+#: templates/user.html:14
 msgid "Username"
 msgstr "שם משתמש"
 
@@ -215,35 +224,35 @@ msgstr "שכחת את הסיסמה?"
 msgid "Register"
 msgstr "הירשם"
 
-#: templates/navbar.html:21
+#: templates/navbar.html:25
 msgid "Messages"
 msgstr "הודעות"
 
-#: templates/navbar.html:37
+#: templates/navbar.html:41
 msgid "Mark all as read"
 msgstr "סמן הכל כנקרא"
 
-#: templates/navbar.html:45
+#: templates/navbar.html:49
 msgid "Courses List"
 msgstr "רשימת הקורסים"
 
-#: templates/navbar.html:65
+#: templates/navbar.html:69
 msgid "Upload Exercises"
 msgstr "העלאת תרגילים"
 
-#: templates/navbar.html:73
+#: templates/navbar.html:77
 msgid "Exercises List"
 msgstr "רשימת התרגילים"
 
-#: templates/navbar.html:81
+#: templates/navbar.html:85
 msgid "Exercises Archive"
 msgstr "ארכיון התרגילים"
 
-#: templates/navbar.html:91
+#: templates/navbar.html:95
 msgid "Check Exercises"
 msgstr "בדוק תרגילים"
 
-#: templates/navbar.html:98
+#: templates/navbar.html:102
 msgid "Logout"
 msgstr "התנתקות"
 
@@ -261,7 +270,7 @@ msgid "Insert your email for getting link to reset it:"
 msgstr "הזינו אימייל לצורך שליחת קישור לאיפוס הסיסמה:"
 
 #: templates/reset-password.html:14 templates/signup.html:15
-#: templates/user.html:12
+#: templates/user.html:15
 msgid "Email Address"
 msgstr "כתובת אימייל"
 
@@ -293,7 +302,7 @@ msgstr "חמ\"ל תרגילים"
 msgid "Name"
 msgstr "שם"
 
-#: templates/status.html:13 templates/user.html:44
+#: templates/status.html:13 templates/user.html:48
 msgid "Checked"
 msgstr "נבדק/ו"
 
@@ -312,6 +321,19 @@ msgstr "מדד"
 #: templates/status.html:31
 msgid "Archive"
 msgstr "ארכיון"
+
+#: templates/update-avatar.html:11
+msgid "Change Avatar"
+msgstr "שנה תמונת פרופיל"
+
+#: templates/update-avatar.html:14
+msgid "Update"
+msgstr "עדכן"
+
+#: templates/update-avatar.html:16
+#, fuzzy
+msgid "Delete Avatar"
+msgstr "מחק תמונת פרופיל"
 
 #: templates/upload.html:7
 msgid "Upload Notebooks"
@@ -337,63 +359,67 @@ msgstr "נכשלו"
 msgid "User details"
 msgstr "פרטי משתמש"
 
-#: templates/user.html:16
+#: templates/user.html:19
 msgid "Actions"
 msgstr "פעולות"
 
-#: templates/user.html:24
+#: templates/user.html:23
+msgid "Update Avatar"
+msgstr "עדכן תמונת פרופיל"
+
+#: templates/user.html:28
 msgid "Exercises Submitted"
 msgstr "תרגילים שהוגשו"
 
-#: templates/user.html:29
+#: templates/user.html:33
 msgid "Course name"
 msgstr "שם קורס"
 
-#: templates/user.html:30
+#: templates/user.html:34
 msgid "Exercise name"
 msgstr "שם תרגיל"
 
-#: templates/user.html:31
+#: templates/user.html:35
 msgid "Submission status"
 msgstr "מצב הגשה"
 
-#: templates/user.html:32
+#: templates/user.html:36
 msgid "Submission"
 msgstr "הגשה"
 
-#: templates/user.html:33
+#: templates/user.html:37
 msgid "Checker"
 msgstr "בודק"
 
-#: templates/user.html:34 templates/view.html:21 templates/view.html:104
-msgid "Verbal note"
+#: templates/user.html:38 templates/view.html:25 templates/view.html:112
+msgid "Assessment"
 msgstr "הערה מילולית"
 
-#: templates/user.html:44
+#: templates/user.html:48
 msgid "Submitted"
 msgstr "הוגש"
 
-#: templates/user.html:44
+#: templates/user.html:48
 msgid "Not submitted"
 msgstr "לא הוגש"
 
-#: templates/user.html:56
+#: templates/user.html:60
 msgid "Notes"
 msgstr "פתקיות"
 
-#: templates/user.html:61 templates/user.html:63
+#: templates/user.html:65 templates/user.html:67
 msgid "New Note"
 msgstr "פתקית חדשה"
 
-#: templates/user.html:67
+#: templates/user.html:71
 msgid "Related Exercise"
 msgstr "תרגיל משויך"
 
-#: templates/user.html:76
+#: templates/user.html:80
 msgid "Privacy Level"
 msgstr "רמת פרטיות"
 
-#: templates/user.html:82
+#: templates/user.html:86
 msgid "Add Note"
 msgstr "הוסף פתקית"
 
@@ -425,43 +451,43 @@ msgstr "הפתרון שלך עדיין לא נבדק."
 msgid "It's important for us that all exercises will be checked by human eye."
 msgstr "חשוב לנו שכל תרגיל יעבור בדיקה של עין אנושית."
 
-#: templates/view.html:18
+#: templates/view.html:19
 msgid "Solver"
 msgstr "מגיש"
 
-#: templates/view.html:24
+#: templates/view.html:32
 msgid "Navigate in solution versions"
 msgstr "ניווט בגרסאות ההגשה"
 
-#: templates/view.html:30
+#: templates/view.html:38
 msgid "Current page"
 msgstr "סיסמה נוכחית"
 
-#: templates/view.html:38
+#: templates/view.html:46
 msgid "Finish Checking"
 msgstr "סיום בדיקה"
 
-#: templates/view.html:78
+#: templates/view.html:86
 msgid "Automatic Checking"
 msgstr "בדיקות אוטומטיות"
 
-#: templates/view.html:85
+#: templates/view.html:93
 msgid "Error"
 msgstr "כישלון חמור"
 
-#: templates/view.html:90
+#: templates/view.html:98
 msgid "Staff Error"
 msgstr "כישלון חמור"
 
-#: templates/view.html:121
+#: templates/view.html:134
 msgid "General comments"
 msgstr "הערות כלליות"
 
-#: templates/view.html:129
+#: templates/view.html:142
 msgid "Checker comments"
 msgstr "הערות בודק"
 
-#: templates/view.html:139
+#: templates/view.html:152
 msgid "Done Checking"
 msgstr "סיום בדיקה"
 

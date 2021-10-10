@@ -1,10 +1,14 @@
+import os
 import re
+import secrets
 
 from flask_babel import gettext as _  # type: ignore
 from itsdangerous import URLSafeTimedSerializer
+from PIL import Image
+from werkzeug.datastructures import FileStorage
 
 from lms.lmsdb.models import User
-from lms.lmsweb import config
+from lms.lmsweb import avatars_path, config
 from lms.models.errors import (
     ForbiddenPermission, UnauthorizedError, UnhashedPasswordError,
 )
@@ -38,3 +42,21 @@ def auth(username: str, password: str) -> User:
 
 def generate_user_token(user: User) -> str:
     return SERIALIZER.dumps(user.mail_address, salt=retrieve_salt(user))
+
+
+def save_avatar(form_picture: FileStorage) -> str:
+    random_hex = secrets.token_hex(nbytes=8)
+    _, extension = os.path.splitext(form_picture.filename)
+    avatar_filename = random_hex + extension
+    avatar_path = avatars_path / avatar_filename
+
+    output_size = (125, 125)
+    image = Image.open(form_picture)
+    image.thumbnail(output_size)
+    image.save(avatar_path)
+    return avatar_filename
+
+
+def delete_previous_avatar(avatar_name: str) -> None:
+    avatar_path = avatars_path / avatar_name
+    avatar_path.unlink()

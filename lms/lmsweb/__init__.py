@@ -18,6 +18,7 @@ template_dir = project_dir / 'templates'
 static_dir = project_dir / 'static'
 config_file = web_dir / 'config.py'
 config_example_file = web_dir / 'config.py.example'
+avatars_path = static_dir / 'avatars'
 
 
 if debug.is_enabled():

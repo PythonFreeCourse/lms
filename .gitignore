@@ -136,3 +136,6 @@ lms/lmsweb/config.py
 db.sqlite
 vim.session
 devops/rabbitmq.cookie
+
+# Avatars
+lms/static/avatars/*

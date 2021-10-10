@@ -315,6 +315,12 @@ def _assessment_migration() -> bool:
     return True
 
 
+def _avatar_migration() -> bool:
+    User = models.User
+    _migrate_column_in_table_if_needed(User, User.avatar)
+    return True
+
+
 def main():
     with models.database.connection_context():
         if models.database.table_exists(models.Exercise.__name__.lower()):
@@ -328,6 +334,7 @@ def main():
             _api_keys_migration()
             _last_course_viewed_migration()
             _uuid_migration()
+            _avatar_migration()
 
         if models.database.table_exists(models.UserCourse.__name__.lower()):
             _add_user_course_constaint()

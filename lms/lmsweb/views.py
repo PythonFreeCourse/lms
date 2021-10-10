@@ -29,6 +29,7 @@ from lms.lmsweb.config import (
 from lms.lmsweb.forms.change_password import ChangePasswordForm
 from lms.lmsweb.forms.register import RegisterForm
 from lms.lmsweb.forms.reset_password import RecoverPassForm, ResetPassForm
+from lms.lmsweb.forms.update_avatar import UpdateAvatarForm
 from lms.lmsweb.git_service import GitService
 from lms.lmsweb.manifest import MANIFEST
 from lms.lmsweb.redirections import (
@@ -41,7 +42,9 @@ from lms.models.errors import (
     FileSizeError, ForbiddenPermission, LmsError,
     UnauthorizedError, UploadError, fail,
 )
-from lms.models.users import SERIALIZER, auth, retrieve_salt
+from lms.models.users import (
+    SERIALIZER, auth, delete_previous_avatar, retrieve_salt, save_avatar,
+)
 from lms.utils.consts import RTL_LANGUAGES
 from lms.utils.files import (
     get_language_name_by_extension, get_mime_type_by_extention,
@@ -209,6 +212,30 @@ def change_password():
             _('Your password has successfully changed'),
         ),
     ))
+
+
+@webapp.route('/avatar', methods=['GET', 'POST'])
+@login_required
+def avatar():
+    form = UpdateAvatarForm()
+    if form.validate_on_submit():
+        avatar_file = save_avatar(form.avatar.data)
+        if current_user.avatar:
+            delete_previous_avatar(current_user.avatar)
+        current_user.avatar = avatar_file
+        current_user.save()
+        return redirect(url_for('user', user_id=current_user.id))
+
+    return render_template('update-avatar.html', form=form)
+
+
+@webapp.route('/avatar/delete')
+@login_required
+def delete_avatar():
+    delete_previous_avatar(current_user.avatar)
+    current_user.avatar = None
+    current_user.save()
+    return redirect(url_for('user', user_id=current_user.id))
 
 
 @webapp.route('/reset-password', methods=['GET', 'POST'])

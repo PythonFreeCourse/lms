@@ -7,6 +7,9 @@
     <div class="body">
       <div class="user-details {{ direction }}">
         <h2>{{ _('User details') }}:</h2>
+        {% if current_user.avatar %}
+          <img class="rounded-circle account-image" src="{{ url_for('static', filename='avatars/' ~ current_user.avatar) }}">
+        {% endif %}
         <ul>
           <li>{{ _('Username') }}: {{ user.username | e }}</li>
           <li>{{ _('Email Address') }}: {{ user.mail_address | e }}</li>
@@ -14,9 +17,10 @@
       </div>
       <div class="user-actions {{ direction }}">
         <h2>{{ _('Actions') }}:</h2>
-        <div id="change-password-user">
+        <div id="actions-list">
           <ul>
             <li><a href="{{ url_for('change_password') }}" role="button">{{ _('Change Password') }}</a></li>
+            <li><a href="{{ url_for('avatar') }}" role="button">{{ _('Update Avatar') }}</a></li>
           </ul>
         </div>
       </div>

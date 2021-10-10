@@ -11,7 +11,11 @@
       <ul class="navbar-nav">
         <li class="nav-item">
           <a href="/user/{{ current_user.id }}" class="nav-link">
-            <i class="fa fa-user" aria-hidden="true"></i>
+            {% if current_user.avatar %}
+              <img class="rounded-circle" width="25" height="25" src="{{ url_for('static', filename='avatars/' ~ current_user.avatar) }}">
+            {% else %}
+              <i class="fa fa-user" aria-hidden="true"></i>
+            {% endif %}
             {{ current_user.fullname | e }}
           </a>
         </li>

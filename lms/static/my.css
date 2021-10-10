@@ -51,7 +51,8 @@ a {
 #signup-container,
 #change-password-container,
 #reset-password-container,
-#recover-password-container {
+#recover-password-container,
+#update-avatar-container {
   height: 100%;
   align-items: center;
   display: flex;
@@ -63,7 +64,8 @@ a {
 #signup,
 #change-password,
 #reset-password,
-#recover-password {
+#recover-password,
+#update-avatar {
   margin: auto;
   max-width: 420px;
   padding: 15px;
@@ -87,6 +89,10 @@ a {
 #forgot-my-password-link {
   display: block;
   margin: 0.5rem;
+}
+
+.avatar-file {
+  width: auto;
 }
 
 .page {

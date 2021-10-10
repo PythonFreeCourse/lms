@@ -50,6 +50,7 @@ mypy==0.910
 mypy-extensions==0.4.3
 numpy==1.21.2
 peewee==3.14.4
+Pillow==8.3.2
 psycopg2-binary==2.9.1
 pycodestyle==2.7.0
 pycparser==2.20

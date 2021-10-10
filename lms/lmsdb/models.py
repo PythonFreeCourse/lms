@@ -172,6 +172,7 @@ class User(UserMixin, BaseModel):
     api_key = CharField()
     last_course_viewed = ForeignKeyField(Course, null=True)
     uuid = UUIDField(default=uuid4, unique=True)
+    avatar = CharField(null=True)
 
     def get_id(self):
         return str(self.uuid)
