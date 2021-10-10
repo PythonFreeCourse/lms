@@ -39,6 +39,7 @@ limiter = Limiter(webapp, key_func=get_remote_address)
 if not config_file.exists():
     shutil.copy(str(config_example_file), str(config_file))
 config_migrator.migrate(config_file, config_example_file)
+avatars_path.mkdir(parents=True)
 
 webapp.config.from_pyfile(str(config_file))
 
