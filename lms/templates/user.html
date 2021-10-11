@@ -17,6 +17,9 @@
         <div id="change-password-user">
           <ul>
             <li><a href="{{ url_for('change_password') }}" role="button">{{ _('Change Password') }}</a></li>
+            {% if public_course_exists %}
+            <li><a href="{{ url_for('public_courses') }}" role="button">{{ _('Join Courses') }}</a></li>
+            {% endif %}
           </ul>
         </div>
       </div>

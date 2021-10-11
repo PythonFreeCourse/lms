@@ -35,10 +35,10 @@ from lms.lmsweb.redirections import (
     PERMISSIVE_CORS, get_next_url, login_manager,
 )
 from lms.models import (
-    comments, notes, notifications, share_link, solutions, upload,
+    comments, notes, notifications, share_link, solutions, upload, users,
 )
 from lms.models.errors import (
-    FileSizeError, ForbiddenPermission, LmsError,
+    AlreadyExists, FileSizeError, ForbiddenPermission, LmsError,
     UnauthorizedError, UploadError, fail,
 )
 from lms.models.users import SERIALIZER, auth, retrieve_salt
@@ -505,7 +505,35 @@ def user(user_id):
         user=target_user,
         is_manager=is_manager,
         notes_options=Note.get_note_options(),
+        public_course_exists=Course.public_course_exists(),
     )
+
+
+@webapp.route('/course')
+@login_required
+def public_courses():
+    return render_template(
+        'public-courses.html',
+        courses=Course.public_courses(),
+    )
+
+
+@webapp.route('/course/join/<int:course_id>')
+@login_required
+def join_public_course(course_id: int):
+    course = Course.get_or_none(course_id)
+    if course is None:
+        return fail(404, 'There is no such course.')
+    if not course.is_public:
+        return fail(403, "You aren't allowed to do this method.")
+
+    try:
+        users.join_public_course(course, current_user)
+    except AlreadyExists as e:
+        error_message, status_code = e.args
+        return fail(status_code, error_message)
+
+    return redirect(url_for('exercises_page'))
 
 
 @webapp.route('/send/<int:course_id>', methods=['GET'])

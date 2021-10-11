@@ -835,16 +835,18 @@ code .grader-add .fa {
 }
 
 /* User's page */
-#user {
+#user, #public-courses {
   text-align: right;
 }
 
-#user h1 {
+#user h1,
+#public-courses h1 {
   margin: 5vh 0;
   text-align: center;
 }
 
-#user .body {
+#user .body,
+#public-courses .body {
   width: 80vw;
   margin: auto;
 }
@@ -853,7 +855,8 @@ code .grader-add .fa {
   width: 80vw;
 }
 
-#user .user-actions {
+#user .user-actions,
+#public-courses .public-courses-links {
   margin-bottom: 5em;
 }
 

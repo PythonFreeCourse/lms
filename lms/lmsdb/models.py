@@ -159,6 +159,14 @@ class Course(BaseModel):
             .order_by(Course.name.desc())
         )
 
+    @classmethod
+    def public_courses(cls):
+        return cls.select().where(cls.is_public)
+
+    @classmethod
+    def public_course_exists(cls):
+        return cls.public_courses().exists()
+
     def __str__(self):
         return f'{self.name}: {self.date} - {self.end_date}'
 
@@ -279,7 +287,7 @@ class UserCourse(BaseModel):
 @post_save(sender=UserCourse)
 def on_save_user_course(model_class, instance, created):
     """Changes user's last course viewed."""
-    if instance.user.last_course_viewed is None:
+    if instance.user.last_course_viewed is None or instance.course.is_public:
         instance.user.last_course_viewed = instance.course
         instance.user.save()
 

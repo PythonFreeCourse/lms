@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-10-03 22:01+0300\n"
+"POT-Creation-Date: 2021-10-06 15:07+0300\n"
 "PO-Revision-Date: 2021-09-29 11:30+0300\n"
 "Last-Translator: Or Ronai\n"
 "Language: he\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.1\n"
 
-#: lmsdb/models.py:879
+#: lmsdb/models.py:864
 msgid "Fatal error"
 msgstr "כישלון חמור"
 
@@ -116,13 +116,18 @@ msgstr "%(checker)s הגיב לך על תרגיל \"%(subject)s\"."
 msgid "Your solution for the \"%(subject)s\" exercise has been checked."
 msgstr "הפתרון שלך לתרגיל \"%(subject)s\" נבדק."
 
-#: models/users.py:28
+#: models/users.py:29
 msgid "Invalid username or password"
 msgstr "שם המשתמש או הסיסמה שהוזנו לא תקינים"
 
-#: models/users.py:31
+#: models/users.py:32
 msgid "You have to confirm your registration with the link sent to your email"
 msgstr "עליך לאשר את מייל האימות"
+
+#: models/users.py:50
+#, python-format
+msgid "You are already registered to %(course_name)s course."
+msgstr "אתה כבר רשום לקורס %(course_name)s."
 
 #: templates/banned.html:8 templates/login.html:7
 #: templates/recover-password.html:8 templates/reset-password.html:8
@@ -247,6 +252,11 @@ msgstr "בדוק תרגילים"
 msgid "Logout"
 msgstr "התנתקות"
 
+#: templates/public-courses.html:6
+#, fuzzy
+msgid "Public Courses List"
+msgstr "רשימת קורסים פתוחים"
+
 #: templates/recover-password.html:9 templates/recover-password.html:17
 #: templates/reset-password.html:9
 msgid "Reset Password"
@@ -293,7 +303,7 @@ msgstr "חמ\"ל תרגילים"
 msgid "Name"
 msgstr "שם"
 
-#: templates/status.html:13 templates/user.html:44
+#: templates/status.html:13 templates/user.html:46
 msgid "Checked"
 msgstr "נבדק/ו"
 
@@ -341,7 +351,11 @@ msgstr "פרטי משתמש"
 msgid "Actions"
 msgstr "פעולות"
 
-#: templates/user.html:24
+#: templates/user.html:21
+msgid "Join Courses"
+msgstr "הירשם לקורסים"
+
+#: templates/user.html:27
 msgid "Exercises Submitted"
 msgstr "תרגילים שהוגשו"
 
@@ -349,19 +363,19 @@ msgstr "תרגילים שהוגשו"
 msgid "Course name"
 msgstr "שם קורס"
 
-#: templates/user.html:30
+#: templates/user.html:33
 msgid "Exercise name"
 msgstr "שם תרגיל"
 
-#: templates/user.html:31
+#: templates/user.html:34
 msgid "Submission status"
 msgstr "מצב הגשה"
 
-#: templates/user.html:32
+#: templates/user.html:35
 msgid "Submission"
 msgstr "הגשה"
 
-#: templates/user.html:33
+#: templates/user.html:36
 msgid "Checker"
 msgstr "בודק"
 
