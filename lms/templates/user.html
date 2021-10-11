@@ -7,23 +7,29 @@
     <div class="body">
       <div class="user-details {{ direction }}">
         <h2>{{ _('User details') }}:</h2>
-        {% if current_user.avatar %}
-          <img class="rounded-circle account-image" src="{{ url_for('static', filename='avatars/' ~ current_user.avatar) }}">
+        {% if user.avatar %}
+        {{ avatars_path }}
+          <img class="rounded-circle account-image" src="{{ url_for('avatar', filename=user.avatar) }}">
         {% endif %}
         <ul>
           <li>{{ _('Username') }}: {{ user.username | e }}</li>
           <li>{{ _('Email Address') }}: {{ user.mail_address | e }}</li>
         </ul>
       </div>
+      {% if current_user == user %}
       <div class="user-actions {{ direction }}">
         <h2>{{ _('Actions') }}:</h2>
         <div id="actions-list">
           <ul>
             <li><a href="{{ url_for('change_password') }}" role="button">{{ _('Change Password') }}</a></li>
-            <li><a href="{{ url_for('avatar') }}" role="button">{{ _('Update Avatar') }}</a></li>
+            <li><a href="{{ url_for('update_avatar') }}" role="button">{{ _('Update Avatar') }}</a></li>
+            {% if public_course_exists %}
+            <li><a href="{{ url_for('public_courses') }}" role="button">{{ _('Join Courses') }}</a></li>
+            {% endif %}
           </ul>
         </div>
       </div>
+      {% endif %}
       <div class="user-exercises {{ direction }}">
       <h2>{{ _('Exercises Submitted') }}:</h2>
         <table class="table table-hover">

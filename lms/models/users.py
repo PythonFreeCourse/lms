@@ -7,10 +7,11 @@ from itsdangerous import URLSafeTimedSerializer
 from PIL import Image
 from werkzeug.datastructures import FileStorage
 
-from lms.lmsdb.models import User
+from lms.lmsdb.models import Course, User, UserCourse
 from lms.lmsweb import avatars_path, config
 from lms.models.errors import (
-    ForbiddenPermission, UnauthorizedError, UnhashedPasswordError,
+    AlreadyExists, ForbiddenPermission, UnauthorizedError,
+    UnhashedPasswordError,
 )
 
 
@@ -60,3 +61,16 @@ def save_avatar(form_picture: FileStorage) -> str:
 def delete_previous_avatar(avatar_name: str) -> None:
     avatar_path = avatars_path / avatar_name
     avatar_path.unlink()
+
+
+def join_public_course(course: Course, user: User) -> None:
+    __, created = UserCourse.get_or_create(**{
+        UserCourse.user.name: user, UserCourse.course.name: course,
+    })
+    if not created:
+        raise AlreadyExists(
+            _(
+                'You are already registered to %(course_name)s course.',
+                course_name=course.name,
+            ), 409,
+        )

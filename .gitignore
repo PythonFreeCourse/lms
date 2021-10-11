@@ -138,4 +138,4 @@ vim.session
 devops/rabbitmq.cookie
 
 # Avatars
-lms/static/avatars/*
+uploads/avatars/*

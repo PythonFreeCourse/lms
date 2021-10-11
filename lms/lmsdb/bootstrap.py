@@ -278,21 +278,34 @@ def _add_exercise_course_id_and_number_columns_constraint() -> bool:
     Exercise = models.Exercise
     migrator = db_config.get_migrator_instance()
     with db_config.database.transaction():
-        course_not_exists = _add_not_null_column(Exercise, Exercise.course)
-        number_not_exists = _add_not_null_column(Exercise, Exercise.number)
-        if course_not_exists and number_not_exists:
+        _add_not_null_column(Exercise, Exercise.course)
+        _add_not_null_column(Exercise, Exercise.number)
+        try:
             migrate(
                 migrator.add_index('exercise', ('course_id', 'number'), True),
             )
+        except OperationalError as e:
+            if 'already exists' in str(e):
+                log.info(f'index exercise already exists: {e}')
+            else:
+                raise
         db_config.database.commit()
 
 
 def _add_user_course_constaint() -> bool:
     migrator = db_config.get_migrator_instance()
     with db_config.database.transaction():
-        migrate(
-            migrator.add_index('usercourse', ('user_id', 'course_id'), True),
-        )
+        try:
+            migrate(
+                migrator.add_index(
+                    'usercourse', ('user_id', 'course_id'), True,
+                ),
+            )
+        except OperationalError as e:
+            if 'already exists' in str(e):
+                log.info(f'index usercourse already exists: {e}')
+            else:
+                raise
         db_config.database.commit()
 
 

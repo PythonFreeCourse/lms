@@ -6,10 +6,10 @@
     <div id="update-avatar-container">
       <div id="update-avatar" class="text-center">
         {% if current_user.avatar %}
-        <img class="rounded-circle account-image" src="{{ url_for('static', filename='avatars/' ~ current_user.avatar) }}">
+        <img class="rounded-circle account-image" src="{{ url_for('avatar', filename=current_user.avatar) }}">
         {% endif %}
         <h1 id="main-title" class="h3 font-weight-normal">{{ _('Change Avatar') }}</h1>
-        <form class="align-items-center {{ direction }}-language" method="post" action="{{ url_for('avatar') }}" enctype="multipart/form-data">
+        <form class="align-items-center {{ direction }}-language" method="post" action="{{ url_for('update_avatar') }}" enctype="multipart/form-data">
             {{ render_field(form.avatar, cls="form-control-file avatar-file") }}
           <button class="btn btn-primary btn-block">{{ _('Update') }}</button>
         </form>
