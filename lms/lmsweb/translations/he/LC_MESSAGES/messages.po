@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-10-10 11:43+0300\n"
+"POT-Creation-Date: 2021-10-11 10:38+0300\n"
 "PO-Revision-Date: 2021-09-29 11:30+0300\n"
 "Last-Translator: Or Ronai\n"
 "Language: he\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.1\n"
 
-#: lmsdb/models.py:943
+#: lmsdb/models.py:951
 msgid "Fatal error"
 msgstr "כישלון חמור"
 
@@ -75,6 +75,22 @@ msgstr "קישור לאיפוס הסיסמה נשלח בהצלחה"
 msgid "Reset password link is expired"
 msgstr "קישור איפוס הסיסמה פג תוקף"
 
+#: lmsweb/views.py:376 templates/user.html:23
+msgid "Mail Subscription"
+msgstr "מנוי להודעות דוא\"ל"
+
+#: lmsweb/views.py:378
+msgid "You've successfully subscribed to get mails for new notifications"
+msgstr "נרשמת בהצלחה לקבלת הודעות דוא\"ל עבור התראות חדשות"
+
+#: lmsweb/views.py:383
+msgid "You've successfully unsubscribed to get mails for new notifications"
+msgstr "ביטלת בהצלחה את ההרשמה לקבלת הודעות דוא\"ל עבור התראות חדשות"
+
+#: lmsweb/views.py:388
+msgid "Something went wrong..."
+msgstr "משהו השתבש..."
+
 #: lmsweb/forms/change_password.py:20 lmsweb/forms/register.py:32
 #: lmsweb/forms/reset_password.py:25
 msgid "The passwords are not identical"
@@ -116,13 +132,18 @@ msgstr "%(checker)s הגיב לך על תרגיל \"%(subject)s\"."
 msgid "Your solution for the \"%(subject)s\" exercise has been checked."
 msgstr "הפתרון שלך לתרגיל \"%(subject)s\" נבדק."
 
-#: models/users.py:28
+#: models/users.py:29
 msgid "Invalid username or password"
 msgstr "שם המשתמש או הסיסמה שהוזנו לא תקינים"
 
-#: models/users.py:31
+#: models/users.py:32
 msgid "You have to confirm your registration with the link sent to your email"
 msgstr "עליך לאשר את מייל האימות"
+
+#: models/users.py:61
+#, python-format
+msgid "You are already registered to %(course_name)s course."
+msgstr "אתה כבר רשום לקורס %(course_name)s."
 
 #: templates/banned.html:8 templates/login.html:7
 #: templates/recover-password.html:8 templates/reset-password.html:8
@@ -247,6 +268,10 @@ msgstr "בדוק תרגילים"
 msgid "Logout"
 msgstr "התנתקות"
 
+#: templates/public-courses.html:6
+msgid "Public Courses List"
+msgstr "רשימת קורסים פתוחים"
+
 #: templates/recover-password.html:9 templates/recover-password.html:17
 #: templates/reset-password.html:9
 msgid "Reset Password"
@@ -293,7 +318,7 @@ msgstr "חמ\"ל תרגילים"
 msgid "Name"
 msgstr "שם"
 
-#: templates/status.html:13 templates/user.html:50
+#: templates/status.html:13 templates/user.html:53
 msgid "Checked"
 msgstr "נבדק/ו"
 
@@ -341,63 +366,63 @@ msgstr "פרטי משתמש"
 msgid "Actions"
 msgstr "פעולות"
 
-#: templates/user.html:23
-msgid "Mail Subscription"
-msgstr "מינוי להודעות דוא\"ל"
+#: templates/user.html:27
+msgid "Join Courses"
+msgstr "הירשם לקורסים"
 
-#: templates/user.html:30
+#: templates/user.html:33
 msgid "Exercises Submitted"
 msgstr "תרגילים שהוגשו"
 
-#: templates/user.html:35
+#: templates/user.html:38
 msgid "Course name"
 msgstr "שם קורס"
 
-#: templates/user.html:36
+#: templates/user.html:39
 msgid "Exercise name"
 msgstr "שם תרגיל"
 
-#: templates/user.html:37
+#: templates/user.html:40
 msgid "Submission status"
 msgstr "מצב הגשה"
 
-#: templates/user.html:38
+#: templates/user.html:41
 msgid "Submission"
 msgstr "הגשה"
 
-#: templates/user.html:39
+#: templates/user.html:42
 msgid "Checker"
 msgstr "בודק"
 
-#: templates/user.html:40 templates/view.html:25 templates/view.html:112
+#: templates/user.html:43 templates/view.html:25 templates/view.html:112
 msgid "Assessment"
 msgstr "הערה מילולית"
 
-#: templates/user.html:50
+#: templates/user.html:53
 msgid "Submitted"
 msgstr "הוגש"
 
-#: templates/user.html:50
+#: templates/user.html:53
 msgid "Not submitted"
 msgstr "לא הוגש"
 
-#: templates/user.html:62
+#: templates/user.html:65
 msgid "Notes"
 msgstr "פתקיות"
 
-#: templates/user.html:67 templates/user.html:69
+#: templates/user.html:70 templates/user.html:72
 msgid "New Note"
 msgstr "פתקית חדשה"
 
-#: templates/user.html:73
+#: templates/user.html:76
 msgid "Related Exercise"
 msgstr "תרגיל משויך"
 
-#: templates/user.html:82
+#: templates/user.html:85
 msgid "Privacy Level"
 msgstr "רמת פרטיות"
 
-#: templates/user.html:88
+#: templates/user.html:91
 msgid "Add Note"
 msgstr "הוסף פתקית"
 

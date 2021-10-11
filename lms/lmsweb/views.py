@@ -38,7 +38,7 @@ from lms.models import (
     comments, notes, notifications, share_link, solutions, upload, users,
 )
 from lms.models.errors import (
-    FileSizeError, ForbiddenPermission, LmsError,
+    AlreadyExists, FileSizeError, ForbiddenPermission, LmsError,
     UnauthorizedError, UploadError, fail,
 )
 from lms.models.users import SERIALIZER, auth, retrieve_salt
@@ -373,7 +373,20 @@ def read_all_notification():
 @webapp.route('/mail/<subscription>', methods=['PATCH'])
 def mail_subscription(subscription: str):
     success_state = users.change_mail_subscription(current_user, subscription)
-    return jsonify({'success': success_state})
+    title = _('Mail Subscription')
+    if subscription == 'subscribe':
+        body = _(
+            "You've successfully subscribed to get mails "
+            'for new notifications',
+        )
+    elif subscription == 'unsubscribe':
+        body = _(
+            "You've successfully unsubscribed to get mails "
+            'for new notifications',
+        )
+    else:
+        body = _('Something went wrong...')
+    return jsonify({'success': success_state, 'title': title, 'body': body})
 
 
 @webapp.route('/share', methods=['POST'])
@@ -511,7 +524,35 @@ def user(user_id):
         user=target_user,
         is_manager=is_manager,
         notes_options=Note.get_note_options(),
+        public_course_exists=Course.public_course_exists(),
     )
+
+
+@webapp.route('/course')
+@login_required
+def public_courses():
+    return render_template(
+        'public-courses.html',
+        courses=Course.public_courses(),
+    )
+
+
+@webapp.route('/course/join/<int:course_id>')
+@login_required
+def join_public_course(course_id: int):
+    course = Course.get_or_none(course_id)
+    if course is None:
+        return fail(404, 'There is no such course.')
+    if not course.is_public:
+        return fail(403, "You aren't allowed to do this method.")
+
+    try:
+        users.join_public_course(course, current_user)
+    except AlreadyExists as e:
+        error_message, status_code = e.args
+        return fail(status_code, error_message)
+
+    return redirect(url_for('exercises_page'))
 
 
 @webapp.route('/send/<int:course_id>', methods=['GET'])
