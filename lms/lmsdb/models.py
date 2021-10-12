@@ -1158,6 +1158,13 @@ def create_basic_roles() -> None:
         Role.create(name=role.value)
 
 
+def create_unverified_role_if_not_exists() -> None:
+    if not (
+        Role.select().where(Role.name == RoleOptions.UNVERIFIED.value).exists()
+    ):
+        Role.create(name=RoleOptions.UNVERIFIED.value)
+
+
 def create_basic_assessments() -> None:
     assessments_dict = {
         'Excellent': {'color': 'green', 'icon': 'star', 'order': 1},
