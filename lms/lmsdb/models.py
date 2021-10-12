@@ -1155,14 +1155,8 @@ def create_demo_users() -> None:
 
 def create_basic_roles() -> None:
     for role in RoleOptions:
-        Role.create(name=role.value)
-
-
-def create_unverified_role_if_not_exists() -> None:
-    if not (
-        Role.select().where(Role.name == RoleOptions.UNVERIFIED.value).exists()
-    ):
-        Role.create(name=RoleOptions.UNVERIFIED.value)
+        if not Role.select().where(Role.name == role.value).exists():
+            Role.create(name=role.value)
 
 
 def create_basic_assessments() -> None:

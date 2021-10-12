@@ -347,9 +347,7 @@ def main():
 
         models.database.create_tables(models.ALL_MODELS, safe=True)
 
-        if models.Role.select().count() == 0:
-            models.create_basic_roles()
-        models.create_unverified_role_if_not_exists()
+        models.create_basic_roles()
         if models.User.select().count() == 0:
             models.create_demo_users()
         if models.SolutionAssessment.select().count() == 0:
