@@ -65,13 +65,16 @@ def get_message_and_addressee(
     return msg, addressee
 
 
-def mark_as_checked(
-    solution_id: int, checker_id: int, assessment_id: Optional[int] = None,
+def change_assessment(
+    solution_id: int, assessment_id: Optional[int] = None,
 ) -> bool:
     checked_solution: Solution = Solution.get_by_id(solution_id)
-    is_updated = checked_solution.mark_as_checked(
-        assessment_id=assessment_id, by=checker_id,
-    )
+    return checked_solution.change_assessment(assessment_id=assessment_id)
+
+
+def mark_as_checked(solution_id: int, checker_id: int) -> bool:
+    checked_solution: Solution = Solution.get_by_id(solution_id)
+    is_updated = checked_solution.mark_as_checked(by=checker_id)
     msg = _(
         'Your solution for the "%(subject)s" exercise has been checked.',
         subject=checked_solution.exercise.subject,
