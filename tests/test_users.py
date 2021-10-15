@@ -4,6 +4,7 @@ import time
 from unittest.mock import Mock, patch
 
 from flask.testing import FlaskClient
+import pytest
 from werkzeug.datastructures import FileStorage
 
 from lms.lmsdb.models import Course, User
@@ -244,12 +245,13 @@ class TestAvatar:
     def open_file(filename: str) -> BufferedReader:
         return open(Path(conftest.SAMPLES_DIR) / filename, 'br')
 
-    def test_upload_avatar(self, student_user: User, captured_templates):
+    @pytest.mark.asyncio
+    async def test_upload_avatar(self, student_user: User, captured_templates):
         client = conftest.get_logged_user(student_user.username)
-        conftest.upload_avatar(client, self.image_storage)
+        await conftest.upload_avatar(client, self.image_storage)
         template, _ = captured_templates[-1]
         assert template.name == "user.html"
-        conftest.upload_avatar(client, self.image_storage_2)
+        await conftest.upload_avatar(client, self.image_storage_2)
         client.get('/avatar/delete')
         template, _ = captured_templates[-1]
         assert template.name == "user.html"
