@@ -16,9 +16,8 @@ CONFIRMATION_TIME = 3600
 
 # MAIL CONFIGURATION
 MAIL_SERVER = 'smtp.gmail.com'
-MAIL_PORT = 465
-MAIL_USE_SSL = True
-MAIL_USE_TLS = False
+MAIL_PORT = 587
+MAIL_USE_TLS = True
 MAIL_USERNAME = 'username@gmail.com'
 MAIL_PASSWORD = 'password'
 MAIL_DEFAULT_SENDER = 'username@gmail.com'

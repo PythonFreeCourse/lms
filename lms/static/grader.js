@@ -39,10 +39,10 @@ function visuallyRemoveComment(commentId) {
     }
   } else {
     let removeContent = `<hr>${commentElement.outerHTML}`;
-    if (!existingPopover.config.content.includes(removeContent)) {
+    if (!existingPopover._config.content.includes(removeContent)) {
       removeContent = `${commentElement.outerHTML} <hr>`;
     }
-    existingPopover.config.content = existingPopover.config.content.replace(removeContent, '');
+    existingPopover._config.content = existingPopover._config.content.replace(removeContent, '');
     const commentParent = commentElement.parentNode;
     hr.parentNode.removeChild(hr);
     commentParent.removeChild(commentElement);
@@ -118,7 +118,7 @@ function trackDragAreas(lineItems, addCommentItems) {
     item.addEventListener('drop', (e) => {
       e.preventDefault();
       const targets = findElementsToMark(e);
-      const { line } = targets[0].dataset;
+      const {line} = targets[0].dataset;
       const commentId = e.dataTransfer.getData('text/plain');
       window.hoverLine(targets, false);
       sendExistsComment(window.fileId, line, commentId);
@@ -136,7 +136,7 @@ function trackDraggables(elements) {
 
 function focusTextArea(lineNumber) {
   const target = document.querySelector(`textarea[data-line='${lineNumber}']`);
-  target.focus({ preventScroll: true });
+  target.focus({preventScroll: true});
 }
 
 function trackTextArea(lineNumber) {
@@ -152,7 +152,7 @@ function trackTextArea(lineNumber) {
     }
 
     const popover = bootstrap.Popover.getInstance(popoverElement);
-    if (popover !== null) { popover.hide(); }
+    if (popover !== null) {popover.hide();}
   });
 }
 
