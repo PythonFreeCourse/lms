@@ -76,7 +76,7 @@ async def avatars_handler(form_picture: FileStorage, filename: str):
 
 def delete_previous_avatar(avatar_name: str) -> None:
     avatar_path = avatars_path / avatar_name
-    avatar_path.unlink()
+    avatar_path.unlink(missing_ok=True)
 
 
 def join_public_course(course: Course, user: User) -> None:
