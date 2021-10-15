@@ -801,7 +801,7 @@ code .grader-add .fa {
 }
 
 #courses-list {
-  overflow-y: scroll;
+  overflow-y: auto;
   max-height: 10em;
 }
 

@@ -1,7 +1,5 @@
 function trackFinished(exerciseId, solutionId, element) {
   element.addEventListener('click', () => {
-    const assessment = document.querySelector('input[name="assessment"]:checked');
-    const assessmentValue = (assessment !== null) ? assessment.value : null;
     const xhr = new XMLHttpRequest();
     xhr.open('POST', `/checked/${exerciseId}/${solutionId}`, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -20,9 +18,7 @@ function trackFinished(exerciseId, solutionId, element) {
       }
     };
 
-    xhr.send(JSON.stringify({
-      assessment: assessmentValue,
-    }));
+    xhr.send(JSON.stringify({}));
   });
 }
 
@@ -30,10 +26,25 @@ function changeAssessmentsAttributes(assessmentGroup, item) {
   if (item.value == assessmentGroup.dataset.checkedid) {
     item.removeAttribute('checked');
     item.checked = false;
-    assessmentGroup.dataset.checkedid = 'None';
+    assessmentGroup.dataset.checkedid = null;
   } else {
     assessmentGroup.dataset.checkedid = item.value;
   }
+  document.activeElement.blur();
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', `/assessment/${solutionId}`, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.responseType = 'json';
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === 4) {
+        if (xhr.status !== 200) {
+          console.log(xhr.status);
+        }
+      }
+    };
+
+    xhr.send(JSON.stringify({assessment: assessmentGroup.dataset.checkedid}));
 }
 
 function trackAssessmentButtons() {
