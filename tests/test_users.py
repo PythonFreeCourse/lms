@@ -251,7 +251,7 @@ class TestAvatar:
         await conftest.upload_avatar(client, self.image_storage)
         template, _ = captured_templates[-1]
         assert template.name == "user.html"
-        await conftest.upload_avatar(client, self.image_storage_2)
+        conftest.upload_avatar(client, self.image_storage_2)
         client.get('/avatar/delete')
         template, _ = captured_templates[-1]
         assert template.name == "user.html"
