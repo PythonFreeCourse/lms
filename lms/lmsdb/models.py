@@ -317,9 +317,6 @@ class Notification(BaseModel):
 
     def read(self) -> bool:
         self.viewed = True
-        mail = MailMessage.get_or_none(MailMessage.notification == self)
-        if mail:
-            mail.delete_instance()
         return bool(self.save())
 
     @classmethod
@@ -398,11 +395,24 @@ class MailMessage(BaseModel):
 
     @classmethod
     def by_user(cls, user: User) -> Iterable['MailMessage']:
-        return cls.select().where(cls.user == user)
+        return (
+            cls
+            .select()
+            .where(cls.user == user)
+            .join(Notification)
+            .where(Notification.viewed == False)  # NOQA: E712
+        )
 
     @classmethod
     def user_messages_number(cls, user: User) -> int:
-        return cls.select(fn.Count(cls.id)).where(cls.user == user).scalar()
+        return (
+            cls
+            .select(fn.Count(cls.id))
+            .where(cls.user == user)
+            .join(Notification)
+            .where(Notification.viewed == False)  # NOQA: E712
+            .scalar()
+        )
 
     @classmethod
     def get_instances_number(cls):

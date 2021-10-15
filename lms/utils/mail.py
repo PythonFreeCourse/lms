@@ -97,7 +97,7 @@ def build_notification_message(mails: Iterable[MailMessage]) -> str:
 
 @webscheduler.task(
     'interval', id='mail_notifications',
-    hours=config.DEFAULT_DO_TASKS_EVERY_HOURS,
+    seconds=30,
 )
 def send_all_notifications_mails():
     for mail_message_user in MailMessage.distincit_users():
