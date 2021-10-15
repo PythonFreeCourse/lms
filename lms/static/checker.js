@@ -45,7 +45,7 @@ function changeAssessmentsAttributes(assessmentGroup, item) {
     };
 
     assessmentValue = assessmentGroup.dataset.checkedid;
-    assessmentChecked = (assessmentValue !== null) ? assessmentValue : 0;
+    assessmentChecked = (assessmentValue !== 'null') ? assessmentValue : null;
     xhr.send(JSON.stringify({assessment: assessmentChecked}));
 }
 
