@@ -3,7 +3,7 @@
 {% block page_content %}
 <div id="page-view">
   <div id="view-head">
-    <h1>{{ _('Exercise view') }} {{ solution['exercise']['id'] }}: {{ solution['exercise']['subject'] }}</h1>
+    <h1>{{ _('Exercise view') }} {{ solution['exercise']['number'] }}: {{ solution['exercise']['subject'] }}</h1>
     {% if not is_manager and not shared_url %}
       {% if solution['state'] == 'DONE' %}
         <p class="checked-msg {{ direction }}"><strong>{{ _('Your solution had checked!') }}</strong> {{ _('Click on the red lines in order to see the comments.') }}</p>
