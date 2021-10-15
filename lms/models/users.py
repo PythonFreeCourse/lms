@@ -1,6 +1,8 @@
+import asyncio
+from functools import partial
 import os
 import re
-import secrets
+from uuid import uuid4
 
 from flask_babel import gettext as _  # type: ignore
 from itsdangerous import URLSafeTimedSerializer
@@ -11,7 +13,7 @@ from lms.lmsdb.models import Course, User, UserCourse
 from lms.lmsweb import avatars_path, config
 from lms.models.errors import (
     AlreadyExists, ForbiddenPermission, UnauthorizedError,
-    UnhashedPasswordError,
+    UnhashedPasswordError, UnprocessableRequest,
 )
 
 
@@ -45,17 +47,31 @@ def generate_user_token(user: User) -> str:
     return SERIALIZER.dumps(user.mail_address, salt=retrieve_salt(user))
 
 
-def save_avatar(form_picture: FileStorage) -> str:
-    random_hex = secrets.token_hex(nbytes=8)
-    _, extension = os.path.splitext(form_picture.filename)
-    avatar_filename = random_hex + extension
-    avatar_path = avatars_path / avatar_filename
+def create_avatar_filename(form_picture: FileStorage) -> str:
+    __, extension = os.path.splitext(form_picture.filename)
+    if not extension:
+        raise UnprocessableRequest(_("Empty filename isn't allowed"), 422)
+    filename = str(uuid4())
+    return filename + extension
 
+
+def save_avatar(form_picture: FileStorage, filename: str) -> None:
+    avatar_path = avatars_path / filename
     output_size = (125, 125)
     image = Image.open(form_picture)
     image.thumbnail(output_size)
     image.save(avatar_path)
-    return avatar_filename
+
+
+async def async_avatars_proccess(form_picture: FileStorage, filename: str):
+    loop = asyncio.get_running_loop()
+    await loop.run_in_executor(
+        None, partial(save_avatar, form_picture, filename),
+    )
+
+
+async def avatars_handler(form_picture: FileStorage, filename: str):
+    asyncio.create_task(async_avatars_proccess(form_picture, filename))
 
 
 def delete_previous_avatar(avatar_name: str) -> None:

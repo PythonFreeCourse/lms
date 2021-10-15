@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any, Callable, Optional
 
 import arrow  # type: ignore
@@ -42,10 +43,11 @@ from lms.models import (
 )
 from lms.models.errors import (
     AlreadyExists, FileSizeError, ForbiddenPermission, LmsError,
-    UnauthorizedError, UploadError, fail,
+    UnauthorizedError, UnprocessableRequest, UploadError, fail,
 )
 from lms.models.users import (
-    SERIALIZER, auth, delete_previous_avatar, retrieve_salt, save_avatar,
+    SERIALIZER, auth, avatars_handler, create_avatar_filename,
+    delete_previous_avatar, retrieve_salt,
 )
 from lms.utils.consts import MB_CONVERSION, RTL_LANGUAGES
 from lms.utils.files import (
@@ -227,10 +229,16 @@ def avatar(filename):
 def update_avatar():
     form = UpdateAvatarForm()
     if form.validate_on_submit():
-        avatar_file = save_avatar(form.avatar.data)
+        try:
+            filename = create_avatar_filename(form.avatar.data)
+        except UnprocessableRequest as e:
+            error_message, status_code = e.args
+            return fail(status_code, error_message)
+
+        asyncio.run(avatars_handler(form.avatar.data, filename))
         if current_user.avatar:
             delete_previous_avatar(current_user.avatar)
-        current_user.avatar = avatar_file
+        current_user.avatar = filename
         current_user.save()
         return redirect(url_for('user', user_id=current_user.id))
 
