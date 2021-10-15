@@ -619,16 +619,11 @@ class Solution(BaseModel):
     def start_checking(self) -> bool:
         return self.set_state(Solution.STATES.IN_CHECKING)
 
-    def set_state(
-        self, new_state: SolutionState,
-        assessment: Optional[SolutionAssessment] = None, **kwargs,
-    ) -> bool:
+    def set_state(self, new_state: SolutionState, **kwargs) -> bool:
         # Optional: filter the old state of the object
         # to make sure that no two processes set the state together
         requested_solution = (Solution.id == self.id)
         updates_dict = {Solution.state.name: new_state.name}
-        if assessment is not None:
-            updates_dict[Solution.assessment.name] = assessment
         changes = Solution.update(
             **updates_dict, **kwargs,
         ).where(requested_solution)
@@ -771,19 +766,20 @@ class Solution(BaseModel):
             cls.submission_timestamp.asc(),
         )
 
-    def mark_as_checked(
-        self,
-        assessment_id: Optional[int] = None,
-        by: Optional[Union[User, int]] = None,
-    ) -> bool:
+    def change_assessment(self, assessment_id: Optional[int] = None) -> bool:
         assessment = SolutionAssessment.get_or_none(
             SolutionAssessment.id == assessment_id,
         )
-        return self.set_state(
-            Solution.STATES.DONE,
-            assessment=assessment,
-            checker=by,
-        )
+        requested_solution = (Solution.id == self.id)
+        updates_dict = {Solution.assessment.name: assessment}
+        changes = Solution.update(**updates_dict).where(requested_solution)
+        return changes.execute() == 1
+
+    def mark_as_checked(
+        self,
+        by: Optional[Union[User, int]] = None,
+    ) -> bool:
+        return self.set_state(Solution.STATES.DONE, checker=by)
 
     @classmethod
     def next_unchecked(cls) -> Optional['Solution']:
