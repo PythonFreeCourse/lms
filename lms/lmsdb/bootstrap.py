@@ -298,11 +298,8 @@ def _add_user_course_constaint() -> bool:
                     'usercourse', ('user_id', 'course_id'), True,
                 ),
             )
-        except OperationalError as e:
-            if 'already exists' in str(e):
-                log.info(f'index usercourse already exists: {e}')
-            else:
-                raise
+        except (OperationalError, ProgrammingError) as e:
+            log.info(f'Index usercourse user and course already exists: {e}')
         db_config.database.commit()
 
 
