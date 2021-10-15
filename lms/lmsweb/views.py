@@ -673,17 +673,20 @@ def shared_solution(shared_url: str, file_id: Optional[int] = None):
     )
 
 
+@webapp.route('/assessment/<int:solution_id>', methods=['POST'])
+@login_required
+@managers_only
+def assessment(solution_id: int):
+    assessment_id = request.json.get('assessment')
+    updated = solutions.change_assessment(solution_id, assessment_id)
+    return jsonify({'success': updated})
+
+
 @webapp.route('/checked/<int:exercise_id>/<int:solution_id>', methods=['POST'])
 @login_required
 @managers_only
-def done_checking(exercise_id, solution_id):
-    if request.method == 'POST':
-        assessment_id = request.json.get('assessment')
-    else:  # it's a GET
-        assessment_id = request.args.get('assessment')
-    is_updated = solutions.mark_as_checked(
-        solution_id, current_user.id, assessment_id,
-    )
+def done_checking(exercise_id: int, solution_id: int):
+    is_updated = solutions.mark_as_checked(solution_id, current_user.id)
     next_solution = solutions.get_next_unchecked(exercise_id)
     next_solution_id = getattr(next_solution, 'id', None)
     return jsonify({'success': is_updated, 'next': next_solution_id})
