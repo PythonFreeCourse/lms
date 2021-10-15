@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-10-11 15:39+0300\n"
+"POT-Creation-Date: 2021-10-15 12:16+0300\n"
 "PO-Revision-Date: 2021-09-29 11:30+0300\n"
 "Last-Translator: Or Ronai\n"
 "Language: he\n"
@@ -47,31 +47,31 @@ msgstr "הבודק האוטומטי נכשל ב־ %(number)d דוגמאות בת
 msgid "Bro, did you check your code?"
 msgstr "אחי, בדקת את הקוד שלך?"
 
-#: lmsweb/views.py:135
+#: lmsweb/views.py:137
 msgid "Can not register now"
 msgstr "לא ניתן להירשם כעת"
 
-#: lmsweb/views.py:152
+#: lmsweb/views.py:154
 msgid "Registration successfully"
 msgstr "ההרשמה בוצעה בהצלחה"
 
-#: lmsweb/views.py:175
+#: lmsweb/views.py:177
 msgid "The confirmation link is expired, new link has been sent to your email"
 msgstr "קישור האימות פג תוקף, קישור חדש נשלח אל תיבת המייל שלך"
 
-#: lmsweb/views.py:191
+#: lmsweb/views.py:193
 msgid "Your user has been successfully confirmed, you can now login"
 msgstr "המשתמש שלך אומת בהצלחה, כעת אתה יכול להתחבר למערכת"
 
-#: lmsweb/views.py:214 lmsweb/views.py:301
+#: lmsweb/views.py:216 lmsweb/views.py:309
 msgid "Your password has successfully changed"
 msgstr "הסיסמה שלך שונתה בהצלחה"
 
-#: lmsweb/views.py:260
+#: lmsweb/views.py:268
 msgid "Password reset link has successfully sent"
 msgstr "קישור לאיפוס הסיסמה נשלח בהצלחה"
 
-#: lmsweb/views.py:281
+#: lmsweb/views.py:289
 msgid "Reset password link is expired"
 msgstr "קישור איפוס הסיסמה פג תוקף"
 
@@ -125,15 +125,19 @@ msgstr "%(checker)s הגיב לך על תרגיל \"%(subject)s\"."
 msgid "Your solution for the \"%(subject)s\" exercise has been checked."
 msgstr "הפתרון שלך לתרגיל \"%(subject)s\" נבדק."
 
-#: models/users.py:33
+#: models/users.py:35
 msgid "Invalid username or password"
 msgstr "שם המשתמש או הסיסמה שהוזנו לא תקינים"
 
-#: models/users.py:36
+#: models/users.py:38
 msgid "You have to confirm your registration with the link sent to your email"
 msgstr "עליך לאשר את מייל האימות"
 
-#: models/users.py:72
+#: models/users.py:53
+msgid "Empty filename isn't allowed"
+msgstr "לא ניתן להעלות קובץ ללא שם"
+
+#: models/users.py:88
 #, python-format
 msgid "You are already registered to %(course_name)s course."
 msgstr "אתה כבר רשום לקורס %(course_name)s."
