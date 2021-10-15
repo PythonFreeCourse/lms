@@ -4,14 +4,14 @@ const FLAKE_COMMENTED_LINE_COLOR = '#fac4c3';
 const HOVER_LINE_STYLE = '1px solid #0d0d0f';
 
 function markLine(target, color, deletion = false) {
-  if (target.dataset && target.dataset.marked === 'true' && !deletion) { return; }
-  if (target.dataset && target.dataset.vimbackground === 'true' && !deletion) { return; }
+  if (target.dataset && target.dataset.marked === 'true' && !deletion) {return;}
+  if (target.dataset && target.dataset.vimbackground === 'true' && !deletion) {return;}
   target.style.background = color;
 }
 
 function hoverLine(targets, hover) {
   const [lineTarget, addCommentTarget] = targets;
-  if (lineTarget.dataset && lineTarget.dataset.vimbackground === 'true') { return; }
+  if (lineTarget.dataset && lineTarget.dataset.vimbackground === 'true') {return;}
   const commentOpacity = (hover === true) ? '1' : '0';
   let parsedColor = hover;
   if (hover === true) {
@@ -44,8 +44,8 @@ function addCommentToLine(line, commentData) {
   const commentText = `<span class="comment" data-line="${line}" data-commentid="${commentData.id}" data-author-role="${commentData.author_role}">${formattedComment}</span>`;
   let existingPopover = bootstrap.Popover.getInstance(commentElement);
   if (existingPopover !== null) {
-    const existingContent = `${existingPopover.config.content} <hr>`;
-    existingPopover.config.content = existingContent + commentText;
+    const existingContent = `${existingPopover._config.content} <hr>`;
+    existingPopover._config.content = existingContent + commentText;
   } else {
     existingPopover = new bootstrap.Popover(commentElement, {
       html: true,
