@@ -677,10 +677,7 @@ def shared_solution(shared_url: str, file_id: Optional[int] = None):
 @login_required
 @managers_only
 def assessment(solution_id: int):
-    if request.method == 'POST':
-        assessment_id = request.json.get('assessment')
-    else:  # it's a GET
-        assessment_id = request.args.get('assessment')
+    assessment_id = request.json.get('assessment')
     updated = solutions.change_assessment(solution_id, assessment_id)
     return jsonify({'success': updated})
 
