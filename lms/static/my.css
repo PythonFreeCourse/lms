@@ -503,14 +503,14 @@ button#share-action:hover {
 }
 
 .code-toolbar-button,
-#share-text {
+#shared-text {
   padding: 0.4rem;
   margin: 0 0.2rem;
   border-radius: 0;
   outline: none;
 }
 
-#share-box > button {
+#shared-box > button {
   padding: 0 0.7rem;
 }
 
@@ -537,7 +537,7 @@ button#share-action:hover {
   align-items: center;
 }
 
-#share-box {
+#shared-box {
   display: flex;
   position: absolute;
   direction: rtl;
@@ -551,7 +551,7 @@ button#share-action:hover {
   padding: 0.4rem;
 }
 
-#share-box * {
+#shared-box * {
   position: relative;
   display: flex;
   line-height: unset;

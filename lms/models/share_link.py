@@ -6,7 +6,7 @@ from lms.lmsweb import webapp
 from lms.models.errors import ForbiddenPermission, ResourceNotFound
 
 
-def get(solution_id: int) -> SharedSolution:
+def get_or_create(solution_id: int) -> SharedSolution:
     if not webapp.config.get('SHAREABLE_SOLUTIONS', False):
         raise ForbiddenPermission('Shareable solutions are not allowed.', 403)
 
@@ -30,7 +30,7 @@ def get(solution_id: int) -> SharedSolution:
     return shared_solution
 
 
-def new(shared_solution: SharedSolution) -> None:
+def new_visit(shared_solution: SharedSolution) -> None:
     SharedSolutionEntry.create(
         referrer=request.referrer,
         user=current_user.id,
