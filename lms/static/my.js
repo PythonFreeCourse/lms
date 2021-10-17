@@ -23,10 +23,10 @@ function sendShareRequest(act, solutionId, callback) {
   xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.responseType = 'json';
 
-  xhr.onreadystatechange = () => { callback(xhr); };
+  xhr.onreadystatechange = () => {callback(xhr);};
 
   xhr.send(
-    JSON.stringify({ act, solutionId }),
+    JSON.stringify({act, solutionId}),
   );
   return xhr;
 }
@@ -38,7 +38,7 @@ function trackCopyButton(button, context) {
 }
 
 function hideShareLink(xhr) {
-  const shareBox = document.getElementById('share-box');
+  const shareBox = document.getElementById('shared-box');
   if (xhr.readyState === 4) {
     if (xhr.status === 200) {
       shareBox.classList.add('d-none');
@@ -49,8 +49,8 @@ function hideShareLink(xhr) {
 }
 
 function updateShareLink(xhr) {
-  const shareBox = document.getElementById('share-box');
-  const shareText = document.getElementById('share-text');
+  const shareBox = document.getElementById('shared-box');
+  const shareText = document.getElementById('shared-text');
   if (xhr.readyState === 4) {
     if (xhr.status === 200) {
       if (shareBox.classList.contains('d-none')) {

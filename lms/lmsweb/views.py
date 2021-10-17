@@ -377,7 +377,7 @@ def share():
     solution_id = int(request.json.get('solutionId', 0))
 
     try:
-        shared_solution = share_link.get(solution_id)
+        shared_solution = share_link.get_or_create(solution_id)
     except LmsError as e:
         error_message, status_code = e.args
         return fail(status_code, error_message)
@@ -666,7 +666,7 @@ def shared_solution(shared_url: str, file_id: Optional[int] = None):
     if shared_solution is None:
         return fail(404, 'The solution does not exist.')
 
-    share_link.new(shared_solution)
+    share_link.new_visit(shared_solution)
     solution_id = shared_solution.solution.id
     return view(
         solution_id=solution_id, file_id=file_id, shared_url=shared_url,
