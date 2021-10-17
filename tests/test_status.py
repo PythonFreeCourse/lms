@@ -57,8 +57,8 @@ class TestStatusPage:
 
     def test_no_submissions(self):
         course = list(Solution.status(self.course_no_submissions).dicts())
-        assert len(course) == 0
+        assert not course
 
     def test_no_exercises(self):
         course = list(Solution.status(self.course_no_exercises).dicts())
-        assert len(course) == 0
+        assert not course
