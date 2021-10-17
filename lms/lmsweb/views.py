@@ -370,6 +370,25 @@ def read_all_notification():
     return jsonify({'success': success_state})
 
 
+@webapp.route('/mail/<subscription>', methods=['PATCH'])
+def mail_subscription(subscription: str):
+    success_state = users.change_mail_subscription(current_user, subscription)
+    title = _('Mail Subscription')
+    if subscription == 'subscribe':
+        body = _(
+            "You've successfully subscribed to get mails "
+            'for new notifications',
+        )
+    elif subscription == 'unsubscribe':
+        body = _(
+            "You've successfully unsubscribed to get mails "
+            'for new notifications',
+        )
+    else:
+        body = _('Something went wrong...')
+    return jsonify({'success': success_state, 'title': title, 'body': body})
+
+
 @webapp.route('/share', methods=['POST'])
 @login_required
 def share():

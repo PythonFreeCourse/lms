@@ -41,6 +41,17 @@ def generate_user_token(user: User) -> str:
     return SERIALIZER.dumps(user.mail_address, salt=retrieve_salt(user))
 
 
+def change_mail_subscription(user: User, subscription: str) -> bool:
+    if subscription == 'subscribe':
+        user.mail_subscription = True
+    elif subscription == 'unsubscribe':
+        user.mail_subscription = False
+    else:
+        return False
+    user.save()
+    return True
+
+
 def join_public_course(course: Course, user: User) -> None:
     __, created = UserCourse.get_or_create(**{
         UserCourse.user.name: user, UserCourse.course.name: course,

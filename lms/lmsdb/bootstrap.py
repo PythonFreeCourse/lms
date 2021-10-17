@@ -255,6 +255,18 @@ def _add_uuid_to_users_table(table: Model, _column: Field) -> None:
             user.save()
 
 
+def _add_mail_subscription_to_users_table(
+    table: Model, _column: Field,
+) -> None:
+    log.info(
+        'Adding mail subscription for users, might take some extra time...',
+    )
+    with db_config.database.transaction():
+        for user in table:
+            user.mail_subscription = True
+            user.save()
+
+
 def _api_keys_migration() -> bool:
     User = models.User
     _add_not_null_column(User, User.api_key, _add_api_keys_to_users_table)
@@ -316,6 +328,13 @@ def _uuid_migration() -> bool:
     return True
 
 
+def _mail_subscription() -> bool:
+    User = models.User
+    _add_not_null_column(
+        User, User.mail_subscription, _add_mail_subscription_to_users_table,
+    )
+
+
 def _assessment_migration() -> bool:
     Solution = models.Solution
     _add_not_null_column(Solution, Solution.assessment)
@@ -335,6 +354,7 @@ def main():
             _api_keys_migration()
             _last_course_viewed_migration()
             _uuid_migration()
+            _mail_subscription()
 
         if models.database.table_exists(models.UserCourse.__name__.lower()):
             _add_user_course_constaint()

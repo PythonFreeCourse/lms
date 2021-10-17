@@ -15,9 +15,9 @@ from peewee import SqliteDatabase
 import pytest
 
 from lms.lmsdb.models import (
-    ALL_MODELS, Comment, CommentText, Course, Exercise, Note, Notification,
-    Role, RoleOptions, SharedSolution, Solution, SolutionAssessment, User,
-    UserCourse,
+    ALL_MODELS, Comment, CommentText, Course, Exercise, MailMessage, Note,
+    Notification, Role, RoleOptions, SharedSolution, Solution,
+    SolutionAssessment, User, UserCourse,
 )
 from lms.extractors.base import File
 from lms.lmstests.public import celery_app as public_app
@@ -281,6 +281,11 @@ def create_notification(
         related_id=solution.id,
         action_url=f'{routes.SOLUTIONS}/{solution.id}',
     )
+
+
+def create_notification_mail(student_user: User, solution) -> MailMessage:
+    notification=create_notification(student_user, solution)
+    return MailMessage.create(user=student_user, notification=notification)
 
 
 def create_course(index: int = 0) -> Course:

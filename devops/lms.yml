@@ -29,6 +29,25 @@ services:
       - ./rabbitmq.cookie:/var/lib/rabbitmq/.erlang.cookie
     networks:
       - lms
+  
+  mailer:
+    image: lms:latest
+    command: celery -A lms.utils worker
+    volumes:
+      - ../lms/utils/:/app_dir/lms/utils/
+    environment:
+      - CELERY_RABBITMQ_ERLANG_COOKIE=AAVyo5djdSMGIZXiwEQs3JeVaBx5l14z
+      - CELERY_RABBITMQ_DEFAULT_USER=rabbit-user
+      - CELERY_RABBITMQ_DEFAULT_PASS=YgKlCvnYVzpTa3T9adG3NrMoUNe4Z5aZ
+      - CELERY_MAILER_VHOST=utils
+      - CELERY_RABBITMQ_HOST=rabbitmq
+      - CELERY_RABBITMQ_PORT=5672
+    links:
+      - rabbitmq
+    depends_on:
+      - rabbitmq
+    networks:
+      - lms
 
   checks-sandbox:
     image: lms:latest

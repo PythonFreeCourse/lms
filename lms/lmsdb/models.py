@@ -180,6 +180,7 @@ class User(UserMixin, BaseModel):
     api_key = CharField()
     last_course_viewed = ForeignKeyField(Course, null=True)
     uuid = UUIDField(default=uuid4, unique=True)
+    mail_subscription = BooleanField(default=True)
 
     def get_id(self):
         return str(self.uuid)
@@ -381,6 +382,41 @@ def on_notification_saved(
     ).offset(Notification.MAX_PER_USER)
     for instance in old_notifications:
         instance.delete_instance()
+
+
+class MailMessage(BaseModel):
+    user = ForeignKeyField(User, backref='mails')
+    notification = ForeignKeyField(Notification, backref='mails')
+    date = DateTimeField(default=datetime.now)
+
+    @classmethod
+    def distincit_users(cls):
+        return cls.select(cls.user).distinct()
+
+    @classmethod
+    def by_user(cls, user: User) -> Iterable['MailMessage']:
+        return (
+            cls
+            .select()
+            .where(cls.user == user)
+            .join(Notification)
+            .where(Notification.viewed == False)  # NOQA: E712
+        )
+
+    @classmethod
+    def user_messages_number(cls, user: User) -> int:
+        return (
+            cls
+            .select(fn.Count(cls.id))
+            .where(cls.user == user)
+            .join(Notification)
+            .where(Notification.viewed == False)  # NOQA: E712
+            .scalar()
+        )
+
+    @classmethod
+    def get_instances_number(cls):
+        return cls.select(fn.Count(cls.id))
 
 
 class Exercise(BaseModel):

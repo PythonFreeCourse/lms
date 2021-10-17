@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.9.1\n"
 
-#: lmsdb/models.py:921
+#: lmsdb/models.py:951
 msgid "Fatal error"
 msgstr "כישלון חמור"
 
@@ -75,6 +75,22 @@ msgstr "קישור לאיפוס הסיסמה נשלח בהצלחה"
 msgid "Reset password link is expired"
 msgstr "קישור איפוס הסיסמה פג תוקף"
 
+#: lmsweb/views.py:376 templates/user.html:23
+msgid "Mail Subscription"
+msgstr "מנוי להודעות דוא\"ל"
+
+#: lmsweb/views.py:378
+msgid "You've successfully subscribed to get mails for new notifications"
+msgstr "נרשמת בהצלחה לקבלת הודעות דוא\"ל עבור התראות חדשות"
+
+#: lmsweb/views.py:383
+msgid "You've successfully unsubscribed to get mails for new notifications"
+msgstr "ביטלת בהצלחה את ההרשמה לקבלת הודעות דוא\"ל עבור התראות חדשות"
+
+#: lmsweb/views.py:388
+msgid "Something went wrong..."
+msgstr "משהו השתבש..."
+
 #: lmsweb/forms/change_password.py:20 lmsweb/forms/register.py:32
 #: lmsweb/forms/reset_password.py:25
 msgid "The passwords are not identical"
@@ -124,7 +140,7 @@ msgstr "שם המשתמש או הסיסמה שהוזנו לא תקינים"
 msgid "You have to confirm your registration with the link sent to your email"
 msgstr "עליך לאשר את מייל האימות"
 
-#: models/users.py:50
+#: models/users.py:61
 #, python-format
 msgid "You are already registered to %(course_name)s course."
 msgstr "אתה כבר רשום לקורס %(course_name)s."
@@ -302,7 +318,7 @@ msgstr "חמ\"ל תרגילים"
 msgid "Name"
 msgstr "שם"
 
-#: templates/status.html:13 templates/user.html:47
+#: templates/status.html:13 templates/user.html:53
 msgid "Checked"
 msgstr "נבדק/ו"
 
@@ -328,7 +344,7 @@ msgstr "העלאת מחברות"
 
 #: templates/upload.html:11
 msgid "Drag here the notebook file or click and choose it from your computer."
-msgstr "גררו לכאן את קובץ המחברת,  או לחצו ובחרו אותה מהמחשב שלכם."
+msgstr "גררו לכאן את קובץ המחברת, או לחצו ובחרו אותה מהמחשב שלכם."
 
 #: templates/upload.html:14
 msgid "Back to Exercises List"
@@ -350,63 +366,63 @@ msgstr "פרטי משתמש"
 msgid "Actions"
 msgstr "פעולות"
 
-#: templates/user.html:21
+#: templates/user.html:27
 msgid "Join Courses"
 msgstr "הירשם לקורסים"
 
-#: templates/user.html:27
+#: templates/user.html:33
 msgid "Exercises Submitted"
 msgstr "תרגילים שהוגשו"
 
-#: templates/user.html:32
+#: templates/user.html:38
 msgid "Course name"
 msgstr "שם קורס"
 
-#: templates/user.html:33
+#: templates/user.html:39
 msgid "Exercise name"
 msgstr "שם תרגיל"
 
-#: templates/user.html:34
+#: templates/user.html:40
 msgid "Submission status"
 msgstr "מצב הגשה"
 
-#: templates/user.html:35
+#: templates/user.html:41
 msgid "Submission"
 msgstr "הגשה"
 
-#: templates/user.html:36
+#: templates/user.html:42
 msgid "Checker"
 msgstr "בודק"
 
-#: templates/user.html:37 templates/view.html:25 templates/view.html:112
+#: templates/user.html:43 templates/view.html:25 templates/view.html:112
 msgid "Assessment"
 msgstr "הערה מילולית"
 
-#: templates/user.html:47
+#: templates/user.html:53
 msgid "Submitted"
 msgstr "הוגש"
 
-#: templates/user.html:47
+#: templates/user.html:53
 msgid "Not submitted"
 msgstr "לא הוגש"
 
-#: templates/user.html:59
+#: templates/user.html:65
 msgid "Notes"
 msgstr "פתקיות"
 
-#: templates/user.html:64 templates/user.html:66
+#: templates/user.html:70 templates/user.html:72
 msgid "New Note"
 msgstr "פתקית חדשה"
 
-#: templates/user.html:70
+#: templates/user.html:76
 msgid "Related Exercise"
 msgstr "תרגיל משויך"
 
-#: templates/user.html:79
+#: templates/user.html:85
 msgid "Privacy Level"
 msgstr "רמת פרטיות"
 
-#: templates/user.html:85
+#: templates/user.html:91
 msgid "Add Note"
 msgstr "הוסף פתקית"
 
@@ -478,12 +494,12 @@ msgstr "הערות בודק"
 msgid "Done Checking"
 msgstr "סיום בדיקה"
 
-#: utils/mail.py:25
+#: utils/mail.py:30
 #, python-format
 msgid "Confirmation mail - %(site_name)s"
 msgstr "מייל אימות - %(site_name)s"
 
-#: utils/mail.py:32
+#: utils/mail.py:37
 #, python-format
 msgid ""
 "Hello %(fullname)s,\n"
@@ -492,12 +508,12 @@ msgstr ""
 "שלום %(fullname)s,\n"
 "לינק האימות שלך למערכת הוא: %(link)s"
 
-#: utils/mail.py:42
+#: utils/mail.py:47
 #, python-format
 msgid "Reset password mail - %(site_name)s"
 msgstr "מייל איפוס סיסמה - %(site_name)s"
 
-#: utils/mail.py:49
+#: utils/mail.py:54
 #, python-format
 msgid ""
 "Hello %(fullname)s,\n"
@@ -506,12 +522,12 @@ msgstr ""
 "שלום %(fullname)s,\n"
 "לינק לצורך איפוס הסיסמה שלך הוא: %(link)s"
 
-#: utils/mail.py:58
+#: utils/mail.py:63
 #, python-format
 msgid "Changing password - %(site_name)s"
 msgstr "שינוי סיסמה - %(site_name)s"
 
-#: utils/mail.py:62
+#: utils/mail.py:67
 #, python-format
 msgid ""
 "Hello %(fullname)s. Your password in %(site_name)s site has been changed."
@@ -522,4 +538,24 @@ msgstr ""
 "שלום %(fullname)s. הסיסמה שלך באתר %(site_name)s שונתה.\n"
 "אם אתה לא עשית את זה צור קשר עם הנהלת האתר.\n"
 "כתובת המייל: %(site_mail)s"
+
+#: utils/mail.py:80
+#, python-format
+msgid "New notification - %(site_name)s"
+msgstr "התראה חדשה - %(site_name)s"
+
+#: utils/mail.py:84
+#, python-format
+msgid ""
+"Hello %(fullname)s. You have %(num)d new notification:\n"
+"%(message)s"
+msgid_plural ""
+"Hello %(fullname)s. You have %(num)d new notifications:\n"
+"%(message)s"
+msgstr[0] ""
+"שלום %(fullname)s. יש לך %(num)d התראה חדשה:\n"
+"%(message)s"
+msgstr[1] ""
+"שלום %(fullname)s. יש לך %(num)d התראות חדשות:\n"
+"%(message)s"
 

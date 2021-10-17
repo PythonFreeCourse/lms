@@ -3,6 +3,7 @@ import shutil
 import typing
 
 from flask import Flask
+from flask_apscheduler import APScheduler  # type: ignore
 from flask_babel import Babel  # type: ignore
 from flask_httpauth import HTTPBasicAuth
 from flask_limiter import Limiter  # type: ignore
@@ -47,6 +48,9 @@ csrf = CSRFProtect(webapp)
 babel = Babel(webapp)
 
 webmail = Mail(webapp)
+
+webscheduler = APScheduler(app=webapp)
+webscheduler.start()
 
 
 # Must import files after app's creation

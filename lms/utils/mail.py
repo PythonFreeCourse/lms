@@ -1,20 +1,25 @@
 from functools import wraps
+from typing import Iterable
 
 from flask import url_for
 from flask_babel import gettext as _  # type: ignore
+from flask_babel import ngettext  # type: ignore
 from flask_mail import Message  # type: ignore
 
-from lms.lmsdb.models import User
-from lms.lmsweb import config, webapp, webmail
+from lms.lmsdb.models import MailMessage, User
+from lms.lmsweb import config, webapp, webmail, webscheduler
 from lms.models.users import generate_user_token
+from lms.utils.config.celery import app
 
 
+@app.task
 def send_message(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        msg = func(*args, **kwargs)
-        if not webapp.config.get('DISABLE_MAIL'):
-            webmail.send(msg)
+        with webapp.app_context():
+            msg = func(*args, **kwargs)
+            if not webapp.config.get('DISABLE_MAIL'):
+                return webmail.send(msg)
 
     return wrapper
 
@@ -67,3 +72,43 @@ def send_change_password_mail(user: User) -> Message:
         site_mail=config.MAIL_DEFAULT_SENDER,
     )
     return msg
+
+
+@send_message
+def send_notification_mail(user_id: int, message: str, number: int) -> Message:
+    user = User.get_by_id(user_id)
+    subject = _(
+        'New notification - %(site_name)s', site_name=config.SITE_NAME,
+    )
+    msg = Message(subject, recipients=[user.mail_address])
+    msg.body = ngettext(
+        'Hello %(fullname)s. You have %(num)d '
+        'new notification:\n%(message)s',
+        'Hello %(fullname)s. You have %(num)d '
+        'new notifications:\n%(message)s',
+        fullname=user.fullname, num=number, message=message,
+    )
+    return msg
+
+
+def build_notification_message(mails: Iterable[MailMessage]) -> str:
+    return '\n'.join(mail.notification.message.strip() for mail in mails)
+
+
+@webscheduler.task(
+    'interval', id='mail_notifications',
+    seconds=30,
+)
+def send_all_notifications_mails():
+    for mail_message_user in MailMessage.distincit_users():
+        mails = MailMessage.by_user(mail_message_user.user)
+        message = build_notification_message(mails)
+
+        if mail_message_user.user.mail_subscription:
+            send_message(send_notification_mail(
+                mail_message_user.user.id, message,
+                MailMessage.user_messages_number(mail_message_user.user.id),
+            ))
+        MailMessage.delete().where(
+            MailMessage.user == mail_message_user.user,
+        ).execute()

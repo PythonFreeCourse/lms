@@ -118,6 +118,44 @@ function trackReadAllNotificationsButton(button) {
   });
 }
 
+function subscriptionToast(toastObject, title, body) {
+  const today = new Date().toLocaleString();
+  document.getElementById('toast-strong').innerHTML = title;
+  document.getElementById('toast-small').innerHTML = today;
+  document.getElementById('toast-body').innerHTML = body;
+  const toast = new bootstrap.Toast(toastObject);
+  toast.show()
+}
+
+function trackMailSubscriptionCheckbox() {
+  const checkbox = document.getElementById('mail-subscription-checkbox');
+  const toastObject = document.getElementById('toast');
+  if (checkbox === null) {
+    return;
+  }
+
+  checkbox.addEventListener('change', (e) => {
+    const subscription = (e.currentTarget.checked) ? 'subscribe' : 'unsubscribe';
+    const xhr = new XMLHttpRequest();
+    xhr.open('PATCH', `/mail/${subscription}`);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.responseType = 'json';
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+          const title = xhr.response.title;
+          const body = xhr.response.body;
+          subscriptionToast(toastObject, title, body);
+        } else {
+          console.log(xhr.status);
+        }
+      }
+    };
+    xhr.send('');
+    return xhr;
+  });
+}
+
 function postUploadMessageUpdate(feedbacks, uploadStatus, matchesSpan, missesSpan) {
   const matches = uploadStatus.exercise_matches;
   const misses = uploadStatus.exercise_misses;
@@ -158,6 +196,7 @@ window.isUserGrader = isUserGrader;
 window.addEventListener('load', () => {
   updateNotificationsBadge();
   trackReadAllNotificationsButton(document.getElementById('read-notifications'));
+  trackMailSubscriptionCheckbox();
   const codeElement = document.getElementById('code-view');
   if (codeElement !== null) {
     const codeElementData = codeElement.dataset;

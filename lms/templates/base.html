@@ -23,7 +23,18 @@
 </head>
 <body>
     {% include 'navbar.html' %}
-    {% block page_content %}{% endblock %}
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+      <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong id="toast-strong" class="me-auto"></strong>
+          <small id="toast-small"></small>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div id="toast-body" class="toast-body"></div>
+      </div>
+    </div>
+    {% block page_content %}
+    {% endblock %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
 </body>
 </html>

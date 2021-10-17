@@ -860,6 +860,12 @@ code .grader-add .fa {
   margin-bottom: 5em;
 }
 
+.mail-subscription {
+  position: relative;
+  display: inline-block;
+  margin-right: -1.4rem;
+}
+
 .user-notes {
   display: flex;
   flex-flow: row wrap;
