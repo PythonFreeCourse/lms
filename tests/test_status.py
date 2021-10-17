@@ -56,9 +56,9 @@ class TestStatusPage:
         assert ex2_1['submitted'] == 1
 
     def test_no_submissions(self):
-        course = list(Solution.status(self.course_no_submissions).dicts())
-        assert len(course) == 0
+        submissions = list(Solution.status(self.course_no_submissions).dicts())
+        assert not submissions
 
     def test_no_exercises(self):
-        course = list(Solution.status(self.course_no_exercises).dicts())
-        assert len(course) == 0
+        submissions = list(Solution.status(self.course_no_exercises).dicts())
+        assert not submissions
