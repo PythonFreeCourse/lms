@@ -109,9 +109,11 @@
     {% if is_manager and not shared_url %}
     <div id="popular-comments">
       <div id="exercise-assessment" class="{{ direction }}">
-        <h2>{{ _('Assessment') }}</h2>
-        <div class="btn-group-vertical" id="solution-assessment" role="group" aria-label="assessments radio toggle button group" data-checkedid="{{ solution.assessment.id }}">
-          {% for assessment in assessments %}
+        {% for assessment in assessments %}
+          {%- if loop.first %}
+          <h2>{{ _('Assessment') }}</h2>
+          <div class="btn-group-vertical" id="solution-assessment" role="group" aria-label="assessments radio toggle button group" data-checkedid="{{ solution.assessment.id }}">
+          {% endif -%}
             <input type="radio" class="btn-check" name="assessment" id="btnradio{{ loop.index }}" autocomplete="off" value="{{ assessment.id }}"{% if solution.assessment.name == assessment.name %} checked{% endif %}>
             <label class="btn btn-outline" style="--color: {{ assessment.color }}; --active-color: {{ assessment.active_color }};" for="btnradio{{ loop.index }}">
               {% if assessment.icon %}
@@ -119,34 +121,18 @@
               {% endif %}
               {{ assessment.name }}
             </label>
+          {%- if loop.last %}</div>{% endif -%}
           {% endfor %}
-        </div>
       </div>
       <div id="exercise-comments" class="{{ direction }}">
-        <h2>{{ _('Comments for the solution') }}</h2>
-        <ol id="exercise-comments-list" class="comments exercise-comments">
           {%- for comment in exercise_common_comments %}
+          {%- if loop.first %}
+            <h2>{{ _('Comments for this exercise') }}</h2>
+            <ol id="exercise-comments-list" class="comments exercise-comments">
+          {% endif -%}
           <li class="known-comment {{ direction }}" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text | e }}</li>
+          {%- if loop.last %}</ol>{% endif -%}
           {% endfor -%}
-        </ol>
-      </div>
-      <div id="all-comments" class="{{ direction }}">
-        <h2>{{ _('General comments') }}</h2>
-        <ol id="all-comments-list" class="comments all-comments">
-          {%- for comment in all_common_comments %}
-          <li class="known-comment {{ direction }}" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text | e }}</li>
-          {% endfor -%}
-        </ol>
-      </div>
-      <div id="my-all-comments" class="{{ direction }}">
-        <h2>{{ _('Checker comments') }}</h2>
-        {% if user_comments %}
-            <ol id="my-comments-list" class="comments my-comments">
-              {%- for comment in user_comments %}
-              <li class="known-comment {{ direction }}" draggable="true" data-commentid="{{ comment.id }}">{{ comment.text | e }}</li>
-              {% endfor -%}
-            </ol>
-        {% endif -%}
       </div>
       <div id="grader-buttons" class="{{ direction }}">
         <button id="save-check" class="btn btn-success">{{ _('Done Checking') }}!</button>

@@ -798,26 +798,29 @@ class Solution(BaseModel):
             return None
 
     @classmethod
-    def status(cls):
+    def status(cls, course_id: Optional[int] = None):
         one_if_is_checked = Case(
             Solution.state, ((Solution.STATES.DONE.name, 1),), 0,
         )
         fields = (
             Exercise.id,
+            Exercise.course,
             Exercise.subject.alias('name'),
             Exercise.is_archived.alias('is_archived'),
             fn.Count(Solution.id).alias('submitted'),
             fn.Sum(one_if_is_checked).alias('checked'),
         )
-        join_by_exercise = (Solution.exercise == Exercise.id)
-        active_solutions = Solution.state.in_(
-            Solution.STATES.active_solutions(),
-        )
+        active_solution_states = Solution.STATES.active_solutions()
+        active_solutions = Solution.state.in_(active_solution_states)
+        right_course = (course_id is None) or course_id == Course.id
+
         return (
             Exercise
             .select(*fields)
-            .join(Solution, JOIN.LEFT_OUTER, on=join_by_exercise)
-            .where(active_solutions)
+            .join(Course, on=(Course.id == Exercise.course))
+            .switch()
+            .join(Solution, on=(Solution.exercise == Exercise.id))
+            .where(active_solutions & right_course)
             .group_by(Exercise.subject, Exercise.id)
             .order_by(Exercise.id)
         )

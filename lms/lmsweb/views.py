@@ -319,13 +319,21 @@ def main():
     return redirect(url_for('exercises_page'))
 
 
-@webapp.route(routes.STATUS)
-@managers_only
-@login_required
-def status():
+@webapp.route(f'{routes.STATUS}/')
+def overview_status():
     return render_template(
         'status.html',
         exercises=Solution.status(),
+    )
+
+
+@webapp.route(f'/course/<int:course_id>/{routes.STATUS.strip("/")}/')
+@managers_only
+@login_required
+def status(course_id: int):
+    return render_template(
+        'status.html',
+        exercises=Solution.status(course_id),
     )
 
 
