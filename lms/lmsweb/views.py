@@ -330,7 +330,7 @@ def overview_status():
 @webapp.route(f'/course/<int:course_id>/{routes.STATUS.strip("/")}/')
 @managers_only
 @login_required
-def status(course_id: Optional[int]):
+def status(course_id: int):
     return render_template(
         'status.html',
         exercises=Solution.status(course_id),
