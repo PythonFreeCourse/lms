@@ -140,10 +140,6 @@ def get_view_parameters(
             **view_params,
             'exercise_common_comments':
                 comments._common_comments(exercise_id=solution.exercise),
-            'all_common_comments':
-                comments._common_comments(),
-            'user_comments':
-                comments._common_comments(user_id=current_user.id),
             'left': Solution.left_in_exercise(solution.exercise),
             'assessments':
                 SolutionAssessment.get_assessments(solution.exercise.course),

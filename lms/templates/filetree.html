@@ -9,12 +9,16 @@
         </span>
       {% endif -%}
       </div>
-      <span class="indent" style="margin-left: {{ file.indent * 0.8 }}em"></span>
+      <span class="indent" style="margin-left: {{ (file.indent + 1) * 0.8 }}em"></span>
       <span class="
       {%- if file.is_folder -%}
       fiv-viv fiv-icon-folder">
       {%- else -%}
-      fiv-viv fiv-icon-{{ file.path.rsplit('.')[-1] | e }}">
+        {% if '.' in file.path %}
+        fiv-viv fiv-icon-{{ file.path.rsplit('.')[-1] | e }}">
+        {% else %}
+        fiv-viv fiv-icon-blank">
+        {% endif %}
       {%- endif -%}
       </span>
       {% if not file.is_folder -%}
