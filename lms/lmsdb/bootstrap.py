@@ -342,7 +342,6 @@ def get_new_tables(tables: Iterable[Model]) -> List[Model]:
     return [table for table in tables if not is_tables_exists(table)]
 
 
-
 def main():
     with models.database.connection_context():
         new_tables = get_new_tables(models.ALL_MODELS)
