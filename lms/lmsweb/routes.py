@@ -1,5 +1,6 @@
 SOLUTIONS = '/view'
 STATUS = '/status'
+SUBMISSIONS = '/submissions'
 DOWNLOADS = '/download'
 SHARED = '/shared'
 GIT = '/git/<int:course_id>/<int:exercise_number>.git'

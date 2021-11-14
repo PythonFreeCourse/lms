@@ -35,7 +35,8 @@ from lms.lmsweb.redirections import (
     PERMISSIVE_CORS, get_next_url, login_manager,
 )
 from lms.models import (
-    comments, notes, notifications, share_link, solutions, upload, users,
+    comments, courses, exercises, notes, notifications,
+    share_link, solutions, upload, users,
 )
 from lms.models.errors import (
     AlreadyExists, FileSizeError, ForbiddenPermission, LmsError,
@@ -334,6 +335,26 @@ def status(course_id: int):
     return render_template(
         'status.html',
         exercises=Solution.status(course_id),
+    )
+
+
+@webapp.route(f'/course/<int:course_id>/{routes.SUBMISSIONS.strip("/")}/')
+@managers_only
+@login_required
+def submissions_table(course_id: int):
+    course = Course.get_or_none(course_id)
+    if course is None:
+        return fail(404, f'No such course {course_id}.')
+
+    course_exercises = exercises.get_basic_exercises_view(course_id)
+    course_users = courses.get_students(course_id)
+    solutions_matrix = course.get_matrix()
+
+    return render_template(
+        'submissions-table.html',
+        exercises=course_exercises,
+        users=course_users,
+        solutions=solutions_matrix,
     )
 
 
