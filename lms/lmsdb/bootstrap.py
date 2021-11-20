@@ -1,4 +1,4 @@
-from typing import Any, Callable, Optional, Tuple, Type
+from typing import Any, Callable, Iterable, List, Optional, Tuple, Type, Union
 from uuid import uuid4
 
 from peewee import (
@@ -284,11 +284,8 @@ def _add_exercise_course_id_and_number_columns_constraint() -> bool:
             migrate(
                 migrator.add_index('exercise', ('course_id', 'number'), True),
             )
-        except OperationalError as e:
-            if 'already exists' in str(e):
-                log.info(f'index exercise already exists: {e}')
-            else:
-                raise
+        except (OperationalError, ProgrammingError) as e:
+            log.info(f'Index exercise course and number already exists: {e}')
         db_config.database.commit()
 
 
@@ -301,11 +298,8 @@ def _add_user_course_constaint() -> bool:
                     'usercourse', ('user_id', 'course_id'), True,
                 ),
             )
-        except OperationalError as e:
-            if 'already exists' in str(e):
-                log.info(f'index usercourse already exists: {e}')
-            else:
-                raise
+        except (OperationalError, ProgrammingError) as e:
+            log.info(f'Index usercourse user and course already exists: {e}')
         db_config.database.commit()
 
 
@@ -328,27 +322,37 @@ def _assessment_migration() -> bool:
     return True
 
 
+def is_tables_exists(tables: Union[Model, Iterable[Model]]) -> bool:
+    if not isinstance(tables, (tuple, list)):
+        tables = (tables,)
+
+    return all(
+        models.database.table_exists(table.__name__.lower())
+        for table in tables
+    )
+
+
+def get_new_tables(tables: Iterable[Model]) -> List[Model]:
+    return [table for table in tables if not is_tables_exists(table)]
+
+
 def main():
     with models.database.connection_context():
-        if models.database.table_exists(models.Exercise.__name__.lower()):
-            _add_exercise_course_id_and_number_columns_constraint()
+        new_tables = get_new_tables(models.ALL_MODELS)
+        models.database.create_tables(new_tables, safe=True)
 
-        if models.database.table_exists(models.Solution.__name__.lower()):
-            _last_status_view_migration()
-            _assessment_migration()
+        _add_exercise_course_id_and_number_columns_constraint()
 
-        if models.database.table_exists(models.User.__name__.lower()):
-            _api_keys_migration()
-            _last_course_viewed_migration()
-            _uuid_migration()
+        _last_status_view_migration()
+        _assessment_migration()
 
-        if models.database.table_exists(models.UserCourse.__name__.lower()):
-            _add_user_course_constaint()
+        _api_keys_migration()
+        _last_course_viewed_migration()
+        _uuid_migration()
 
-        models.database.create_tables(models.ALL_MODELS, safe=True)
+        _add_user_course_constaint()
 
-        if models.Role.select().count() == 0:
-            models.create_basic_roles()
+        models.create_basic_roles()
         if models.User.select().count() == 0:
             models.create_demo_users()
         if models.SolutionAssessment.select().count() == 0:

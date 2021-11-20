@@ -84,9 +84,9 @@
         {% endif -%}
       </ul>
       <ul class="navbar-nav ms-auto">
-        {%- if current_user.role.is_manager %}
+        {%- if current_user.role.is_manager and current_user.last_course_viewed %}
         <li class="nav-item">
-          <a href="/status" class="nav-link">
+          <a href="{{ url_for('status', course_id=current_user.last_course_viewed.id) }}" class="nav-link">
             <i class="fa fa-check-square-o" aria-hidden="true"></i>
             {{ _('Check Exercises') }}
           </a>

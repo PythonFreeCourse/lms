@@ -319,13 +319,21 @@ def main():
     return redirect(url_for('exercises_page'))
 
 
-@webapp.route(routes.STATUS)
-@managers_only
-@login_required
-def status():
+@webapp.route(f'{routes.STATUS}/')
+def overview_status():
     return render_template(
         'status.html',
         exercises=Solution.status(),
+    )
+
+
+@webapp.route(f'/course/<int:course_id>/{routes.STATUS.strip("/")}/')
+@managers_only
+@login_required
+def status(course_id: int):
+    return render_template(
+        'status.html',
+        exercises=Solution.status(course_id),
     )
 
 
@@ -377,7 +385,7 @@ def share():
     solution_id = int(request.json.get('solutionId', 0))
 
     try:
-        shared_solution = share_link.get(solution_id)
+        shared_solution = share_link.get_or_create(solution_id)
     except LmsError as e:
         error_message, status_code = e.args
         return fail(status_code, error_message)
@@ -666,24 +674,27 @@ def shared_solution(shared_url: str, file_id: Optional[int] = None):
     if shared_solution is None:
         return fail(404, 'The solution does not exist.')
 
-    share_link.new(shared_solution)
+    share_link.new_visit(shared_solution)
     solution_id = shared_solution.solution.id
     return view(
         solution_id=solution_id, file_id=file_id, shared_url=shared_url,
     )
 
 
+@webapp.route('/assessment/<int:solution_id>', methods=['POST'])
+@login_required
+@managers_only
+def assessment(solution_id: int):
+    assessment_id = request.json.get('assessment')
+    updated = solutions.change_assessment(solution_id, assessment_id)
+    return jsonify({'success': updated})
+
+
 @webapp.route('/checked/<int:exercise_id>/<int:solution_id>', methods=['POST'])
 @login_required
 @managers_only
-def done_checking(exercise_id, solution_id):
-    if request.method == 'POST':
-        assessment_id = request.json.get('assessment')
-    else:  # it's a GET
-        assessment_id = request.args.get('assessment')
-    is_updated = solutions.mark_as_checked(
-        solution_id, current_user.id, assessment_id,
-    )
+def done_checking(exercise_id: int, solution_id: int):
+    is_updated = solutions.mark_as_checked(solution_id, current_user.id)
     next_solution = solutions.get_next_unchecked(exercise_id)
     next_solution_id = getattr(next_solution, 'id', None)
     return jsonify({'success': is_updated, 'next': next_solution_id})

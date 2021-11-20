@@ -132,7 +132,7 @@ class TestSolutionBridge:
     ):
         # Basic functionality
         assert solution.state == Solution.STATES.CREATED.name
-        marked = solutions.mark_as_checked(solution.id, staff_user.id, 2)
+        marked = solutions.mark_as_checked(solution.id, staff_user.id)
         # HELL WITH PEEWEE!!!
         solution = Solution.get_by_id(solution.id)
         assert marked
@@ -142,7 +142,7 @@ class TestSolutionBridge:
         # Not duplicating things
         staff_user2 = conftest.create_staff_user(index=1)
         solution2 = conftest.create_solution(exercise, student_user)
-        marked = solutions.mark_as_checked(solution2.id, staff_user2.id, 3)
+        marked = solutions.mark_as_checked(solution2.id, staff_user2.id)
         solution2 = Solution.get_by_id(solution2.id)
         assert solution2.state == Solution.STATES.DONE.name
         assert solution2.checker == staff_user2
@@ -171,13 +171,13 @@ class TestSolutionBridge:
         assert unchecked.exercise.id == solution1.exercise.id
         assert unchecked == solution1
 
-        solutions.mark_as_checked(solution1.id, staff_user, 4)
+        solutions.mark_as_checked(solution1.id, staff_user)
         unchecked = solutions.get_next_unchecked(exercise.id)
         assert unchecked is not None
         assert unchecked.exercise.id == solution3.exercise.id
         assert unchecked == solution3
 
-        solutions.mark_as_checked(solution3.id, staff_user, 1)
+        solutions.mark_as_checked(solution3.id, staff_user)
         unchecked = solutions.get_next_unchecked(exercise.id)
         assert unchecked is None
 
@@ -185,7 +185,7 @@ class TestSolutionBridge:
         assert unchecked is not None
         assert unchecked == solution2
 
-        solutions.mark_as_checked(solution2.id, staff_user, 2)
+        solutions.mark_as_checked(solution2.id, staff_user)
         unchecked = solutions.get_next_unchecked()
         assert unchecked is None
 
@@ -563,7 +563,7 @@ class TestSolutionBridge:
         solution = Solution.get_by_id(solution.id)
         assert solution.last_status_view == SolutionStatusView.NOT_CHECKED.name
 
-        solutions.mark_as_checked(solution.id, staff_user.id, 3)
+        solutions.mark_as_checked(solution.id, staff_user.id)
         solution = Solution.get_by_id(solution.id)
         assert solution.last_status_view == SolutionStatusView.NOT_CHECKED.name
         client.get(f'/view/{solution.id}')
@@ -590,8 +590,6 @@ class TestSolutionBridge:
         client = conftest.get_logged_user(staff_user.username)
         response = client.post(
             f'/checked/{solution.exercise.id}/{solution.id}',
-            data=json.dumps({'assessment': 1}),
-            content_type='application/json',
         )
         assert response.status_code == 200
 
@@ -636,14 +634,30 @@ class TestSolutionBridge:
         solution: Solution, _assessments,
     ):
         conftest.create_usercourse(student_user, course)
-        solutions.mark_as_checked(solution.id, staff_user.id, 2)
+        client = conftest.get_logged_user(staff_user.username)
+        client.post(
+            f'/assessment/{solution.id}',
+            data=json.dumps({'assessment': 2}),
+            content_type='application/json',
+        )
         solution = Solution.get_by_id(solution.id)
+        assert solution.assessment.name == 'Nice'
+
+        client.post(
+            f'/assessment/{solution.id}',
+            data=json.dumps({'assessment': None}),
+            content_type='application/json',
+        )
 
         exercise2 = conftest.create_exercise(course, 2)
         solution2 = conftest.create_solution(exercise2, student_user)
-        solutions.mark_as_checked(solution2.id, staff_user.id)
+        client.post(
+            f'/assessment/{solution2.id}',
+            data=json.dumps({'assessment': 3}),
+            content_type='application/json',
+        )
         solution2 = Solution.get_by_id(solution2.id)
         
         exercises = solution.of_user(student_user.id, from_all_courses=True)
-        assert exercises[0].get('assessment') == 'Nice'
-        assert exercises[1].get('assessment') is None
+        assert exercises[0].get('assessment') is None
+        assert exercises[1].get('assessment') == 'Try again'
