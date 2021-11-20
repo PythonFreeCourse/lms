@@ -13,7 +13,9 @@ BASE_DIR = os.path.abspath(os.path.join(__file__, '../../../../../'))
 
 def register_test_class(file_path: str, test_class: typing.ClassVar):
     subject = test_class.__doc__
-    exercises = tuple(models.Exercise.filter(models.Exercise.subject == subject))
+    exercises = tuple(
+        models.Exercise.filter(models.Exercise.subject == subject),
+    )
     if not exercises:
         log.info(f'Failed to find exercises for subject {subject}')
         raise SystemError
