@@ -13,28 +13,31 @@ BASE_DIR = os.path.abspath(os.path.join(__file__, '../../../../../'))
 
 def register_test_class(file_path: str, test_class: typing.ClassVar):
     subject = test_class.__doc__
-    exercise = models.Exercise.get_or_none(models.Exercise.subject == subject)
-    if not exercise:
-        log.info(f'Failed to find exercise subject {subject}')
+    exercises = tuple(
+        models.Exercise.filter(models.Exercise.subject == subject),
+    )
+    if not exercises:
+        log.info(f'Failed to find exercises for subject {subject}')
         raise SystemError
 
     with open(file_path, 'r') as file_reader:
         code = file_reader.read()
 
-    exercise_test = models.ExerciseTest.get_or_create_exercise_test(
-        exercise=exercise,
-        code=code,
-    )
+    for exercise in exercises:
+        exercise_test = models.ExerciseTest.get_or_create_exercise_test(
+            exercise=exercise,
+            code=code,
+        )
 
-    for test_func_name in inspect.getmembers(test_class):
-        test_func_name = test_func_name[0]
-        if test_func_name.startswith('test_'):
-            test_func = getattr(test_class, test_func_name)
-            models.ExerciseTestName.create_exercise_test_name(
-                exercise_test=exercise_test,
-                test_name=test_func_name,
-                pretty_test_name=test_func.__doc__,
-            )
+        for test_func_name in inspect.getmembers(test_class):
+            test_func_name = test_func_name[0]
+            if test_func_name.startswith('test_'):
+                test_func = getattr(test_class, test_func_name)
+                models.ExerciseTestName.create_exercise_test_name(
+                    exercise_test=exercise_test,
+                    test_name=test_func_name,
+                    pretty_test_name=test_func.__doc__,
+                )
 
 
 def load_tests_from_path(file_path: str):
