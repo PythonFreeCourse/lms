@@ -1,7 +1,6 @@
 import logging
 import subprocess  # noqa: S404
-from typing import Iterable, List, Optional, Tuple
-
+from typing import Iterable, List, Optional
 from flask_babel import gettext as _  # type: ignore
 import junitparser
 from junitparser.junitparser import TestCase
@@ -83,7 +82,7 @@ class UnitTestChecker:
         try:
             parsed_string = junitparser.TestSuite.fromstring(raw_results)
             test_suites = tuple(parsed_string.testsuites())
-            single_test_suite = len(test_suites) == 0
+            single_test_suite = not test_suites
             if single_test_suite:
                 yield from tuple(parsed_string)
             for test_suite in test_suites:
