@@ -1,7 +1,6 @@
 import logging
 import subprocess  # noqa: S404
-from typing import Iterable, List, Optional, Tuple
-
+from typing import Iterable, List, Optional
 from flask_babel import gettext as _  # type: ignore
 import junitparser
 from junitparser.junitparser import TestCase
@@ -51,7 +50,6 @@ class UnitTestChecker:
         python_file = 'test_checks.py'
         test_output_path = 'output.xml'
 
-        junit_results = None
         try:
             with executers.get_executor(self._executor_name) as executor:
                 executor.write_file(python_file, python_code)
@@ -78,12 +76,17 @@ class UnitTestChecker:
         test_code = self._exercise_auto_test.code
         return f'{test_code}\n\n{user_code}'
 
-    def _get_parsed_suites(
+    def _get_test_cases(
             self, raw_results: bytes,
-    ) -> Optional[Iterable[junitparser.TestSuite]]:
+    ) -> Optional[Iterable[junitparser.TestCase]]:
         try:
             parsed_string = junitparser.TestSuite.fromstring(raw_results)
-            return parsed_string.testsuites()
+            test_suites = tuple(parsed_string.testsuites())
+            single_test_suite = not test_suites
+            if single_test_suite:
+                yield from tuple(parsed_string)
+            for test_suite in test_suites:
+                yield from tuple(test_suite)
         except SyntaxError:  # importing xml make the lint go arrrr
             self._logger.exception('Failed to parse junit result')
             return None
@@ -98,17 +101,15 @@ class UnitTestChecker:
         if not raw_results:
             return None
 
-        suites = self._get_parsed_suites(raw_results)
-        if not suites:
+        test_cases = self._get_test_cases(raw_results)
+        if not test_cases:
             return None
 
         tests_ran = False
         number_of_failures = 0
-        for test_suite in suites:
-            failures, ran = self._handle_test_suite(test_suite)
-            number_of_failures += failures
-            if ran and not tests_ran:
-                tests_ran = ran
+        for test_case in test_cases:
+            number_of_failures += int(self._handle_test_case(test_case))
+            tests_ran = True
 
         if not tests_ran:
             self._handle_failed_to_execute_tests(raw_results)
@@ -181,13 +182,3 @@ class UnitTestChecker:
             self._handle_result(case.name, result)
             number_of_failures += 1
         return number_of_failures
-
-    def _handle_test_suite(
-            self, test_suite: junitparser.TestSuite,
-    ) -> Tuple[int, bool]:
-        number_of_failures = 0
-        tests_ran = False
-        for case in test_suite:
-            tests_ran = True
-            number_of_failures += int(self._handle_test_case(case))
-        return number_of_failures, tests_ran
