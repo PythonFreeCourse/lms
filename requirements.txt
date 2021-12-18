@@ -44,7 +44,7 @@ Jinja2==3.0.1
 jinja2-pluralize==0.3.0
 junitparser==2.1.1
 loguru==0.5.3
-lxml==4.6.3
+lxml==4.6.5
 mccabe==0.6.1
 mypy==0.910
 mypy-extensions==0.4.3
