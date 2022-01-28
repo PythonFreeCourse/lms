@@ -66,7 +66,7 @@
             </a>
           </li>
         {% endif -%}
-        {%- if not exercises or fetch_archived %}
+        {%- if not exercises or fetch_archived or tag_name %}
         <li class="nav-item">
           <a href="/exercises" class="nav-link">
             <i class="fa fa-book" aria-hidden="true"></i>

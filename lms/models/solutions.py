@@ -14,7 +14,7 @@ from lms.lmsdb.models import (
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmsweb import config, routes
-from lms.models import comments, notifications
+from lms.models import comments, notifications, tags
 from lms.models.errors import ForbiddenPermission, ResourceNotFound
 from lms.utils.files import ALLOWED_IMAGES_EXTENSIONS
 
@@ -212,3 +212,11 @@ def get_files_tree(files: Iterable[SolutionFile]) -> List[Dict[str, Any]]:
     for file in file_details:
         del file['fullpath']
     return file_details
+
+
+def is_tag_name_exists(tag_name: str, course_id: int) -> None:
+    if not tags.get_exercises_of(course_id, tag_name):
+        raise ResourceNotFound(
+            f'No such tag {tag_name} for course '
+            f'{current_user.last_course_viewed.name}.', 404,
+        )

@@ -365,6 +365,31 @@ def exercises_page():
     )
 
 
+@webapp.route('/exercises/<tagname>')
+@login_required
+def exercises_tag_page(tagname: str):
+    fetch_archived = bool(request.args.get('archived'))
+    try:
+        solutions.is_tag_name_exists(
+            tagname, current_user.last_course_viewed.id,
+        )
+    except LmsError as e:
+        error_message, status_code = e.args
+        return fail(status_code, error_message)
+
+    exercises = Solution.of_user(
+        current_user.id, fetch_archived, exercise_tag=tagname,
+    )
+    is_manager = current_user.role.is_manager
+    return render_template(
+        'exercises.html',
+        exercises=exercises,
+        is_manager=is_manager,
+        fetch_archived=fetch_archived,
+        tag_name=tagname,
+    )
+
+
 @webapp.route('/notifications')
 @login_required
 def get_notifications():
@@ -488,7 +513,7 @@ def comment():
 
 @webapp.route('/send/<int:course_id>/<int:_exercise_number>')
 @login_required
-def send(course_id: int, _exercise_number: Optional[int]):
+def send(course_id: int, _exercise_number: Optional[int] = None):
     if not UserCourse.is_user_registered(current_user.id, course_id):
         return fail(403, "You aren't allowed to watch this page.")
     return render_template('upload.html', course_id=course_id)
