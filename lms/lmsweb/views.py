@@ -28,6 +28,7 @@ from lms.lmsweb.config import (
 )
 from lms.lmsweb.forms.change_password import ChangePasswordForm
 from lms.lmsweb.forms.register import RegisterForm
+from lms.lmsweb.forms.login import LoginForm
 from lms.lmsweb.forms.reset_password import RecoverPassForm, ResetPassForm
 from lms.lmsweb.git_service import GitService
 from lms.lmsweb.manifest import MANIFEST
@@ -99,27 +100,30 @@ def ratelimit_handler(e):
     deduct_when=lambda response: response.status_code != 200,
 )
 def login(login_message: Optional[str] = None):
-    if current_user.is_authenticated:
-        return get_next_url(request.args.get('next'))
-
-    username = request.form.get('username')
-    password = request.form.get('password')
     next_page = request.form.get('next')
+    if current_user.is_authenticated:
+        return get_next_url(next_page)
+
+    form = LoginForm()
     login_message = request.args.get('login_message')
+    if not form.validate_on_submit():
+        return render_template(
+            'login.html', form=form, login_message=login_message,
+        )
 
-    if request.method == 'POST':
-        try:
-            user = auth(username, password)
-        except (ForbiddenPermission, UnauthorizedError) as e:
-            error_message, _ = e.args
-            error_details = {'next': next_page, 'login_message': error_message}
-            return redirect(url_for('login', **error_details))
-        else:
-            login_user(user)
-            session['_invalid_password_tries'] = 0
-            return get_next_url(next_page)
+    username = form.username.data
+    password = form.password.data
 
-    return render_template('login.html', login_message=login_message)
+    try:
+        user = auth(username, password)
+    except (ForbiddenPermission, UnauthorizedError) as e:
+        error_message, _ = e.args
+        error_details = {'next': next_page, 'login_message': error_message}
+        return redirect(url_for('login', **error_details))
+    else:
+        login_user(user)
+        session['_invalid_password_tries'] = 0
+        return get_next_url(next_page)
 
 
 @webapp.route('/signup', methods=['GET', 'POST'])
