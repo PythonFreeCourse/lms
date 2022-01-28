@@ -13,6 +13,7 @@ from flask_mail import Mail
 from loguru import logger
 from peewee import SqliteDatabase
 import pytest
+from werkzeug.datastructures import FileStorage
 
 from lms.lmsdb.models import (
     ALL_MODELS, Comment, CommentText, Course, Exercise, Note, Notification,
@@ -184,6 +185,12 @@ def recover_client_password(
         'password': password,
         'confirm': confirm_password,
     }, follow_redirects=True)
+
+
+def upload_avatar(client: FlaskClient, avatar: FileStorage):
+    return client.post(
+        '/update-avatar', data={'avatar': avatar}, follow_redirects=True,
+    )
 
 
 def create_user(

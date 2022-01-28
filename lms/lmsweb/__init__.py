@@ -18,6 +18,7 @@ template_dir = project_dir / 'templates'
 static_dir = project_dir / 'static'
 config_file = web_dir / 'config.py'
 config_example_file = web_dir / 'config.py.example'
+avatars_path = project_dir.parent / 'uploads' / 'avatars'
 
 
 if debug.is_enabled():
@@ -38,6 +39,9 @@ limiter = Limiter(webapp, key_func=get_remote_address)
 if not config_file.exists():
     shutil.copy(str(config_example_file), str(config_file))
 config_migrator.migrate(config_file, config_example_file)
+
+if not avatars_path.exists():
+    avatars_path.mkdir(parents=True)
 
 webapp.config.from_pyfile(str(config_file))
 

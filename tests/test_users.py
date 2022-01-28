@@ -1,10 +1,15 @@
+from io import BufferedReader
+from pathlib import Path
 import time
 from unittest.mock import Mock, patch
 
 from flask.testing import FlaskClient
+import pytest
+from werkzeug.datastructures import FileStorage
 
 from lms.lmsdb.models import Course, User
 from lms.lmsweb.config import CONFIRMATION_TIME, MAX_INVALID_PASSWORD_TRIES
+from lms.models import users
 from lms.models.users import generate_user_token
 from tests import conftest
 
@@ -204,3 +209,61 @@ class TestUser:
 
         usercourse.delete_instance()
         assert student_user.last_course_viewed == course2
+
+
+class TestAvatar:
+    IMAGE_NAME = 'bird.jpg'
+    IMAGE_NAME_2 = 'seaturtle.jpg'
+    IMAGE_WRONG_EXTENSION = 'code1.py'
+    IMAGE_BIG_SIZE = 'turtle.jpg'
+    IMAGE_NO_NAME = '.jpg'
+
+    def setup(self):
+        self.image_file = self.open_file(self.IMAGE_NAME)
+        self.image_file_2 = self.open_file(self.IMAGE_NAME_2)
+        self.image_wrong_extension_file = self.open_file(
+            self.IMAGE_WRONG_EXTENSION,
+        )
+        self.image_big_size_file = self.open_file(self.IMAGE_BIG_SIZE)
+        self.image_no_name_file = self.open_file(self.IMAGE_NO_NAME)
+        self.image_storage = FileStorage(self.image_file)
+        self.image_storage_2 = FileStorage(self.image_file_2)
+        self.image_wrong_extension_storage = FileStorage(
+            self.image_wrong_extension_file,
+        )
+        self.image_big_size_storage = FileStorage(self.image_big_size_file)
+        self.image_no_name_storage = FileStorage(self.image_no_name_file)
+
+    def teardown(self):
+        self.image_file.close()
+        self.image_file_2.close()
+        self.image_wrong_extension_file.close()
+        self.image_big_size_file.close()
+        self.image_no_name_file.close()
+
+    @staticmethod
+    def open_file(filename: str) -> BufferedReader:
+        return open(Path(conftest.SAMPLES_DIR) / filename, 'br')
+
+    def test_upload_avatar(self, student_user: User, captured_templates):
+        client = conftest.get_logged_user(student_user.username)
+        conftest.upload_avatar(client, self.image_storage)
+        template, _ = captured_templates[-1]
+        assert template.name == "user.html"
+        conftest.upload_avatar(client, self.image_storage_2)
+        client.get('/avatar/delete')
+        template, _ = captured_templates[-1]
+        assert template.name == "user.html"
+
+    def test_upload_big_size_avatar(
+        self, student_user: User, captured_templates,
+    ):
+        client = conftest.get_logged_user(student_user.username)
+        conftest.upload_avatar(client, self.image_big_size_storage)
+        template, _ = captured_templates[-1]
+        assert template.name == "update-avatar.html"
+
+    def test_upload_no_name_avatar(self, student_user: User):
+        client = conftest.get_logged_user(student_user.username)
+        response = conftest.upload_avatar(client, self.image_no_name_storage)
+        assert response.status_code == 422

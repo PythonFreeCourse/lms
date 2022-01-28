@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any, Callable, Optional
 
 import arrow  # type: ignore
@@ -18,7 +19,9 @@ from lms.lmsdb.models import (
     ALL_MODELS, Comment, Course, Note, Role, RoleOptions, SharedSolution,
     Solution, SolutionFile, User, UserCourse, database,
 )
-from lms.lmsweb import babel, http_basic_auth, limiter, routes, webapp
+from lms.lmsweb import (
+    avatars_path, babel, http_basic_auth, limiter, routes, webapp,
+)
 from lms.lmsweb.admin import (
     AdminModelView, SPECIAL_MAPPING, admin, managers_only,
 )
@@ -29,6 +32,7 @@ from lms.lmsweb.config import (
 from lms.lmsweb.forms.change_password import ChangePasswordForm
 from lms.lmsweb.forms.register import RegisterForm
 from lms.lmsweb.forms.reset_password import RecoverPassForm, ResetPassForm
+from lms.lmsweb.forms.update_avatar import UpdateAvatarForm
 from lms.lmsweb.git_service import GitService
 from lms.lmsweb.manifest import MANIFEST
 from lms.lmsweb.redirections import (
@@ -39,10 +43,13 @@ from lms.models import (
 )
 from lms.models.errors import (
     AlreadyExists, FileSizeError, ForbiddenPermission, LmsError,
-    UnauthorizedError, UploadError, fail,
+    UnauthorizedError, UnprocessableRequest, UploadError, fail,
 )
-from lms.models.users import SERIALIZER, auth, retrieve_salt
-from lms.utils.consts import RTL_LANGUAGES
+from lms.models.users import (
+    SERIALIZER, auth, avatars_handler, create_avatar_filename,
+    delete_previous_avatar, retrieve_salt,
+)
+from lms.utils.consts import MB_CONVERSION, RTL_LANGUAGES
 from lms.utils.files import (
     get_language_name_by_extension, get_mime_type_by_extention,
 )
@@ -209,6 +216,42 @@ def change_password():
             _('Your password has successfully changed'),
         ),
     ))
+
+
+@webapp.route('/avatar/<path:filename>')
+@login_required
+def avatar(filename):
+    return send_from_directory(avatars_path, filename)
+
+
+@webapp.route('/update-avatar', methods=['GET', 'POST'])
+@login_required
+def update_avatar():
+    form = UpdateAvatarForm()
+    if form.validate_on_submit():
+        try:
+            filename = create_avatar_filename(form.avatar.data)
+        except UnprocessableRequest as e:
+            error_message, status_code = e.args
+            return fail(status_code, error_message)
+
+        asyncio.run(avatars_handler(form.avatar.data, filename))
+        if current_user.avatar:
+            delete_previous_avatar(current_user.avatar)
+        current_user.avatar = filename
+        current_user.save()
+        return redirect(url_for('user', user_id=current_user.id))
+
+    return render_template('update-avatar.html', form=form)
+
+
+@webapp.route('/avatar/delete')
+@login_required
+def delete_avatar():
+    delete_previous_avatar(current_user.avatar)
+    current_user.avatar = None
+    current_user.save()
+    return redirect(url_for('user', user_id=current_user.id))
 
 
 @webapp.route('/reset-password', methods=['GET', 'POST'])
@@ -561,7 +604,8 @@ def upload_page(course_id: int):
         return fail(404, 'User not found.')
     if request.content_length > MAX_UPLOAD_SIZE:
         return fail(
-            413, f'File is too big. {MAX_UPLOAD_SIZE // 1000000}MB allowed.',
+            413,
+            f'File is too big. {MAX_UPLOAD_SIZE // MB_CONVERSION}MB allowed.',
         )
 
     file: Optional[FileStorage] = request.files.get('file')

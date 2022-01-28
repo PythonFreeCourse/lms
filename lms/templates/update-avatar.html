@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% from "_formhelpers.html" import render_field %}
+
+{% block page_content %}
+  <div class="container">
+    <div id="update-avatar-container">
+      <div id="update-avatar" class="text-center">
+        {% if current_user.avatar %}
+        <img class="rounded-circle account-image" src="{{ url_for('avatar', filename=current_user.avatar) }}">
+        {% endif %}
+        <h1 id="main-title" class="h3 font-weight-normal">{{ _('Change Avatar') }}</h1>
+        <form class="align-items-center {{ direction }}-language" method="post" action="{{ url_for('update_avatar') }}" enctype="multipart/form-data">
+            {{ render_field(form.avatar, cls="form-control-file avatar-file") }}
+          <button class="btn btn-primary btn-block">{{ _('Update') }}</button>
+        </form>
+        <a href="{{ url_for('delete_avatar') }}" role="button">{{ _('Delete Avatar') }}</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}
