@@ -32,7 +32,11 @@ webapp = Flask(
 
 http_basic_auth = HTTPBasicAuth()
 
-limiter = Limiter(webapp, key_func=get_remote_address)
+limiter = Limiter(
+    app=webapp,
+    key_func=get_remote_address,
+    storage_uri='memory://',
+)
 
 
 if not config_file.exists():

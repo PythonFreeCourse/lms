@@ -17,11 +17,11 @@ DOWNLOAD_FILE = os.path.join(conftest.SAMPLES_DIR, 'download_test.zip')
 
 
 class TestDownloadSolution:
-    def setup(self):
+    def setup_method(self):
         self.zipfile_file = self.zipfile_file()
         self.zipfile_content = self.zipfile_file.read()
 
-    def teardown(self):
+    def teardown_method(self):
         self.zipfile_file.close()
 
     @staticmethod

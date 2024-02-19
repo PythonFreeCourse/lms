@@ -20,13 +20,13 @@ class TestFlake8Linter:
     test_directory = None
 
     @classmethod
-    def setup_class(cls):
+    def setup_method(cls):
         cls.test_directory = tempfile.mkdtemp()
         cls.file_path = os.path.join(cls.test_directory, 'some-file')
         cls.execute_script = EXECUTE_CODE.format(cls.file_path)
 
     @classmethod
-    def teardown_class(cls):
+    def teardown_method(cls):
         if cls.test_directory is not None:
             shutil.rmtree(cls.test_directory)
 

@@ -13,11 +13,11 @@ CONFIG_FILE = pathlib.Path(conftest.SAMPLES_DIR) / 'config.py'
 
 class TestConfigMigrator:
     @staticmethod
-    def setup():
+    def setup_method():
         shutil.copyfile(str(CONFIG_COPY_FILE), str(CONFIG_FILE))
 
     @staticmethod
-    def teardown():
+    def teardown_method():
         os.remove(str(CONFIG_FILE))
 
     @staticmethod

@@ -247,14 +247,15 @@ class User(UserMixin, BaseModel):
 @pre_save(sender=User)
 def on_save_handler(model_class, instance, created):
     """Hash password on creation/save."""
+    supported_hashing = ('pbkdf2:sha256', 'scrypt:')
 
     # If password changed then it won't start with hash's method prefix
-    is_password_changed = not instance.password.startswith('pbkdf2:sha256')
+    is_password_changed = not instance.password.startswith(supported_hashing)
     if created or is_password_changed:
         instance.password = generate_password_hash(instance.password)
         instance.uuid = uuid4()
 
-    is_api_key_changed = not instance.api_key.startswith('pbkdf2:sha256')
+    is_api_key_changed = not instance.api_key.startswith(supported_hashing)
     if created or is_api_key_changed:
         if not instance.api_key:
             instance.api_key = model_class.random_password()
@@ -563,9 +564,7 @@ class Solution(BaseModel):
     )
 
     @property
-    def solution_files(
-            self,
-    ) -> Union[Iterable['SolutionFile'], 'SolutionFile']:
+    def solution_files(self) -> Iterable["SolutionFile"]:
         return SolutionFile.filter(SolutionFile.solution == self)
 
     @property
@@ -707,8 +706,8 @@ class Solution(BaseModel):
             raise AlreadyExists('This solution already exists.')
 
         instance = cls.create(**{
-            cls.exercise.name: exercise,
-            cls.solver.name: solver,
+            cls.exercise.name: exercise.id,
+            cls.solver.name: solver.id,
             cls.submission_timestamp.name: datetime.now(),
             cls.hashed.name: hash_,
         })
@@ -726,8 +725,8 @@ class Solution(BaseModel):
 
         # update old solutions for this exercise
         other_solutions: Iterable[Solution] = cls.select().where(
-            cls.exercise == exercise,
-            cls.solver == solver,
+            cls.exercise == exercise.id,
+            cls.solver == solver.id,
             cls.id != instance.id,
         )
         for old_solution in other_solutions:

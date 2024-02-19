@@ -601,7 +601,7 @@ class TestSolutionBridge:
         )
         assert assessment1.color == COLORS.get('red')
         assert (
-            assessment1.active_color == DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR,
+            assessment1.active_color == DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR
         )
 
         assessment2 = SolutionAssessment.create(
@@ -625,7 +625,7 @@ class TestSolutionBridge:
         assessment.save()
         assert assessment.color == DEFAULT_ASSESSMENT_BUTTON_COLOR
         assert (
-            assessment.active_color == DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR,
+            assessment.active_color == DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR
         )
 
     @staticmethod
@@ -657,7 +657,7 @@ class TestSolutionBridge:
             content_type='application/json',
         )
         solution2 = Solution.get_by_id(solution2.id)
-        
+
         exercises = solution.of_user(student_user.id, from_all_courses=True)
         assert exercises[0].get('assessment') is None
         assert exercises[1].get('assessment') == 'Try again'

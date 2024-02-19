@@ -200,7 +200,7 @@ class GitService:
             contain_new_commits=False,
         )
 
-    def _load_files_from_repository(self) -> typing.List[upload.File]:
+    def _load_files_from_repository(self) -> list[upload.File]:
         """
         Since the remote server is a git bare repository
         we need to 'clone' the bare repository to resolve the files.
@@ -209,7 +209,7 @@ class GitService:
         """
         with tempfile.TemporaryDirectory() as tempdir:
             self._execute_command(
-                args=['git', 'clone', self.repository_folder, '.'],
+                args=['git', 'clone', str(self.repository_folder), '.'],
                 cwd=tempdir,
             )
             to_return = []

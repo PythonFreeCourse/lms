@@ -21,7 +21,7 @@ services:
       - lms
 
   rabbitmq:
-    image: rabbitmq:3.9-management-alpine
+    image: rabbitmq:3.12-management-alpine
     hostname: celery-mq
     volumes:
       - rabbit-data-volume:/var/lib/rabbitmq
@@ -129,7 +129,6 @@ volumes:
   db-data-volume:
   rabbit-data-volume:
   repositories-data-volume:
-
 
 networks:
   lms:

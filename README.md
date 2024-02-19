@@ -9,20 +9,26 @@
 
 👋 Welcome to Python course learning management system. 🐍
 
-The system objectives - 
+The system objectives -
+
 1. Allow teachers and mentors to input exercises list and provide feedback/comments to students exercises solutions.
 2. Allow students to load their exercises solutions and get feedback to their work.
 
 ## Creating development environment
+
 ### Prerequisites
+
 1. Linux based system - either [WSL on windows](https://docs.microsoft.com/en-us/windows/wsl/install-win10) or full blown linux.
-2. [Python](https://www.python.org/downloads/release/python-385/) 
+2. [Python](https://www.python.org/downloads/release/python-385/)
 3. [Docker](https://docs.docker.com/docker-for-windows/install/) and docker-compose.
 
+
 ### Minimal setup
-This setup is for debug purposes and will use sqlite database and frontend only.
+
+This setup is for debug purposes and will use SQLite database and frontend only.
 
 Steps to do:
+
 1. Clone this repository.
 2. Set environment variables.
 3. Run the application.
@@ -48,7 +54,9 @@ After logging in, use [localhost admin](https://127.0.0.1:5000/admin) to modify 
 
 
 ### Full setup
+
 This setup will create the following items:
+
 * Application - LMS code.
 * Middleware (messaging queue) - RabbitMQ.
 * Persistence database - PostgreSQL.
@@ -70,7 +78,8 @@ cd devops
 ```
 
 In case you want to add the stub data to PostgreSQL DB, run:
-```
+
+```bash
 docker exec -it lms_http_1 bash
 python lmsdb/bootstrap.py
 ```
@@ -86,17 +95,23 @@ In case you want to enable the mail system:
 
 
 ## Code modification check list
-### Run flake8 
-```
+
+## Run flake8
+
+```bash
 # on lms root directory
 flake8 lms
 ```
+
 ### Run tests
-```
+
+```bash
 export PYTHONPATH=`pwd`
 pip install -r requirements.txt
 pip install -r dev_requirements.txt
 py.test -vvv
 ```
+
 ### Contributing
+
 View [contributing guidelines](https://github.com/PythonFreeCourse/lms/blob/master/CONTRIBUTING.md).

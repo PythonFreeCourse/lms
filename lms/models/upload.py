@@ -95,7 +95,7 @@ def new(
 def upload_solution(
         course_id: int,
         exercise_number: int,
-        files: List[File],
+        files: list[File],
         solution_hash: str,
         user_id: int,
 ):

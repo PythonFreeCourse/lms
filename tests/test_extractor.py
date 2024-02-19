@@ -27,7 +27,7 @@ class TestExtractor:
     ZIP_FILES = ('Upload_1.zip', 'zipfiletest.zip')
     ZIP_BOMB_FILE = 'zipbomb.zip'
 
-    def setup(self):
+    def setup_method(self):
         self.ipynb_file = self.ipynb_file()
         self.image_file = next(self.zip_files((self.IMAGE_NAME,)))
         self.image_no_exercise_file = next(self.zip_files(
@@ -66,7 +66,7 @@ class TestExtractor:
             self.zipbomb_file_list, (self.ZIP_BOMB_FILE,),
         ))
 
-    def teardown(self):
+    def teardown_method(self):
         self.ipynb_file.close()
         self.image_file.close()
         self.image_no_exercise_file.close()
