@@ -725,8 +725,8 @@ class Solution(BaseModel):
 
         # update old solutions for this exercise
         other_solutions: Iterable[Solution] = cls.select().where(
-            cls.exercise == exercise.id,
-            cls.solver == solver.id,
+            cls.exercise == exercise,
+            cls.solver == solver,
             cls.id != instance.id,
         )
         for old_solution in other_solutions:

@@ -35,6 +35,7 @@ http_basic_auth = HTTPBasicAuth()
 limiter = Limiter(
     app=webapp,
     key_func=get_remote_address,
+    default_limits=["60 per minute"],
     storage_uri='memory://',
 )
 

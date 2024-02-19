@@ -10,7 +10,7 @@ from lms.models import notifications
 INVALID_CODE = 'print "Hello Word" '
 INVALID_CODE_MESSAGE = 'כשהבודק שלנו ניסה להריץ את הקוד שלך, הוא ראה שלפייתון יש בעיה להבין אותו. כדאי לוודא שהקוד רץ כהלכה לפני שמגישים אותו.'  # noqa E501
 INVALID_CODE_KEY = 'E999'
-VALID_CODE = 'print(0)'
+VALID_CODE = 'x = 5 * 2'
 
 EXECUTE_CODE = ('import os\n'
                 'eval(\'os.system("touch {}")\')')
