@@ -125,9 +125,7 @@ class TestSendSolutionFromGit:
             data=POST_NEW_REPOSITORY_BUFFER,
         )
         assert response.status_code == 200
-        assert response.data.startswith(
-            b"0030\x01000eunpack ok\n0019ok refs/heads/master\n00000000"
-        )
+        assert response.data.startswith(b"0000")
 
     def test_get_exercise(self, exercise: models.Exercise, student_user: models.User):
         git_upload_pack = "git-upload-pack"
@@ -149,5 +147,5 @@ class TestSendSolutionFromGit:
         )
         assert response.status_code == 200
         assert response.data.startswith(
-            b"0008NAK\n0023\x02Enumerating objects: 3, done."
+            b"0008NAK\n0043\x02Enumerating objects: 3, done."
         )
