@@ -136,3 +136,4 @@ lms/lmsweb/config.py
 db.sqlite
 vim.session
 devops/rabbitmq.cookie
+our.db

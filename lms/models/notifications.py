@@ -1,5 +1,5 @@
 import enum
-from typing import Iterable, Optional
+from typing import Iterable, Optional, cast
 
 from lms.lmsdb.models import Notification, User
 
@@ -33,7 +33,10 @@ def read(user: Optional[User] = None, id_: Optional[int] = None) -> bool:
     return all(is_success)  # Not gen to prevent lazy evaluation
 
 
-def read_related(related_id: int, user: int):
+def read_related(related_id: int, user: int | User):
+    if isinstance(user, User):
+        user = cast(int, user.id)
+
     for n in Notification.of(related_id, user):
         n.read()
 

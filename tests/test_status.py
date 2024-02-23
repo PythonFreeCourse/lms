@@ -4,7 +4,7 @@ from tests import conftest
 
 class TestStatusPage:
     @classmethod
-    def setup(cls):
+    def setup_method(cls):
         cls.course1 = conftest.create_course(1)
         cls.course2 = conftest.create_course(2)
         cls.course_no_submissions = conftest.create_course(3)

@@ -1,6 +1,7 @@
 import logging
 import subprocess  # noqa: S404
 from typing import Iterable, List, Optional
+
 from flask_babel import gettext as _  # type: ignore
 import junitparser
 from junitparser.junitparser import TestCase

@@ -7,8 +7,8 @@ from lms.lmsdb.models import Exercise, Solution, User
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
 from lms.lmstests.public.linters import tasks as linters_tasks
 from lms.lmstests.public.unittests import tasks as unittests_tasks
-from lms.models.errors import AlreadyExists, UploadError
 from lms.lmsweb import config
+from lms.models.errors import AlreadyExists, UploadError
 from lms.utils.log import log
 
 
@@ -95,7 +95,7 @@ def new(
 def upload_solution(
         course_id: int,
         exercise_number: int,
-        files: List[File],
+        files: list[File],
         solution_hash: str,
         user_id: int,
 ):

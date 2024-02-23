@@ -10,7 +10,7 @@ from lms.models import notifications
 INVALID_CODE = 'print "Hello Word" '
 INVALID_CODE_MESSAGE = 'כשהבודק שלנו ניסה להריץ את הקוד שלך, הוא ראה שלפייתון יש בעיה להבין אותו. כדאי לוודא שהקוד רץ כהלכה לפני שמגישים אותו.'  # noqa E501
 INVALID_CODE_KEY = 'E999'
-VALID_CODE = 'print(0)'
+VALID_CODE = 'x = 5 * 2'
 
 EXECUTE_CODE = ('import os\n'
                 'eval(\'os.system("touch {}")\')')
@@ -20,13 +20,13 @@ class TestFlake8Linter:
     test_directory = None
 
     @classmethod
-    def setup_class(cls):
+    def setup_method(cls):
         cls.test_directory = tempfile.mkdtemp()
         cls.file_path = os.path.join(cls.test_directory, 'some-file')
         cls.execute_script = EXECUTE_CODE.format(cls.file_path)
 
     @classmethod
-    def teardown_class(cls):
+    def teardown_method(cls):
         if cls.test_directory is not None:
             shutil.rmtree(cls.test_directory)
 

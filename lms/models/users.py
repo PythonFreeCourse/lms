@@ -12,7 +12,12 @@ from lms.models.errors import (
 
 
 SERIALIZER = URLSafeTimedSerializer(config.SECRET_KEY)
-HASHED_PASSWORD = re.compile(r'^pbkdf2.+?\$(?P<salt>.+?)\$(?P<password>.+)')
+HASHED_PASSWORD = re.compile(
+    r"^(?:scrypt|pbkdf2)"
+    r".+?\$"
+    r"(?P<salt>.+?)\$"
+    r"(?P<password>.+)",
+)
 
 
 def retrieve_salt(user: User) -> str:
