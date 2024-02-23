@@ -2,7 +2,7 @@ from typing import Any, Callable, Optional
 
 import arrow  # type: ignore
 from flask import (
-    Response,
+    # Response,
     jsonify,
     make_response,
     render_template,
@@ -37,7 +37,13 @@ from lms.lmsdb.models import (
     UserCourse,
     database,
 )
-from lms.lmsweb import babel, http_basic_auth, limiter, routes, webapp
+from lms.lmsweb import (
+    babel,
+    # http_basic_auth,
+    limiter,
+    routes,
+    webapp,
+)
 from lms.lmsweb.admin import (
     AdminModelView,
     SPECIAL_MAPPING,
@@ -51,12 +57,12 @@ from lms.lmsweb.config import (
     LIMITS_PER_MINUTE,
     LOCALE,
     MAX_UPLOAD_SIZE,
-    REPOSITORY_FOLDER,
+    # REPOSITORY_FOLDER,
 )
 from lms.lmsweb.forms.change_password import ChangePasswordForm
 from lms.lmsweb.forms.register import RegisterForm
 from lms.lmsweb.forms.reset_password import RecoverPassForm, ResetPassForm
-from lms.lmsweb.git_service import GitService
+# from lms.lmsweb.git_service import GitService
 from lms.lmsweb.manifest import MANIFEST
 from lms.lmsweb.redirections import (
     PERMISSIVE_CORS,
