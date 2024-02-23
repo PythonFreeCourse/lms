@@ -16,7 +16,7 @@ HASHED_PASSWORD = re.compile(
     r"^(?:scrypt|pbkdf2)"
     r".+?\$"
     r"(?P<salt>.+?)\$"
-    r"(?P<password>.+)"
+    r"(?P<password>.+)",
 )
 
 

@@ -135,6 +135,7 @@ FLAKE_SKIP_ERRORS = (
     'S322',  # input is a dangerous method of Python 2 yada yada
     'T000',  # todo note found
     'T001',  # print found
+    'T201',  # print found (newer version of T001)
     'T002',  # Python 2.x reserved word print used
     'W291',  # whitespaces @ end of line
     'W292',  # no new line in the end of the code

@@ -63,5 +63,5 @@ def load_test_from_module(file_path: str):
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print('python load_tests.py test-module-path')  # noqa: T001
+        print('python load_tests.py test-module-path')  # noqa: T201
     load_tests_from_path(file_path=sys.argv[1])

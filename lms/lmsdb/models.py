@@ -1134,7 +1134,7 @@ def generate_string(
 
 
 def create_demo_users() -> None:
-    print('First run! Here are some users to get start with:')  # noqa: T001
+    print('First run! Here are some users to get start with:')  # noqa: T201
     fields = ['username', 'fullname', 'mail_address', 'role']
     student_role = Role.by_name('Student')
     admin_role = Role.by_name('Administrator')
@@ -1148,7 +1148,7 @@ def create_demo_users() -> None:
         password = User.random_password()
         api_key = User.random_password(stronger=True)
         User.create(**user, password=password, api_key=api_key)
-        print(f"User: {user['username']}, Password: {password}")  # noqa: T001
+        print(f"User: {user['username']}, Password: {password}")  # noqa: T201
 
 
 def create_basic_roles() -> None:

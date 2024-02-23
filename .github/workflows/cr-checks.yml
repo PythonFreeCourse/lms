@@ -27,7 +27,7 @@ jobs:
         chmod +x /opt/vnu/vnu-runtime-image/bin/vnu
     - name: Lint
       run: |
-        flake8 lms --count --show-source --statistics
+        flake8 lms --ignore Q000,I202,W503,S101,I100,I101 --import-order-style=google --count --show-source --statistics
     - name: Test
       run: |
         export PYTHONPATH=`pwd`

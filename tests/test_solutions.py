@@ -1,5 +1,3 @@
-from lms.models.errors import ResourceNotFound
-from lms.models.solutions import get_view_parameters
 from unittest import mock
 
 from flask import json
@@ -15,7 +13,11 @@ from lms.lmsweb import routes
 from lms.models import notifications, solutions
 from lms.models.errors import ResourceNotFound
 from lms.models.solutions import get_view_parameters
-from lms.utils.consts import COLORS, DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR, DEFAULT_ASSESSMENT_BUTTON_COLOR
+from lms.utils.consts import (
+    COLORS,
+    DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR,
+    DEFAULT_ASSESSMENT_BUTTON_COLOR,
+)
 from tests import conftest
 
 

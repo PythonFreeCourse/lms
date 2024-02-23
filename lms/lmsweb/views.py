@@ -172,7 +172,7 @@ def signup():
             url_for(
                 "login",
                 login_message=_("Can not register now"),
-            )
+            ),
         )
 
     form = RegisterForm()
@@ -187,14 +187,14 @@ def signup():
             User.role.name: Role.get_unverified_role(),
             User.password.name: form.password.data,
             User.api_key.name: User.random_password(),
-        }
+        },
     )
     send_confirmation_mail(user)
     return redirect(
         url_for(
             "login",
             login_message=_("Registration successfully"),
-        )
+        ),
     )
 
 
@@ -226,7 +226,7 @@ def confirm_email(user_id: int, token: str):
                         "sent to your email",
                     ),
                 ),
-            )
+            ),
         )
     except BadSignature:
         return fail(404, "The authentication code is invalid.")
@@ -245,7 +245,7 @@ def confirm_email(user_id: int, token: str):
                         "you can now login",
                     ),
                 ),
-            )
+            ),
         )
 
 
@@ -266,7 +266,7 @@ def change_password():
         url_for(
             "login",
             login_message=(_("Your password has successfully changed"),),
-        )
+        ),
     )
 
 
@@ -284,7 +284,7 @@ def reset_password():
         url_for(
             "login",
             login_message=_("Password reset link has successfully sent"),
-        )
+        ),
     )
 
 
@@ -310,7 +310,7 @@ def recover_password(user_id: int, token: str):
             url_for(
                 "login",
                 login_message=(_("Reset password link is expired"),),
-            )
+            ),
         )
     except BadSignature:
         return fail(404, "The authentication code is invalid.")
@@ -334,7 +334,7 @@ def recover_password_check(user: User, token: str):
         url_for(
             "login",
             login_message=(_("Your password has successfully changed"),),
-        )
+        ),
     )
 
 
@@ -465,7 +465,7 @@ def share():
             {
                 "success": "true",
                 "share_link": shared_solution.shared_url,
-            }
+            },
         )
     elif act == "delete":
         shared_solution.delete_instance()
@@ -473,7 +473,7 @@ def share():
             {
                 "success": "true",
                 "share_link": "false",
-            }
+            },
         )
 
     return fail(400, f'Unknown or unset act value "{act}".')
@@ -560,7 +560,7 @@ def comment():
                 "author_role": user.role.id,
                 "id": comment_.id,
                 "line_number": comment_.line_number,
-            }
+            },
         )
 
     return fail(400, f'Unknown or unset act value "{act}".')
@@ -664,7 +664,7 @@ def upload_page(course_id: int):
         {
             "exercise_matches": matches,
             "exercise_misses": misses,
-        }
+        },
     )
 
 
