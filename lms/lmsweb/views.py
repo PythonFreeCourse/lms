@@ -693,22 +693,22 @@ def download(download_id: str):
     return response
 
 
-@webapp.route(f"{routes.GIT}/info/refs")
-@webapp.route(f"{routes.GIT}/git-receive-pack", methods=["POST"])
-@webapp.route(f"{routes.GIT}/git-upload-pack", methods=["POST"])
-@http_basic_auth.login_required
-def git_handler(course_id: int, exercise_number: int) -> Response:
-    current_user = http_basic_auth.current_user()
-    assert current_user is not None
-
-    git_service = GitService(
-        user=current_user,
-        exercise_number=exercise_number,
-        course_id=course_id,
-        request=request,
-        base_repository_folder=REPOSITORY_FOLDER,
-    )
-    return git_service.handle_operation()
+# @webapp.route(f"{routes.GIT}/info/refs")
+# @webapp.route(f"{routes.GIT}/git-receive-pack", methods=["POST"])
+# @webapp.route(f"{routes.GIT}/git-upload-pack", methods=["POST"])
+# @http_basic_auth.login_required
+# def git_handler(course_id: int, exercise_number: int) -> Response:
+#     current_user = http_basic_auth.current_user()
+#     assert current_user is not None
+#
+#     git_service = GitService(
+#         user=current_user,
+#         exercise_number=exercise_number,
+#         course_id=course_id,
+#         request=request,
+#         base_repository_folder=str(REPOSITORY_FOLDER),
+#     )
+#     return git_service.handle_operation()
 
 
 @webapp.route(f"{routes.SOLUTIONS}/<int:solution_id>")

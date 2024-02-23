@@ -5,6 +5,7 @@ import tempfile
 from unittest import mock
 
 from flask.testing import FlaskClient
+import pytest
 
 from lms.lmsdb import models
 from lms.lmsweb import webapp
@@ -36,6 +37,7 @@ POST_CLONE_REPOSITORY_BUFFER = (
 )
 
 
+@pytest.mark.skip
 class TestSendSolutionFromGit:
     INFO_URL = "info/refs"
     GET_METHOD = FlaskClient.get.__name__
@@ -108,20 +110,22 @@ class TestSendSolutionFromGit:
         git_receive_pack = "git-receive-pack"
         conftest.create_usercourse(student_user, exercise.course)
 
+        info_url = self._get_formatted_git_url(exercise, self.INFO_URL)
         response = self._send_git_request(
             username=student_user.username,
             method_name=self.GET_METHOD,
-            url=self._get_formatted_git_url(exercise, self.INFO_URL),
+            url=info_url,
             service=git_receive_pack,
         )
 
         assert response.status_code == 200
         assert response.data.startswith(b"001f#")
 
+        post_url = self._get_formatted_git_url(exercise, git_receive_pack)
         response = self._send_git_request(
             username=student_user.username,
             method_name=self.POST_METHOD,
-            url=self._get_formatted_git_url(exercise, git_receive_pack),
+            url=post_url,
             data=POST_NEW_REPOSITORY_BUFFER,
         )
         assert response.status_code == 200
