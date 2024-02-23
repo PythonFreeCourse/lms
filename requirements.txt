@@ -30,7 +30,7 @@ flake8-tidy-imports==4.10.0
 flake8-todo==0.7
 Flask==3.0.2
 Flask-Admin==1.6.1
-Flask-Babel=4.0.0
+Flask-Babel==4.0.0
 Flask-HTTPAuth==4.8.0
 Flask-Limiter==3.5.1
 Flask-Login==0.6.3
