@@ -141,10 +141,14 @@ function focusTextArea(lineNumber) {
 
 function trackTextArea(lineNumber) {
   const target = `textarea[data-line='${lineNumber}']`;
+  const textareaElement = document.querySelector(target);
   const popoverElement = document.querySelector(`.grader-add[data-line='${lineNumber}']`);
-  document.querySelector(target).addEventListener('keydown', (ev) => {
-    if ((ev.which === 10 || ev.which === 13) && ev.ctrlKey) { // CTRL + ENTER
+
+  const keyDownFunction = function(ev) {
+    if ((ev.key === 'Enter' && ev.ctrlKey) || ((ev.which === 10 || ev.which === 13) && ev.ctrlKey)) {
       sendNewComment(window.fileId, lineNumber, ev.target.value);
+      ev.target.value = '';
+      textareaElement.removeEventListener('keydown', keyDownFunction);
     } else if (ev.key === 'Escape') {
       ev.preventDefault();
     } else {
@@ -153,7 +157,9 @@ function trackTextArea(lineNumber) {
 
     const popover = bootstrap.Popover.getInstance(popoverElement);
     if (popover !== null) {popover.hide();}
-  });
+  };
+
+  textareaElement.addEventListener('keydown', keyDownFunction, {});
 }
 
 function registerNewCommentPopover(element) {
