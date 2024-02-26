@@ -146,7 +146,6 @@ function addLineSpansToPre(items) {
   window.dispatchEvent(new Event('lines-numbered'));
 }
 
-<<<<<<< HEAD
 class LineComment extends HTMLElement {
   static observedAttributes = ['data-line', 'img-src', 'name', 'date'];
 
