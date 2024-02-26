@@ -27,7 +27,7 @@ function sendComment(kind, fileId, line, commentData) {
 
 function visuallyRemoveComment(commentId) {
   const commentElement = document.querySelector(`.grader-delete[data-commentid="${commentId}"]`).closest('.comment');
-  const lineElement = document.querySelector(`.line[data-line="${commentElement.dataset.line}"]`);
+  const lineElement = document.querySelector(`.line-container[data-line="${commentElement.dataset.line}"]`);
   const existingPopover = bootstrap.Popover.getInstance(lineElement);
   const hr = commentElement.nextElementSibling || commentElement.previousElementSibling;
   if (hr === null) {
@@ -82,12 +82,12 @@ function sendExistsComment(...commentData) {
 function trackDragAreas(lineItems, addCommentItems) {
   function findElementsToMark(e) {
     const span = (e.target.nodeType === 3) ? e.target.parentNode : e.target;
-    let lineTarget = span.closest('.line');
+    let lineTarget = span.closest('.line-container');
     let addCommentTarget = span.closest('.grader-add');
     const codeView = document.querySelector('#code-view');
     if (lineTarget === null || addCommentTarget !== null) {
       const commentLine = addCommentTarget.dataset.line;
-      lineTarget = codeView.querySelector(`.line[data-line="${commentLine}"]`);
+      lineTarget = codeView.querySelector(`.line-container[data-line="${commentLine}"]`);
     } else {
       const commentLine = lineTarget.dataset.line;
       addCommentTarget = codeView.querySelector(`.grader-add[data-line="${commentLine}"]`);
