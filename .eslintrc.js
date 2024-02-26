@@ -1,19 +1,21 @@
 module.exports = {
-  env: {
-    browser: true,
-    es2021: true,
+  "env": {
+    "browser": true,
+    "node": true
   },
-  globals: {
-    bootstrap: true,
-    Dropzone: true,
-    workbox: true,
-  },
-  extends: [
-    'airbnb-base',
+  "ignorePatterns": [
+    "/lms/static/prism.js",
+    "/lms/static/markdown.js",
   ],
-  parserOptions: {
-    ecmaVersion: 12,
-    sourceType: 'module',
+  "globals": {
+    "bootstrap": true,
+    "Dropzone": true,
+    "workbox": true,
+  },
+  "extends": "eslint:recommended",
+  "parserOptions": {
+      "ecmaVersion": "latest",
+      "sourceType": "module"
   },
   rules: {
     'no-param-reassign': [2, { props: false }],
