@@ -470,6 +470,7 @@ button#share-action:hover {
   flex-flow: column wrap;
   flex-basis: 70vw;
   flex-grow: 4;
+  border: 1px solid #e1e4e8;
 }
 
 #code-view {
@@ -494,6 +495,13 @@ button#share-action:hover {
   display: inline-block;
   width: 100%;
   padding-inline-start: 0.5em;
+}
+
+.line-comment {
+  display: flex;
+  background: white;
+  border-block: 1px solid #e1e4e8;
+  margin-block-end: 1rem;
 }
 
 #code-toolbar {
@@ -724,6 +732,11 @@ code > code:last-of-type{
   display: inherit;
 }
 */
+pre[class*="language-"] {
+  /* Override prism.js */
+  padding: 0 !important;
+  margin: 0 !important;
+}
 
 code#user-code {
   display: flex;

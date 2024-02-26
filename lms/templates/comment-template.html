@@ -1,0 +1,64 @@
+<template id="comment-template">
+  <style>
+    :host {
+      display: flex;
+      margin-bottom: 1rem;
+      font-family: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+      font-size: 0.9rem;
+    }
+    .comment-container {
+      background: white;
+      border: 1px solid #e1e4e8;
+      display: flex;
+      flex-direction: column;
+      width: 100%
+    }
+    .comment-header {
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      margin-block: 0.75rem;
+      margin-inline: 1rem;
+    }
+    .commenter-info {
+      display: flex;
+      align-items: center;
+    }
+    img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-inline-end: 1rem;
+    }
+    .comment-date {
+      display: flex;
+      font-size: 0.8rem;
+      color: #666;
+      align-items: center;
+      margin-inline-start: 1em;
+    }
+    .comment-body {
+      display: flex;
+    }
+    .comment-text {
+      display: block;
+      width: 100%;
+      margin-inline: 1rem;
+      text-wrap: wrap;
+      margin-block-start: 0;
+    }
+
+  </style>
+  <article class="comment-container">
+    <header class="comment-header">
+      <div class="commenter-info">
+        <img class="commenter-image" src="" alt="Profile Picture" onerror="this.src='/static/avatar.jpg';">
+        <strong class="commenter-name"></strong>
+      </div>
+      <time class="comment-date" aria-label="Comment Date" datetime=""></time>
+    </header>
+    <section class="comment-body">
+      <p class="comment-text"><slot></slot></p>
+    </section>
+  </article>
+</template>

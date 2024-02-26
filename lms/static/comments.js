@@ -141,6 +141,45 @@ function addLineSpansToPre(items) {
   window.dispatchEvent(new Event('lines-numbered'));
 }
 
+class LineComment extends HTMLElement {
+  static observedAttributes = ['data-line', 'img-src', 'name', 'date'];
+
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+    const template = document.getElementById('comment-template').content.cloneNode(true);
+    this.shadowRoot.appendChild(template);
+    this.updateComponent();
+  }
+
+  attributeChangedCallback(_, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      this.updateComponent();
+    }
+  }
+
+  updateComponent() {
+    const img = this.shadowRoot.querySelector('.commenter-image');
+    const name = this.shadowRoot.querySelector('.commenter-name');
+    const dateElement = this.shadowRoot.querySelector('.comment-date');
+
+    img.src = this.getAttribute('img-src') || '/static/avatar.jpg';
+    img.alt = `${this.getAttribute('name')}'s profile picture`;
+    name.textContent = this.getAttribute('name');
+
+    const dateString = this.getAttribute('date');
+    dateElement.textContent = this.formatDate(dateString);
+    dateElement.setAttribute('datetime', this.formatDate(dateString));
+  }
+
+  formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+}
+
+
 window.markLine = markLine;
 window.hoverLine = hoverLine;
 window.addCommentToLine = addCommentToLine;
@@ -153,6 +192,7 @@ window.addEventListener('load', () => {
   sessionStorage.setItem('role', codeElementData.role);
   sessionStorage.setItem('solver', codeElementData.solver);
   sessionStorage.setItem('allowedComment', codeElementData.allowedComment);
+  customElements.define('line-comment', LineComment);
   addLineSpansToPre(document.getElementsByTagName('code'));
   pullComments(window.fileId, treatComments);
 });

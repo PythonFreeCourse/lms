@@ -1,22 +1,11 @@
 module.exports = {
-  env: {
-    browser: true,
-    es2021: true,
+  "env": {
+      "browser": true,
+      "es2021": true
   },
-  globals: {
-    bootstrap: true,
-    Dropzone: true,
-    workbox: true,
+  "extends": "eslint:recommended",
+  "parserOptions": {
+      "ecmaVersion": "latest",
+      "sourceType": "module"
   },
-  extends: [
-    'airbnb-base',
-  ],
-  parserOptions: {
-    ecmaVersion: 12,
-    sourceType: 'module',
-  },
-  rules: {
-    'no-param-reassign': [2, { props: false }],
-    'no-console': 'off',
-  },
-};
+}
