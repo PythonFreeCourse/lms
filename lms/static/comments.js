@@ -30,7 +30,8 @@ function isSolverComment(commentData) {
 }
 
 function formatCommentData(commentData) {
-  let changedCommentText = `<span class="comment-author">${commentData.author_name}:</span> ${commentData.text}`;
+  const commentText = DOMPurify.sanitize(marked.parse(commentData.text));
+  let changedCommentText = `<span class="comment-author">${commentData.author_name}:</span> ${commentText}`;
   if (window.isUserGrader() || isSolverComment(commentData)) {
     const deleteButton = `<i class="fa fa-trash grader-delete" aria-hidden="true" data-commentid="${commentData.id}" onclick="deleteComment(${window.fileId}, ${commentData.id});"></i>`;
     changedCommentText = `${deleteButton} ${changedCommentText}`;
@@ -55,10 +56,14 @@ function addCommentToLine(line, commentData) {
       boundary: 'viewport',
       placement: 'auto',
     });
+
+    commentElement.addEventListener('shown.bs.popover', function () {
+      Prism.highlightAllUnder(existingPopover.tip);
+    })
   }
 
   commentElement.dataset.comment = 'true';
-  if (commentData.is_auto) {
+  if ((commentData.is_auto) && (commentElement.dataset.marked !== 'true')) {
     markLine(commentElement, FLAKE_COMMENTED_LINE_COLOR);
   } else {
     const lineColor = window.getLineColorByRole(commentData.author_role);
@@ -141,6 +146,7 @@ function addLineSpansToPre(items) {
   window.dispatchEvent(new Event('lines-numbered'));
 }
 
+<<<<<<< HEAD
 class LineComment extends HTMLElement {
   static observedAttributes = ['data-line', 'img-src', 'name', 'date'];
 
@@ -179,6 +185,16 @@ class LineComment extends HTMLElement {
   }
 }
 
+function configureMarkdownParser() {
+  marked.use({
+    renderer: {
+      code: (code, infoString, _) => {
+        const language = infoString || 'plaintext';
+        return `<pre><code class="language-${language}">${code}</code></pre>`;
+      }
+    },
+  });
+}
 
 window.markLine = markLine;
 window.hoverLine = hoverLine;
@@ -193,6 +209,7 @@ window.addEventListener('load', () => {
   sessionStorage.setItem('solver', codeElementData.solver);
   sessionStorage.setItem('allowedComment', codeElementData.allowedComment);
   customElements.define('line-comment', LineComment);
+  configureMarkdownParser();
   addLineSpansToPre(document.getElementsByTagName('code'));
   pullComments(window.fileId, treatComments);
 });
