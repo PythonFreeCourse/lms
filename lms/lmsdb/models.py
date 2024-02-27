@@ -193,8 +193,8 @@ class User(UserMixin, BaseModel):
     @classmethod
     def get_system_user(cls) -> 'User':
         instance, _ = cls.get_or_create(**{
-            cls.mail_address.name: 'linter-checks@python.guru',
-            User.username.name: 'linter-checks@python.guru',
+            cls.mail_address.name: 'linter-checks@pythonic.guru',
+            User.username.name: 'linter-checks@pythonic.guru',
         }, defaults={
             User.fullname.name: 'Checker guru',
             User.role.name: Role.get_staff_role(),
