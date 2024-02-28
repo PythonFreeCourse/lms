@@ -52,7 +52,7 @@ def _create_comment(
     )
 
 
-def delete(comment_id: int):
+def delete(*, comment_id: int, request_user_id: int, is_manager: bool = False):
     if not isinstance(comment_id, int):
         raise NotValidRequest('Invalid comment id.', 400)
 
@@ -60,10 +60,7 @@ def delete(comment_id: int):
     if comment_ is None:
         raise ResourceNotFound('No such comment.', 404)
 
-    if (
-        comment_.commenter.id != current_user.id
-        and not current_user.role.is_manager
-    ):
+    if comment_.commenter.id != request_user_id and not is_manager:
         raise ForbiddenPermission(
             "You aren't allowed to access this page.", 403,
         )

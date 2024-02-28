@@ -557,7 +557,12 @@ def comment():
         if not comment_id:
             return fail(400, "No comment id was given.")
 
-        delete_comment = partial(comments.delete, comment_id=int(comment_id))
+        delete_comment = partial(
+            comments.delete,
+            comment_id=int(comment_id),
+            request_user_id=current_user.id,
+            is_manager=current_user.role.is_manager,
+        )
         return try_or_fail(delete_comment)
 
     if act == "create":
@@ -835,13 +840,8 @@ def common_comments(exercise_id=None):
 @webapp.route("/user/<int:user_id>/avatar")
 @login_required
 def get_avatar(user_id: int):
-    user = User.get_or_none(User.id == user_id)
-    if user is None:
-        return fail(404, "There is no such user.")
-
     # In the meanwhile, support gravatar only.
-    gravatar = users.get_gravatar(user)
-    return gravatar
+    return users.get_gravatar(user_id)
 
 
 @webapp.template_filter("date_humanize")
