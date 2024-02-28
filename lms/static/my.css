@@ -497,11 +497,23 @@ button#share-action:hover {
   padding-inline-start: 0.5em;
 }
 
+.comments-container {
+  display: flex;
+  width: 100%;
+  padding: 0.4em 0;
+  flex-direction: column;
+}
+
+.comments-container code {
+  border: 1px solid #e1e4e8;
+  border-radius: 5px;
+  padding: 0.25rem;
+}
+
 .line-comment {
   display: flex;
   background: white;
   border-block: 1px solid #e1e4e8;
-  margin-block-end: 1rem;
 }
 
 #code-toolbar {
@@ -693,6 +705,12 @@ ol.comments > li {
 
 ol.comments > li:active {
   cursor: grabbing;
+}
+
+.comment-text {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.625rem;
 }
 
 .comment-author {

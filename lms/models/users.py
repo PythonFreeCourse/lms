@@ -1,3 +1,4 @@
+import hashlib
 import re
 
 from flask_babel import gettext as _  # type: ignore
@@ -57,3 +58,12 @@ def join_public_course(course: Course, user: User) -> None:
                 course_name=course.name,
             ), 409,
         )
+
+
+def get_gravatar(user: User) -> str:
+    if not isinstance(user, User):
+        raise ValueError('User is None')
+
+    user_email = str(user.mail_address).strip().lower()
+    gravatar_hash = hashlib.sha256(user_email.encode('utf-8')).hexdigest()
+    return f'https://www.gravatar.com/avatar/{gravatar_hash}?d=404'

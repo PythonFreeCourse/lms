@@ -1,64 +1,146 @@
 <template id="comment-template">
   <style>
     :host {
-      display: flex;
-      margin-bottom: 1rem;
       font-family: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
-      font-size: 0.9rem;
+      display: flex;
+      width: 100%;
+    }
+    ::slotted(*) {
+      overflow-wrap: break-word;
+      word-break: break-word;
+      text-wrap: wrap;
     }
     .comment-container {
-      background: white;
-      border: 1px solid #e1e4e8;
       display: flex;
       flex-direction: column;
-      width: 100%
+      width: 100%;
+      background: white;
+      border: 1px solid #e1e4e8;
+      padding: 1rem;
+      margin-bottom: 0rem;
+    }
+    article {
+      margin-bottom: 0;
+      display: flex;
+      flex-shrink: 1;
+      min-width: 0;
     }
     .comment-header {
-      margin-top: 1rem;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      margin-block: 0.75rem;
-      margin-inline: 1rem;
+      flex-direction: row;
     }
     .commenter-info {
       display: flex;
       align-items: center;
+      flex-direction: row;
+      justify-content: flex-start;
+    }
+    .name-and-date {
+      display: flex;
+      flex-direction: column;
+    }
+    .comment-body {
+      display: flex;
+      width: 100%;
+      padding: 0.2em 0;
+      margin: 0;
+    }
+    .comment-content {
+      display: flex;
+      margin-top: 1rem;
+      padding: 0.5rem 0;
+      width: 100%;
+      flex-direction: column;
+    }
+    .comment-content > * + * {
+      /* Add space between paragraphs */
+      margin-top: 1rem;
     }
     img {
-      width: 40px;
-      height: 40px;
+      width: 3em;
+      height: 3em;
       border-radius: 50%;
       margin-inline-end: 1rem;
     }
     .comment-date {
-      display: flex;
-      font-size: 0.8rem;
       color: #666;
-      align-items: center;
-      margin-inline-start: 1em;
+      font-size: 0.8rem;
     }
-    .comment-body {
+    .edit-delete-btns {
       display: flex;
+      align-items: center;
+      justify-content: flex-end;
     }
-    .comment-text {
-      display: block;
-      width: 100%;
-      margin-inline: 1rem;
-      text-wrap: wrap;
-      margin-block-start: 0;
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      padding: 0.5rem;
+      margin-inline-start: 0.5rem;
+      cursor: pointer;
+      background-color: #f5f5f5;
+      border: 1px solid #dcdcdc;
+      border-radius: 3px;
+      transition: background-color 0.3s, box-shadow 0.3s;
     }
-
+    .btn:hover, .btn:focus {
+      background-color: #e2e2e2;
+      box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.2);
+    }
+    .btn svg {
+      fill: currentColor;
+    }
+    @media screen and (max-width: 768px) {
+      .comment-container {
+        padding: 0.5rem;
+      }
+      .comment-content {
+        font-size: 0.9rem;
+      }
+      .btn {
+        font-size: calc(var(--btn-font-size) - 2px);
+      }
+      .comment-date {
+        font-size: 0.7rem;
+      }
+    }
+    @media screen and (max-width: 640px) {
+      .edit-delete-btns {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.5rem;
+      }
+      .btn {
+        padding: 0.2rem;
+      }
+      img {
+        display: none;
+      }
+    }
   </style>
   <article class="comment-container">
     <header class="comment-header">
       <div class="commenter-info">
         <img class="commenter-image" src="" alt="Profile Picture" onerror="this.src='/static/avatar.jpg';">
-        <strong class="commenter-name"></strong>
+        <div class="name-and-date">
+          <strong class="commenter-name"></strong>
+          <time class="comment-date" aria-label="Comment Date" datetime=""></time>
+        </div>
       </div>
-      <time class="comment-date" aria-label="Comment Date" datetime=""></time>
+      <div class="edit-delete-btns">
+        <button type="button" class="btn edit-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
+        </button>
+        <button type="button" class="btn delete-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
+        </button>
+      </div>
     </header>
     <section class="comment-body">
-      <p class="comment-text"><slot></slot></p>
+      <slot class="comment-content"></slot>
     </section>
   </article>
 </template>

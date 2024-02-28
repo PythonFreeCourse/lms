@@ -26,30 +26,7 @@ function sendComment(kind, fileId, line, commentData) {
 }
 
 function visuallyRemoveComment(commentId) {
-  const commentElement = document.querySelector(`.grader-delete[data-commentid="${commentId}"]`).closest('.comment');
-  const lineElement = document.querySelector(`.line-container[data-line="${commentElement.dataset.line}"]`);
-  const existingPopover = bootstrap.Popover.getInstance(lineElement);
-  const hr = commentElement.nextElementSibling || commentElement.previousElementSibling;
-  if (hr === null) {
-    lineElement.dataset.marked = false;
-    window.markLine(lineElement, 'none');
-    const popover = bootstrap.Popover.getInstance(lineElement);
-    if (popover !== null) {
-      popover.dispose();
-    }
-  } else {
-    let removeContent = `<hr>${commentElement.outerHTML}`;
-    if (!existingPopover._config.content.includes(removeContent)) {
-      removeContent = `${commentElement.outerHTML} <hr>`;
-    }
-    existingPopover._config.content = existingPopover._config.content.replace(removeContent, '');
-    const commentParent = commentElement.parentNode;
-    hr.parentNode.removeChild(hr);
-    commentParent.removeChild(commentElement);
-    const lastAuthorRole = commentParent.lastChild.previousElementSibling.dataset.authorRole;
-    const newLineColor = window.getLineColorByRole(lastAuthorRole);
-    window.markLine(lineElement, newLineColor, true);
-  }
+  document.querySelector(`comment-line[data-comment-id='${commentId}']`).remove();
 }
 
 function deleteComment(fileId, commentId) {

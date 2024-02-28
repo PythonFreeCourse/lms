@@ -193,8 +193,8 @@ class User(UserMixin, BaseModel):
     @classmethod
     def get_system_user(cls) -> 'User':
         instance, _ = cls.get_or_create(**{
-            cls.mail_address.name: 'linter-checks@python.guru',
-            User.username.name: 'linter-checks@python.guru',
+            cls.mail_address.name: 'linter-checks@pythonic.guru',
+            User.username.name: 'linter-checks@pythonic.guru',
         }, defaults={
             User.fullname.name: 'Checker guru',
             User.role.name: Role.get_staff_role(),
@@ -1096,9 +1096,13 @@ class Comment(BaseModel):
     @classmethod
     def _by_file(cls, file_id: int):
         fields = (
-            cls.id, cls.line_number, cls.is_auto,
-            CommentText.id.alias('comment_id'), CommentText.text,
+            cls.id,
+            cls.line_number,
+            cls.is_auto,
+            cls.timestamp,
+            CommentText.text,
             SolutionFile.id.alias('file_id'),
+            User.id.alias('author_id'),
             User.fullname.alias('author_name'),
             User.role.alias('author_role'),
         )

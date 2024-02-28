@@ -52,9 +52,14 @@ def _create_comment(
     )
 
 
-def delete():
-    comment_id = int(request.args.get('commentId'))
+def delete(comment_id: int):
+    if not isinstance(comment_id, int):
+        raise NotValidRequest('Invalid comment id.', 400)
+
     comment_ = Comment.get_or_none(Comment.id == comment_id)
+    if comment_ is None:
+        raise ResourceNotFound('No such comment.', 404)
+
     if (
         comment_.commenter.id != current_user.id
         and not current_user.role.is_manager
