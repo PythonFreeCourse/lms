@@ -3,7 +3,7 @@ import hashlib
 import re
 from typing import cast
 
-from flask_babel import gettext as _, to_user_timezone  # type: ignore
+from flask_babel import gettext as _
 from itsdangerous import URLSafeTimedSerializer
 
 from lms.lmsdb.models import Course, User, UserCourse

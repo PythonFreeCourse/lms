@@ -1,7 +1,6 @@
 from typing import Optional
 
 from flask import request
-from flask_login import current_user  # type: ignore
 from peewee import fn  # type: ignore
 
 from lms.lmsdb.models import (
