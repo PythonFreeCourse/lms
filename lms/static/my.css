@@ -713,6 +713,10 @@ ol.comments > li:active {
     gap: 0.625rem;
 }
 
+.comment-text p {
+  margin: 0;
+}
+
 .comment-author {
   color: #50514f;
 }

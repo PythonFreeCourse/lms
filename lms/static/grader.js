@@ -26,7 +26,12 @@ function sendComment(kind, fileId, line, commentData) {
 }
 
 function visuallyRemoveComment(commentId) {
-  document.querySelector(`comment-line[data-comment-id='${commentId}']`).remove();
+  const commentElement = document.querySelector(`comment-line[data-comment-id='${commentId}']`);
+  const commentsContainer = commentElement.parentElement;
+  commentElement.remove();
+  if (commentsContainer.children.length === 0) {
+    commentsContainer.remove();
+  }
 }
 
 function deleteComment(fileId, commentId) {

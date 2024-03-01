@@ -30,16 +30,19 @@
       justify-content: space-between;
       align-items: center;
       flex-direction: row;
+      padding-block-end: 0.5rem;
     }
     .commenter-info {
       display: flex;
       align-items: center;
       flex-direction: row;
-      justify-content: flex-start;
+      justify-content: center;
     }
     .name-and-date {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
+      align-items: center;
+      gap: 1rem;
     }
     .comment-body {
       display: flex;
@@ -47,39 +50,32 @@
       padding: 0.2em 0;
       margin: 0;
     }
-    .comment-content {
-      display: flex;
-      margin-top: 1rem;
-      padding: 0.5rem 0;
-      width: 100%;
-      flex-direction: column;
-    }
-    .comment-content > * + * {
-      /* Add space between paragraphs */
-      margin-top: 1rem;
-    }
-    img {
-      width: 3em;
-      height: 3em;
+    img.commenter-image {
+      width: 1.5rem;
+      height: 1.5rem;
       border-radius: 50%;
       margin-inline-end: 1rem;
     }
     .comment-date {
+      display: flex;
       color: #666;
       font-size: 0.8rem;
+      padding-block-start: 0.1rem;
+      justify-self: center;
+      align-self: center;
     }
     .edit-delete-btns {
       display: flex;
       align-items: center;
       justify-content: flex-end;
+      gap: 0.75rem;
     }
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       font-size: 0.9rem;
-      padding: 0.5rem;
-      margin-inline-start: 0.5rem;
+      padding: 0.3rem;
       cursor: pointer;
       background-color: #f5f5f5;
       border: 1px solid #dcdcdc;
@@ -92,13 +88,17 @@
     }
     .btn svg {
       fill: currentColor;
+      width: 1rem;
+      height: 1rem;
+    }
+    .left-header {
+      display: flex;
+      align-items: flex-end;
+      gap: 1rem;
     }
     @media screen and (max-width: 768px) {
       .comment-container {
         padding: 0.5rem;
-      }
-      .comment-content {
-        font-size: 0.9rem;
       }
       .btn {
         font-size: calc(var(--btn-font-size) - 2px);
@@ -116,7 +116,7 @@
       .btn {
         padding: 0.2rem;
       }
-      img {
+      .commenter-image {
         display: none;
       }
     }
@@ -125,18 +125,20 @@
     <header class="comment-header">
       <div class="commenter-info">
         <img class="commenter-image" src="" alt="Profile Picture" onerror="this.src='/static/avatar.jpg';">
-        <div class="name-and-date">
-          <strong class="commenter-name"></strong>
-          <time class="comment-date" aria-label="Comment Date" datetime=""></time>
-        </div>
+        <strong class="commenter-name"></strong>
       </div>
-      <div class="edit-delete-btns">
-        <button type="button" class="btn edit-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
-        </button>
-        <button type="button" class="btn delete-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
-        </button>
+      <div class="left-header">
+        <div class="comment-date">
+          <time class="comment-date-text" aria-label="Comment Date" datetime=""></time>
+        </div>
+        <div class="edit-delete-btns">
+          <button type="button" class="btn edit-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
+          </button>
+          <button type="button" class="btn delete-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
+          </button>
+        </div>
       </div>
     </header>
     <section class="comment-body">

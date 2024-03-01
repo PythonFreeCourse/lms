@@ -2,7 +2,7 @@ import pytest
 
 from lms.lmsdb.models import Comment, Solution, User
 from lms.models import comments
-from lms.models.errors import ForbiddenPermission
+from lms.models.errors import ForbiddenPermission, NotValidRequest
 from tests.conftest import create_student_user
 
 
@@ -27,6 +27,14 @@ class TestComments:
         )
         assert Comment.get_or_none(comment.id) is None
         assert Comment.get_or_none(second_comment.id)
+
+    @staticmethod
+    def test_comment_delete_invalid_comment_id():
+        with pytest.raises(NotValidRequest):
+            comments.delete(
+                comment_id="Shawarma",  # type: ignore
+                request_user_id=1,
+            )
 
     @staticmethod
     def test_comment_delete_by_unexisting_user(comment: Comment):

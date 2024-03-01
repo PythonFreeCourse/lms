@@ -207,7 +207,7 @@ class LineComment extends HTMLElement {
   updateComponent() {
     const img = this.shadowRoot.querySelector('.commenter-image');
     const name = this.shadowRoot.querySelector('.commenter-name');
-    const dateElement = this.shadowRoot.querySelector('.comment-date');
+    const dateElement = this.shadowRoot.querySelector('.comment-date-text');
     const editDeleteBtns = this.shadowRoot.querySelector('.edit-delete-btns');
 
     img.src = this.getAttribute('avatar') || '/static/avatar.jpg';
