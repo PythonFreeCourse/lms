@@ -133,4 +133,3 @@ volumes:
 networks:
   lms:
     external: true
-    name: lms
