@@ -1,3 +1,4 @@
+from functools import partial
 from typing import Any, Callable, Optional
 
 import arrow  # type: ignore
@@ -522,9 +523,11 @@ def note(user_id: int):
 @webapp.route("/comments", methods=["GET", "POST"])
 @login_required
 def comment():
-    act = request.args.get("act") or request.json.get("act")
+    act = request.args.get("act")
+    if act is None and request.json and request.json.get("act"):
+        act = request.json.get("act")
 
-    if request.method == "POST":
+    if request.method == "POST" and request.json:
         file_id = int(request.json.get("fileId", 0))
     else:  # it's a GET
         file_id = int(request.args.get("fileId", 0))
@@ -538,7 +541,10 @@ def comment():
         return fail(403, "You aren't allowed to access this page.")
 
     if act == "fetch":
-        return jsonify(Comment.by_file(file_id))
+        fetched_comments = Comment.by_file(file_id)
+        for c in fetched_comments:
+            c['avatar'] = get_avatar(c['author_id'])
+        return jsonify(fetched_comments)
 
     if (
         not webapp.config.get("USERS_COMMENTS", False)
@@ -547,7 +553,17 @@ def comment():
         return fail(403, "You aren't allowed to access this page.")
 
     if act == "delete":
-        return try_or_fail(comments.delete)
+        comment_id = request.args.get('commentId')
+        if not comment_id:
+            return fail(400, "No comment id was given.")
+
+        delete_comment = partial(
+            comments.delete,
+            comment_id=int(comment_id),
+            request_user_id=current_user.id,
+            is_manager=current_user.role.is_manager,
+        )
+        return try_or_fail(delete_comment)
 
     if act == "create":
         user = User.get_or_none(User.id == current_user.id)
@@ -560,12 +576,16 @@ def comment():
         return jsonify(
             {
                 "success": "true",
+                "id": comment_.id,
+                "file_id": comment_.file.id,
+                "line_number": comment_.line_number,
                 "text": comment_.comment.text,
-                "is_auto": False,
+                "author_id": user.id,
                 "author_name": user.fullname,
                 "author_role": user.role.id,
-                "id": comment_.id,
-                "line_number": comment_.line_number,
+                "avatar": get_avatar(user.id),
+                "timestamp": comment_.timestamp,
+                "is_auto": False,
             },
         )
 
@@ -819,6 +839,13 @@ def start_checking(exercise_id):
 @managers_only
 def common_comments(exercise_id=None):
     return jsonify(comments._common_comments(exercise_id=exercise_id))
+
+
+@webapp.route("/user/<int:user_id>/avatar")
+@login_required
+def get_avatar(user_id: int):
+    # In the meanwhile, support gravatar only.
+    return users.get_gravatar(user_id)
 
 
 @webapp.template_filter("date_humanize")

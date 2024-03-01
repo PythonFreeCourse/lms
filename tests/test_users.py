@@ -1,11 +1,14 @@
 import time
 from unittest.mock import Mock, patch
+from urllib.parse import urlparse
 
 from flask.testing import FlaskClient
+import pytest
 
 from lms.lmsdb.models import Course, User
 from lms.lmsweb.config import CONFIRMATION_TIME, MAX_INVALID_PASSWORD_TRIES
-from lms.models.users import generate_user_token
+from lms.models.errors import NotValidRequest, ResourceNotFound
+from lms.models.users import _to_user_object, generate_user_token, get_gravatar
 from tests import conftest
 
 
@@ -176,6 +179,46 @@ class TestUser:
             conftest.login_client_user(client, user.username, 'fake pass')
             fail_login_response = client.get('/exercises')
             assert fail_login_response.status_code == 200
+
+    @staticmethod
+    def test_to_user_object(student_user: User):
+        with pytest.raises(NotValidRequest):
+            _to_user_object('Shmulik')  # type: ignore
+        with pytest.raises(ResourceNotFound):
+            _to_user_object(500)
+        assert _to_user_object(student_user.id) == student_user
+        assert _to_user_object(student_user) == student_user
+
+    @staticmethod
+    def test_avatar_gravatar_bad_entity():
+        with pytest.raises(NotValidRequest):
+            assert get_gravatar('Shmulik')
+
+    @staticmethod
+    def test_avatar_gravatar(student_user: User):
+        def get_hash(url: str):
+            parsed_url = urlparse(url)
+            hash_ = parsed_url.path.split('/')[-1]
+            return hash_
+
+        student_user.mail_address = 'linter-checks@pythonic.guru'
+
+        wanted_response = (
+            'https://www.gravatar.com/avatar/'
+            '872341a5e93f23af67cfaa441cbffb431a4fe6a8923fcf13864deb2f5119deae'
+            '?d=404'
+        )
+        response = get_gravatar(student_user)
+        assert get_hash(response) == get_hash(wanted_response)
+
+    @staticmethod
+    def test_avatar_using_gravatar(student_user: User):
+        client = conftest.get_logged_user(str(student_user.username))
+        student_user.mail_address = 'linter-checks@pythonic.guru'
+        student_user.save()
+        response = client.get(f'/user/{student_user.id}/avatar')
+        assert 200 <= response.status_code < 400
+        assert response.text.startswith("https://www.gravatar.com/")
 
     @staticmethod
     def test_user_registered_to_course(student_user: User, course: Course):

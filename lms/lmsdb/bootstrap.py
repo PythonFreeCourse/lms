@@ -322,6 +322,22 @@ def _assessment_migration() -> bool:
     return True
 
 
+def _linter_email_migration():
+    old_mail_address = 'lms-checks@python.guru'
+    new_mail_address = 'lms-checks@pythonic.guru'
+
+    find_user = models.User.select().where
+    mail_field = models.User.mail_address
+
+    if find_user(mail_field == old_mail_address).exists():
+        user = find_user(mail_field == old_mail_address).get()
+        user.mail_address = new_mail_address
+        user.save()
+        log.info(f'Changed {old_mail_address} to {new_mail_address} in User')
+    else:
+        log.info(f'{new_mail_address} already exists in User')
+
+
 def is_tables_exists(tables: Union[Model, Iterable[Model]]) -> bool:
     if not isinstance(tables, (tuple, list)):
         tables = (tables,)
@@ -351,6 +367,7 @@ def main():
         _uuid_migration()
 
         _add_user_course_constaint()
+        _linter_email_migration()
 
         models.create_basic_roles()
         if models.User.select().count() == 0:

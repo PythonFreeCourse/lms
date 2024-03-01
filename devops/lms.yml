@@ -132,5 +132,5 @@ volumes:
 
 networks:
   lms:
-    external:
-      name: lms
+    external: true
+    name: lms

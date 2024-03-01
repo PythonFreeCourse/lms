@@ -29,49 +29,64 @@ function isSolverComment(commentData) {
   return (authorIsSolver && allowedComment);
 }
 
-function formatCommentData(commentData) {
-  const commentText = DOMPurify.sanitize(marked.parse(commentData.text));
-  let changedCommentText = `<span class="comment-author">${commentData.author_name}:</span> ${commentText}`;
-  if (window.isUserGrader() || isSolverComment(commentData)) {
-    const deleteButton = `<i class="fa fa-trash grader-delete" aria-hidden="true" data-commentid="${commentData.id}" onclick="deleteComment(${window.fileId}, ${commentData.id});"></i>`;
-    changedCommentText = `${deleteButton} ${changedCommentText}`;
+function createCommentLine(commentData) {
+  const commentLineElement = document.createElement('comment-line');
+  const commentContent = DOMPurify.sanitize(marked.parse(commentData.text));
+
+  commentAttributes = {
+    'data-comment-id': commentData.id,
+    'data-file-id': commentData.file_id,
+    'data-line': commentData.line_number,
+    'data-author-role': commentData.author_role,
+    'avatar': commentData.avatar,
+    'name': commentData.author_name,
+    'date': commentData.timestamp,
+    'editor': window.isUserGrader() || isSolverComment(commentData),
   }
-  return changedCommentText;
+
+  for (const [key, value] of Object.entries(commentAttributes)) {
+    commentLineElement.setAttribute(key, value);
+  }
+
+  commentLineElement.innerHTML = `<span class="comment-text">${commentContent}</span>`;
+
+  return commentLineElement;
+}
+
+function getCommentsContainer(line) {
+  let commentsContainer = document.querySelector(`.comments-container[data-line="${line}"]`);
+  if (commentsContainer !== null) {
+    return commentsContainer;
+  }
+
+  const lineContainer = document.querySelector(`.line-container[data-line="${line}"]`);
+  commentsContainer = document.createElement('div');
+  commentsContainer.classList.add('comments-container');
+  commentsContainer.setAttribute('data-line', line);
+
+  if (document.documentElement?.dir === 'rtl') {
+    commentsContainer.classList.add('rtl');
+  }
+
+  lineContainer.insertAdjacentElement('afterend', commentsContainer);
+  return commentsContainer;
 }
 
 function addCommentToLine(line, commentData) {
-  const commentElement = document.querySelector(`.line[data-line="${line}"]`);
-  const formattedComment = formatCommentData(commentData);
-  const commentText = `<span class="comment" data-line="${line}" data-commentid="${commentData.id}" data-author-role="${commentData.author_role}">${formattedComment}</span>`;
-  let existingPopover = bootstrap.Popover.getInstance(commentElement);
-  if (existingPopover !== null) {
-    const existingContent = `${existingPopover._config.content} <hr>`;
-    existingPopover._config.content = existingContent + commentText;
-  } else {
-    existingPopover = new bootstrap.Popover(commentElement, {
-      html: true,
-      title: `שורה ${line}`,
-      content: commentText,
-      sanitize: false,
-      boundary: 'viewport',
-      placement: 'auto',
-    });
-
-    commentElement.addEventListener('shown.bs.popover', function () {
-      Prism.highlightAllUnder(existingPopover.tip);
-    })
+  const commentedLine = document.querySelector(`.line-container[data-line="${line}"]`);
+  if (commentedLine === null) {
+    console.error(`No line found for comment: ${commentData.id}`);
+    return;
   }
 
-  commentElement.dataset.comment = 'true';
-  if ((commentData.is_auto) && (commentElement.dataset.marked !== 'true')) {
-    markLine(commentElement, FLAKE_COMMENTED_LINE_COLOR);
-  } else {
-    const lineColor = window.getLineColorByRole(commentData.author_role);
-    markLine(commentElement, lineColor, true);
-    commentElement.dataset.marked = true;
-  }
+  const commentsContainer = getCommentsContainer(line);
+  const commentLine = createCommentLine(commentData);
+  commentsContainer.appendChild(commentLine);
+  Prism.highlightAllUnder(commentLine);
 
-  return existingPopover;
+  commentedLine.dataset.comment = 'true';
+
+  return commentLine;
 }
 
 function getLineColorByRole(authorRole) {
@@ -132,17 +147,105 @@ function addLineSpansToPre(items) {
   const openSpans = [];
   Array.from(items).forEach((item) => {
     const code = item.innerHTML.trim().split('\n');
+    const digits = code.length.toString().length;
     item.innerHTML = code.map(
       (line, i) => {
         let lineContent = openSpans.join('') + line;
         updateOpenedSpans(openSpans, line);
         lineContent += '</span>'.repeat(openSpans.length);
-        const wrappedLine = `<span data-line="${i + 1}" class="line">${lineContent}</span>`;
+        const wrappedLine = `<div class="line-container" data-line="${i + 1}"><span class="line-number" style="width: ${digits}em">${i + 1}</span> <span data-line="${i + 1}" class="line">${lineContent}</span></div>`;
         return wrappedLine;
       },
     ).join('\n');
   });
   window.dispatchEvent(new Event('lines-numbered'));
+}
+
+class LineComment extends HTMLElement {
+  static observedAttributes = [
+    'data-line', 'avatar', 'name', 'date', 'editor', 'data-comment-id', 'data-file-id',
+  ];
+
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+    const template = document.getElementById('comment-template').content.cloneNode(true);
+    this.shadowRoot.appendChild(template);
+  }
+
+  connectedCallback() {
+    this.#trackEditButton();
+    this.#trackDeleteButton();
+    this.updateComponent();
+  }
+
+  #trackEditButton() {
+    const editButton = this.shadowRoot.querySelector('.edit-btn');
+    const commentId = this.getAttribute('data-comment-id');
+    editButton.addEventListener('click', () => {
+      window.location.href = `/comments/${commentId}/edit`;
+    });
+  }
+
+  #trackDeleteButton() {
+    const deleteButton = this.shadowRoot.querySelector('.delete-btn');
+
+    const fileId = this.getAttribute('data-file-id');
+    const commentId = this.getAttribute('data-comment-id');
+
+    deleteButton.addEventListener('click', () => {
+      deleteComment(fileId, commentId);
+    });
+  }
+
+  attributeChangedCallback(_, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      this.updateComponent();
+    }
+  }
+
+  updateComponent() {
+    const img = this.shadowRoot.querySelector('.commenter-image');
+    const name = this.shadowRoot.querySelector('.commenter-name');
+    const dateElement = this.shadowRoot.querySelector('.comment-date-text');
+    const editDeleteBtns = this.shadowRoot.querySelector('.edit-delete-btns');
+
+    img.src = this.getAttribute('avatar') || '/static/avatar.jpg';
+    img.alt = `${this.getAttribute('name')}'s profile picture`;
+
+    name.textContent = this.getAttribute('name');
+
+    const dateString = this.getAttribute('date');
+    dateElement.textContent = this.formatDate(dateString);
+    dateElement.setAttribute('datetime', this.createDatetime(dateString));
+
+    editDeleteBtns.style.display = 'none';
+    if (this.getAttribute('editor') === 'true') {
+      editDeleteBtns.style.display = 'flex';
+    }
+  }
+
+  formatDate(dateString) {
+    if (!dateString) return '';
+    const lang = document.documentElement.lang;
+    const date = new Date(dateString);
+    const options = {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }
+    return new Intl.DateTimeFormat(lang, options).format(date);
+  }
+
+  createDatetime(dateString) {
+    const date = new Date(dateString);
+    let year = date.getFullYear();
+    let month = String(date.getMonth() + 1).padStart(2, '0'); // JS months are 0-based
+    let day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
 }
 
 function configureMarkdownParser() {
@@ -156,7 +259,7 @@ function configureMarkdownParser() {
   });
 }
 
-window.markLink = markLine;
+window.markLine = markLine;
 window.hoverLine = hoverLine;
 window.addCommentToLine = addCommentToLine;
 window.getLineColorByRole = getLineColorByRole;
@@ -167,7 +270,9 @@ window.addEventListener('load', () => {
   window.exerciseId = codeElementData.exercise;
   sessionStorage.setItem('role', codeElementData.role);
   sessionStorage.setItem('solver', codeElementData.solver);
+  sessionStorage.setItem('solverId', codeElementData.solverId);
   sessionStorage.setItem('allowedComment', codeElementData.allowedComment);
+  customElements.define('comment-line', LineComment);
   configureMarkdownParser();
   addLineSpansToPre(document.getElementsByTagName('code'));
   pullComments(window.fileId, treatComments);

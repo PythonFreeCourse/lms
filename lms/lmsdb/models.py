@@ -1096,9 +1096,13 @@ class Comment(BaseModel):
     @classmethod
     def _by_file(cls, file_id: int):
         fields = (
-            cls.id, cls.line_number, cls.is_auto,
-            CommentText.id.alias('comment_id'), CommentText.text,
+            cls.id,
+            cls.line_number,
+            cls.is_auto,
+            cls.timestamp,
+            CommentText.text,
             SolutionFile.id.alias('file_id'),
+            User.id.alias('author_id'),
             User.fullname.alias('author_name'),
             User.role.alias('author_role'),
         )

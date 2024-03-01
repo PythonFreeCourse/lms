@@ -249,8 +249,23 @@ class TestSolutionBridge:
         }, content_type='application/json')
         assert delete_response.status_code == 200
 
+        # Now with no comment ID
+        delete_response = client.get('/comments', query_string={
+            'fileId': solution.files[0].id, 'act': 'delete',
+        }, content_type='application/json')
+        assert delete_response.status_code == 400
+
         # Disabling users comments option
         conftest.disable_users_comments()
+
+        # Trying to create a comment
+        disable_comment_response = client.post(
+            '/comments', data=json.dumps({
+                'fileId': solution.files[0].id, 'act': 'create',
+                'kind': 'text', 'comment': 'well well well', 'line': 2,
+            }), content_type='application/json',
+        )
+        assert disable_comment_response.status_code == 403
 
         # Trying to remove a comment
         json_response_comment = json.loads(
@@ -262,14 +277,16 @@ class TestSolutionBridge:
         }, content_type='application/json')
         assert delete_response.status_code == 403
 
-        # Trying to create a comment
-        disable_comment_response = client.post(
-            '/comments', data=json.dumps({
-                'fileId': solution.files[0].id, 'act': 'create',
-                'kind': 'text', 'comment': 'well well well', 'line': 2,
-            }), content_type='application/json',
+        # Trying to fetch a comment
+        comments_fetched = client.post(
+            '/comments',
+            data=json.dumps({'fileId': solution.files[0].id, 'act': 'fetch'}),
+            content_type='application/json',
         )
-        assert disable_comment_response.status_code == 403
+        assert (
+            comments_fetched.json and
+            all(comment['id'] is not None for comment in comments_fetched.json)
+        )
 
     @staticmethod
     def test_staff_and_user_comments(
@@ -337,6 +354,12 @@ class TestSolutionBridge:
             'commentId': json_response_comment['id'],
         }, content_type='application/json')
         assert delete_response.status_code == 403
+
+        delete_response = client2.get('/comments', query_string={
+            'fileId': solution.files[0].id, 'act': 'delete',
+            'commentId': 987654321,
+        }, content_type='application/json')
+        assert delete_response.status_code == 404
 
     @staticmethod
     def test_share_solution_by_another_user(

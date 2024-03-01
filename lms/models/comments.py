@@ -1,7 +1,6 @@
 from typing import Optional
 
 from flask import request
-from flask_login import current_user  # type: ignore
 from peewee import fn  # type: ignore
 
 from lms.lmsdb.models import (
@@ -52,13 +51,15 @@ def _create_comment(
     )
 
 
-def delete():
-    comment_id = int(request.args.get('commentId'))
+def delete(*, comment_id: int, request_user_id: int, is_manager: bool = False):
+    if not isinstance(comment_id, int):
+        raise NotValidRequest('Invalid comment id.', 400)
+
     comment_ = Comment.get_or_none(Comment.id == comment_id)
-    if (
-        comment_.commenter.id != current_user.id
-        and not current_user.role.is_manager
-    ):
+    if comment_ is None:
+        raise ResourceNotFound('No such comment.', 404)
+
+    if comment_.commenter.id != request_user_id and not is_manager:
         raise ForbiddenPermission(
             "You aren't allowed to access this page.", 403,
         )

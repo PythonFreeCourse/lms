@@ -470,12 +470,50 @@ button#share-action:hover {
   flex-flow: column wrap;
   flex-basis: 70vw;
   flex-grow: 4;
+  border: 1px solid #e1e4e8;
 }
 
 #code-view {
   display: flex;
   width: 100%;
   overflow-x: hidden;
+}
+
+.line-number {
+  box-sizing: content-box;
+  display: flex;
+  flex-shrink: 0;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 0.75em;
+  text-align: right;
+  border-right: 1px solid #e1e4e8;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.line {
+  display: inline-block;
+  width: 100%;
+  padding-inline-start: 0.5em;
+}
+
+.comments-container {
+  display: flex;
+  width: 100%;
+  padding: 0.4em 0;
+  flex-direction: column;
+}
+
+.comments-container code {
+  border: 1px solid #e1e4e8;
+  border-radius: 5px;
+  padding: 0.25rem;
+}
+
+.line-comment {
+  display: flex;
+  background: white;
+  border-block: 1px solid #e1e4e8;
 }
 
 #code-toolbar {
@@ -669,17 +707,18 @@ ol.comments > li:active {
   cursor: grabbing;
 }
 
-.comment-author {
-  color: #50514f;
+.comment-text {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.625rem;
 }
 
-span.line {
-  cursor: pointer;
-  direction: ltr;
-  display: inline-block;
-  text-align: left;
-  width: calc(100% - 1.4em);
-  margin-left: 0.3em;
+.comment-text p {
+  margin: 0;
+}
+
+.comment-author {
+  color: #50514f;
 }
 
 #grader-buttons {
@@ -695,7 +734,7 @@ span.line {
   margin-top: 1rem;
 }
 
-.line[data-vimbackground="true"] {
+.line-container[data-vimbackground="true"] {
   background: lightgreen;
 }
 
@@ -715,14 +754,35 @@ code > code:last-of-type{
   display: inherit;
 }
 */
+pre[class*="language-"] {
+  /* Override prism.js */
+  padding: 0 !important;
+  margin: 0 !important;
+}
 
-.line[data-marked="true"] {
+code#user-code {
+  display: flex;
+  flex-direction: column;
+}
+
+.line-container[data-marked="true"] {
   background: #fac4c3;
+}
+
+.line-container {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: start;
+  cursor: pointer;
+  width: 100%;
+  flex-grow: 1;
 }
 
 .grader-add {
   background-attachment: fixed;
-  display: inline-flex;
+  display: flex;
+  margin-inline-start: -0.5rem;
   width: 1rem;
   height: 1em;
   line-height: 1em;
