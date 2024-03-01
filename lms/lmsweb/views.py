@@ -576,12 +576,16 @@ def comment():
         return jsonify(
             {
                 "success": "true",
+                "id": comment_.id,
+                "file_id": comment_.file.id,
+                "line_number": comment_.line_number,
                 "text": comment_.comment.text,
-                "is_auto": False,
+                "author_id": user.id,
                 "author_name": user.fullname,
                 "author_role": user.role.id,
-                "id": comment_.id,
-                "line_number": comment_.line_number,
+                "avatar": get_avatar(user.id),
+                "timestamp": comment_.timestamp,
+                "is_auto": False,
             },
         )
 
