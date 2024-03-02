@@ -10,6 +10,7 @@
 	<tr>
           <th scope="col">#</th>
           <th scope="col">{{ _('Name') }}</th>
+	  <th scope="col">{{ _('Notebook') }}</th>
           <th scope="col">{{ _('Checked') }}</th>
           <th scope="col">{{ _('Solved') }}</th>
           <th scope="col">{{ _('Percentage') }}</th>
@@ -21,6 +22,9 @@
         <tr>
           <th scope="row">{{ exercise['id'] }}</th>
           <td><a href="/check/{{ exercise['id'] }}">{{ exercise['name'] | e }}</a></td>
+	  {%- if exercise['notebook'] %}
+		<td>{{ exercise['notebook'] }}</td>
+          {%- endif %}
           <td>{{ exercise['checked'] }}</td>
           <td>{{ exercise['submitted'] }}</td>
           <td>{{ (exercise['checked'] * 100 / exercise['submitted']) | round(2, 'floor') }}%</td>
@@ -34,6 +38,9 @@
         <tr>
     	  <th scope="row">{{ exercise['id'] }}</th>
           <td><a href="/check/{{ exercise['id'] }}">{{ exercise['name'] | e }}</a></td>
+	  {%- if exercise['notebook'] %}
+		<td>{{ exercise['notebook'] }}</td>
+          {%- endif %}
           <td>{{ exercise['checked'] }}</td>
           <td>{{ exercise['submitted'] }}</td>
           <td>{{ (exercise['checked'] * 100 / exercise['submitted']) | round(2, 'floor') }}%</td>
