@@ -15,6 +15,7 @@ function markLine(target, deletion = false) {
   target.style.background = FLAKE_COMMENTED_LINE_COLOR;
 }
 
+
 function hoverLine(targets, hover) {
   const [lineTarget, addCommentTarget] = targets;
   if (lineTarget.dataset && lineTarget.dataset.vimbackground === 'true') {return;}
