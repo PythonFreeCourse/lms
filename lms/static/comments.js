@@ -1,6 +1,3 @@
-const AUTO_CHECKER_ROLE = 2;
-const DEFAULT_COMMENTED_LINE_COLOR = '#fab3b0';
-const STUDENT_COMMENTED_LINE_COLOR = '#a9f6f9';
 const FLAKE_COMMENTED_LINE_COLOR = '#fac4c3';
 const HOVER_LINE_STYLE = '1px solid #0d0d0f';
 
@@ -11,12 +8,13 @@ function removeMark(lineElement) {
 }
 
 
-function markLine(target, color, deletion = false) {
+function markLine(target, deletion = false) {
   if (target.dataset && target.dataset.marked === 'true' && !deletion) {return;}
   if (target.dataset && target.dataset.vimbackground === 'true' && !deletion) {return;}
   target.classList.add('marked');
-  target.style.background = color;
+  target.style.background = FLAKE_COMMENTED_LINE_COLOR;
 }
+
 
 function hoverLine(targets, hover) {
   const [lineTarget, addCommentTarget] = targets;
@@ -47,6 +45,7 @@ function createCommentLine(commentData) {
     'data-file-id': commentData.file_id,
     'data-line': commentData.line_number,
     'data-author-role': commentData.author_role,
+    'data-is-auto': commentData.is_auto,
     'avatar': commentData.avatar,
     'name': commentData.author_name,
     'date': commentData.timestamp,
@@ -85,7 +84,7 @@ function getCommentsContainer(line) {
 function createToggledComment(lineElement, commentsContainer, authorRole) {
   if (lineElement.classList.contains('marked')) { return; }
 
-  markLine(lineElement, getLineColorByRole(authorRole));
+  markLine(lineElement);
 
   commentsContainer.classList.add('d-none');
   lineElement.addEventListener('click', () => {
@@ -106,23 +105,12 @@ function addCommentToLine(line, commentData) {
   commentsContainer.appendChild(commentLine);
   Prism.highlightAllUnder(commentLine);
 
-  if (commentData.author_role === AUTO_CHECKER_ROLE) {
+  if (commentLine.dataset.isAuto === "true") {
     createToggledComment(commentedLine, commentsContainer, commentData.author_role);
   }
   commentedLine.dataset.comment = 'true';
 
   return commentLine;
-}
-
-function getLineColorByRole(authorRole) {
-  switch (authorRole) {
-    case 1:
-      return STUDENT_COMMENTED_LINE_COLOR;
-    case 2:
-      return FLAKE_COMMENTED_LINE_COLOR;
-    default:
-      return DEFAULT_COMMENTED_LINE_COLOR;
-  }
 }
 
 function treatComments(comments) {
@@ -195,7 +183,8 @@ function addLineSpansToPre(items) {
 
 class LineComment extends HTMLElement {
   static observedAttributes = [
-    'data-line', 'avatar', 'name', 'date', 'editor', 'data-comment-id', 'data-file-id',
+    'data-line', 'avatar', 'name', 'date', 'editor', 'data-comment-id',
+    'data-file-id',
   ];
 
   constructor() {
@@ -295,7 +284,6 @@ window.markLine = markLine;
 window.removeMark = removeMark;
 window.hoverLine = hoverLine;
 window.addCommentToLine = addCommentToLine;
-window.getLineColorByRole = getLineColorByRole;
 window.addEventListener('load', () => {
   const codeElementData = document.getElementById('code-view').dataset;
   window.solutionId = codeElementData.id;
