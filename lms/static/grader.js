@@ -28,9 +28,12 @@ function sendComment(kind, fileId, line, commentData) {
 function visuallyRemoveComment(commentId) {
   const commentElement = document.querySelector(`comment-line[data-comment-id='${commentId}']`);
   const commentsContainer = commentElement.parentElement;
+  const lineNumber = commentsContainer.dataset.line;
   commentElement.remove();
   if (commentsContainer.children.length === 0) {
     commentsContainer.remove();
+    const lineContainer = document.querySelector(`.line-container[data-line='${lineNumber}']`);
+    removeMark(lineContainer);
   }
 }
 

@@ -1,11 +1,20 @@
+const AUTO_CHECKER_ROLE = 2;
 const DEFAULT_COMMENTED_LINE_COLOR = '#fab3b0';
 const STUDENT_COMMENTED_LINE_COLOR = '#a9f6f9';
 const FLAKE_COMMENTED_LINE_COLOR = '#fac4c3';
 const HOVER_LINE_STYLE = '1px solid #0d0d0f';
 
+
+function removeMark(lineElement) {
+  lineElement.classList.remove('marked');
+  lineElement.style.background = 'none';
+}
+
+
 function markLine(target, color, deletion = false) {
   if (target.dataset && target.dataset.marked === 'true' && !deletion) {return;}
   if (target.dataset && target.dataset.vimbackground === 'true' && !deletion) {return;}
+  target.classList.add('marked');
   target.style.background = color;
 }
 
@@ -72,6 +81,19 @@ function getCommentsContainer(line) {
   return commentsContainer;
 }
 
+
+function createToggledComment(lineElement, commentsContainer, authorRole) {
+  if (lineElement.classList.contains('marked')) { return; }
+
+  markLine(lineElement, getLineColorByRole(authorRole));
+
+  commentsContainer.classList.add('d-none');
+  lineElement.addEventListener('click', () => {
+    commentsContainer.classList.toggle('d-none');
+  });
+}
+
+
 function addCommentToLine(line, commentData) {
   const commentedLine = document.querySelector(`.line-container[data-line="${line}"]`);
   if (commentedLine === null) {
@@ -84,13 +106,23 @@ function addCommentToLine(line, commentData) {
   commentsContainer.appendChild(commentLine);
   Prism.highlightAllUnder(commentLine);
 
+  if (commentData.author_role === AUTO_CHECKER_ROLE) {
+    createToggledComment(commentedLine, commentsContainer, commentData.author_role);
+  }
   commentedLine.dataset.comment = 'true';
 
   return commentLine;
 }
 
 function getLineColorByRole(authorRole) {
-  return authorRole === 1 ? STUDENT_COMMENTED_LINE_COLOR : DEFAULT_COMMENTED_LINE_COLOR;
+  switch (authorRole) {
+    case 1:
+      return STUDENT_COMMENTED_LINE_COLOR;
+    case 2:
+      return FLAKE_COMMENTED_LINE_COLOR;
+    default:
+      return DEFAULT_COMMENTED_LINE_COLOR;
+  }
 }
 
 function treatComments(comments) {
@@ -260,6 +292,7 @@ function configureMarkdownParser() {
 }
 
 window.markLine = markLine;
+window.removeMark = removeMark;
 window.hoverLine = hoverLine;
 window.addCommentToLine = addCommentToLine;
 window.getLineColorByRole = getLineColorByRole;
