@@ -406,7 +406,7 @@ def overview_status():
     )
 
 
-@webapp.route(f'/course/<int:course_id>/{routes.STATUS.strip("/")}/')
+@webapp.route(f'/course/<int:course_id>/{routes.STATUS.strip("/")}/detailed/')
 @managers_only
 @login_required
 def status(course_id: int):
@@ -416,7 +416,7 @@ def status(course_id: int):
     )
 
 
-@webapp.route(f'/course/<int:course_id>/{routes.SUBMISSIONS.strip("/")}/')
+@webapp.route(f'/course/<int:course_id>/{routes.STATUS.strip("/")}/')
 @managers_only
 @login_required
 def submissions_table(course_id: int):
@@ -433,6 +433,7 @@ def submissions_table(course_id: int):
         exercises=course_exercises,
         users=course_users,
         solutions=solutions_matrix,
+        course_id=course_id,
     )
 
 
@@ -845,13 +846,29 @@ def done_checking(exercise_id: int, solution_id: int):
     return jsonify({"success": is_updated, "next": next_solution_id})
 
 
-@webapp.route("/check/<int:exercise_id>")
+@webapp.route("/check/exercise/<int:exercise_id>")
 @login_required
 @managers_only
 def start_checking(exercise_id):
     next_solution = solutions.get_next_unchecked(exercise_id)
     if solutions.start_checking(next_solution):
         return redirect(f"{routes.SOLUTIONS}/{next_solution.id}")
+    return redirect(routes.STATUS)
+
+
+@webapp.route("/check/solution/<int:solution_id>")
+@login_required
+@managers_only
+def check_solution(solution_id: int):
+    solution = Solution.get_or_none(Solution.id == solution_id)
+
+    if solution is None:
+        return fail(404, "Solution does not exist.")
+    if solution.is_checked:
+        return redirect(url_for("view", solution_id=solution.id))
+
+    if solutions.start_checking(solution):
+        return redirect(url_for("view", solution_id=solution.id))
     return redirect(routes.STATUS)
 
 

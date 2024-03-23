@@ -1,7 +1,10 @@
 #!/bin/bash -x
 
 original_dir="$(pwd)"
-cd "$(dirname "${BASH_SOURCE[0]}")" || return
+
+cd "$(dirname "${0:-${BASH_SOURCE[0]}}")" || return
+cd ..
+
 
 if [ "${1}" = "update" ]; then
     echo "Updating translations"

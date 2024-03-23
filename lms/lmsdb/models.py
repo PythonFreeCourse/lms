@@ -13,7 +13,7 @@ from uuid import uuid4
 from flask_babel import gettext as _  # type: ignore
 from flask_login import UserMixin, current_user  # type: ignore
 from peewee import (  # type: ignore
-    BooleanField, Case, CharField, Check, DateTimeField, ForeignKeyField,
+    BooleanField, Case, CharField, Check, Database, DateTimeField, ForeignKeyField,
     IntegerField, JOIN, ManyToManyField, Select, TextField, UUIDField, fn,
 )
 from playhouse.signals import (  # type: ignore
@@ -185,7 +185,7 @@ class Course(BaseModel):
     def get_exercise_ids(self) -> List[int]:
         return [e.id for e in self.exercise]
 
-    def get_matrix(self):
+    def get_matrix(self, database: Database = database) -> dict:
         SolutionAlias = Solution.alias()
         fields = [
             SolutionAlias.id.alias('solution_id'),
@@ -237,9 +237,17 @@ class Course(BaseModel):
             .join(User, JOIN.LEFT_OUTER, on=(Solution.checker == User.id))
         )
 
+        print("--------------------------------------!!!!")
+        print(solutions)
+        print("--------------------------------------!!!!")
+        query_results = solutions.execute(database)
+        print("--------------------------------------!!!!")
+        print(solutions)
+        print("--------------------------------------!!!!")
+
         return {
             (row['exercise_id'], row['solver_id']): row
-            for row in solutions.execute(database)
+            for row in query_results
         }
 
     def __str__(self):
@@ -255,6 +263,9 @@ class User(UserMixin, BaseModel):
     api_key = CharField()
     last_course_viewed = ForeignKeyField(Course, null=True)
     uuid = UUIDField(default=uuid4, unique=True)
+
+    class Meta:
+        table_name = "user"
 
     def get_id(self):
         return str(self.uuid)
