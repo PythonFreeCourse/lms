@@ -84,7 +84,7 @@ function trackDisableShareButton(solutionId, button) {
 }
 
 function updateNotificationsBadge() {
-  const dropdown = document.getElementById('navbarNavDropdown');
+  const dropdown = document.getElementById('navbarSupportedContent');
   const container = document.getElementById('notifications-list');
   if (dropdown === null || container === null) {
     return;

@@ -7,7 +7,6 @@ from lms.lmstests.public.unittests import executers, import_tests, tasks
 from lms.models import notifications
 from tests import conftest
 
-
 STUDENT_CODE = """
 def foo(bar=None):
     return 'bar' if bar == 'bar' else 'foo'
@@ -65,10 +64,24 @@ class TestUTForExercise:
         first = auto_comments[0]
         assert first.exercise_test_name.test_name == 'test_check_bar_bar'
         assert first.exercise_test_name.pretty_test_name == 'שם כזה מגניב 2'
-        expected = ('AssertionError: איזה ברברון'
-                    "assert 'bar' == 'barbaron'  - barbaron  + bar")
+        expected = ("AssertionError: איזה ברברון"
+                    "assert 'bar' == 'barbaron'    - barbaron  + bar")
         assert expected == first.user_message
         assert "foo('bar') == 'barbaron'" in first.staff_message
+
+    def test_register_two_exercises_with_same_name(
+            self,
+            course: models.Course,
+    ):
+        ex1 = conftest.create_exercise(course, 0)
+        ex2 = conftest.create_exercise(course, 0)
+        import_tests.load_test_from_module(EXERCISE_TESTS)
+        assert models.ExerciseTest.select().filter(
+            models.ExerciseTest.exercise == ex1,
+        ).get()
+        assert models.ExerciseTest.select().filter(
+            models.ExerciseTest.exercise == ex2,
+        ).get()
 
     @staticmethod
     def _verify_notifications(solution):

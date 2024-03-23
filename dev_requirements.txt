@@ -1,4 +1,4 @@
-debugpy==1.4.3
-ipdb==0.13.9
-pytest-cov==2.12.1
-pytest-env==0.6.2
+debugpy==1.8.1
+ipdb==0.13.13
+pytest-cov==4.1.0
+pytest-env==1.1.3

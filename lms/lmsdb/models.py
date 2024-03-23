@@ -268,8 +268,8 @@ class User(UserMixin, BaseModel):
     @classmethod
     def get_system_user(cls) -> 'User':
         instance, _ = cls.get_or_create(**{
-            cls.mail_address.name: 'linter-checks@python.guru',
-            User.username.name: 'linter-checks@python.guru',
+            cls.mail_address.name: 'linter-checks@pythonic.guru',
+            User.username.name: 'linter-checks@pythonic.guru',
         }, defaults={
             User.fullname.name: 'Checker guru',
             User.role.name: Role.get_staff_role(),
@@ -322,14 +322,15 @@ class User(UserMixin, BaseModel):
 @pre_save(sender=User)
 def on_save_handler(model_class, instance, created):
     """Hash password on creation/save."""
+    supported_hashing = ('pbkdf2:sha256', 'scrypt:')
 
     # If password changed then it won't start with hash's method prefix
-    is_password_changed = not instance.password.startswith('pbkdf2:sha256')
+    is_password_changed = not instance.password.startswith(supported_hashing)
     if created or is_password_changed:
         instance.password = generate_password_hash(instance.password)
         instance.uuid = uuid4()
 
-    is_api_key_changed = not instance.api_key.startswith('pbkdf2:sha256')
+    is_api_key_changed = not instance.api_key.startswith(supported_hashing)
     if created or is_api_key_changed:
         if not instance.api_key:
             instance.api_key = model_class.random_password()
@@ -638,9 +639,7 @@ class Solution(BaseModel):
     )
 
     @property
-    def solution_files(
-            self,
-    ) -> Union[Iterable['SolutionFile'], 'SolutionFile']:
+    def solution_files(self) -> Iterable["SolutionFile"]:
         return SolutionFile.filter(SolutionFile.solution == self)
 
     @property
@@ -782,8 +781,8 @@ class Solution(BaseModel):
             raise AlreadyExists('This solution already exists.')
 
         instance = cls.create(**{
-            cls.exercise.name: exercise,
-            cls.solver.name: solver,
+            cls.exercise.name: exercise.id,
+            cls.solver.name: solver.id,
             cls.submission_timestamp.name: datetime.now(),
             cls.hashed.name: hash_,
         })
@@ -1172,9 +1171,13 @@ class Comment(BaseModel):
     @classmethod
     def _by_file(cls, file_id: int):
         fields = (
-            cls.id, cls.line_number, cls.is_auto,
-            CommentText.id.alias('comment_id'), CommentText.text,
+            cls.id,
+            cls.line_number,
+            cls.is_auto,
+            cls.timestamp,
+            CommentText.text,
             SolutionFile.id.alias('file_id'),
+            User.id.alias('author_id'),
             User.fullname.alias('author_name'),
             User.role.alias('author_role'),
         )
@@ -1210,7 +1213,7 @@ def generate_string(
 
 
 def create_demo_users() -> None:
-    print('First run! Here are some users to get start with:')  # noqa: T001
+    print('First run! Here are some users to get start with:')  # noqa: T201
     fields = ['username', 'fullname', 'mail_address', 'role']
     student_role = Role.by_name('Student')
     admin_role = Role.by_name('Administrator')
@@ -1224,7 +1227,7 @@ def create_demo_users() -> None:
         password = User.random_password()
         api_key = User.random_password(stronger=True)
         User.create(**user, password=password, api_key=api_key)
-        print(f"User: {user['username']}, Password: {password}")  # noqa: T001
+        print(f"User: {user['username']}, Password: {password}")  # noqa: T201
 
 
 def create_basic_roles() -> None:

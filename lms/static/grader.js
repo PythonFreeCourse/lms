@@ -26,29 +26,14 @@ function sendComment(kind, fileId, line, commentData) {
 }
 
 function visuallyRemoveComment(commentId) {
-  const commentElement = document.querySelector(`.grader-delete[data-commentid="${commentId}"]`).closest('.comment');
-  const lineElement = document.querySelector(`.line[data-line="${commentElement.dataset.line}"]`);
-  const existingPopover = bootstrap.Popover.getInstance(lineElement);
-  const hr = commentElement.nextElementSibling || commentElement.previousElementSibling;
-  if (hr === null) {
-    lineElement.dataset.marked = false;
-    window.markLine(lineElement, 'none');
-    const popover = bootstrap.Popover.getInstance(lineElement);
-    if (popover !== null) {
-      popover.dispose();
-    }
-  } else {
-    let removeContent = `<hr>${commentElement.outerHTML}`;
-    if (!existingPopover._config.content.includes(removeContent)) {
-      removeContent = `${commentElement.outerHTML} <hr>`;
-    }
-    existingPopover._config.content = existingPopover._config.content.replace(removeContent, '');
-    const commentParent = commentElement.parentNode;
-    hr.parentNode.removeChild(hr);
-    commentParent.removeChild(commentElement);
-    const lastAuthorRole = commentParent.lastChild.previousElementSibling.dataset.authorRole;
-    const newLineColor = window.getLineColorByRole(lastAuthorRole);
-    window.markLine(lineElement, newLineColor, true);
+  const commentElement = document.querySelector(`comment-line[data-comment-id='${commentId}']`);
+  const commentsContainer = commentElement.parentElement;
+  const lineNumber = commentsContainer.dataset.line;
+  commentElement.remove();
+  if (commentsContainer.children.length === 0) {
+    commentsContainer.remove();
+    const lineContainer = document.querySelector(`.line-container[data-line='${lineNumber}']`);
+    removeMark(lineContainer);
   }
 }
 
@@ -82,12 +67,12 @@ function sendExistsComment(...commentData) {
 function trackDragAreas(lineItems, addCommentItems) {
   function findElementsToMark(e) {
     const span = (e.target.nodeType === 3) ? e.target.parentNode : e.target;
-    let lineTarget = span.closest('.line');
+    let lineTarget = span.closest('.line-container');
     let addCommentTarget = span.closest('.grader-add');
     const codeView = document.querySelector('#code-view');
     if (lineTarget === null || addCommentTarget !== null) {
       const commentLine = addCommentTarget.dataset.line;
-      lineTarget = codeView.querySelector(`.line[data-line="${commentLine}"]`);
+      lineTarget = codeView.querySelector(`.line-container[data-line="${commentLine}"]`);
     } else {
       const commentLine = lineTarget.dataset.line;
       addCommentTarget = codeView.querySelector(`.grader-add[data-line="${commentLine}"]`);
@@ -141,10 +126,14 @@ function focusTextArea(lineNumber) {
 
 function trackTextArea(lineNumber) {
   const target = `textarea[data-line='${lineNumber}']`;
+  const textareaElement = document.querySelector(target);
   const popoverElement = document.querySelector(`.grader-add[data-line='${lineNumber}']`);
-  document.querySelector(target).addEventListener('keydown', (ev) => {
-    if ((ev.which === 10 || ev.which === 13) && ev.ctrlKey) { // CTRL + ENTER
+
+  const keyDownFunction = function(ev) {
+    if ((ev.key === 'Enter' && ev.ctrlKey) || ((ev.which === 10 || ev.which === 13) && ev.ctrlKey)) {
       sendNewComment(window.fileId, lineNumber, ev.target.value);
+      ev.target.value = '';
+      textareaElement.removeEventListener('keydown', keyDownFunction);
     } else if (ev.key === 'Escape') {
       ev.preventDefault();
     } else {
@@ -153,7 +142,9 @@ function trackTextArea(lineNumber) {
 
     const popover = bootstrap.Popover.getInstance(popoverElement);
     if (popover !== null) {popover.hide();}
-  });
+  };
+
+  textareaElement.addEventListener('keydown', keyDownFunction, {});
 }
 
 function registerNewCommentPopover(element) {

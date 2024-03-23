@@ -1,5 +1,3 @@
-from lms.models.errors import ResourceNotFound
-from lms.models.solutions import get_view_parameters
 from unittest import mock
 
 from flask import json
@@ -15,7 +13,11 @@ from lms.lmsweb import routes
 from lms.models import notifications, solutions
 from lms.models.errors import ResourceNotFound
 from lms.models.solutions import get_view_parameters
-from lms.utils.consts import COLORS, DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR, DEFAULT_ASSESSMENT_BUTTON_COLOR
+from lms.utils.consts import (
+    COLORS,
+    DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR,
+    DEFAULT_ASSESSMENT_BUTTON_COLOR,
+)
 from tests import conftest
 
 
@@ -247,8 +249,23 @@ class TestSolutionBridge:
         }, content_type='application/json')
         assert delete_response.status_code == 200
 
+        # Now with no comment ID
+        delete_response = client.get('/comments', query_string={
+            'fileId': solution.files[0].id, 'act': 'delete',
+        }, content_type='application/json')
+        assert delete_response.status_code == 400
+
         # Disabling users comments option
         conftest.disable_users_comments()
+
+        # Trying to create a comment
+        disable_comment_response = client.post(
+            '/comments', data=json.dumps({
+                'fileId': solution.files[0].id, 'act': 'create',
+                'kind': 'text', 'comment': 'well well well', 'line': 2,
+            }), content_type='application/json',
+        )
+        assert disable_comment_response.status_code == 403
 
         # Trying to remove a comment
         json_response_comment = json.loads(
@@ -260,14 +277,16 @@ class TestSolutionBridge:
         }, content_type='application/json')
         assert delete_response.status_code == 403
 
-        # Trying to create a comment
-        disable_comment_response = client.post(
-            '/comments', data=json.dumps({
-                'fileId': solution.files[0].id, 'act': 'create',
-                'kind': 'text', 'comment': 'well well well', 'line': 2,
-            }), content_type='application/json',
+        # Trying to fetch a comment
+        comments_fetched = client.post(
+            '/comments',
+            data=json.dumps({'fileId': solution.files[0].id, 'act': 'fetch'}),
+            content_type='application/json',
         )
-        assert disable_comment_response.status_code == 403
+        assert (
+            comments_fetched.json and
+            all(comment['id'] is not None for comment in comments_fetched.json)
+        )
 
     @staticmethod
     def test_staff_and_user_comments(
@@ -335,6 +354,12 @@ class TestSolutionBridge:
             'commentId': json_response_comment['id'],
         }, content_type='application/json')
         assert delete_response.status_code == 403
+
+        delete_response = client2.get('/comments', query_string={
+            'fileId': solution.files[0].id, 'act': 'delete',
+            'commentId': 987654321,
+        }, content_type='application/json')
+        assert delete_response.status_code == 404
 
     @staticmethod
     def test_share_solution_by_another_user(
@@ -601,7 +626,7 @@ class TestSolutionBridge:
         )
         assert assessment1.color == COLORS.get('red')
         assert (
-            assessment1.active_color == DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR,
+            assessment1.active_color == DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR
         )
 
         assessment2 = SolutionAssessment.create(
@@ -625,7 +650,7 @@ class TestSolutionBridge:
         assessment.save()
         assert assessment.color == DEFAULT_ASSESSMENT_BUTTON_COLOR
         assert (
-            assessment.active_color == DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR,
+            assessment.active_color == DEFAULT_ASSESSMENT_BUTTON_ACTIVE_COLOR
         )
 
     @staticmethod
@@ -657,7 +682,7 @@ class TestSolutionBridge:
             content_type='application/json',
         )
         solution2 = Solution.get_by_id(solution2.id)
-        
+
         exercises = solution.of_user(student_user.id, from_all_courses=True)
         assert exercises[0].get('assessment') is None
         assert exercises[1].get('assessment') == 'Try again'

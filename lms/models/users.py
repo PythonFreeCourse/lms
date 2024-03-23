@@ -1,25 +1,44 @@
+from functools import cache
+import hashlib
 import re
+from typing import cast
 
-from flask_babel import gettext as _  # type: ignore
+from flask_babel import gettext as _
 from itsdangerous import URLSafeTimedSerializer
 
 from lms.lmsdb.models import Course, User, UserCourse
 from lms.lmsweb import config
 from lms.models.errors import (
-    AlreadyExists, ForbiddenPermission, UnauthorizedError,
-    UnhashedPasswordError,
+    AlreadyExists, ForbiddenPermission, NotValidRequest, ResourceNotFound,
+    UnauthorizedError, UnhashedPasswordError,
 )
 
 
 SERIALIZER = URLSafeTimedSerializer(config.SECRET_KEY)
-HASHED_PASSWORD = re.compile(r'^pbkdf2.+?\$(?P<salt>.+?)\$(?P<password>.+)')
+HASHED_PASSWORD = re.compile(
+    r"^(?:scrypt|pbkdf2)"
+    r".+?\$"
+    r"(?P<salt>.+?)\$"
+    r"(?P<password>.+)",
+)
+
+
+def _to_user_object(user: int | User) -> User:
+    if isinstance(user, int):
+        user = cast(User, User.get_or_none(User.id == user))
+        if user is None:
+            raise ResourceNotFound(_('User not found'), 404)
+
+    if not isinstance(user, User):
+        raise NotValidRequest(_('User is not valid'), 400)
+
+    return user
 
 
 def retrieve_salt(user: User) -> str:
-    password = HASHED_PASSWORD.match(user.password)
-    try:
-        return password.groupdict().get('salt')
-    except AttributeError:  # should never happen
+    if password := HASHED_PASSWORD.match(str(user.password)):
+        return password.groupdict()['salt']
+    else:
         raise UnhashedPasswordError('Password format is invalid.')
 
 
@@ -52,3 +71,11 @@ def join_public_course(course: Course, user: User) -> None:
                 course_name=course.name,
             ), 409,
         )
+
+
+@cache
+def get_gravatar(user: int | User) -> str:
+    user = _to_user_object(user)
+    user_email = str(user.mail_address).strip().lower()
+    gravatar_hash = hashlib.sha256(user_email.encode('utf-8')).hexdigest()
+    return f'https://www.gravatar.com/avatar/{gravatar_hash}?d=404'

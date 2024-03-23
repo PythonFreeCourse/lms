@@ -33,7 +33,7 @@ function changeAssessmentsAttributes(assessmentGroup, item) {
   document.activeElement.blur();
 
   const xhr = new XMLHttpRequest();
-  xhr.open('POST', `/assessment/${solutionId}`, true);
+  xhr.open('POST', `/assessment/${window.solutionId}`, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.responseType = 'json';
     xhr.onreadystatechange = () => {
@@ -44,8 +44,8 @@ function changeAssessmentsAttributes(assessmentGroup, item) {
       }
     };
 
-    assessmentValue = assessmentGroup.dataset.checkedid;
-    assessmentChecked = (assessmentValue !== 'null') ? assessmentValue : null;
+    const assessmentValue = assessmentGroup.dataset.checkedid;
+    const assessmentChecked = (assessmentValue !== 'null') ? assessmentValue : null;
     xhr.send(JSON.stringify({assessment: assessmentChecked}));
 }
 

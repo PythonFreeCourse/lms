@@ -1,5 +1,6 @@
+from collections.abc import Iterable
 import tempfile
-import typing
+from typing import cast
 
 from flake8.main import application
 
@@ -10,7 +11,7 @@ from lms.lmstests.sandbox.linters.base import BaseLinter, LinterError
 class PythonLinter(BaseLinter):
     def initialize(self):
         self._app = application.Application()
-        self._app.initialize(argv=['--import-order-style', 'google'])
+        self._argv = ['--import-order-style', 'google']
 
     @property
     def app(self) -> application.Application:
@@ -24,19 +25,22 @@ class PythonLinter(BaseLinter):
     def match_to_file_suffix(file_suffix: str) -> bool:
         return file_suffix.lower() == 'py'
 
-    def _get_errors_from_solution(self) -> typing.Iterable[LinterError]:
-        index_of_check = 0
+    def _get_errors_from_solution(self) -> Iterable[LinterError]:
         with tempfile.NamedTemporaryFile('w') as temp_file:
             temp_file.write(self._code)
             temp_file.flush()
-
-            self.app.run_checks([temp_file.name])
-            checkers = self.app.file_checker_manager.checkers
-            results = checkers[index_of_check].results
+            self.app.initialize(argv=[temp_file.name, *self._argv])
+            self.app.run_checks()
+            assert self.app.file_checker_manager is not None
+            artifacts = self.app.file_checker_manager.results
+            results = [r for _, results_, _ in artifacts for r in results_]
 
         for result in results:
+            assert isinstance(result, tuple)
+            result = cast(tuple, result)
             response = LinterError(
-                *result, solution_file_id=self._solution_file_id)
+                *result, solution_file_id=self._solution_file_id,
+            )
             if response.error_code in defines.FLAKE_SKIP_ERRORS:
                 self._logger.info(
                     'Skipping error %s on line %s to solution file %s',

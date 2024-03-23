@@ -35,7 +35,7 @@ function highlightLinesThatStartsWith(lineNumber, enable) {
   const highlight = enable || (enable === undefined);
   const specificSelector = lineNumber && `^='${lineNumber}'`;
   const lines = document.querySelectorAll(
-    `#code-view .line[data-line${specificSelector}]`,
+    `#code-view .line-container[data-line${specificSelector}]`,
   );
   Array.from(lines).forEach((line) => {
     line.dataset.vimbackground = highlight;
@@ -68,7 +68,7 @@ function listenToKeys() {
       return;
     }
     const key = event.key.toLowerCase();
-    const linesSelected = `#code-view .line[data-line='${lineNumber}']`;
+    const linesSelected = `#code-view .line-container[data-line='${lineNumber}']`;
     const graderAddButton = `.grader-add[data-line='${lineNumber}']`;
     if (key === 'q') {
       event.preventDefault();

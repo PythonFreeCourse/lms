@@ -12,7 +12,8 @@ SQLErrors = typing.Sequence[SQLBaseError]
 
 class SQLLinter(BaseLinter):
     def initialize(self):
-        self._app = Linter(config=FluffConfig.from_root())
+        config = {'dialect': 'ansi'}
+        self._app = Linter(config=FluffConfig(overrides=config))
 
     @property
     def app(self) -> Linter:

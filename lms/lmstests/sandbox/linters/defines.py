@@ -15,7 +15,7 @@ FLAKE_ERRORS_MAPPING = {
     'C404': 'אין סיבה להשתמש פה ב־list comprehension – השתמשו ב־dictionary comprehension במקום.',
     'C406': 'אין סיבה להשתמש בפונקציה <code>list</code> או <code>tuple</code>. אפשר במקום להשתמש פשוט בסוגריים המתאימים שמייצגים את מבנה הנתונים.',
     'C407': 'לא חייבים להשתמש כאן ב־list/dict comprehension, הפונקציה יודעת לקבל גנרטור.',
-    'C408': 'אין סיבה לקרוא פה לפונקציה – עדיף לציין מבנה נתונים ריק. במקום <code dir="ltr">dict()</code>, לדוגמה, רשמו <code dir="ltr">\{\}</code>.',  # NOQA: W605
+    'C408': 'אין סיבה לקרוא פה לפונקציה – עדיף לציין מבנה נתונים ריק. במקום <code dir="ltr">dict()</code>, לדוגמה, רשמו <code dir="ltr">{}</code>.',  # NOQA: W605
     'C409': 'העברת ל־<code dir="ltr">tuple()</code> רשימה, אך אין בזה צורך. עדיף להשתמש בסוגריים עגולים במקום.',
     'C410': 'אין צורך להמיר את הרשימה הזו ל־list. הוציאו אותה מהקריאה לפונקציה.',
     'C413': 'אין צורך להמיר לרשימה, <var>sorted</var> כבר מחזירה רשימה בעצמה.',
@@ -135,6 +135,7 @@ FLAKE_SKIP_ERRORS = (
     'S322',  # input is a dangerous method of Python 2 yada yada
     'T000',  # todo note found
     'T001',  # print found
+    'T201',  # print found (newer version of T001)
     'T002',  # Python 2.x reserved word print used
     'W291',  # whitespaces @ end of line
     'W292',  # no new line in the end of the code
