@@ -13,8 +13,9 @@ from uuid import uuid4
 from flask_babel import gettext as _  # type: ignore
 from flask_login import UserMixin, current_user  # type: ignore
 from peewee import (  # type: ignore
-    BooleanField, Case, CharField, Check, Database, DateTimeField, ForeignKeyField,
-    IntegerField, JOIN, ManyToManyField, Select, TextField, UUIDField, fn,
+    BooleanField, Case, CharField, Check, Database, DateTimeField,
+    ForeignKeyField, IntegerField, JOIN, ManyToManyField, Select, TextField,
+    UUIDField, fn,
 )
 from playhouse.signals import (  # type: ignore
     Model, post_delete, post_save, pre_save,
