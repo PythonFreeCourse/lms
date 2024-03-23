@@ -35,9 +35,6 @@ class TestStatusPage:
         all_solutions = get_matrix(cls.user_ids, cls.exercise_ids)
         assert len(all_solutions) == len(cls.user_ids) * len(cls.exercise_ids)
 
-
-
-    
         solution = conftest.create_solution
 
         cls.s1 = solution(cls.ex1_1, cls.user1)

@@ -178,7 +178,7 @@ class Course(BaseModel):
             .join(Role)
             .where(
                 (self.id == UserCourse.course_id)
-                & (Role.id == Role.get_student_role().id)
+                & (Role.id == Role.get_student_role().id),
             )
         )
 
@@ -209,7 +209,7 @@ class Course(BaseModel):
             .group_by(Exercise.id, User.id, SolutionAlias.id)
             .having(
                 (SolutionAlias.id == fn.MAX(SolutionAlias.id))
-                | (SolutionAlias.id.is_null(True))
+                | (SolutionAlias.id.is_null(True)),
             )
             .alias('solutions_subquery')
         )

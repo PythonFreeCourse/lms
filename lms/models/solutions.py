@@ -5,14 +5,11 @@ from zipfile import ZipFile
 
 from flask_babel import gettext as _  # type: ignore
 from flask_login import current_user
-import loguru
-from peewee import JOIN, fn  # type: ignore
 from playhouse.shortcuts import model_to_dict  # type: ignore
 
 from lms.extractors.base import File
 from lms.lmsdb.models import (
-    Course, Exercise, SharedSolution, Solution,
-    SolutionAssessment, SolutionFile, SolutionState, User, UserCourse,
+    SharedSolution, Solution, SolutionAssessment, SolutionFile, User,
 )
 from lms.lmstests.public.general import tasks as general_tasks
 from lms.lmstests.public.identical_tests import tasks as identical_tests_tasks
