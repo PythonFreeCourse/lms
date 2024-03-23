@@ -237,13 +237,7 @@ class Course(BaseModel):
             .join(User, JOIN.LEFT_OUTER, on=(Solution.checker == User.id))
         )
 
-        print("--------------------------------------!!!!")
-        print(solutions)
-        print("--------------------------------------!!!!")
         query_results = solutions.execute(database)
-        print("--------------------------------------!!!!")
-        print(solutions)
-        print("--------------------------------------!!!!")
 
         return {
             (row['exercise_id'], row['solver_id']): row
