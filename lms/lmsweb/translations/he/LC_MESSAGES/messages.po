@@ -5,9 +5,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: 1.0\n"
+"Project-Id-Version:  1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-10-15 14:37+0300\n"
+"POT-Creation-Date: 2024-03-23 17:39+0200\n"
 "PO-Revision-Date: 2021-10-17 01:59+0300\n"
 "Last-Translator: Or Ronai\n"
 "Language: he\n"
@@ -16,476 +16,523 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.1\n"
-"X-Generator: Poedit 3.0\n"
-"X-Poedit-Bookmarks: -1,-1,-1,-1,0,-1,-1,-1,-1,-1\n"
+"Generated-By: Babel 2.14.0\n"
 
-#: lmsdb/models.py:921
+#: /home/yam/projects/lms/lms/lmsdb/models.py:998
 msgid "Fatal error"
 msgstr "כישלון חמור"
 
-#: lmstests/public/identical_tests/services.py:103
+#: /home/yam/projects/lms/lms/lmstests/public/identical_tests/services.py:103
 #, python-format
 msgid "Your solution for the %(subject)s exercise has been checked."
 msgstr "הפתרון שלך לתרגיל %(subject)s נבדק."
 
-#: lmstests/public/linters/services.py:95
+#: /home/yam/projects/lms/lms/lmstests/public/linters/services.py:95
 #, python-format
 msgid "The automatic checker gave you %(errors_num)d for your %(name)s solution."
 msgstr "הבודק האוטומטי נתן %(errors_num)d הערות על תרגילך %(name)s."
 
-#: lmstests/public/unittests/services.py:16 lmstests/sandbox/linters/base.py:16
+#: /home/yam/projects/lms/lms/lmstests/public/unittests/services.py:16
+#: /home/yam/projects/lms/lms/lmstests/sandbox/linters/base.py:16
 msgid "The automatic checker couldn't run your code."
 msgstr "הבודק האוטומטי לא הצליח להריץ את הקוד שלך."
 
-#: lmstests/public/unittests/services.py:120
+#: /home/yam/projects/lms/lms/lmstests/public/unittests/services.py:122
 #, python-format
 msgid ""
-"The automatic checker failed in %(number)d examples in your \"%(subject)s\" "
-"solution."
+"The automatic checker failed in %(number)d examples in your "
+"\"%(subject)s\" solution."
 msgstr "הבודק האוטומטי נכשל ב־ %(number)d דוגמאות בתרגיל \"%(subject)s\"."
 
-#: lmstests/public/unittests/services.py:142
-msgid "Bro, did you check your code?"
+#: /home/yam/projects/lms/lms/lmstests/public/unittests/services.py:144
+#, fuzzy
+msgid "Woah! Did you check your code?"
 msgstr "אחי, בדקת את הקוד שלך?"
 
-#: lmsweb/views.py:130
+#: /home/yam/projects/lms/lms/lmsweb/views.py:183
 msgid "Can not register now"
 msgstr "לא ניתן להירשם כעת"
 
-#: lmsweb/views.py:147
+#: /home/yam/projects/lms/lms/lmsweb/views.py:205
 msgid "Registration successfully"
 msgstr "ההרשמה בוצעה בהצלחה"
 
-#: lmsweb/views.py:170
+#: /home/yam/projects/lms/lms/lmsweb/views.py:233
 msgid "The confirmation link is expired, new link has been sent to your email"
 msgstr "קישור האימות פג תוקף, קישור חדש נשלח אל תיבת המייל שלך"
 
-#: lmsweb/views.py:186
+#: /home/yam/projects/lms/lms/lmsweb/views.py:252
 msgid "Your user has been successfully confirmed, you can now login"
 msgstr "המשתמש שלך אומת בהצלחה, כעת אתה יכול להתחבר למערכת"
 
-#: lmsweb/views.py:209 lmsweb/views.py:266
+#: /home/yam/projects/lms/lms/lmsweb/views.py:277
+#: /home/yam/projects/lms/lms/lmsweb/views.py:345
 msgid "Your password has successfully changed"
 msgstr "הסיסמה שלך שונתה בהצלחה"
 
-#: lmsweb/views.py:225
+#: /home/yam/projects/lms/lms/lmsweb/views.py:295
 msgid "Password reset link has successfully sent"
 msgstr "קישור לאיפוס הסיסמה נשלח בהצלחה"
 
-#: lmsweb/views.py:246
+#: /home/yam/projects/lms/lms/lmsweb/views.py:321
 msgid "Reset password link is expired"
 msgstr "הקישור לאיפוס הסיסמה פג תוקף"
 
-#: lmsweb/forms/change_password.py:20 lmsweb/forms/register.py:32
-#: lmsweb/forms/reset_password.py:25
+#: /home/yam/projects/lms/lms/lmsweb/forms/change_password.py:20
+#: /home/yam/projects/lms/lms/lmsweb/forms/register.py:32
+#: /home/yam/projects/lms/lms/lmsweb/forms/reset_password.py:25
 msgid "The passwords are not identical"
 msgstr "הסיסמאות שהוזנו אינן זהות"
 
-#: lmsweb/forms/change_password.py:31
+#: /home/yam/projects/lms/lms/lmsweb/forms/change_password.py:31
 msgid "Invalid old password has been inserted too many times"
 msgstr "הזנת סיסמה שגויה מספר רב מדי של פעמים"
 
-#: lmsweb/forms/change_password.py:35
+#: /home/yam/projects/lms/lms/lmsweb/forms/change_password.py:35
 msgid "Invalid current password"
 msgstr "הסיסמה הנוכחית שהוזנה שגויה"
 
-#: lmsweb/forms/register.py:14 lmsweb/forms/reset_password.py:12
-#: lmsweb/tools/validators.py:29
+#: /home/yam/projects/lms/lms/lmsweb/forms/register.py:14
+#: /home/yam/projects/lms/lms/lmsweb/forms/reset_password.py:12
+#: /home/yam/projects/lms/lms/lmsweb/tools/validators.py:29
 msgid "Invalid email"
 msgstr "כתובת הדואר האלקטרוני שהוזנה אינה תקינה"
 
-#: lmsweb/tools/validators.py:13
+#: /home/yam/projects/lms/lms/lmsweb/tools/validators.py:17
 msgid "The username is already in use"
 msgstr "שם המשתמש הזה כבר נמצא בשימוש"
 
-#: lmsweb/tools/validators.py:21
+#: /home/yam/projects/lms/lms/lmsweb/tools/validators.py:23
 msgid "The email is already in use"
 msgstr "כתובת הדואר האלקטרוני הזו כבר נמצאת בשימוש"
 
-#: models/solutions.py:52
+#: /home/yam/projects/lms/lms/models/solutions.py:52
 #, python-format
 msgid "%(solver)s has replied for your \"%(subject)s\" check."
 msgstr "%(solver)s הגיב לך על בדיקת תרגיל \"%(subject)s\"."
 
-#: models/solutions.py:59
+#: /home/yam/projects/lms/lms/models/solutions.py:59
 #, python-format
 msgid "%(checker)s replied for \"%(subject)s\"."
 msgstr "%(checker)s הגיב לך על תרגיל \"%(subject)s\"."
 
-#: models/solutions.py:78
+#: /home/yam/projects/lms/lms/models/solutions.py:78
 #, python-format
 msgid "Your solution for the \"%(subject)s\" exercise has been checked."
 msgstr "הפתרון שלך לתרגיל \"%(subject)s\" נבדק."
 
-#: models/users.py:29
+#: /home/yam/projects/lms/lms/models/users.py:30
+msgid "User not found"
+msgstr "לא מצאנו את המשתמש"
+
+#: /home/yam/projects/lms/lms/models/users.py:33
+msgid "User is not valid"
+msgstr "לא זיהינו את המשתמש"
+
+#: /home/yam/projects/lms/lms/models/users.py:48
 msgid "Invalid username or password"
 msgstr "שם המשתמש או הסיסמה שהוזנו לא תקינים"
 
-#: models/users.py:32
+#: /home/yam/projects/lms/lms/models/users.py:51
 msgid "You have to confirm your registration with the link sent to your email"
 msgstr "עליך לאשר את מייל האימות"
 
-#: models/users.py:50
+#: /home/yam/projects/lms/lms/models/users.py:69
 #, python-format
 msgid "You are already registered to %(course_name)s course."
 msgstr "אתה כבר רשום לקורס %(course_name)s."
 
-#: templates/banned.html:8 templates/login.html:7
-#: templates/recover-password.html:8 templates/reset-password.html:8
-#: templates/signup.html:8
+#: /home/yam/projects/lms/lms/templates/banned.html:8
+#: /home/yam/projects/lms/lms/templates/login.html:7
+#: /home/yam/projects/lms/lms/templates/recover-password.html:8
+#: /home/yam/projects/lms/lms/templates/reset-password.html:8
+#: /home/yam/projects/lms/lms/templates/signup.html:8
 msgid "Profile picture of the Python Course"
 msgstr "תמונת הפרופיל של קורס פייתון"
 
-#: templates/banned.html:12
+#: /home/yam/projects/lms/lms/templates/banned.html:12
 msgid "Your account has been suspended by the manager."
 msgstr "המשתמש שלך הושעה על ידי מנהל המערכת."
 
-#: templates/banned.html:13
+#: /home/yam/projects/lms/lms/templates/banned.html:13
 msgid "For more details please contact the management team."
 msgstr "לפרטים נוספים אנא פנה אל צוות הניהול."
 
-#: templates/base.html:6
+#: /home/yam/projects/lms/lms/templates/base.html:6
 msgid "Exercise submission system for the Python Course"
 msgstr "מערכת הגשת תרגילים לקורס פייתון"
 
-#: templates/change-password.html:8 templates/change-password.html:17
-#: templates/user.html:19
+#: /home/yam/projects/lms/lms/templates/change-password.html:8
+#: /home/yam/projects/lms/lms/templates/change-password.html:17
+#: /home/yam/projects/lms/lms/templates/user.html:19
 msgid "Change Password"
 msgstr "שנה סיסמה"
 
-#: templates/change-password.html:10
+#: /home/yam/projects/lms/lms/templates/change-password.html:10
 msgid "Insert current password and new password for changing it:"
 msgstr "הזינו סיסמה ישנה וסיסמה חדשה לצורך שינוי הסיסמה:"
 
-#: templates/change-password.html:13
+#: /home/yam/projects/lms/lms/templates/change-password.html:13
 msgid "Current password"
 msgstr "סיסמה נוכחית"
 
-#: templates/change-password.html:14 templates/login.html:28
-#: templates/login.html:30 templates/recover-password.html:14
-#: templates/signup.html:18
+#: /home/yam/projects/lms/lms/templates/change-password.html:14
+#: /home/yam/projects/lms/lms/templates/login.html:28
+#: /home/yam/projects/lms/lms/templates/login.html:30
+#: /home/yam/projects/lms/lms/templates/recover-password.html:14
+#: /home/yam/projects/lms/lms/templates/signup.html:18
 msgid "Password"
 msgstr "סיסמה"
 
-#: templates/change-password.html:15 templates/recover-password.html:15
-#: templates/signup.html:19
+#: /home/yam/projects/lms/lms/templates/change-password.html:15
+#: /home/yam/projects/lms/lms/templates/recover-password.html:15
+#: /home/yam/projects/lms/lms/templates/signup.html:19
 msgid "Password Confirmation"
 msgstr "אימות סיסמה"
 
-#: templates/exercises.html:8
+#: /home/yam/projects/lms/lms/templates/exercises.html:8
 msgid "Exercises"
 msgstr "תרגילים"
 
-#: templates/exercises.html:21 templates/view.html:126
+#: /home/yam/projects/lms/lms/templates/exercises.html:21
 msgid "Comments for the solution"
 msgstr "הערות על התרגיל"
 
-#: templates/exercises.html:30
+#: /home/yam/projects/lms/lms/templates/exercises.html:30
 msgid "Send"
 msgstr "שלח"
 
-#: templates/exercises.html:32
+#: /home/yam/projects/lms/lms/templates/exercises.html:32
 msgid "View"
 msgstr "הצצה"
 
-#: templates/exercises.html:34
+#: /home/yam/projects/lms/lms/templates/exercises.html:34
 msgid "Check"
 msgstr "לבדיקה"
 
-#: templates/exercises.html:53
+#: /home/yam/projects/lms/lms/templates/exercises.html:53
 msgid "All Exercises"
 msgstr "לכל התרגילים"
 
-#: templates/login.html:8 templates/login.html:35
+#: /home/yam/projects/lms/lms/templates/login.html:8
+#: /home/yam/projects/lms/lms/templates/login.html:35
 msgid "Login"
 msgstr "התחברות"
 
-#: templates/login.html:10 templates/signup.html:11
+#: /home/yam/projects/lms/lms/templates/login.html:10
+#: /home/yam/projects/lms/lms/templates/signup.html:11
 msgid "Welcome to the exercise system!"
 msgstr "ברוכים הבאים למערכת התרגילים!"
 
-#: templates/login.html:11
+#: /home/yam/projects/lms/lms/templates/login.html:11
 msgid "Insert your username and password:"
 msgstr "הזינו את שם המשתמש והסיסמה שלכם:"
 
-#: templates/login.html:22 templates/login.html:24 templates/signup.html:16
-#: templates/user.html:11
+#: /home/yam/projects/lms/lms/templates/login.html:22
+#: /home/yam/projects/lms/lms/templates/login.html:24
+#: /home/yam/projects/lms/lms/templates/signup.html:16
+#: /home/yam/projects/lms/lms/templates/user.html:11
 msgid "Username"
 msgstr "שם משתמש"
 
-#: templates/login.html:37
+#: /home/yam/projects/lms/lms/templates/login.html:37
 msgid "Forgot your password?"
 msgstr "שכחת את הסיסמה?"
 
-#: templates/login.html:40 templates/signup.html:22
+#: /home/yam/projects/lms/lms/templates/login.html:40
+#: /home/yam/projects/lms/lms/templates/signup.html:22
 msgid "Register"
 msgstr "הירשם"
 
-#: templates/navbar.html:21
+#: /home/yam/projects/lms/lms/templates/navbar.html:21
 msgid "Messages"
 msgstr "הודעות"
 
-#: templates/navbar.html:37
+#: /home/yam/projects/lms/lms/templates/navbar.html:37
 msgid "Mark all as read"
 msgstr "סמן הכל כנקרא"
 
-#: templates/navbar.html:45
+#: /home/yam/projects/lms/lms/templates/navbar.html:45
 msgid "Courses List"
 msgstr "רשימת הקורסים"
 
-#: templates/navbar.html:65
+#: /home/yam/projects/lms/lms/templates/navbar.html:65
 msgid "Upload Exercises"
 msgstr "העלאת תרגילים"
 
-#: templates/navbar.html:73
+#: /home/yam/projects/lms/lms/templates/navbar.html:73
 msgid "Exercises List"
 msgstr "רשימת התרגילים"
 
-#: templates/navbar.html:81
+#: /home/yam/projects/lms/lms/templates/navbar.html:81
 msgid "Exercises Archive"
 msgstr "ארכיון התרגילים"
 
-#: templates/navbar.html:91
+#: /home/yam/projects/lms/lms/templates/navbar.html:91
 msgid "Check Exercises"
 msgstr "בדוק תרגילים"
 
-#: templates/navbar.html:98
+#: /home/yam/projects/lms/lms/templates/navbar.html:98
 msgid "Logout"
 msgstr "התנתקות"
 
-#: templates/public-courses.html:6
+#: /home/yam/projects/lms/lms/templates/public-courses.html:6
 msgid "Public Courses List"
 msgstr "רשימת קורסים פתוחים"
 
-#: templates/recover-password.html:9 templates/recover-password.html:17
-#: templates/reset-password.html:9
+#: /home/yam/projects/lms/lms/templates/recover-password.html:9
+#: /home/yam/projects/lms/lms/templates/recover-password.html:17
+#: /home/yam/projects/lms/lms/templates/reset-password.html:9
 msgid "Reset Password"
 msgstr "אפס סיסמה"
 
-#: templates/recover-password.html:11
+#: /home/yam/projects/lms/lms/templates/recover-password.html:11
 msgid "Insert password for changing it:"
 msgstr "הזינו סיסמה לצורך שינוי הסיסמה:"
 
-#: templates/reset-password.html:11
+#: /home/yam/projects/lms/lms/templates/reset-password.html:11
 msgid "Insert your email for getting link to reset it:"
 msgstr "הזינו מייל לצורך שליחת קישור לאיפוס הסיסמה:"
 
-#: templates/reset-password.html:14 templates/signup.html:15
-#: templates/user.html:12
+#: /home/yam/projects/lms/lms/templates/reset-password.html:14
+#: /home/yam/projects/lms/lms/templates/signup.html:15
+#: /home/yam/projects/lms/lms/templates/user.html:12
 msgid "Email Address"
 msgstr "כתובת אימייל"
 
-#: templates/reset-password.html:15
+#: /home/yam/projects/lms/lms/templates/reset-password.html:15
 msgid "Send Reset Password Link"
 msgstr "שלח מייל איפוס סיסמה"
 
-#: templates/reset-password.html:18 templates/signup.html:25
+#: /home/yam/projects/lms/lms/templates/reset-password.html:18
+#: /home/yam/projects/lms/lms/templates/signup.html:25
 msgid "Back to login page"
 msgstr "חזרה לדף ההתחברות"
 
-#: templates/signup.html:9
+#: /home/yam/projects/lms/lms/templates/signup.html:9
 msgid "Registration"
 msgstr "הרשמה"
 
-#: templates/signup.html:12
+#: /home/yam/projects/lms/lms/templates/signup.html:12
 msgid "Insert your email and password for registration:"
 msgstr "הזינו מייל וסיסמה לצורך רישום למערכת:"
 
-#: templates/signup.html:17
+#: /home/yam/projects/lms/lms/templates/signup.html:17
 msgid "Full Name"
 msgstr "שם מלא"
 
-#: templates/status.html:7
+#: /home/yam/projects/lms/lms/templates/status.html:7
 msgid "Exercises operations room"
 msgstr "חמ\"ל תרגילים"
 
-#: templates/status.html:12
+#: /home/yam/projects/lms/lms/templates/status.html:12
 msgid "Name"
 msgstr "שם"
 
-#: templates/status.html:13 templates/user.html:47
+#: /home/yam/projects/lms/lms/templates/status.html:13
+#: /home/yam/projects/lms/lms/templates/submissions-table.html:38
+#: /home/yam/projects/lms/lms/templates/user.html:47
 msgid "Checked"
 msgstr "נבדקו"
 
-#: templates/status.html:14
+#: /home/yam/projects/lms/lms/templates/status.html:14
 msgid "Solved"
 msgstr "נפתרו"
 
-#: templates/status.html:15
+#: /home/yam/projects/lms/lms/templates/status.html:15
 msgid "Percentage"
 msgstr "באחוזים"
 
-#: templates/status.html:16
+#: /home/yam/projects/lms/lms/templates/status.html:16
 msgid "Measurement"
 msgstr "מדד"
 
-#: templates/status.html:31
+#: /home/yam/projects/lms/lms/templates/status.html:31
 msgid "Archive"
 msgstr "ארכיון"
 
-#: templates/upload.html:7
-msgid "Upload Notebooks"
-msgstr "העלאת מחברות"
+#: /home/yam/projects/lms/lms/templates/submissions-table.html:6
+#, fuzzy
+msgid "Submissions table"
+msgstr "מצב הגשה"
 
-#: templates/upload.html:11
-msgid "Drag here the notebook file or click and choose it from your computer."
-msgstr "גררו לכאן את קובץ המחברת, או לחצו ובחרו אותה מהמחשב שלכם."
-
-#: templates/upload.html:14
-msgid "Back to Exercises List"
-msgstr "חזרו לרשימת התרגילים"
-
-#: templates/upload.html:17
-msgid "Matches"
-msgstr "הועלו"
-
-#: templates/upload.html:18
-msgid "Misses"
-msgstr "נכשלו"
-
-#: templates/user.html:9
-msgid "User details"
-msgstr "פרטי משתמש"
-
-#: templates/user.html:16
-msgid "Actions"
-msgstr "פעולות"
-
-#: templates/user.html:21
-msgid "Join Courses"
-msgstr "הירשם לקורסים"
-
-#: templates/user.html:27
-msgid "Exercises Submitted"
-msgstr "תרגילים שהוגשו"
-
-#: templates/user.html:32
-msgid "Course name"
-msgstr "שם קורס"
-
-#: templates/user.html:33
+#: /home/yam/projects/lms/lms/templates/submissions-table.html:10
+#: /home/yam/projects/lms/lms/templates/user.html:33
 msgid "Exercise name"
 msgstr "שם תרגיל"
 
-#: templates/user.html:34
-msgid "Submission status"
-msgstr "מצב הגשה"
+#: /home/yam/projects/lms/lms/templates/submissions-table.html:31
+msgid "By"
+msgstr "על־ידי"
 
-#: templates/user.html:35
-msgid "Submission"
-msgstr "הגשה"
-
-#: templates/user.html:36
-msgid "Checker"
-msgstr "בודק"
-
-#: templates/user.html:37 templates/view.html:25 templates/view.html:112
-msgid "Assessment"
-msgstr "הערכה מילולית"
-
-#: templates/user.html:47
+#: /home/yam/projects/lms/lms/templates/submissions-table.html:34
+#: /home/yam/projects/lms/lms/templates/user.html:47
 msgid "Submitted"
 msgstr "הוגש"
 
-#: templates/user.html:47
+#: /home/yam/projects/lms/lms/templates/submissions-table.html:36
+#, fuzzy
+msgid "Checking..."
+msgstr "סיים לבדוק"
+
+#: /home/yam/projects/lms/lms/templates/submissions-table.html:40
+msgid "Error? This is an old solution"
+msgstr "שגיאה? זהו פתרון ישן"
+
+#: /home/yam/projects/lms/lms/templates/upload.html:7
+msgid "Upload Notebooks"
+msgstr "העלאת מחברות"
+
+#: /home/yam/projects/lms/lms/templates/upload.html:11
+msgid "Drag here the notebook file or click and choose it from your computer."
+msgstr "גררו לכאן את קובץ המחברת, או לחצו ובחרו אותה מהמחשב שלכם."
+
+#: /home/yam/projects/lms/lms/templates/upload.html:14
+msgid "Back to Exercises List"
+msgstr "חזרו לרשימת התרגילים"
+
+#: /home/yam/projects/lms/lms/templates/upload.html:17
+msgid "Matches"
+msgstr "הועלו"
+
+#: /home/yam/projects/lms/lms/templates/upload.html:18
+msgid "Misses"
+msgstr "נכשלו"
+
+#: /home/yam/projects/lms/lms/templates/user.html:9
+msgid "User details"
+msgstr "פרטי משתמש"
+
+#: /home/yam/projects/lms/lms/templates/user.html:16
+msgid "Actions"
+msgstr "פעולות"
+
+#: /home/yam/projects/lms/lms/templates/user.html:21
+msgid "Join Courses"
+msgstr "הירשם לקורסים"
+
+#: /home/yam/projects/lms/lms/templates/user.html:27
+msgid "Exercises Submitted"
+msgstr "תרגילים שהוגשו"
+
+#: /home/yam/projects/lms/lms/templates/user.html:32
+msgid "Course name"
+msgstr "שם קורס"
+
+#: /home/yam/projects/lms/lms/templates/user.html:34
+msgid "Submission status"
+msgstr "מצב הגשה"
+
+#: /home/yam/projects/lms/lms/templates/user.html:35
+msgid "Submission"
+msgstr "הגשה"
+
+#: /home/yam/projects/lms/lms/templates/user.html:36
+msgid "Checker"
+msgstr "בודק"
+
+#: /home/yam/projects/lms/lms/templates/user.html:37
+#: /home/yam/projects/lms/lms/templates/view.html:25
+#: /home/yam/projects/lms/lms/templates/view.html:114
+msgid "Assessment"
+msgstr "הערכה מילולית"
+
+#: /home/yam/projects/lms/lms/templates/user.html:47
 msgid "Not submitted"
 msgstr "לא הוגש"
 
-#: templates/user.html:59
+#: /home/yam/projects/lms/lms/templates/user.html:59
 msgid "Notes"
 msgstr "פתקיות"
 
-#: templates/user.html:64 templates/user.html:66
+#: /home/yam/projects/lms/lms/templates/user.html:64
+#: /home/yam/projects/lms/lms/templates/user.html:66
 msgid "New Note"
 msgstr "פתקית חדשה"
 
-#: templates/user.html:70
+#: /home/yam/projects/lms/lms/templates/user.html:70
 msgid "Related Exercise"
 msgstr "עבור תרגיל"
 
-#: templates/user.html:79
+#: /home/yam/projects/lms/lms/templates/user.html:79
 msgid "Privacy Level"
 msgstr "רמת פרטיות"
 
-#: templates/user.html:85
+#: /home/yam/projects/lms/lms/templates/user.html:85
 msgid "Add Note"
 msgstr "הוסף פתקית"
 
-#: templates/view.html:6
+#: /home/yam/projects/lms/lms/templates/view.html:6
 msgid "Exercise view"
 msgstr "תצוגת תרגיל"
 
-#: templates/view.html:9
+#: /home/yam/projects/lms/lms/templates/view.html:9
 msgid "Your solution had checked!"
 msgstr "התרגיל שלך נבדק!"
 
-#: templates/view.html:9
+#: /home/yam/projects/lms/lms/templates/view.html:9
 msgid "Click on the red lines in order to see the comments."
 msgstr "לחצו על השורות האדומות כדי לראות את הערות הבודקים."
 
-#: templates/view.html:11
+#: /home/yam/projects/lms/lms/templates/view.html:11
 msgid "Your solution is being checked in these moments!"
 msgstr "התרגיל שלך נבדק ברגעים אלו!"
 
-#: templates/view.html:13
+#: /home/yam/projects/lms/lms/templates/view.html:13
 msgid "This solution is not up to date!"
 msgstr "פתרון זה אינו עדכני!"
 
-#: templates/view.html:15
+#: /home/yam/projects/lms/lms/templates/view.html:15
 msgid "Your solution hasn't been checked."
 msgstr "הפתרון שלך עדיין לא נבדק."
 
-#: templates/view.html:15
+#: /home/yam/projects/lms/lms/templates/view.html:15
 msgid "It's important for us that all exercises will be checked by human eye."
 msgstr "חשוב לנו שכל תרגיל יעבור בדיקה של עין אנושית."
 
-#: templates/view.html:19
+#: /home/yam/projects/lms/lms/templates/view.html:19
 msgid "Solver"
 msgstr "מגיש"
 
-#: templates/view.html:32
+#: /home/yam/projects/lms/lms/templates/view.html:32
 msgid "Navigate in solution versions"
 msgstr "ניווט בגרסאות ההגשה"
 
-#: templates/view.html:38
+#: /home/yam/projects/lms/lms/templates/view.html:38
 msgid "Current page"
 msgstr "סיסמה נוכחית"
 
-#: templates/view.html:46
+#: /home/yam/projects/lms/lms/templates/view.html:46
 msgid "Finish Checking"
 msgstr "סיום בדיקה"
 
-#: templates/view.html:86
+#: /home/yam/projects/lms/lms/templates/view.html:86
 msgid "Automatic Checking"
 msgstr "בדיקות אוטומטיות"
 
-#: templates/view.html:93
+#: /home/yam/projects/lms/lms/templates/view.html:93
 msgid "Error"
 msgstr "כישלון"
 
-#: templates/view.html:98
+#: /home/yam/projects/lms/lms/templates/view.html:98
 msgid "Staff Error"
 msgstr "כישלון סגל"
 
-#: templates/view.html:134
-msgid "General comments"
-msgstr "הערות כלליות"
+#: /home/yam/projects/lms/lms/templates/view.html:130
+#, fuzzy
+msgid "Comments for this exercise"
+msgstr "הערות על התרגיל"
 
-#: templates/view.html:142
-msgid "Checker comments"
-msgstr "הערות בודק"
-
-#: templates/view.html:152
+#: /home/yam/projects/lms/lms/templates/view.html:138
 msgid "Done Checking"
 msgstr "סיים לבדוק"
 
-#: utils/mail.py:25
+#: /home/yam/projects/lms/lms/utils/mail.py:25
 #, python-format
 msgid "Confirmation mail - %(site_name)s"
 msgstr "הודעת אימות - %(site_name)s"
 
-#: utils/mail.py:32
+#: /home/yam/projects/lms/lms/utils/mail.py:32
 #, python-format
 msgid ""
 "Hello %(fullname)s,\n"
@@ -494,12 +541,12 @@ msgstr ""
 "שלום %(fullname)s,\n"
 "קישור האימות שלך למערכת הוא: %(link)s"
 
-#: utils/mail.py:42
+#: /home/yam/projects/lms/lms/utils/mail.py:42
 #, python-format
 msgid "Reset password mail - %(site_name)s"
 msgstr "הודעה על איפוס סיסמה - %(site_name)s"
 
-#: utils/mail.py:49
+#: /home/yam/projects/lms/lms/utils/mail.py:49
 #, python-format
 msgid ""
 "Hello %(fullname)s,\n"
@@ -508,18 +555,20 @@ msgstr ""
 "שלום %(fullname)s,\n"
 "הקישור לצורך איפוס הסיסמה שלך הוא: %(link)s"
 
-#: utils/mail.py:58
+#: /home/yam/projects/lms/lms/utils/mail.py:58
 #, python-format
 msgid "Changing password - %(site_name)s"
 msgstr "שינוי סיסמה - %(site_name)s"
 
-#: utils/mail.py:62
+#: /home/yam/projects/lms/lms/utils/mail.py:62
 #, python-format
 msgid ""
-"Hello %(fullname)s. Your password in %(site_name)s site has been changed.\n"
+"Hello %(fullname)s. Your password in %(site_name)s site has been changed."
+"\n"
 "If you didn't do it please contact with the site management.\n"
 "Mail address: %(site_mail)s"
 msgstr ""
 "שלום %(fullname)s. הסיסמה שלך באתר %(site_name)s שונתה.\n"
 "אם לא אתה שינית את הסיסמה, צור קשר עם הנהלת האתר.\n"
 "כתובת המייל שלך לפי רישומינו: %(site_mail)s"
+

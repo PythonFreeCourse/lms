@@ -1,29 +1,29 @@
 # Python's Course LMS
 
 <p align="center">
-  <img title="BSD-3 Clause" src="https://img.shields.io/github/license/PythonFreeCourse/LMS.svg">
-  <img title="Travis (.com) branch" src="https://img.shields.io/travis/com/PythonFreeCourse/LMS/master.svg">
+  <img title="BSD-3 Clause" src="https://img.shields.io/github/license/PythonFreeCourse/LMS.svg" alt="LMS License is BSD-3 Clause">
 </p>
 
 👋 Welcome to Python course learning management system. 🐍
 
 The system objectives -
 
-1. Allow teachers and mentors to input exercises list and provide feedback/comments to students exercises solutions.
+1. Allow teachers and mentors to input exercises list and provide feedback/comments
+   to students exercises solutions.
 2. Allow students to load their exercises solutions and get feedback to their work.
 
 ## Creating development environment
 
 ### Prerequisites
 
-1. Linux based system - either [WSL on windows](https://docs.microsoft.com/en-us/windows/wsl/install-win10) or full blown linux.
-2. [Python](https://www.python.org/downloads/release/python-385/)
-3. [Docker](https://docs.docker.com/docker-for-windows/install/) and docker-compose.
-
+1. Linux based system - either [WSL on windows](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
+   or full blown Linux.
+2. Latest Python version
+3. Docker
 
 ### Minimal setup
 
-This setup is for debug purposes and will use SQLite database and frontend only.
+This setup is for debug purposes and will use SQLite database and front-end only.
 
 Steps to do:
 
@@ -48,8 +48,8 @@ cd ..
 flask run  # Run in root directory
 ```
 
-After logging in, use [localhost admin](https://127.0.0.1:5000/admin) to modify entries in the database.
-
+After logging in, use [localhost admin](https://127.0.0.1:5000/admin)
+to modify entries in the database.
 
 ### Full setup
 
@@ -82,24 +82,33 @@ docker exec -it lms_http_1 bash
 python lmsdb/bootstrap.py
 ```
 
-Enter http://127.0.0.1:8080, and the initial credentials should appear in your terminal. :)
+Enter [http://127.0.0.1:8080], and the initial credentials should appear in
+your terminal. :)
 
-After logging in, use [localhost admin](https://127.0.0.1:8080/admin) to modify entries in the database.
+After logging in, use [localhost admin](https://127.0.0.1:8080/admin) to
+modify entries in the database.
 
 In case you want to enable the mail system:
 
 1. Insert your mail details in the configuration file.
 2. Change the `DISABLE_MAIL` line value to False.
 
-
 ## Code modification check list
 
-## Run flake8
+## Run Flake8
 
 ```bash
-# on lms root directory
+# on LMS root directory
 flake8 lms
 ```
+
+### Updating localization files
+
+```bash
+. devops/i18n.sh update
+```
+
+Then go to lms/lmsweb/translations to translate the strings, if needed.
 
 ### Run tests
 
