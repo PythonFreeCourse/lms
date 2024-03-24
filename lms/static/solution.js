@@ -32,6 +32,6 @@ function addLineSpansToPre(items) {
   window.dispatchEvent(new Event('lines-numbered'));
 }
 
-window.addEventListener('load', () => {
+window.addEventListener('defined-window-variables', () => {
   addLineSpansToPre(document.getElementsByTagName('code'));
 });

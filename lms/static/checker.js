@@ -59,7 +59,7 @@ function trackAssessmentButtons() {
   });
 }
 
-window.addEventListener('lines-numbered', () => {
+window.addEventListener('defined-window-variables', () => {
   trackFinished(window.exerciseId, window.solutionId, document.getElementById('save-check'));
   trackAssessmentButtons();
 });
