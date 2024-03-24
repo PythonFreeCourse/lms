@@ -338,6 +338,12 @@ def _linter_email_migration():
         log.info(f'{new_mail_address} already exists in User')
 
 
+def _add_is_model_solution_column() -> bool:
+    Solution = models.Solution
+    _migrate_column_in_table_if_needed(Solution, Solution.is_model_solution)
+    return True
+
+
 def is_tables_exists(tables: Union[Model, Iterable[Model]]) -> bool:
     if not isinstance(tables, (tuple, list)):
         tables = (tables,)
@@ -368,6 +374,8 @@ def main():
 
         _add_user_course_constaint()
         _linter_email_migration()
+
+        _add_is_model_solution_column()
 
         models.create_basic_roles()
         if models.User.select().count() == 0:
