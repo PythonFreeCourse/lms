@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-23 18:51+0200\n"
+"POT-Creation-Date: 2024-03-24 16:57+0200\n"
 "PO-Revision-Date: 2024-03-23 18:59+0300\n"
 "Last-Translator: Yam Mesicka\n"
 "Language: he\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: lms/lmsdb/models.py:998
+#: lms/lmsdb/models.py:1004
 msgid "Fatal error"
 msgstr "כישלון חמור"
 
@@ -312,8 +312,7 @@ msgstr "חמ\"ל תרגילים"
 msgid "Name"
 msgstr "שם"
 
-#: lms/templates/status.html:13 lms/templates/submissions-table.html:38
-#: lms/templates/user.html:47
+#: lms/templates/status.html:13 lms/templates/user.html:47
 msgid "Checked"
 msgstr "נבדקו"
 
@@ -336,28 +335,38 @@ msgstr "ארכיון"
 #: lms/templates/submissions-table.html:6
 #, fuzzy
 msgid "Submissions table"
-msgstr "מצב הגשה"
+msgstr "טבלת הגשות"
 
-#: lms/templates/submissions-table.html:10 lms/templates/user.html:33
+#: lms/templates/submissions-table.html:11 lms/templates/user.html:33
 msgid "Exercise name"
 msgstr "שם תרגיל"
 
-#: lms/templates/submissions-table.html:31
+#: lms/templates/submissions-table.html:32
 msgid "By"
 msgstr "על־ידי"
 
-#: lms/templates/submissions-table.html:34 lms/templates/user.html:47
+#: lms/templates/submissions-table.html:35 lms/templates/user.html:47
 msgid "Submitted"
 msgstr "הוגש"
 
-#: lms/templates/submissions-table.html:36
+#: lms/templates/submissions-table.html:37
 #, fuzzy
 msgid "Checking..."
 msgstr "בבדיקה..."
 
-#: lms/templates/submissions-table.html:40
+#: lms/templates/submissions-table.html:39
+#, fuzzy
+msgctxt "past_tense"
+msgid "Checked"
+msgstr "נבדק"
+
+#: lms/templates/submissions-table.html:41
 msgid "Error? This is an old solution"
 msgstr "שגיאה? זהו פתרון ישן"
+
+#: lms/templates/submissions-table.html:62
+msgid "Go to detailed status view"
+msgstr "לעמוד המצב המפורט"
 
 #: lms/templates/upload.html:7
 msgid "Upload Notebooks"

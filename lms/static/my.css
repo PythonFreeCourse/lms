@@ -650,6 +650,52 @@ code {
   display: flex;
 }
 
+#page-status table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#page-status table th,
+#page-status table td {
+  padding: 0.75rem;
+  text-align: center;
+  vertical-align: middle;
+  border: 1px solid #dee2e6;
+
+}
+
+#page-status .table thead th {
+  background-color: #e9ecef;
+  font-weight: bold;
+}
+
+#page-status table a {
+  text-decoration: none;
+  color: #333;
+}
+
+#page-status table a:hover {
+  background-color: #f8f9fa;
+}
+
+#page-status .already-checked { color: #28a745; }
+#page-status .in-the-checking { color: #ffc107; }
+#page-status .waiting-for-check { color: #6c757d; }
+#page-status .oh-no-error { color: #dc3545; }
+
+#page-status .solution-assessment {
+  font-size: 0.9em;
+  margin-block-start: 0.5rem;
+}
+
+#page-status .fa {
+  margin-inline-end: 0.2rem;
+}
+
+#page-status .waiting-for-check-cell {
+  background-color: #fde2d2;
+}
+
 .btn-outline {
   color: var(--color);
   border-color: var(--color);
