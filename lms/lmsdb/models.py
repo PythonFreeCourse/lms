@@ -13,8 +13,9 @@ from uuid import uuid4
 from flask_babel import gettext as _  # type: ignore
 from flask_login import UserMixin, current_user  # type: ignore
 from peewee import (  # type: ignore
-    BooleanField, Case, CharField, Check, DateTimeField, ForeignKeyField,
-    IntegerField, JOIN, ManyToManyField, TextField, UUIDField, fn,
+    BooleanField, Case, CharField, Check, Database, DateTimeField,
+    ForeignKeyField, IntegerField, JOIN, ManyToManyField, Select, TextField,
+    UUIDField, fn,
 )
 from playhouse.signals import (  # type: ignore
     Model, post_delete, post_save, pre_save,
@@ -167,8 +168,85 @@ class Course(BaseModel):
     def public_course_exists(cls):
         return cls.public_courses().exists()
 
+    def get_students(self, fields=None) -> List[int]:
+        fields = fields or [User.id]
+
+        return (
+            self
+            .select(*fields)
+            .join(UserCourse)
+            .join(User, on=(User.id == UserCourse.user_id))
+            .join(Role)
+            .where(
+                (self.id == UserCourse.course_id)
+                & (Role.id == Role.get_student_role().id),
+            )
+        )
+
+    def get_exercise_ids(self) -> List[int]:
+        return [e.id for e in self.exercise]
+
+    def get_matrix(self, database: Database = database) -> dict:
+        SolutionAlias = Solution.alias()
+        fields = [
+            SolutionAlias.id.alias('solution_id'),
+            SolutionAlias.solver.id.alias('solver_id'),
+            SolutionAlias.exercise.id.alias('exercise_id'),
+        ]
+
+        query = (
+            User
+            .select(*fields)
+            .join(Exercise, JOIN.CROSS)
+            .join(Course, JOIN.LEFT_OUTER, on=(Exercise.course == Course.id))
+            .join(SolutionAlias, JOIN.LEFT_OUTER, on=(
+                (SolutionAlias.exercise == Exercise.id)
+                & (SolutionAlias.solver == User.id)
+            ))
+            .where(
+                (Exercise.id << self.exercise),
+                (User.id << self.get_students()),
+            )
+            .group_by(Exercise.id, User.id, SolutionAlias.id)
+            .having(
+                (SolutionAlias.id == fn.MAX(SolutionAlias.id))
+                | (SolutionAlias.id.is_null(True)),
+            )
+            .alias('solutions_subquery')
+        )
+
+        full_query_fields = [
+            query.c.solver_id,
+            query.c.exercise_id,
+            Solution.id.alias('solution_id'),
+            User.fullname.alias('checker'),
+            Solution.state,
+            Solution.submission_timestamp,
+            SolutionAssessment.name.alias('assessment'),
+            SolutionAssessment.icon.alias('assessment_icon'),
+        ]
+
+        solutions = (
+            Select(columns=full_query_fields)
+            .from_(query)
+            .join(Solution, JOIN.LEFT_OUTER, on=(
+                Solution.id == query.c.solution_id
+            ))
+            .join(SolutionAssessment, JOIN.LEFT_OUTER, on=(
+                (Solution.assessment == SolutionAssessment.id)
+            ))
+            .join(User, JOIN.LEFT_OUTER, on=(Solution.checker == User.id))
+        )
+
+        query_results = solutions.execute(database)
+
+        return {
+            (row['exercise_id'], row['solver_id']): row
+            for row in query_results
+        }
+
     def __str__(self):
-        return f'{self.name}: {self.date} - {self.end_date}'
+        return self.name
 
 
 class User(UserMixin, BaseModel):
@@ -180,6 +258,9 @@ class User(UserMixin, BaseModel):
     api_key = CharField()
     last_course_viewed = ForeignKeyField(Course, null=True)
     uuid = UUIDField(default=uuid4, unique=True)
+
+    class Meta:
+        table_name = "user"
 
     def get_id(self):
         return str(self.uuid)

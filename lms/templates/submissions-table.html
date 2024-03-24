@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block page_content %}
+  <div id="page-status" class="{{ direction }}">
+    <div id="status-head">
+      <h1>{{ _('Submissions table') }}</h1>
+      <div class="center">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">{{ _('Exercise name') }}</th>
+              {%- for user in users %}
+              <th scope="col">
+                <a href="{{ url_for('user', user_id=user.id) }}">
+                  {{ user.fullname | e }}
+                </a>
+              </th>
+              {% endfor -%}
+            </tr>
+          </thead>
+          <tbody>
+            {%- for exercise in exercises|rejectattr('is_archived') %}
+            <tr>
+              <th scope="row">{{ exercise.name | e }}</th>
+              {%- for user in users %}
+              {% set solution = solutions[(exercise.id, user.id)] %}
+              <td>
+                {%- if solution.solution_id and solution.state is not none %}
+                <div class="link-to-solution">
+                  <a
+                    href="{{ url_for("check_solution", solution_id=solution.solution_id) }}"
+                    title="{{ solution.submission_timestamp.strftime("%Y-%m-%d") }} {{ _("By") }} {{ solution.checker }}"
+                  >
+                    {% if solution.state == 'CREATED' %}
+                    <i class="fa fa-check-square"></i> {{ _('Submitted') }}
+                    {% elif solution.state == 'IN_CHECKING' %}
+                    <i class="fa fa-spinner fa-pulse"></i> {{ _('Checking...') }}
+                    {% elif solution.state == 'DONE' %}
+                    <i class="fa fa-thumbs-up"></i> {{ _('Checked') }}
+                    {% elif solution.state == 'OLD_SOLUTION' %}
+                      {{ _('Error? This is an old solution') }}
+                    {% elif solution.state is none %}
+                    {% endif %}
+                  </a>
+                </div>
+                {%- if solution.assessment %}
+                <div class="solution-assessment">
+                  <i class="fa fa-{{ solution.assessment_icon | e }}"></i>
+                  {{ solution.assessment | e }}
+                </div>
+                {% endif -%}
+                {% endif -%}
+              </td>
+            {% endfor -%}
+            </tr>
+          {% endfor -%}
+          </tbody>
+        </table>
+      </div>
+      <div class="{{ direction }}">
+        <a href="{{ url_for("status", course_id=course_id) }}">
+           {{ _('Go to detailed status view') }}
+        </a>
+      </div>
+    </div>
+  </div>
+{% endblock %}

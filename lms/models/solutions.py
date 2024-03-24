@@ -4,7 +4,7 @@ from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple, Union
 from zipfile import ZipFile
 
 from flask_babel import gettext as _  # type: ignore
-from flask_login import current_user  # type: ignore
+from flask_login import current_user
 from playhouse.shortcuts import model_to_dict  # type: ignore
 
 from lms.extractors.base import File
@@ -140,6 +140,10 @@ def get_view_parameters(
             **view_params,
             'exercise_common_comments':
                 comments._common_comments(exercise_id=solution.exercise),
+            'all_common_comments':
+                comments._common_comments(),
+            'user_comments':
+                comments._common_comments(user_id=current_user.id),
             'left': Solution.left_in_exercise(solution.exercise),
             'assessments':
                 SolutionAssessment.get_assessments(solution.exercise.course),

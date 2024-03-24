@@ -141,7 +141,7 @@ class UnitTestChecker:
             solution=self._solution,
             test_name=models.ExerciseTestName.FATAL_TEST_NAME,
             user_message=fail_user_message,
-            staff_message=_('Bro, did you check your code?'),
+            staff_message=_('Woah! Did you check your code?'),
         )
         notifications.send(
             kind=notifications.NotificationKind.UNITTEST_ERROR,

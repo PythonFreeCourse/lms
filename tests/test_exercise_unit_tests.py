@@ -70,8 +70,8 @@ class TestUTForExercise:
         assert "foo('bar') == 'barbaron'" in first.staff_message
 
     def test_register_two_exercises_with_same_name(
-            self,
-            course: models.Course,
+        self,
+        course: models.Course,
     ):
         ex1 = conftest.create_exercise(course, 0)
         ex2 = conftest.create_exercise(course, 0)
