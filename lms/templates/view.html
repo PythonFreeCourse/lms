@@ -146,10 +146,10 @@
   </div>
 </div>
 <script src="{{ url_for('static', filename='prism.js') }}"></script>
-{% if not shared_url %}
-{% include 'comment-template.html' %}
 <script src="{{ url_for('static', filename='purify.js') }}"></script>
 <script src="{{ url_for('static', filename='markdown.js') }}"></script>
+{% if not shared_url %}
+{% include 'comment-template.html' %}
 <script src="{{ url_for('static', filename='comments.js') }}"></script>
 {%- if is_manager or config.USERS_COMMENTS %}
 <script src="{{ url_for('static', filename='grader.js') }}"></script>
