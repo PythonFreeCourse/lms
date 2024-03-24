@@ -5,7 +5,7 @@
     <div id="status-head">
       <h1>{{ _('Submissions table') }}</h1>
       <div class="center">
-        <table class="table">
+        <table class="table text-center">
           <thead>
             <tr>
               <th scope="col">{{ _('Exercise name') }}</th>
@@ -24,7 +24,7 @@
               <th scope="row">{{ exercise.name | e }}</th>
               {%- for user in users %}
               {% set solution = solutions[(exercise.id, user.id)] %}
-              <td>
+              <td class="{% if solution.state == 'CREATED' %}waiting-for-check-cell{% endif %}">
                 {%- if solution.solution_id and solution.state is not none %}
                 <div class="link-to-solution">
                   <a
@@ -32,13 +32,13 @@
                     title="{{ solution.submission_timestamp.strftime("%Y-%m-%d") }} {{ _("By") }} {{ solution.checker }}"
                   >
                     {% if solution.state == 'CREATED' %}
-                    <i class="fa fa-check-square"></i> {{ _('Submitted') }}
+                    <i class="fa fa-envelope waiting-for-check"></i> {{ _('Submitted') }}
                     {% elif solution.state == 'IN_CHECKING' %}
-                    <i class="fa fa-spinner fa-pulse"></i> {{ _('Checking...') }}
+                    <i class="fa fa-spinner fa-pulse in-the-checking"></i> {{ _('Checking...') }}
                     {% elif solution.state == 'DONE' %}
-                    <i class="fa fa-thumbs-up"></i> {{ _('Checked') }}
+                    <i class="fa fa-check-square already-checked"></i> {{ pgettext('past_tense', 'Checked') }}
                     {% elif solution.state == 'OLD_SOLUTION' %}
-                      {{ _('Error? This is an old solution') }}
+                    <i class="fa fa-exclamation-triangle oh-no-error"></i> {{ _('Error? This is an old solution') }}
                     {% elif solution.state is none %}
                     {% endif %}
                   </a>
