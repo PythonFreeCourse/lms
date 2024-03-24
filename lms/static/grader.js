@@ -176,7 +176,7 @@ function addNewCommentButtons(elements) {
 
 window.deleteComment = deleteComment;
 window.sendExistsComment = sendExistsComment;
-window.addEventListener('lines-numbered', () => {
+window.addEventListener('fully-loaded', () => {
   const codeView = document.getElementById('code-view');
   const lineItems = codeView.getElementsByClassName('line');
   addNewCommentButtons(lineItems);

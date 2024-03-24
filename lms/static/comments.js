@@ -240,6 +240,7 @@ window.markLine = markLine;
 window.removeMark = removeMark;
 window.hoverLine = hoverLine;
 window.addCommentToLine = addCommentToLine;
+
 window.addEventListener('load', () => {
   const codeElementData = document.getElementById('code-view').dataset;
   window.solutionId = codeElementData.id;
@@ -250,6 +251,11 @@ window.addEventListener('load', () => {
   sessionStorage.setItem('solverId', codeElementData.solverId);
   sessionStorage.setItem('allowedComment', codeElementData.allowedComment);
   customElements.define('comment-line', LineComment);
+  window.dispatchEvent(new Event('defined-window-variables'));
+});
+
+window.addEventListener('lines-numbered', () => {
   configureMarkdownParser();
   pullComments(window.fileId, treatComments);
+  window.dispatchEvent(new Event('fully-loaded'));
 });
