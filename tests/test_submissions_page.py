@@ -1,4 +1,3 @@
-from lms.lmsdb.models import Course
 from tests import conftest
 
 
@@ -45,7 +44,14 @@ class TestSubmissionsPage:
         cls.s5 = solution(cls.ex2_1, cls.user1)
 
     @classmethod
-    def test_we_get_users_x_exercises_results(cls, db_in_memory):
-        all_solutions = cls.course1.get_matrix(db_in_memory)
+    def test_we_get_users_x_exercises_results(cls, db):
+        all_solutions = cls.course1.get_matrix(db)
         solution_count = len(cls.user_ids) * len(cls.exercise_ids)
         assert len(all_solutions) == solution_count
+
+        assert len(cls.course2.get_matrix(db)) == 0
+
+        students_count = len(cls.course3.get_students())
+        exercise_count = len(cls.course3.get_exercise_ids())
+        solution_count = students_count * exercise_count
+        assert len(cls.course3.get_matrix(db)) == solution_count

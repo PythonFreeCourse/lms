@@ -100,6 +100,26 @@ def enable_registration():
     webapp.config['REGISTRATION_OPEN'] = True
 
 
+@pytest.fixture
+def user_client(student_user) -> FlaskClient:
+    client = webapp.test_client()
+    client.post('/login', data={  # noqa: S106
+        'username': student_user.username,
+        'password': FAKE_PASSWORD,
+    }, follow_redirects=True)
+    return client
+
+
+@pytest.fixture
+def admin_client(admin_user) -> FlaskClient:
+    client = webapp.test_client()
+    client.post('/login', data={  # noqa: S106
+        'username': admin_user.username,
+        'password': FAKE_PASSWORD,
+    }, follow_redirects=True)
+    return client
+
+
 def disable_shareable_solutions():
     webapp.config['SHAREABLE_SOLUTIONS'] = False
 
@@ -283,10 +303,10 @@ def create_notification(
     )
 
 
-def create_course(index: int = 0) -> Course:
+def create_course(index: int = 0, name: str | None = None) -> Course:
     return Course.create(
         number=index,
-        name=f'course {index}',
+        name=name or f'course {index}',
         date=datetime.datetime.now(),
     )
 

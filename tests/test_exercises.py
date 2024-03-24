@@ -1,6 +1,7 @@
 import datetime
 
 from lms.lmsdb.models import Course, Exercise, User
+from lms.models import exercises
 from tests import conftest
 
 
@@ -52,3 +53,24 @@ class TestExercise:
         template, _ = captured_templates[-1]
         assert template.name == 'exercises.html'
         assert len(list(Exercise.get_objects(student_user.id))) == 2
+
+    @staticmethod
+    def test_get_basic_exercises_view():
+        basic_view = exercises.get_basic_exercises_view
+        assert len(basic_view(course_id=None)) == 0
+
+        course1 = conftest.create_course(index=1)
+        course2 = conftest.create_course(index=2)
+        assert len(basic_view(course_id=None)) == 0
+
+        ex = [conftest.create_exercise(course1, i) for i in range(3)]
+        assert len(basic_view(course_id=None)) == 3
+        assert len(basic_view(course_id=course1.id)) == 3
+        assert len(basic_view(course_id=course2.id)) == 0
+        assert basic_view(course_id=None)[0].id == ex[0].id
+
+        ex2 = [conftest.create_exercise(course2, i) for i in range(3, 6)]
+        assert len(basic_view(course_id=None)) == 6
+        assert len(basic_view(course_id=course1.id)) == 3
+        assert len(basic_view(course_id=course2.id)) == 3
+        assert basic_view(course_id=2)[0].id == ex2[0].id

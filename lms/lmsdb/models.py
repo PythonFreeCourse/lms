@@ -246,7 +246,7 @@ class Course(BaseModel):
         }
 
     def __str__(self):
-        return f'{self.name}: {self.date} - {self.end_date}'
+        return self.name
 
 
 class User(UserMixin, BaseModel):
