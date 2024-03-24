@@ -1,25 +1,15 @@
 function updateOpenedSpans(currentSpans, line) {
-  /* Because we have each line wrapped in it's own span, we must close
-   * all the opened spans in this specific line and re-open them in the next
-   * line. This function help us to manage the state of open span tags.
+  /* This function manages the state of open span tags by using regular expressions
+   * to find span tags and adjust the currentSpans array accordingly.
    */
-  let isCatching = false;
-  let phrase = '';
-  for (let i = 0; i < line.length; i += 1) {
-    const c = line[i];
-    if (c === '>') {
-      isCatching = false;
-      phrase = `<${phrase}>`;
-      if (phrase === '</span>') {
-        currentSpans.pop();
-      } else if (phrase.startsWith('<span')) {
-        currentSpans.push(phrase);
-      }
-      phrase = '';
-    } else if (c === '<') {
-      isCatching = true;
-    } else if (isCatching) {
-      phrase += c;
+  const spanRegex = /<span[^>]*>|<\/span>/g;
+  let match;
+
+  while ((match = spanRegex.exec(line)) !== null) {
+    if (match[0] === '</span>') {
+      currentSpans.pop();
+    } else {
+      currentSpans.push(match[0]);
     }
   }
 }
