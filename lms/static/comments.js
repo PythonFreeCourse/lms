@@ -241,7 +241,7 @@ function configureMarkdownParser() {
           .replace(/&gt;/g, '>')
           .replace(/&amp;/g, '&')
         );
-        return `<code>${parsed}</code>`;
+        return `<code class="d-inline-block">${parsed}</code>`;
       },
     },
   });
