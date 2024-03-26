@@ -231,6 +231,17 @@ function configureMarkdownParser() {
       code: (code, infoString, _) => {
         const language = infoString || 'plaintext';
         return `<pre><code class="language-${language}">${code}</code></pre>`;
+      },
+      codespan: (code) => {
+        const parsed = (
+          code
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'")
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&amp;/g, '&')
+        );
+        return `<code>${parsed}</code>`;
       }
     },
   });
