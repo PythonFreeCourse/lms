@@ -242,7 +242,7 @@ function configureMarkdownParser() {
           .replace(/&amp;/g, '&')
         );
         return `<code>${parsed}</code>`;
-      }
+      },
     },
   });
 }
