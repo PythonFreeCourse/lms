@@ -1,6 +1,5 @@
 import inspect
 import os
-import typing
 import sys
 import importlib
 
@@ -11,19 +10,22 @@ from lms.utils.log import log
 BASE_DIR = os.path.abspath(os.path.join(__file__, '../../../../../'))
 
 
-def register_test_class(file_path: str, test_class: typing.ClassVar):
+def register_test_class(file_path: str, test_class):
+    log.debug(f'Registering test class {test_class=}')
     subject = test_class.__doc__
     exercises = tuple(
         models.Exercise.filter(models.Exercise.subject == subject),
     )
     if not exercises:
-        log.info(f'Failed to find exercises for subject {subject}')
+        log.info(f'Failed to find exercises for {subject=}')
         raise SystemError
 
     with open(file_path, 'r') as file_reader:
         code = file_reader.read()
 
     for exercise in exercises:
+        course = exercise.course
+        log.info(f'Registering {test_class=} for {exercise=} of {course=}')
         exercise_test = models.ExerciseTest.get_or_create_exercise_test(
             exercise=exercise,
             code=code,
@@ -45,8 +47,10 @@ def load_tests_from_path(file_path: str):
         for root, _, files in os.walk(file_path):
             for file in files:
                 if file.startswith('test_') and file.endswith('.py'):
+                    log.debug(f'Loading test from {os.path.join(root, file)}')
                     load_test_from_module(os.path.join(root, file))
     elif os.path.isfile(file_path):
+        log.debug(f'Loading test from {file_path}')
         load_test_from_module(file_path)
 
 
@@ -55,13 +59,21 @@ def load_test_from_module(file_path: str):
     response = importlib.import_module(
         relative_path.replace('.py', '').replace('/', '.'))
     for potential_test in inspect.getmembers(response):
+        log.debug(f'Potential test: {potential_test}')
         potential_test = potential_test[0]
         potential_test_cls = getattr(response, potential_test)
         if potential_test.startswith('Test'):
+            log.debug(f'Registering test class {potential_test}')
             register_test_class(file_path, potential_test_cls)
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print('python load_tests.py test-module-path')  # noqa: T201
+        exit(-1)
+    if not os.path.exists(sys.argv[1]):
+        print(f"Path {sys.argv[1]} doesn't exists")  # noqa: T201
+        exit(-1)
+    if "-X" in sys.argv:
+        log.configure(handlers=[{"sink": sys.stdout, "level": "DEBUG"}])
     load_tests_from_path(file_path=sys.argv[1])
