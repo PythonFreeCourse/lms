@@ -624,6 +624,7 @@ class Solution(BaseModel):
     exercise = ForeignKeyField(Exercise, backref='solutions')
     solver = ForeignKeyField(User, backref='solutions')
     checker = ForeignKeyField(User, null=True, backref='solutions')
+    is_key_answer = BooleanField(default=False)
     state = CharField(
         choices=STATES.to_choices(),
         default=STATES.CREATED.name,
