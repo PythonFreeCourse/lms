@@ -90,8 +90,8 @@
               {%- for test_result in test_results %}
               <li class="test-result">
                   <div class="test-header">
-                      <span class="test-status failure">{{ _('Test failed') }}: </span>
                       <span class="test-name">{{ test_result.pretty_test_name | e }}</span>
+                      <span class="test-status failure">{{ _('Test failed') }}</span>
                   </div>
                   <div class="test-description">
                       <span class="error-description">{{ test_result.user_message | e }}</span>
