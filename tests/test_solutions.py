@@ -686,3 +686,15 @@ class TestSolutionBridge:
         exercises = solution.of_user(student_user.id, from_all_courses=True)
         assert exercises[0].get('assessment') is None
         assert exercises[1].get('assessment') == 'Try again'
+
+    @staticmethod
+    def test_get_solution_summary(solution: Solution, staff_user: User):
+        summary = Solution._get_summary(solution)
+        assert summary.get('assessment') is None
+        assert summary['solution_id'] == solution.id
+        assert not summary['is_checked']
+
+        solution.mark_as_checked(staff_user)
+        solution = Solution.get_by_id(solution.id)
+        summary = Solution._get_summary(solution)
+        assert summary['is_checked']

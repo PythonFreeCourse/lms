@@ -590,7 +590,7 @@ class SolutionAssessment(BaseModel):
     name = CharField()
     icon = CharField(null=True)
     color = CharField()
-    active_color = CharField()
+    active_color = CharField(default="#fff")
     order = IntegerField(default=0, index=True)
     course = ForeignKeyField(Course, backref='assessments')
 
@@ -718,6 +718,19 @@ class Solution(BaseModel):
     def test_results(self) -> Iterable[dict]:
         return SolutionExerciseTestExecution.by_solution(self)
 
+    @staticmethod
+    def _get_summary(solution: 'Solution') -> dict:
+        exercise = {}
+        exercise['solution_id'] = solution.id
+        exercise['is_checked'] = solution.is_checked
+        exercise['comments_num'] = len(solution.staff_comments)
+        if solution.is_checked and solution.checker:
+            exercise['checker'] = solution.checker.fullname
+        if solution.assessment:
+            exercise['assessment'] = solution.assessment.name
+            exercise['grade_color'] = solution.assessment.color
+        return exercise
+
     @classmethod
     def of_user(
         cls, user_id: int, with_archived: bool = False,
@@ -737,15 +750,10 @@ class Solution(BaseModel):
             .order_by(cls.submission_timestamp.desc())
         )
         for solution in solutions:
-            exercise = exercises[solution.exercise_id]
-            if exercise.get('solution_id') is None:
-                exercise['solution_id'] = solution.id
-                exercise['is_checked'] = solution.is_checked
-                exercise['comments_num'] = len(solution.staff_comments)
-                if solution.is_checked and solution.checker:
-                    exercise['checker'] = solution.checker.fullname
-                if solution.assessment:
-                    exercise['assessment'] = solution.assessment.name
+            id_ = solution.exercise_id
+            if exercises[id_].get('solution_id') is None:
+                exercises[id_].update(cls._get_summary(solution))
+
         return tuple(exercises.values())
 
     @property
@@ -1244,11 +1252,20 @@ def create_basic_roles() -> None:
 
 def create_basic_assessments() -> None:
     assessments_dict = {
-        'Excellent': {'color': 'green', 'icon': 'star', 'order': 1},
-        'Nice': {'color': 'blue', 'icon': 'check', 'order': 2},
-        'Try again': {'color': 'red', 'icon': 'exclamation', 'order': 3},
+        'Excellent': {
+            'color': 'green', 'icon': 'star', 'order': 1,
+        },
+        'Nice': {
+            'color': 'blue', 'icon': 'check', 'order': 2,
+        },
+        'Try again': {
+            'color': 'red', 'icon': 'exclamation', 'order': 3,
+        },
+        'Invalid': {
+            'color': 'red', 'icon': 'ban', 'order': 4,
+        },
         'Plagiarism': {
-            'color': 'black', 'icon': 'exclamation-triangle', 'order': 4,
+            'color': 'black', 'icon': 'exclamation-triangle', 'order': 5,
         },
     }
     courses = Course.select()

@@ -10,16 +10,12 @@
     </div>
     <div id="exercises">
       {%- for exercise in exercises %}
-      <div class="exercise">
+      <div class="exercise" {%- if exercise.grade_color %} style="border-right: 8px solid {{ exercise.grade_color }};" {%- endif -%}>
         <div class="right-side {{ direction }}-language">
           <div class="exercise-number me-3">{{ exercise['exercise_number'] }}</div>
           <div class="exercise-name"><div class="ex-title">{{ exercise['exercise_name'] | e }}</div></div>
         </div>
         <div class="left-side">
-          <div class="comments-count">
-            <span class="badge bg-secondary">{{ exercise['comments_num'] }}</span>
-            <span class="visually-hidden">{{ _("Comments for the solution") }}</span>
-          </div>
           {%- if exercise['notebook'] %}
           <div class="which-notebook">
             <i class="fa fa-book" aria-hidden="true"></i>
@@ -39,11 +35,6 @@
             <i class="fa fa-{{ details['icon'] }}" aria-hidden="true"></i>
           </a>
           {% endif -%}
-          {% if is_manager %}
-          <a class="our-button our-button-narrow go-grader" href="check/{{ exercise['exercise_id'] }}">
-            <i class="fa fa-graduation-cap" aria-hidden="true"></i>
-          </a>
-          {% endif %}
         </div>
       </div>
       {% endfor -%}
