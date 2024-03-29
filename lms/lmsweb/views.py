@@ -455,11 +455,11 @@ def change_last_course_viewed(course_id: int):
 @login_required
 def exercises_page():
     fetch_archived = bool(request.args.get("archived"))
-    solutions = Solution.of_user(current_user.id, fetch_archived)
+    exercises = Solution.of_user(current_user.id, fetch_archived)
     is_manager = current_user.role.is_manager
     return render_template(
         "exercises.html",
-        solutions=solutions,
+        exercises=exercises,
         is_manager=is_manager,
         fetch_archived=fetch_archived,
     )
