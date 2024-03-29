@@ -9,41 +9,32 @@
       </div>
     </div>
     <div id="exercises">
-      {%- for exercise in exercises %}
-      <div class="exercise">
+      {%- for solution in solutions %}
+      <div class="exercise" {%- if solution.grade_color %} style="border-right: 8px solid {{ solution.grade_color }};" {%- endif -%}>
         <div class="right-side {{ direction }}-language">
-          <div class="exercise-number me-3">{{ exercise['exercise_number'] }}</div>
-          <div class="exercise-name"><div class="ex-title">{{ exercise['exercise_name'] | e }}</div></div>
+          <div class="exercise-number me-3">{{ solution['exercise_number'] }}</div>
+          <div class="exercise-name"><div class="ex-title">{{ solution['exercise_name'] | e }}</div></div>
         </div>
         <div class="left-side">
-          <div class="comments-count">
-            <span class="badge bg-secondary">{{ exercise['comments_num'] }}</span>
-            <span class="visually-hidden">{{ _("Comments for the solution") }}</span>
-          </div>
-          {%- if exercise['notebook'] %}
+          {%- if solution['notebook'] %}
           <div class="which-notebook">
             <i class="fa fa-book" aria-hidden="true"></i>
-            {{ exercise['notebook'] }}
+            {{ solution['notebook'] }}
           </div>
           {%- endif %}
-          {%- if exercise.get('is_checked') is none %}
-            {% set details = {'page': 'send', 'icon': 'upload', 'text': _('Send'), 'css': 'send', 'page_id': exercise['course_id'] ~ '/' ~ exercise['exercise_id']} %}
-          {% elif not exercise.get('is_checked') %}
-            {% set details = {'page': 'view', 'icon': 'eye', 'text': _('View'), 'css': 'view', 'page_id': exercise['solution_id']} %}
+          {%- if solution.get('is_checked') is none %}
+            {% set details = {'page': 'send', 'icon': 'upload', 'text': _('Send'), 'css': 'send', 'page_id': solution['course_id'] ~ '/' ~ solution['exercise_id']} %}
+          {% elif not solution.get('is_checked') %}
+            {% set details = {'page': 'view', 'icon': 'eye', 'text': _('View'), 'css': 'view', 'page_id': solution['solution_id']} %}
           {% else %}
-            {% set details = {'page': 'view', 'icon': 'check-circle-o', 'text': _('Check'), 'css': 'checked', 'page_id': exercise['solution_id']} %}
+            {% set details = {'page': 'view', 'icon': 'check-circle-o', 'text': _('Check'), 'css': 'checked', 'page_id': solution['solution_id']} %}
           {% endif -%}
-          {%- if not exercise.get('is_archived') or exercise.get('is_checked') is not none %}
+          {%- if not solution.get('is_archived') or solution.get('is_checked') is not none %}
           <a class="our-button go-{{ details['css'] }}" href="{{ details['page'] }}/{{ details['page_id'] }}">
             {{ details['text'] | e }}
             <i class="fa fa-{{ details['icon'] }}" aria-hidden="true"></i>
           </a>
           {% endif -%}
-          {% if is_manager %}
-          <a class="our-button our-button-narrow go-grader" href="check/{{ exercise['exercise_id'] }}">
-            <i class="fa fa-graduation-cap" aria-hidden="true"></i>
-          </a>
-          {% endif %}
         </div>
       </div>
       {% endfor -%}
