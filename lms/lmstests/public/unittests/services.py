@@ -154,9 +154,10 @@ class UnitTestChecker:
     def _handle_result(
             self, case_name: str, result: junitparser.Element,
     ) -> None:
-        message = ' '.join(
-            elem[1].replace('\n', '')
-            for elem in result._elem.items()
+        # Extract only the Assertion Message
+        message = '\n'.join(
+            msg_.partition("\n")[0].removeprefix("AssertionError: ")
+            for _type, msg_ in result._elem.items()
         )
         self._logger.info(
             'Create comment on test %s solution %s.',

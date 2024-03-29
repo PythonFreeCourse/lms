@@ -467,17 +467,24 @@ button.our-button-narrow, a.our-button-narrow {
   border-bottom-left-radius: 0.25rem;
 }
 
-.code-view-container {
+.code-review-container {
   position: relative;
-  direction: ltr;
-  text-align: left;
   height: min-content;
   display: flex;
-  overflow-x: hidden;
-  flex-flow: column wrap;
+  flex-direction: column;
   flex-basis: 70vw;
   flex-grow: 4;
+}
+
+.code-view-container {
   border: 1px solid #e1e4e8;
+  direction: ltr;
+  display: flex;
+  flex-flow: column wrap;
+  margin-block-end: 2rem;
+  overflow-x: hidden;
+  text-align: left;
+  width: 100%;
 }
 
 #code-view {
@@ -612,36 +619,98 @@ pre {
 }
 
 .test-results {
-  direction: rtl;
-  text-align: right;
+  font-family: Arial, sans-serif;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  margin: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.test-result-title {
+.test-results-header {
+  background-color: #F9FAFB;
   text-align: center;
-  text-decoration: underline;
-  margin-top: 20px;
+  color: #333;
+  padding: 0.5rem 0;
+  border-radius: 6px 6px 0 0;
+  font-size: 1.1rem;
 }
 
 .test-results-list {
+  list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 .test-result {
-  padding: 10px;
-  margin: 5px 0;
+  background-color: #FFFFFF;
+  border-radius: 6px;
+  border: 1px solid #E2E8F0;
   display: flex;
   flex-direction: column;
-  border: 1px solid #c2bdbd;
+  padding: 1.5rem;
+  transition: box-shadow 0.2s ease;
+  width: 100%;
 }
 
-.test-result .test-name {
-  border-bottom: 1px solid #c2bdbd;
-  margin-bottom: 12px;
-  padding-bottom: 6px;
+.test-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.test-result .title {
+.test-name {
+  font-weight: 600;
+  color: #1A202C;
+}
+
+.test-status.failure {
+  background-color: #F56565;
+  border-radius: 12px;
+  color: #FFFFFF;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.error-description {
+  background-color: #F7FAFC;
+  border-radius: 4px;
+  color: #2D3748;
+  display: flex;
+  line-height: 1.5;
+  margin: 0.5rem 0;
+  padding: 0.75rem;
+}
+
+.staff-failure .title {
   font-weight: bold;
+  display: flex;
+  margin-bottom: 5px;
+}
+
+.stack-trace pre {
+  background-color: #EDF2F7;
+  color: #2D3748;
+  padding: 0.75rem;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+.stack-trace code {
+  width: 100%;
+  background-color: #F8F9FA;
+  color: #333;
+  padding: 10px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  white-space: pre;
+}
+
+@media (max-width: 768px) {
+  .test-result {
+    padding: 1rem; /* less padding on smaller screens */
+  }
 }
 
 .stack-trace {
@@ -809,7 +878,7 @@ code > code:last-of-type{
 */
 pre[class*="language-"] {
   /* Override prism.js */
-  padding: 0 !important;
+  padding: 0.5rem !important;
   margin: 0 !important;
 }
 
@@ -829,6 +898,10 @@ code#user-code {
   justify-content: start;
   cursor: pointer;
   width: 100%;
+  /* Nice trick: with flex-grow: 1; and width: 0;
+  * the line fits the container width
+  * */
+  width: 0;
   flex-grow: 1;
 }
 
