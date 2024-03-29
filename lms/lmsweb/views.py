@@ -3,7 +3,6 @@ from typing import Any, Callable, Optional
 
 import arrow  # type: ignore
 from flask import (
-    # Response,
     jsonify,
     make_response,
     render_template,
@@ -40,7 +39,6 @@ from lms.lmsdb.models import (
 )
 from lms.lmsweb import (
     babel,
-    # http_basic_auth,
     limiter,
     routes,
     webapp,

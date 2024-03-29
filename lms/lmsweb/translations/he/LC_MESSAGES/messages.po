@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-29 05:54+0300\n"
+"POT-Creation-Date: 2024-03-29 21:14+0300\n"
 "PO-Revision-Date: 2024-03-23 18:59+0300\n"
 "Last-Translator: Yam Mesicka\n"
 "Language: he\n"
@@ -48,31 +48,31 @@ msgstr "הבודק האוטומטי נכשל ב־%(number)d דוגמאות בת�
 msgid "Woah! Did you check your code?"
 msgstr "ווהו! בדקת את הקוד שלך?"
 
-#: lms/lmsweb/views.py:183
+#: lms/lmsweb/views.py:181
 msgid "Can not register now"
 msgstr "לא ניתן להירשם כעת"
 
-#: lms/lmsweb/views.py:205
+#: lms/lmsweb/views.py:203
 msgid "Registration successfully"
 msgstr "ההרשמה בוצעה בהצלחה"
 
-#: lms/lmsweb/views.py:233
+#: lms/lmsweb/views.py:231
 msgid "The confirmation link is expired, new link has been sent to your email"
 msgstr "קישור האימות פג תוקף, קישור חדש נשלח אל תיבת המייל שלך"
 
-#: lms/lmsweb/views.py:252
+#: lms/lmsweb/views.py:250
 msgid "Your user has been successfully confirmed, you can now login"
 msgstr "המשתמש שלך אומת בהצלחה, כעת אתה יכול להתחבר למערכת"
 
-#: lms/lmsweb/views.py:277 lms/lmsweb/views.py:345
+#: lms/lmsweb/views.py:275 lms/lmsweb/views.py:343
 msgid "Your password has successfully changed"
 msgstr "הסיסמה שלך שונתה בהצלחה"
 
-#: lms/lmsweb/views.py:295
+#: lms/lmsweb/views.py:293
 msgid "Password reset link has successfully sent"
 msgstr "קישור לאיפוס הסיסמה נשלח בהצלחה"
 
-#: lms/lmsweb/views.py:321
+#: lms/lmsweb/views.py:319
 msgid "Reset password link is expired"
 msgstr "הקישור לאיפוס הסיסמה פג תוקף"
 
@@ -413,7 +413,7 @@ msgid "Checker"
 msgstr "בודק"
 
 #: lms/templates/user.html:37 lms/templates/view.html:25
-#: lms/templates/view.html:114
+#: lms/templates/view.html:118
 msgid "Assessment"
 msgstr "הערכה מילולית"
 
@@ -485,23 +485,23 @@ msgstr "סיסמה נוכחית"
 msgid "Finish Checking"
 msgstr "סיום בדיקה"
 
-#: lms/templates/view.html:86
+#: lms/templates/view.html:88
 msgid "Automatic Checking"
 msgstr "בדיקות אוטומטיות"
 
 #: lms/templates/view.html:93
-msgid "Error"
-msgstr "כישלון"
+msgid "Test failed"
+msgstr "בדיקה נכשלה"
 
-#: lms/templates/view.html:98
-msgid "Staff Error"
-msgstr "כישלון סגל"
+#: lms/templates/view.html:101
+msgid "Staff traceback"
+msgstr "Traceback לצוות"
 
-#: lms/templates/view.html:130
+#: lms/templates/view.html:134
 msgid "Comments for this exercise"
 msgstr "הערות על התרגיל"
 
-#: lms/templates/view.html:138
+#: lms/templates/view.html:142
 msgid "Done Checking"
 msgstr "סיים לבדוק"
 
