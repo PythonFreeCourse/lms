@@ -1,5 +1,5 @@
 const FLAKE_COMMENTED_LINE_COLOR = '#fac4c3';
-const HOVER_LINE_STYLE = '1px solid #0d0d0f';
+const HOVER_LINE_COLOR = '#0d0d0f';
 
 
 function removeMark(lineElement) {
@@ -20,13 +20,8 @@ function hoverLine(targets, hover) {
   const [lineTarget, addCommentTarget] = targets;
   if (lineTarget.dataset && lineTarget.dataset.vimbackground === 'true') {return;}
   const commentOpacity = (hover === true) ? '1' : '0';
-  let parsedColor = hover;
-  if (hover === true) {
-    parsedColor = HOVER_LINE_STYLE;
-  } else if (hover === false) {
-    parsedColor = 'none';
-  }
-  lineTarget.style.border = parsedColor;
+  const parsedColor = (hover === true) ? HOVER_LINE_COLOR : '';
+  lineTarget.style.borderColor = parsedColor;
   addCommentTarget.style.opacity = commentOpacity;
 }
 
