@@ -10,7 +10,7 @@
     </div>
     <div id="exercises">
       {%- for exercise in exercises %}
-      <div class="exercise" {%- if exercise.grade_color %} style="border-right: 8px solid {{ exercise.grade_color }};" {%- endif -%}>
+      <div class="exercise" {%- if exercise.grade_color %} style="border-inline-start-color: {{ exercise.grade_color }};" {%- endif -%}>
         <div class="right-side {{ direction }}-language">
           <div class="exercise-number me-3">{{ exercise['exercise_number'] }}</div>
           <div class="exercise-name"><div class="ex-title">{{ exercise['exercise_name'] | e }}</div></div>
