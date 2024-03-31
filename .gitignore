@@ -137,3 +137,4 @@ db.sqlite
 vim.session
 devops/rabbitmq.cookie
 our.db
+package-lock.json

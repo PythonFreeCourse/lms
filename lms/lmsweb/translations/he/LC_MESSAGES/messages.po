@@ -29,7 +29,7 @@ msgstr "הפתרון שלך לתרגיל %(subject)s נבדק."
 
 #: lms/lmstests/public/linters/services.py:95
 #, python-format
-msgid "The automatic checker gave you %(errors_num)d for your %(name)s solution."
+msgid "The automatic checker gave you %(errors_num)d comments on your %(name)s solution."
 msgstr "הבודק האוטומטי נתן %(errors_num)d הערות על תרגילך %(name)s."
 
 #: lms/lmstests/public/unittests/services.py:16
@@ -40,8 +40,8 @@ msgstr "הבודק האוטומטי לא הצליח להריץ את הקוד ש�
 #: lms/lmstests/public/unittests/services.py:122
 #, python-format
 msgid ""
-"The automatic checker failed in %(number)d examples in your "
-"\"%(subject)s\" solution."
+"The automatic checker failed in %(number)d examples in "
+"exercise \"%(subject)s\"."
 msgstr "הבודק האוטומטי נכשל ב־%(number)d דוגמאות בתרגיל \"%(subject)s\"."
 
 #: lms/lmstests/public/unittests/services.py:144
@@ -49,40 +49,40 @@ msgid "Woah! Did you check your code?"
 msgstr "ווהו! בדקת את הקוד שלך?"
 
 #: lms/lmsweb/views.py:181
-msgid "Can not register now"
+msgid "Cannot register right now"
 msgstr "לא ניתן להירשם כעת"
 
 #: lms/lmsweb/views.py:203
-msgid "Registration successfully"
+msgid "Registration completed successfully"
 msgstr "ההרשמה בוצעה בהצלחה"
 
 #: lms/lmsweb/views.py:231
-msgid "The confirmation link is expired, new link has been sent to your email"
+msgid "This confirmation link is expired, a new link was sent to your email"
 msgstr "קישור האימות פג תוקף, קישור חדש נשלח אל תיבת המייל שלך"
 
 #: lms/lmsweb/views.py:250
-msgid "Your user has been successfully confirmed, you can now login"
+msgid "Your user was successfully confirmed, you can now login"
 msgstr "המשתמש שלך אומת בהצלחה, כעת אתה יכול להתחבר למערכת"
 
 #: lms/lmsweb/views.py:275 lms/lmsweb/views.py:343
-msgid "Your password has successfully changed"
+msgid "Your password was changed successfully"
 msgstr "הסיסמה שלך שונתה בהצלחה"
 
 #: lms/lmsweb/views.py:293
-msgid "Password reset link has successfully sent"
+msgid "Password reset link was sent successfully"
 msgstr "קישור לאיפוס הסיסמה נשלח בהצלחה"
 
 #: lms/lmsweb/views.py:319
-msgid "Reset password link is expired"
+msgid "Password reset link has expired"
 msgstr "הקישור לאיפוס הסיסמה פג תוקף"
 
 #: lms/lmsweb/forms/change_password.py:20 lms/lmsweb/forms/register.py:32
 #: lms/lmsweb/forms/reset_password.py:25
-msgid "The passwords are not identical"
+msgid "Passwords do not match"
 msgstr "הסיסמאות שהוזנו אינן זהות"
 
 #: lms/lmsweb/forms/change_password.py:31
-msgid "Invalid old password has been inserted too many times"
+msgid "Incorrect password was inserted too many times"
 msgstr "הזנת סיסמה שגויה מספר רב מדי של פעמים"
 
 #: lms/lmsweb/forms/change_password.py:35
@@ -95,21 +95,21 @@ msgid "Invalid email"
 msgstr "כתובת הדואר האלקטרוני שהוזנה אינה תקינה"
 
 #: lms/lmsweb/tools/validators.py:17
-msgid "The username is already in use"
+msgid "This username is already in use"
 msgstr "שם המשתמש הזה כבר נמצא בשימוש"
 
 #: lms/lmsweb/tools/validators.py:23
-msgid "The email is already in use"
+msgid "This email is already in use"
 msgstr "כתובת הדואר האלקטרוני הזו כבר נמצאת בשימוש"
 
 #: lms/models/solutions.py:52
 #, python-format
-msgid "%(solver)s has replied for your \"%(subject)s\" check."
+msgid "%(solver)s has replied to your \"%(subject)s\" check."
 msgstr "%(solver)s הגיב לך על בדיקת תרגיל \"%(subject)s\"."
 
 #: lms/models/solutions.py:59
 #, python-format
-msgid "%(checker)s replied for \"%(subject)s\"."
+msgid "%(checker)s commented on your \"%(subject)s\" exercise."
 msgstr "%(checker)s הגיב לך על תרגיל \"%(subject)s\"."
 
 #: lms/models/solutions.py:78
@@ -135,13 +135,13 @@ msgstr "עליך לאשר את מייל האימות"
 
 #: lms/models/users.py:69
 #, python-format
-msgid "You are already registered to %(course_name)s course."
+msgid "You are already registered to the %(course_name)s course."
 msgstr "אתה כבר רשום לקורס %(course_name)s."
 
 #: lms/templates/banned.html:8 lms/templates/login.html:7
 #: lms/templates/recover-password.html:8 lms/templates/reset-password.html:8
 #: lms/templates/signup.html:8
-msgid "Profile picture of the Python Course"
+msgid "Profile picture for the Python Course"
 msgstr "תמונת הפרופיל של קורס פייתון"
 
 #: lms/templates/banned.html:12
@@ -162,7 +162,7 @@ msgid "Change Password"
 msgstr "שנה סיסמה"
 
 #: lms/templates/change-password.html:10
-msgid "Insert current password and new password for changing it:"
+msgid "Insert current password and new password to change your password:"
 msgstr "הזינו סיסמה ישנה וסיסמה חדשה לצורך שינוי הסיסמה:"
 
 #: lms/templates/change-password.html:13
@@ -267,11 +267,11 @@ msgid "Reset Password"
 msgstr "אפס סיסמה"
 
 #: lms/templates/recover-password.html:11
-msgid "Insert password for changing it:"
+msgid "Insert password to change it:"
 msgstr "הזינו סיסמה לצורך שינוי הסיסמה:"
 
 #: lms/templates/reset-password.html:11
-msgid "Insert your email for getting link to reset it:"
+msgid "Insert your email to get reset link:"
 msgstr "הזינו מייל לצורך שליחת קישור לאיפוס הסיסמה:"
 
 #: lms/templates/reset-password.html:14 lms/templates/signup.html:15
@@ -284,7 +284,7 @@ msgid "Send Reset Password Link"
 msgstr "שלח מייל איפוס סיסמה"
 
 #: lms/templates/reset-password.html:18 lms/templates/signup.html:25
-msgid "Back to login page"
+msgid "Back to Login Page"
 msgstr "חזרה לדף ההתחברות"
 
 #: lms/templates/signup.html:9
@@ -300,7 +300,7 @@ msgid "Full Name"
 msgstr "שם מלא"
 
 #: lms/templates/status.html:7
-msgid "Exercises operations room"
+msgid "Exercises Operations Room"
 msgstr "חמ\"ל תרגילים"
 
 #: lms/templates/status.html:12
@@ -357,7 +357,7 @@ msgid "Error? This is an old solution"
 msgstr "שגיאה? זהו פתרון ישן"
 
 #: lms/templates/submissions-table.html:62
-msgid "Go to detailed status view"
+msgid "Go to Detailed Status View"
 msgstr "לעמוד המצב המפורט"
 
 #: lms/templates/upload.html:7
@@ -365,7 +365,7 @@ msgid "Upload Notebooks"
 msgstr "העלאת מחברות"
 
 #: lms/templates/upload.html:11
-msgid "Drag here the notebook file or click and choose it from your computer."
+msgid "Drag the notebook file here or click and select it from your computer."
 msgstr "גררו לכאן את קובץ המחברת, או לחצו ובחרו אותה מהמחשב שלכם."
 
 #: lms/templates/upload.html:14
@@ -373,15 +373,15 @@ msgid "Back to Exercises List"
 msgstr "חזרו לרשימת התרגילים"
 
 #: lms/templates/upload.html:17
-msgid "Matches"
+msgid "Uploaded"
 msgstr "הועלו"
 
 #: lms/templates/upload.html:18
-msgid "Misses"
+msgid "Failed"
 msgstr "נכשלו"
 
 #: lms/templates/user.html:9
-msgid "User details"
+msgid "User Details"
 msgstr "פרטי משתמש"
 
 #: lms/templates/user.html:16
@@ -397,11 +397,11 @@ msgid "Exercises Submitted"
 msgstr "תרגילים שהוגשו"
 
 #: lms/templates/user.html:32
-msgid "Course name"
+msgid "Course Name"
 msgstr "שם קורס"
 
 #: lms/templates/user.html:34
-msgid "Submission status"
+msgid "Submission Status"
 msgstr "מצב הגשה"
 
 #: lms/templates/user.html:35
@@ -414,7 +414,7 @@ msgstr "בודק"
 
 #: lms/templates/user.html:37 lms/templates/view.html:25
 #: lms/templates/view.html:118
-msgid "Assessment"
+msgid "Written Assessment"
 msgstr "הערכה מילולית"
 
 #: lms/templates/user.html:47
@@ -430,7 +430,7 @@ msgid "New Note"
 msgstr "פתקית חדשה"
 
 #: lms/templates/user.html:70
-msgid "Related Exercise"
+msgid "Switch Exercise"
 msgstr "עבור תרגיל"
 
 #: lms/templates/user.html:79
@@ -442,12 +442,12 @@ msgid "Add Note"
 msgstr "הוסף פתקית"
 
 #: lms/templates/view.html:6
-msgid "Exercise view"
+msgid "Exercise View"
 msgstr "תצוגת תרגיל"
 
 #: lms/templates/view.html:9
-msgid "Your solution had checked!"
-msgstr "התרגיל שלך נבדק!"
+msgid "Your solution was checked!"
+msgstr "הפתרון שלך נבדק!"
 
 #: lms/templates/view.html:9
 msgid "Click on the red lines in order to see the comments."
@@ -462,11 +462,11 @@ msgid "This solution is not up to date!"
 msgstr "פתרון זה אינו עדכני!"
 
 #: lms/templates/view.html:15
-msgid "Your solution hasn't been checked."
+msgid "Your solution hasn't been checked yet."
 msgstr "הפתרון שלך עדיין לא נבדק."
 
 #: lms/templates/view.html:15
-msgid "It's important for us that all exercises will be checked by human eye."
+msgid "It's important to us that all exercises be checked by a human eye."
 msgstr "חשוב לנו שכל תרגיל יעבור בדיקה של עין אנושית."
 
 #: lms/templates/view.html:19
@@ -474,11 +474,11 @@ msgid "Solver"
 msgstr "מגיש"
 
 #: lms/templates/view.html:32
-msgid "Navigate in solution versions"
+msgid "Navigate in Solution Versions"
 msgstr "ניווט בגרסאות ההגשה"
 
 #: lms/templates/view.html:38
-msgid "Current page"
+msgid "Current Password"
 msgstr "סיסמה נוכחית"
 
 #: lms/templates/view.html:46
@@ -486,7 +486,7 @@ msgid "Finish Checking"
 msgstr "סיום בדיקה"
 
 #: lms/templates/view.html:88
-msgid "Automatic Checking"
+msgid "Automatic Checkings"
 msgstr "בדיקות אוטומטיות"
 
 #: lms/templates/view.html:93
@@ -508,7 +508,7 @@ msgstr "סיים לבדוק"
 #: lms/utils/mail.py:25
 #, python-format
 msgid "Confirmation mail - %(site_name)s"
-msgstr "הודעת אימות - %(site_name)s"
+msgstr "מייל אימות - %(site_name)s"
 
 #: lms/utils/mail.py:32
 #, python-format
@@ -541,10 +541,10 @@ msgstr "שינוי סיסמה - %(site_name)s"
 #: lms/utils/mail.py:62
 #, python-format
 msgid ""
-"Hello %(fullname)s. Your password in %(site_name)s site has been changed."
+"Hello %(fullname)s. Your password in the %(site_name)s site has been changed."
 "\n"
-"If you didn't do it please contact with the site management.\n"
-"Mail address: %(site_mail)s"
+"If you didn't do it please contact the site management.\n"
+"Your email address: %(site_mail)s"
 msgstr ""
 "שלום %(fullname)s. הסיסמה שלך באתר %(site_name)s שונתה.\n"
 "אם לא אתה שינית את הסיסמה, צור קשר עם הנהלת האתר.\n"
