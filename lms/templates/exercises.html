@@ -1,49 +1,54 @@
 {%- extends 'base.html' -%}
 
 {%- block page_content -%}
-<div class="container">
+<div id="exercises-page-container" class="container">
   <div id="exercises-page" class="page {{ direction }}">
     <div id="exercises-header">
       <div id="main-title">
         <h1 id="exercises-head">{{ _('Exercises') }}</h1>
       </div>
+      <div id="upload-solutions-button">
+        <a href="{{ url_for('send_', course_id=current_user.last_course_viewed.id) }}" class="our-button our-cta-button">
+          <i class="fa fa-upload" aria-hidden="true"></i>
+          {{ _('Upload Solutions') }}
+        </a>
+      </div>
     </div>
     <div id="exercises">
       {%- for exercise in exercises %}
-      <div class="exercise" {%- if exercise.grade_color %} style="border-right: 8px solid {{ exercise.grade_color }};" {%- endif -%}>
-        <div class="right-side {{ direction }}-language">
-          <div class="exercise-number me-3">{{ exercise['exercise_number'] }}</div>
-          <div class="exercise-name"><div class="ex-title">{{ exercise['exercise_name'] | e }}</div></div>
-        </div>
-        <div class="left-side">
-          {%- if exercise['notebook'] %}
-          <div class="which-notebook">
-            <i class="fa fa-book" aria-hidden="true"></i>
-            {{ exercise['notebook'] }}
+      {%- if exercise.get('is_checked') is none %}
+        {% set details = {'page': 'send', 'icon': 'upload', 'text': _('Send'), 'css': 'send', 'page_id': exercise['course_id'] ~ '/' ~ exercise['exercise_id']} %}
+      {% elif not exercise.get('is_checked') %}
+        {% set details = {'page': 'view', 'icon': 'eye', 'text': _('View'), 'css': 'view', 'page_id': exercise['solution_id']} %}
+      {% else %}
+        {% set details = {'page': 'view', 'icon': 'check-circle-o', 'text': _('Check'), 'css': 'checked', 'page_id': exercise['solution_id']} %}
+      {% endif -%}
+      <a href="{{ details['page'] }}/{{ details['page_id'] }}" class="exercise-link">
+        <div class="exercise" {%- if exercise.grade_color %} style="border-right: 8px solid {{ exercise.grade_color }};" {%- endif -%}>
+          <div class="right-side {{ direction }}-language">
+            <i class="fa fa-{{ details['icon'] }} exercise-status-icon" aria-hidden="true"></i>
+            <div class="exercise-number me-3">{{ exercise['exercise_number'] }}</div>
+            {%- if exercise['notebook'] %}
+            {%- endif %}
+            <div class="exercise-name"><div class="ex-title">{{ exercise['exercise_name'] | e }}</div></div>
           </div>
-          {%- endif %}
-          {%- if exercise.get('is_checked') is none %}
-            {% set details = {'page': 'send', 'icon': 'upload', 'text': _('Send'), 'css': 'send', 'page_id': exercise['course_id'] ~ '/' ~ exercise['exercise_id']} %}
-          {% elif not exercise.get('is_checked') %}
-            {% set details = {'page': 'view', 'icon': 'eye', 'text': _('View'), 'css': 'view', 'page_id': exercise['solution_id']} %}
-          {% else %}
-            {% set details = {'page': 'view', 'icon': 'check-circle-o', 'text': _('Check'), 'css': 'checked', 'page_id': exercise['solution_id']} %}
-          {% endif -%}
-          {%- if not exercise.get('is_archived') or exercise.get('is_checked') is not none %}
-          <a class="our-button go-{{ details['css'] }}" href="{{ details['page'] }}/{{ details['page_id'] }}">
-            {{ details['text'] | e }}
-            <i class="fa fa-{{ details['icon'] }}" aria-hidden="true"></i>
-          </a>
-          {% endif -%}
+          <div class="left-side">
+            <div class="which-notebook">
+              <i class="fa fa-book" aria-hidden="true"></i>
+              {{ exercise['notebook'] }}
+            </div>
+          </div>
         </div>
-      </div>
+      </a>
       {% endfor -%}
       {%- if not fetch_archived %}
-      <div class="exercise centered">
-        <div id="show-all-exercises-action" class="right-side">
-          <a href="?archived=1">{{ _('All Exercises') }}</a>
+      <a href="?archived=1">
+        <div class="exercise centered">
+          <div id="show-all-exercises-action" class="right-side">
+            {{ _('All Exercises') }}
+          </div>
         </div>
-      </div>
+      </a>
       {% endif -%}
     </div>
   </div>

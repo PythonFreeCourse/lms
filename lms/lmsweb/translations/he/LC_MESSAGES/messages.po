@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-29 21:14+0300\n"
+"POT-Creation-Date: 2024-04-05 05:39+0300\n"
 "PO-Revision-Date: 2024-03-23 18:59+0300\n"
 "Last-Translator: Yam Mesicka\n"
 "Language: he\n"
@@ -184,19 +184,23 @@ msgstr "אימות סיסמה"
 msgid "Exercises"
 msgstr "תרגילים"
 
-#: lms/templates/exercises.html:26
+#: lms/templates/exercises.html:13
+msgid "Upload Solutions"
+msgstr "העלו פתרונות"
+
+#: lms/templates/exercises.html:32
 msgid "Send"
 msgstr "שלח"
 
-#: lms/templates/exercises.html:28
+#: lms/templates/exercises.html:34
 msgid "View"
 msgstr "הצצה"
 
-#: lms/templates/exercises.html:30
+#: lms/templates/exercises.html:36
 msgid "Check"
 msgstr "לבדיקה"
 
-#: lms/templates/exercises.html:44
+#: lms/templates/exercises.html:50
 msgid "All Exercises"
 msgstr "לכל התרגילים"
 
@@ -489,7 +493,7 @@ msgstr "סיום בדיקה"
 msgid "Automatic Checking"
 msgstr "בדיקות אוטומטיות"
 
-#: lms/templates/view.html:93
+#: lms/templates/view.html:94
 msgid "Test failed"
 msgstr "בדיקה נכשלה"
 
@@ -549,3 +553,4 @@ msgstr ""
 "שלום %(fullname)s. הסיסמה שלך באתר %(site_name)s שונתה.\n"
 "אם לא אתה שינית את הסיסמה, צור קשר עם הנהלת האתר.\n"
 "כתובת המייל שלך לפי רישומינו: %(site_mail)s"
+
