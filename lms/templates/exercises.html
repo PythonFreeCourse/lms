@@ -8,10 +8,12 @@
         <h1 id="exercises-head">{{ _('Exercises') }}</h1>
       </div>
       <div id="upload-solutions-button">
+        {% if current_user.last_course_viewed %}
         <a href="{{ url_for('send_', course_id=current_user.last_course_viewed.id) }}" class="our-button our-cta-button">
           <i class="fa fa-upload" aria-hidden="true"></i>
           {{ _('Upload Solutions') }}
         </a>
+        {% endif %}
       </div>
     </div>
     <div id="exercises">
@@ -28,15 +30,15 @@
           <div class="right-side {{ direction }}-language">
             <i class="fa fa-{{ details['icon'] }} exercise-status-icon" aria-hidden="true"></i>
             <div class="exercise-number me-3">{{ exercise['exercise_number'] }}</div>
-            {%- if exercise['notebook'] %}
-            {%- endif %}
             <div class="exercise-name"><div class="ex-title">{{ exercise['exercise_name'] | e }}</div></div>
           </div>
           <div class="left-side">
+            {%- if exercise['notebook'] %}
             <div class="which-notebook">
               <i class="fa fa-book" aria-hidden="true"></i>
               {{ exercise['notebook'] }}
             </div>
+            {%- endif %}
           </div>
         </div>
       </a>
