@@ -58,14 +58,6 @@
             {% endfor -%}
           </ul>
         </li>
-        {%- if current_user.last_course_viewed %}
-          <li class="nav-item">
-            <a href="{{ url_for('send_', course_id=current_user.last_course_viewed.id) }}" class="nav-link">
-              <i class="fa fa-upload" aria-hidden="true"></i>
-              {{ _('Upload Exercises') }}
-            </a>
-          </li>
-        {% endif -%}
         {%- if not exercises or fetch_archived %}
         <li class="nav-item">
           <a href="/exercises" class="nav-link">
