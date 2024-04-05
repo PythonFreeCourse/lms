@@ -140,8 +140,7 @@ a {
   overflow: auto;
   padding: 0.75rem;
   text-align: center;
-  border-right: #00000000 8px solid;
-  border-left: #00000000 8px solid;
+  border-inline: #00000000 8px solid;
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
@@ -536,6 +535,8 @@ button.our-button-narrow, a.our-button-narrow {
   flex-direction: column;
   flex-basis: 70vw;
   flex-grow: 4;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .code-view-container {
@@ -959,12 +960,10 @@ code#user-code {
   flex-direction: row;
   justify-content: start;
   cursor: pointer;
+  min-width: 0;
   width: 100%;
-  /* Nice trick: with flex-grow: 1; and width: 0;
-  * the line fits the container width
-  * */
-  width: 0;
-  flex-grow: 1;
+  flex-shrink: 1;
+  border-inline-start: 1px solid #00000000;
 }
 
 .grader-add {
