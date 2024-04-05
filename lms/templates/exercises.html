@@ -24,7 +24,7 @@
         {% set details = {'page': 'view', 'icon': 'check-circle-o', 'text': _('Check'), 'css': 'checked', 'page_id': exercise['solution_id']} %}
       {% endif -%}
       <a href="{{ details['page'] }}/{{ details['page_id'] }}" class="exercise-link">
-        <div class="exercise" {%- if exercise.grade_color %} style="border-inline-start-color: 8px solid {{ exercise.grade_color }};" {%- endif -%}>
+        <div class="exercise" {%- if exercise.grade_color %} style="border-inline-start-color: {{ exercise.grade_color }};" {%- endif -%}>
           <div class="right-side {{ direction }}-language">
             <i class="fa fa-{{ details['icon'] }} exercise-status-icon" aria-hidden="true"></i>
             <div class="exercise-number me-3">{{ exercise['exercise_number'] }}</div>

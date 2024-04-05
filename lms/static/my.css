@@ -109,6 +109,7 @@ a {
   margin-bottom: 2rem;
   flex-direction: row;
   justify-content: space-between;
+  align-items: center;
 }
 
 #show-all-exercises-action {
