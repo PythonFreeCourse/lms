@@ -34,4 +34,4 @@ function addLineSpansToPre(items) {
 
 window.addEventListener('defined-window-variables', () => {
   addLineSpansToPre(document.getElementsByTagName('code'));
-});
+}, { once: true });

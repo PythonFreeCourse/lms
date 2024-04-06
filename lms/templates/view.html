@@ -61,8 +61,8 @@
                 <button id="share-action" title="Share solution"><i class="fa fa-share-alt"></i></button>
               </div>
               <div id="shared-box" class="glowing d-none">
-                <button id="cancel-share" class="share-button" title="Disable share solution"><i class="fa fa-trash"></i></button>
-                <button id="copy-link" class="share-button" title="Copy shared link"><i class="fa fa-copy"></i></button>
+                <button id="cancel-share" title="Disable share solution"><i class="fa fa-trash"></i></button>
+                <button id="copy-link" title="Copy shared link"><i class="fa fa-copy"></i></button>
                 <input id="shareable-link" class="form-control" type="text" readonly>
               </div>
             </div>
@@ -151,7 +151,9 @@
 </div>
 <script src="{{ url_for('static', filename='prism.js') }}"></script>
 <script src="{{ url_for('static', filename='solution.js') }}"></script>
-{% if not shared_url %}
+{% if shared_url %}
+<script src="{{ url_for('static', filename='shared.js') }}"></script>
+{% else %}
 {% include 'comment-template.html' %}
 <script src="{{ url_for('static', filename='purify.js') }}"></script>
 <script src="{{ url_for('static', filename='markdown.js') }}"></script>
