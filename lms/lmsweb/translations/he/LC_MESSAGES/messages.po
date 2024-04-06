@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-04-05 05:39+0300\n"
+"POT-Creation-Date: 2024-04-06 03:43+0300\n"
 "PO-Revision-Date: 2024-03-23 18:59+0300\n"
 "Last-Translator: Yam Mesicka\n"
 "Language: he\n"
@@ -184,23 +184,23 @@ msgstr "אימות סיסמה"
 msgid "Exercises"
 msgstr "תרגילים"
 
-#: lms/templates/exercises.html:13
+#: lms/templates/exercises.html:14
 msgid "Upload Solutions"
 msgstr "העלו פתרונות"
 
-#: lms/templates/exercises.html:32
+#: lms/templates/exercises.html:22
 msgid "Send"
 msgstr "שלח"
 
-#: lms/templates/exercises.html:34
+#: lms/templates/exercises.html:24
 msgid "View"
 msgstr "הצצה"
 
-#: lms/templates/exercises.html:36
+#: lms/templates/exercises.html:26
 msgid "Check"
 msgstr "לבדיקה"
 
-#: lms/templates/exercises.html:50
+#: lms/templates/exercises.html:54
 msgid "All Exercises"
 msgstr "לכל התרגילים"
 
@@ -242,22 +242,18 @@ msgid "Courses List"
 msgstr "רשימת הקורסים"
 
 #: lms/templates/navbar.html:65
-msgid "Upload Exercises"
-msgstr "העלאת תרגילים"
-
-#: lms/templates/navbar.html:73
 msgid "Exercises List"
 msgstr "רשימת התרגילים"
 
-#: lms/templates/navbar.html:81
+#: lms/templates/navbar.html:73
 msgid "Exercises Archive"
 msgstr "ארכיון התרגילים"
 
-#: lms/templates/navbar.html:91
+#: lms/templates/navbar.html:83
 msgid "Check Exercises"
 msgstr "בדוק תרגילים"
 
-#: lms/templates/navbar.html:98
+#: lms/templates/navbar.html:90
 msgid "Logout"
 msgstr "התנתקות"
 
@@ -330,6 +326,14 @@ msgstr "מדד"
 #: lms/templates/status.html:31
 msgid "Archive"
 msgstr "ארכיון"
+
+#: lms/templates/strings.html:3
+msgid "Submit"
+msgstr "תגובה"
+
+#: lms/templates/strings.html:4
+msgid "Cancel"
+msgstr "ביטול"
 
 #: lms/templates/submissions-table.html:6
 msgid "Submissions table"
