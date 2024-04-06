@@ -135,6 +135,7 @@ function createEditor(textarea, solutionId, lineNumber) {
       uniqueId: `${solutionId}-${lineNumber}`,
     },
     element: textarea,
+    minheight: '75px',
     direction: document.documentElement.dir,
     spellChecker: false,
     previewClass: ["editor-preview", document.documentElement.dir],
