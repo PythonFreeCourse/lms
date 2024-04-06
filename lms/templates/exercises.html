@@ -25,7 +25,9 @@
       {% else %}
         {% set details = {'page': 'view', 'icon': 'check-circle-o', 'text': _('Check'), 'css': 'checked', 'page_id': exercise['solution_id']} %}
       {% endif -%}
+      {%- if not exercise.is_archived or exercise.get('is_checked') is not none -%}
       <a href="{{ details['page'] }}/{{ details['page_id'] }}" class="exercise-link">
+      {%- endif -%}
         <div class="exercise" {%- if exercise.grade_color %} style="border-inline-start-color: {{ exercise.grade_color }};" {%- endif -%}>
           <div class="right-side {{ direction }}-language">
             <i class="fa fa-{{ details['icon'] }} exercise-status-icon" aria-hidden="true"></i>
@@ -41,7 +43,9 @@
             {%- endif %}
           </div>
         </div>
+      {%- if not exercise.is_archived or exercise.get('is_checked') is not none -%}
       </a>
+      {%- endif -%}
       {% endfor -%}
       {%- if not fetch_archived %}
       <a href="?archived=1">

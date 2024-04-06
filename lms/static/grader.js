@@ -1,28 +1,35 @@
 function sendComment(kind, fileId, line, commentData) {
-  const xhr = new XMLHttpRequest();
-  xhr.open('POST', '/comments');
-  xhr.setRequestHeader('Content-Type', 'application/json');
-  xhr.responseType = 'json';
-  xhr.onreadystatechange = () => {
-    if (xhr.readyState === 4) {
-      if (xhr.status === 200) {
-        const response = JSON.parse(window.escapeUnicode(xhr.response));
-        window.addCommentToLine(line, response);
+  return new Promise((resolve, _reject) => {
+    fetch('/comments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        act: 'create',
+        comment: commentData,
+        kind, // Should be 'text' or 'id'
+        line,
+        fileId,
+      }),
+    })
+    .then(response => {
+      if (!response.ok) {
+        console.log(response.status);
+        resolve(false);
       } else {
-        console.log(xhr.status);
+        return response.json();
       }
-    }
-  };
-
-  xhr.send(
-    JSON.stringify({
-      act: 'create',
-      comment: commentData,
-      kind, // Should be 'text' or 'id'
-      line,
-      fileId,
-    }),
-  );
+    })
+    .then(data => {
+      if (data) {
+        window.addCommentToLine(line, JSON.parse(window.escapeUnicode(data)));
+        resolve(true);
+      }
+    })
+    .catch(error => {
+      console.error('Error sending comment:', error);
+      resolve(false);
+    });
+  });
 }
 
 function visuallyRemoveComment(commentId) {
@@ -119,48 +126,99 @@ function trackDraggables(elements) {
   });
 }
 
-function focusTextArea(lineNumber) {
-  const target = document.querySelector(`textarea[data-line='${lineNumber}']`);
-  target.focus({preventScroll: true});
+
+function createEditor(textarea, solutionId, lineNumber) {
+  return new EasyMDE({
+    autofocus: true,
+    autosave: {
+      enabled: true,
+      uniqueId: `${solutionId}-${lineNumber}`,
+    },
+    element: textarea,
+    direction: document.documentElement.dir,
+    spellChecker: false,
+    previewClass: ["editor-preview", document.documentElement.dir],
+  });
 }
 
-function trackTextArea(lineNumber) {
-  const target = `textarea[data-line='${lineNumber}']`;
-  const textareaElement = document.querySelector(target);
-  const popoverElement = document.querySelector(`.grader-add[data-line='${lineNumber}']`);
+function trackCommentSendControllers(
+  editor, controllers, fileId, lineNumber, creationTracker,
+) {
+  const submitButton = controllers.querySelector('.send-comment');
+  const cancelButton = controllers.querySelector('.cancel-comment');
+  const commentContainer = submitButton.closest('.comments-container');
+  const commentsAdder = commentContainer.querySelector('.comments-adder-container');
 
-  const keyDownFunction = function(ev) {
-    if ((ev.key === 'Enter' && ev.ctrlKey) || ((ev.which === 10 || ev.which === 13) && ev.ctrlKey)) {
-      sendNewComment(window.fileId, lineNumber, ev.target.value);
-      ev.target.value = '';
-      textareaElement.removeEventListener('keydown', keyDownFunction);
-    } else if (ev.key === 'Escape') {
-      ev.preventDefault();
-    } else {
+  function clearElements() {
+    commentsAdder.remove();
+    editor.element.remove();
+    if (commentContainer.children.length === 0) {
+      commentContainer.remove();
+    }
+    editor.cleanup();
+  }
+
+  commentsAdder.addEventListener('keydown', (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+      submitButton.click();
+    }
+  });
+
+  commentsAdder.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      cancelButton.click();
+    }
+  });
+
+  submitButton.addEventListener('click', () => {
+    submitButton.disabled = true;
+    const commentData = editor.value();
+    sendNewComment(fileId, lineNumber, commentData).then((_) => {
+      editor.clearAutosavedValue();
+    });
+    clearElements();
+    creationTracker.delete(lineNumber);
+  }, { once: true });
+
+  cancelButton.addEventListener('click', () => {
+    clearElements();
+    creationTracker.delete(lineNumber);
+  }, { once: true });
+}
+  
+
+function openNewCommentArea(element, content) {
+  const created = new Set();
+  const currentText = content || "";
+
+  element.addEventListener('click', () => {
+    const lineElement = element.closest('.line-container');
+    const lineNumber = lineElement.dataset.line;
+    const fileId = window.fileId;
+    if (created.has(lineNumber)) {
       return;
     }
 
-    const popover = bootstrap.Popover.getInstance(popoverElement);
-    if (popover !== null) {popover.hide();}
-  };
+    comments = getCommentsContainer(lineNumber);
+    const newCommentArea = `
+      <div class="comments-adder-container">
+        <textarea data-line="${lineNumber}">${currentText}</textarea>
+        <div class="comment-buttons">
+          <button class="btn btn-success send-comment">${_("Submit")}</button>
+          <button class="btn btn-danger cancel-comment">${_("Cancel")}</button>
+        </div>
+      </div>
+    `;
+    comments.insertAdjacentHTML('beforeend', newCommentArea);
 
-  textareaElement.addEventListener('keydown', keyDownFunction, {});
-}
+    const newTextarea = comments.querySelector('textarea');
+    editor = createEditor(newTextarea, fileId, lineNumber);
 
-function registerNewCommentPopover(element) {
-  const lineNumber = element.dataset.line;
-  const addCommentString = 'הערה חדשה לשורה';
-  const popover = new bootstrap.Popover(element, {
-    html: true,
-    title: `${addCommentString} ${lineNumber}`,
-    sanitize: false,
-    content: `<textarea data-line='${lineNumber}'></textarea>`,
+    const controllers = comments.querySelector('.comment-buttons');
+    trackCommentSendControllers(editor, controllers, fileId, lineNumber, created);
+
+    created.add(lineNumber);
   });
-  element.addEventListener('inserted.bs.popover', () => {
-    trackTextArea(lineNumber);
-    focusTextArea(lineNumber);
-  });
-  return popover;
 }
 
 function addNewCommentButtons(elements) {
@@ -170,7 +228,7 @@ function addNewCommentButtons(elements) {
     newNode.dataset.line = item.dataset.line;
     newNode.innerHTML = '<i class="fa fa-plus-square"></i>';
     item.parentNode.insertBefore(newNode, item);
-    registerNewCommentPopover(newNode);
+    openNewCommentArea(newNode);
   });
 }
 

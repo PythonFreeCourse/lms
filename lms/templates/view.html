@@ -158,6 +158,8 @@
 <script src="{{ url_for('static', filename='comments.js') }}"></script>
 {%- if is_manager or config.USERS_COMMENTS %}
 <script src="{{ url_for('static', filename='grader.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='easymde.min.css') }}" />
+<script src="{{ url_for('static', filename='easymde.min.js') }}"></script>
 {% endif -%}
 {%- if is_manager %}
 <script src="{{ url_for('static', filename='keyboard.js') }}"></script>

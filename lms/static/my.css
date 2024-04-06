@@ -20,10 +20,18 @@ body > .container {
 
 code,
 input,
-pre,
+pre:not(.CodeMirror-line),
 div#code-view {
   direction: ltr;
   text-align: left;
+}
+
+.CodeMirror-line {
+  unicode-bidi: isolate;
+}
+
+.comments-adder-container, .CodeMirror pre.CodeMirror-line span, .editor-preview {
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, -apple-system, BlinkMacSystemFont, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 a {
@@ -582,6 +590,16 @@ button.our-button-narrow, a.our-button-narrow {
   flex-direction: column;
 }
 
+.comments-adder-container {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  display: flex;
+  width: 100%;
+  margin: 0.6em 0;
+  padding: 0.6em;
+  flex-direction: column;
+}
+
 .comments-container code {
   border: 1px solid #e1e4e8;
   border-radius: 5px;
@@ -592,6 +610,16 @@ button.our-button-narrow, a.our-button-narrow {
   display: flex;
   background: white;
   border-block: 1px solid #e1e4e8;
+}
+
+.comment-buttons {
+  align-content: center;
+  align-items: center;
+  display: flex;
+  flex-direction: row-reverse;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 0.5em;
 }
 
 #code-toolbar {
@@ -673,7 +701,7 @@ button.our-button-narrow, a.our-button-narrow {
   line-height: unset;
 }
 
-pre {
+pre:not(.CodeMirror-line) {
   width: 100%;
 }
 
