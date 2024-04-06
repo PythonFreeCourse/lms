@@ -151,7 +151,9 @@
 </div>
 <script src="{{ url_for('static', filename='prism.js') }}"></script>
 <script src="{{ url_for('static', filename='solution.js') }}"></script>
-{% if not shared_url %}
+{% if shared_url %}
+<script src="{{ url_for('static', filename='shared.js') }}"></script>
+{% else %}
 {% include 'comment-template.html' %}
 <script src="{{ url_for('static', filename='purify.js') }}"></script>
 <script src="{{ url_for('static', filename='markdown.js') }}"></script>
