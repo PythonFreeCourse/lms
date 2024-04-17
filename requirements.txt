@@ -36,7 +36,7 @@ Flask-Limiter==3.5.1
 Flask-Login==0.6.3
 Flask-Mail==0.9.1
 Flask-WTF==1.2.1
-gunicorn==21.2.0
+gunicorn==22.0.0
 importlib-metadata==7.0.1
 itsdangerous==2.1.2
 jedi==0.19.1
