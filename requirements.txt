@@ -40,7 +40,7 @@ gunicorn==22.0.0
 importlib-metadata==7.0.1
 itsdangerous==2.1.2
 jedi==0.19.1
-Jinja2==3.1.3
+Jinja2==3.1.4
 jinja2-pluralize==0.3.0
 junitparser==3.1.2
 loguru==0.7.2
