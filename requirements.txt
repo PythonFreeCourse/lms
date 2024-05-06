@@ -65,7 +65,7 @@ python-dotenv==1.0.1
 requests==2.31.0
 sqlfluff==2.3.5
 webencodings==0.5.1
-Werkzeug==3.0.1
+Werkzeug==3.0.3
 wrapt==1.16.0
 wtf-peewee==3.0.5
 WTForms==3.1.2
